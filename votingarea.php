@@ -8,7 +8,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: votingarea.php,v 1.34 2005-02-10 18:15:29 francis Exp $
+ * $Id: votingarea.php,v 1.35 2005-02-10 18:17:25 francis Exp $
  * 
  */
 
@@ -135,7 +135,7 @@ Mayor's budget, <strong>culture</strong>, <strong>sport and tourism</strong>,
             <strong>planning</strong>, <strong>transport</strong>, <strong>education</strong>, 
             <strong>social services</strong> and <strong>libraries</strong>.",
     'COI' => "
-The Council of the Isles is responsible for <strong>education<strong>,
+The Council of the Isles is responsible for <strong>education</strong>,
 <strong>housing</strong>, <strong>planning</strong>, <strong>water and
 sewage</strong> and various other local matters including
 <strong>tourism</strong>, <strong>development</strong> and running <strong>the
