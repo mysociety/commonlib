@@ -6,17 +6,18 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-ratty.php,v 1.21 2005-01-12 17:03:19 chris Exp $
+ * $Id: admin-ratty.php,v 1.22 2005-01-12 17:36:40 chris Exp $
  * 
  */
 
 require_once "ratty.php";
 
 class ADMIN_PAGE_RATTY {
-    function ADMIN_PAGE_RATTY($scope) {
+    function ADMIN_PAGE_RATTY($scope, $what) {
         $this->id = "ratty";
         $this->name = "Ratty";
-        $this->navname = "Ratty the Rate Limiter";
+        $this->navname = "Rate Limiter - $what";
+        $this->scope = $scope;
     }
 
     function display($self_link) {
@@ -32,9 +33,9 @@ class ADMIN_PAGE_RATTY {
                     $ruledata = array();
                     $conditiondata = array();
                 } else {
-                    $ruledata = ratty_admin_get_rule(get_http_var('rule_id'));
+                    $ruledata = ratty_admin_get_rule($this->scope, get_http_var('rule_id'));
                     $ruledata['rule_id'] = get_http_var('rule_id');
-                    $conditiondata = ratty_admin_get_conditions(get_http_var('rule_id'));
+                    $conditiondata = ratty_admin_get_conditions($this->scope, get_http_var('rule_id'));
                 }
             } else {
                 // Load data from form
@@ -96,7 +97,7 @@ class ADMIN_PAGE_RATTY {
             $form->addElement('header', '', 'Conditions for Rule');
     
             // Get list of fields from ratty
-            $fieldarray = ratty_admin_available_fields();
+            $fieldarray = ratty_admin_available_fields($this->scope);
             $fields = array();
             foreach ($fieldarray as $row) {
                 $fields[$row[0]] = $row[0] . " (e.g. " .  trim_characters($row[1], 0, 30) . ")";
@@ -141,7 +142,8 @@ class ADMIN_PAGE_RATTY {
             $buttongroup[2] = &HTML_QuickForm::createElement('submit', 'newdistinct', 'Limit number of distinct values of...');
             $form->addGroup($buttongroup, "buttongroup", "Add new rule condition:",' <br> ', false);
 
-            $form->addElement('hidden', 'rule_id', $ruledata['rule_id']);
+            if (array_key_exists('rule_id', $ruledata))
+                $form->addElement('hidden', 'rule_id', $ruledata['rule_id']);
             $form->addElement('hidden', 'page', $this->id);
             $form->addElement('hidden', 'action', $action);
             $form->addElement('header', '', 'Submit Changes');
@@ -152,14 +154,14 @@ class ADMIN_PAGE_RATTY {
 
             if (get_http_var('done') != "") {
                 if ($form->validate()) {
-                    $new_rule_id = ratty_admin_update_rule($ruledata, $conditiondata);
+                    $new_rule_id = ratty_admin_update_rule($this->scope, $ruledata, $conditiondata);
                     $action = "listrules";
                 }
             } else if (get_http_var('cancel') != "") {
                 $action = "listrules";
             } else if (get_http_var('deleterule') != "") {
                 if ($ruledata['rule_id'] != "") {
-                    ratty_admin_delete_rule($ruledata['rule_id']);
+                    ratty_admin_delete_rule($this->scope, $ruledata['rule_id']);
                 }
                 $action = "listrules";
             }
@@ -169,7 +171,7 @@ class ADMIN_PAGE_RATTY {
             }
         }
         if ($action == "listrules") {
-            $rules = ratty_admin_get_rules();
+            $rules = ratty_admin_get_rules($this->scope);
             print <<<EOF
 <p>
 Rules enforce limits on access to web pages or other resources, or on when a
@@ -197,7 +199,7 @@ more rules, in which case the request is permitted.
         <th>Hit limit</th>
         <th>Matches</th>
     </tr>
-EOF
+EOF;
             foreach ($rules as $rule) {
                 if ($rule['note'] == "") 
                     $rule['note'] = "&lt;unnamed&gt;";
