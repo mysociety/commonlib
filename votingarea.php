@@ -8,7 +8,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: votingarea.php,v 1.20 2005-01-12 20:53:17 chris Exp $
+ * $Id: votingarea.php,v 1.21 2005-01-19 14:45:32 francis Exp $
  * 
  */
 
@@ -36,8 +36,8 @@ $va_inside = array(
         'SPE' => 'SPA',
         'SPC' => 'SPA',
 
-        'WAE' => 'WAP',
-        'WAC' => 'WAP',
+        'WAE' => 'WAS',
+        'WAC' => 'WAS',
 
         'NIE' => 'NIA',
 
@@ -148,7 +148,7 @@ Parliament. Devolved matters include <strong>education</strong>,
 <strong>health</strong>, <strong>agriculture</strong>, <strong>justice</strong>
 and <strong>prisons</strong>. It also has some tax-raising powers.
 ",
-    'WAP' => "
+    'WAS' => "
 The National Assembly for Wales has a wide range of powers over areas including
 <strong>economic development</strong>, <strong>transport</strong>,
 <strong>finance</strong>, <strong>local government</strong>,
