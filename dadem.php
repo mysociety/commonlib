@@ -7,7 +7,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: dadem.php,v 1.1 2004-10-18 08:48:07 francis Exp $
+ * $Id: dadem.php,v 1.2 2004-10-18 09:24:56 francis Exp $
  * 
  */
 
@@ -65,7 +65,9 @@ function dadem_get_error($e) {
  * area on success, or an error code on failure. */
 function dadem_get_representatives($va_id) {
     debug("DADEM", "Looking up representatives for voting area id $va_id");
-    return sxr_call(OPTION_DADEM_HOST, OPTION_DADEM_PORT, OPTION_DADEM_PATH, 'DaDem.get_representatives', array($va_id));
+    $result = sxr_call(OPTION_DADEM_HOST, OPTION_DADEM_PORT, OPTION_DADEM_PATH, 'DaDem.get_representatives', array($va_id));
+    debug("DADEMRESULT", "Result is:", $result);
+    return $reuslt;
 }
 
 /* dadem_get_representative_info ID
@@ -78,7 +80,9 @@ function dadem_get_representatives($va_id) {
  * On failure, returns an error code. */
 function dadem_get_representative_info($rep_id) {
     debug("DADEM", "Looking up info on representative id $rep_id");
-    return sxr_call(OPTION_DADEM_HOST, OPTION_DADEM_PORT, OPTION_DADEM_PATH, 'DaDem.get_representative_info', array($rep_id));
+    $result = sxr_call(OPTION_DADEM_HOST, OPTION_DADEM_PORT, OPTION_DADEM_PATH, 'DaDem.get_representative_info', array($rep_id));
+    debug("DADEMRESULT", "Result is:", $result);
+    return $reuslt;
 }
 
 ?>

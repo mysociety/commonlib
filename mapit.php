@@ -6,7 +6,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: mapit.php,v 1.1 2004-10-18 08:48:07 francis Exp $
+ * $Id: mapit.php,v 1.2 2004-10-18 09:24:56 francis Exp $
  * 
  */
 
@@ -59,7 +59,9 @@ function mapit_get_error($e) {
  * voting area ID. On failure, returns an error code. */
 function mapit_get_voting_areas($postcode) {
     debug("MAPIT", "Looking up areas for postcode $postcode");
-    return sxr_call(OPTION_MAPIT_HOST, OPTION_MAPIT_PORT, OPTION_MAPIT_PATH, 'MaPit.get_voting_areas', array($postcode));
+    $result = sxr_call(OPTION_MAPIT_HOST, OPTION_MAPIT_PORT, OPTION_MAPIT_PATH, 'MaPit.get_voting_areas', array($postcode));
+    debug("MAPITRESULT", "Result is:", $result);
+    return $result;
 }
 
 /* mapit_get_voting_area_info ID
@@ -69,7 +71,9 @@ function mapit_get_voting_areas($postcode) {
  * County Council"). On failure, returns an error code. */
 function mapit_get_voting_area_info($va_id) {
     debug("MAPIT", "Looking up info on area $va_id");
-    return sxr_call(OPTION_MAPIT_HOST, OPTION_MAPIT_PORT, OPTION_MAPIT_PATH, 'MaPit.get_voting_area_info', array($va_id));
+    $result = sxr_call(OPTION_MAPIT_HOST, OPTION_MAPIT_PORT, OPTION_MAPIT_PATH, 'MaPit.get_voting_area_info', array($va_id));
+    debug("MAPITRESULT", "Result is:", $result);
+    return $result;
 }
 
 ?>
