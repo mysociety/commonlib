@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.24 2005-01-08 10:28:16 matthew Exp $
+ * $Id: utility.php,v 1.25 2005-01-11 17:27:14 francis Exp $
  * 
  */
 
@@ -360,8 +360,11 @@ function new_url($page, $retain) {
  * Return the user name authenticated by HTTP, or *unknown* if none.
  * XXX should this not return null? */
 function http_auth_user() {
-    $editor = $_SERVER["REMOTE_USER"];
-    if (!$editor) $editor = "*unknown*";
+    $editor = null;
+    if (array_key_exists("REMOTE_USER", $_SERVER))
+        $editor = $_SERVER["REMOTE_USER"];
+    if (!$editor) 
+        $editor = "*unknown*";
     return $editor;
 }
 
