@@ -7,7 +7,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: CouncilMatch.pm,v 1.5 2005-01-28 12:07:21 francis Exp $
+# $Id: CouncilMatch.pm,v 1.6 2005-01-28 12:54:05 francis Exp $
 #
 
 package mySociety::CouncilMatch;
@@ -225,7 +225,6 @@ sub match_council_wards ($$$$) {
     $matchesdump = &$dump_wards();
 
     # Make it an error when a ward has two 'G' spellings, as it happens rarely
-=comment
     if (!$error) {
         my $wardnames;
         foreach my $g (@$wards_goveval) {
@@ -240,7 +239,6 @@ sub match_council_wards ($$$$) {
             $wardnames->{$dd->{id}} = $g->{name};
         }
     }
-=cut
 
     # Delete any old aliases
     foreach my $d (@$wards_database) {
@@ -270,8 +268,8 @@ sub match_council_wards ($$$$) {
     # Update status field
     $status = $error ? 'wards-mismatch' : 'wards-match';
     $d_dbh->do(q#delete from raw_process_status where council_id=?#, {}, $area_id);
-    $d_dbh->do(q#insert into raw_process_status (council_id, status, details)
-        values (?,?,?)#, {}, $area_id, $status, ($error ? ($error . "\n") : "") . $matchesdump);
+    $d_dbh->do(q#insert into raw_process_status (council_id, status, error, details)
+        values (?,?,?,?)#, {}, $area_id, $status, $error ? $error : undef, $matchesdump);
     $d_dbh->commit();
 
     return { 'matchesdump' => $matchesdump, 
