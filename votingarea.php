@@ -8,7 +8,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: votingarea.php,v 1.27 2005-02-09 11:59:50 chris Exp $
+ * $Id: votingarea.php,v 1.28 2005-02-09 12:05:26 chris Exp $
  * 
  */
 
@@ -108,10 +108,11 @@ $va_responsibility_description = array(
             "The District Council is responsible for
             <strong>local services</strong>, including <strong>planning</strong>, <strong>council housing</strong>,
             <strong>rubbish collection</strong>, and <strong>local roads</strong>.",
-    'LBO' =>
-            "The London Borough Council is responsible for
-            <strong>local services</strong>, including <strong>planning</strong>, <strong>council housing</strong>,
-            <strong>rubbish collection</strong>, and <strong>local roads</strong>.",
+    'LBO' => "
+The Borough Council is responsible for <strong>local services</strong>,
+including <strong>planning</strong>, <strong>council housing</strong>,
+<strong>rubbish collection</strong>, and <strong>local roads</strong>.
+",
     'LAS' => "
 The London Assembly <strong>examines</strong> the Mayor of London's
 activities, <strong>investigates</strong> issues of importance to Londoners,
