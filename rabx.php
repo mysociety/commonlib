@@ -10,7 +10,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: rabx.php,v 1.9 2005-01-12 16:41:35 chris Exp $
+ * $Id: rabx.php,v 1.10 2005-01-12 16:42:48 chris Exp $
  * 
  */
 
@@ -330,7 +330,7 @@ class RABX_Client {
             curl_setopt($this->ch, CURLOPT_HTTPGET, 1);
         }
 
-        if (!curl_exec($this->ch))
+        if (!($r = curl_exec($this->ch)))
             return rabx_error(RABX_ERROR_TRANSPORT, curl_error($this->ch) . " calling $this->url");
         $C = curl_getinfo($this->ch, CURLINFO_HTTP_CODE);
         debug("RABXWIRE", "RABX raw result:", $r);
