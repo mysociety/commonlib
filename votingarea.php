@@ -8,7 +8,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: votingarea.php,v 1.2 2004-10-18 10:17:06 chris Exp $
+ * $Id: votingarea.php,v 1.3 2004-11-02 16:24:14 chris Exp $
  * 
  */
 
@@ -19,6 +19,7 @@ define('VA_LBW', 102);  /* ... ward */
 
 define('VA_GLA', 201);  /* Greater London Assembly */
 define('VA_LAC', 202);  /* London constituency */
+define('VA_LAE', 203);  /* ... electoral region */
 
 define('VA_CTY', 301);  /* County */
 define('VA_CED', 302);  /* ... electoral division */
@@ -55,6 +56,7 @@ $va_inside = array(
         VA_LBW => VA_LBO,
 
         VA_LAC => VA_GLA,
+        VA_LAE => VA_GLA,
 
         VA_CED => VA_CTY,
 
