@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.5 2004-10-28 10:53:20 francis Exp $
+ * $Id: utility.php,v 1.6 2004-10-28 11:00:20 chris Exp $
  * 
  */
 
@@ -30,7 +30,7 @@ function debug ($header, $text="", $complex_variable=null) {
 	
 		// Set which level shows which types of debug info.
 		$levels = array (
-			1 => array ('FRONTEND', 'WARNING', 'MAPIT', 'DADEM', 'QUEUE'),
+			1 => array ('FRONTEND', 'WARNING', 'MAPIT', 'DADEM', 'QUEUE', 'TIMESTAMP'),
 			2 => array ('MAPITRESULT', 'DADEMRESULT', 'RATTY'), 
 			3 => array ('XMLRPC'),
 			4 => array ('SERIALIZE'),
@@ -743,6 +743,17 @@ function make_plural($word, $number)
     if ($number == 1)
         return $word;
     return $word . "s";
+}
+
+/* debug_timestamp
+ * Output a timestamp since the page was started. */
+$timestamp_last = $timestamp_start = getmicrotime();
+function debug_timestamp() {
+    global $timestamp_last, $timestamp_start;
+    $t = getmicrotime();
+    debug("TIMESTAMP", sprintf("%f seconds since start; %f seconds since last",
+            $t - $timestamp_start, $t - $timestamp_last));
+    $timestamp_last = $t;
 }
 
 ?>
