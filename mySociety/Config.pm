@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Config.pm,v 1.6 2004-11-10 12:22:03 chris Exp $
+# $Id: Config.pm,v 1.7 2004-11-18 22:28:46 chris Exp $
 #
 
 package mySociety::Config;
@@ -68,8 +68,8 @@ sub read_config ($;$) {
     my $text = join('', $f->getlines());
     $f->close();
 
-    $text =~ s#//.*$##m;
-    $text =~ s#/\*.+?\*/##s;
+    $text =~ s#//.*$##gm;
+    $text =~ s#/\*.+?\*/##gs;
 
     my $config = { };
     if ($defaults) {
