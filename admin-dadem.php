@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-dadem.php,v 1.1 2004-11-19 12:25:44 francis Exp $
+ * $Id: admin-dadem.php,v 1.2 2004-11-22 12:22:39 francis Exp $
  * 
  */
 
@@ -19,14 +19,12 @@ class ADMIN_PAGE_DADEM {
     }
 
     function display($self_link) {
-        global $fyr_error_message;
-
         $form = new HTML_QuickForm('adminDaDemForm', 'get', $self_link);
 
        // General Statistics
         $form->addElement('header', '', 'General Statistics');
         $stats = dadem_admin_get_stats();
-        if ($fyr_error_message = dadem_get_error($stats)) template_show_error();
+        dadem_check_error($stats);
         $form->addElement('static', 'stats', "Representatives: ",  $stats['representative_count']);
         $form->addElement('static', 'stats', "Voting Areas: ", $stats['area_count']);
 
@@ -59,7 +57,7 @@ class ADMIN_PAGE_DADEM {
             $va_id = 1;
         if ($va_id != "") {
             $reps = dadem_get_representatives($va_id);
-            if ($fyr_error_message = dadem_get_error($reps)) template_show_error();
+            dadem_check_error($reps);
             $reps = array_values($reps);
             $html .= "<b>$va_id: Voting Area</b> ";
             $html .= "<a href=\"?page=mapit&va_id=$va_id\">Browse in MaPit</a><br>";
@@ -68,7 +66,7 @@ class ADMIN_PAGE_DADEM {
         }
 
         $info = dadem_get_representatives_info($reps);
-        if ($fyr_error_message = dadem_get_error($info)) template_show_error();
+        dadem_check_error($info);
 
         foreach ($info as $rep => $repinfo) {
             $html .= "<b>$rep: Representative</b><br>";

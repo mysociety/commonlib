@@ -7,7 +7,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: mapit.php,v 1.7 2004-11-19 12:25:44 francis Exp $
+ * $Id: mapit.php,v 1.8 2004-11-22 12:22:39 francis Exp $
  * 
  */
 
@@ -26,6 +26,15 @@ function mapit_get_error($e) {
         return FALSE;
     else
         return $e->text;
+}
+
+/* mapit_check_error R
+ * If R indicates failure, displays error message and stops procesing.
+ */
+function mapit_check_error($data) {
+    if ($error_message = mapit_get_error($data)) {
+        template_show_error($error_message);
+    }
 }
 
 $mapit_client = new RABX_Client(OPTION_MAPIT_URL);

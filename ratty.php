@@ -6,13 +6,14 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: ratty.php,v 1.10 2004-11-18 20:47:14 francis Exp $
+ * $Id: ratty.php,v 1.11 2004-11-22 12:22:39 francis Exp $
  * 
  */
 
 // TODO: Write script to automatically generate this file from perldoc.
 
 require_once('rabx.php');
+require_once('template.php');
 
 /* ratty_get_error R
  * Return FALSE if R indicates success, or an error string otherwise. */
@@ -21,6 +22,15 @@ function ratty_get_error($e) {
         return FALSE;
     else
         return $e->text;
+}
+
+/* ratty_check_error R
+ * If R indicates failure, displays error message and stops procesing.
+ */
+function ratty_check_error($data) {
+    if ($error_message = ratty_get_error($data)) {
+        template_show_error($error_message);
+    }
 }
 
 $ratty_client = new RABX_Client(OPTION_RATTY_URL);
@@ -41,9 +51,7 @@ function ratty_test($vals) {
     global $ratty_client;
     debug("RATTY", "Rate limiting", $vals);
     $res = $ratty_client->call('Ratty.test', array($vals));
-    if ($fyr_error_message = ratty_get_error($res)) {
-        template_show_error();
-    }
+    ratty_check_error($res);
     debug("RATTYRESULT", "Result is:", $res);
     return $res;
 }
@@ -54,9 +62,7 @@ function ratty_test($vals) {
 function ratty_admin_available_fields() {
     global $ratty_client;
     $res = $ratty_client->call('Ratty.admin_available_fields', array());
-    if ($fyr_error_message = ratty_get_error($res)) {
-        template_show_error();
-    }
+    ratty_check_error($res);
     return $res;
 }
 
@@ -64,11 +70,8 @@ function ratty_admin_available_fields() {
  * Updates a ratty rule. */
 function ratty_admin_update_rule($vals, $conds) {
     global $ratty_client;
-    global $fyr_error_message;
     $res = $ratty_client->call('Ratty.admin_update_rule', array($vals, $conds));
-    if ($fyr_error_message = ratty_get_error($res)) {
-        template_show_error();
-    }
+    ratty_check_error($res);
     return $res;
 }
 
@@ -76,11 +79,8 @@ function ratty_admin_update_rule($vals, $conds) {
  * Updates a ratty rule. */
 function ratty_admin_delete_rule($id) {
     global $ratty_client;
-    global $fyr_error_message;
     $res = $ratty_client->call('Ratty.admin_delete_rule', array($id));
-    if ($fyr_error_message = ratty_get_error($res)) {
-        template_show_error();
-    }
+    ratty_check_error($res);
     return $res;
 }
 
@@ -89,11 +89,8 @@ function ratty_admin_delete_rule($id) {
  * Get info about all rules. */
 function ratty_admin_get_rules() {
     global $ratty_client;
-    global $fyr_error_message;
     $res = $ratty_client->call('Ratty.admin_get_rules', array($vals, $conds));
-    if ($fyr_error_message = ratty_get_error($res)) {
-        template_show_error();
-    }
+    ratty_check_error($res);
     return $res;
 }
 
@@ -101,11 +98,8 @@ function ratty_admin_get_rules() {
  * Get info about a rule. */
 function ratty_admin_get_rule($id) {
     global $ratty_client;
-    global $fyr_error_message;
     $res = $ratty_client->call('Ratty.admin_get_rule', array($id));
-    if ($fyr_error_message = ratty_get_error($res)) {
-        template_show_error();
-    }
+    ratty_check_error($res);
     return $res;
 }
 
@@ -114,11 +108,8 @@ function ratty_admin_get_rule($id) {
  * Get all conditions for a rule. */
 function ratty_admin_get_conditions($id) {
     global $ratty_client;
-    global $fyr_error_message;
     $res = $ratty_client->call('Ratty.admin_get_conditions', array($id));
-    if ($fyr_error_message = ratty_get_error($res)) {
-        template_show_error();
-    }
+    ratty_check_error($res);
     return $res;
 }
 

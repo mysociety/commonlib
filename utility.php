@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.15 2004-11-22 11:24:09 francis Exp $
+ * $Id: utility.php,v 1.16 2004-11-22 12:22:39 francis Exp $
  * 
  */
 
@@ -682,12 +682,12 @@ function send_email ($to, $subject, $message) {
 
 // Call this with a key name to get a GET or POST variable.
 function get_http_var ($name, $default=''){
-	global $HTTP_GET_VARS, $HTTP_POST_VARS;
-	if (arrayKeyExists($name, $HTTP_GET_VARS)) {
-		return clean_var($HTTP_GET_VARS[$name]);
+	global $_GET, $_POST;
+	if (arrayKeyExists($name, $_GET)) {
+		return clean_var($_GET[$name]);
 	}
-	if (arrayKeyExists($name, $HTTP_POST_VARS)) {
-		return clean_var($HTTP_POST_VARS[$name]);
+	if (arrayKeyExists($name, $_POST)) {
+		return clean_var($_POST[$name]);
 	}
 	return $default;
 }
@@ -713,9 +713,9 @@ function recursive_strip ($a){
 
 // Call this with a key name to get a COOKIE variable.
 function get_cookie_var($name, $default=''){
-	global $HTTP_COOKIE_VARS;
-	if (arrayKeyExists($name, $HTTP_COOKIE_VARS)) {
-		return clean_var($HTTP_COOKIE_VARS[$name]);
+	global $_COOKIE;
+	if (arrayKeyExists($name, $_COOKIE)) {
+		return clean_var($_COOKIE[$name]);
 	}
 	return $default;
 }

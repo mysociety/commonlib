@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-mapit.php,v 1.1 2004-11-19 12:25:44 francis Exp $
+ * $Id: admin-mapit.php,v 1.2 2004-11-22 12:22:39 francis Exp $
  * 
  */
 
@@ -19,8 +19,6 @@ class ADMIN_PAGE_MAPIT {
     }
 
     function display($self_link) {
-        global $fyr_error_message;
-
         $form = new HTML_QuickForm('adminMaPitForm', 'get', $self_link);
 
         // MaPit Browser
@@ -37,7 +35,7 @@ class ADMIN_PAGE_MAPIT {
             $va_id = 1;
         if ($va_id != "") {
             $info = mapit_get_voting_area_info($va_id);
-            if ($fyr_error_message = mapit_get_error($info)) template_show_error();
+            mapit_check_error($info);
 
             $html .= "<b>".$va_id . ": " . $info['name'] .  " (".$info['type_name'].")</b> ";
             $html .= "<a href=\"?page=dadem&va_id=$va_id\">Browse in DaDem</a>";
@@ -49,17 +47,17 @@ class ADMIN_PAGE_MAPIT {
             $html .= "<br>Parent: ";
             if ($info['parent_area_id']) {
                 $parent_info = mapit_get_voting_area_info($info['parent_area_id']);
-                if ($fyr_error_message = mapit_get_error($parent_info)) template_show_error();
+                mapit_check_error($parent_info);
                 $html .= render_area($self_link, $info['parent_area_id'], $parent_info);
             } else {
                 $html .= "None";
             }
             $children = mapit_get_voting_area_children($va_id);
-            if ($fyr_error_message = mapit_get_error($children)) template_show_error();
+            mapit_check_error($children);
             $html .= "<br>Children: ";
             if (count($children) > 0) {
                 $children_info = mapit_get_voting_areas_info($children);
-                if ($fyr_error_message = mapit_get_error($children_info)) template_show_error();
+                mapit_check_error($children_info);
                 foreach ($children_info as $child=>$child_info) {
                     $html .= "<br>";
                     $html .= render_area($self_link, $child, $child_info);
@@ -73,10 +71,10 @@ class ADMIN_PAGE_MAPIT {
             $html .= "<b>$pc</b><br>";
 
             $voting_areas = mapit_get_voting_areas($pc);
-            if ($fyr_error_message = mapit_get_error($voting_areas)) template_show_error();
+            mapit_check_error($voting_areas);
             $areas = array_values($voting_areas);
             $areas_info = mapit_get_voting_areas_info($areas);
-            if ($fyr_error_message = mapit_get_error($areas_info)) template_show_error();
+            mapit_check_error($areas_info);
             foreach ($areas_info as $area=>$area_info) {
                 $html .= render_area($self_link, $area, $area_info);
                 $html .= "<br>";

@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin.php,v 1.11 2004-11-19 12:25:44 francis Exp $
+ * $Id: admin.php,v 1.12 2004-11-22 12:22:39 francis Exp $
  * 
  */
 
@@ -22,6 +22,8 @@ require_once "admin-configinfo.php";
 require_once "HTML/QuickForm.php";
 require_once "HTML/QuickForm/Rule.php";
 require_once "HTML/QuickForm/Renderer/Default.php";
+
+template_set_style(null);
 
 function admin_page_display($site_name, $pages) {
     // generate navigation bar
