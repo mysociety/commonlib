@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.29 2005-02-08 14:34:59 chris Exp $
+ * $Id: utility.php,v 1.30 2005-03-04 13:16:43 matthew Exp $
  * 
  */
 
@@ -268,7 +268,6 @@ function convert_to_unix_newlines($text) {
  * such parameter is present, DEFAULT; or, if DEFAULT is not specified, the
  * empty string (""). */
 function get_http_var($name, $default='') {
-    global $_GET, $_POST;
     if (array_key_exists($name, $_GET))
         return $_GET[$name];
     else if (array_key_exists($name, $_POST))
