@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: VotingArea.pm,v 1.9 2004-11-18 08:58:38 francis Exp $
+# $Id: VotingArea.pm,v 1.10 2004-11-18 18:18:23 chris Exp $
 #
 
 package mySociety::VotingArea;
@@ -214,6 +214,13 @@ Map a 3-letter type string (like "WMC") to its corresponding numeric type.
             LBO LBW GLA LAC LAE CTY CED DIS DIW UTA UTE UTW MTD MTW SPA SPE SPC WAS WAE WAC WMP WMC EUP EUR
         );
 }
+
+=item %id_to_type
+
+Map a numeric type to its corresponding three-letter type.
+
+=cut
+%mySociety::VotingArea::id_to_type = reverse(%mySociety::VotingArea::type_to_id);
 
 =item %type_name
 
