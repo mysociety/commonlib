@@ -9,8 +9,14 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: DBHandle.pm,v 1.8 2005-02-03 12:29:57 chris Exp $
+# $Id: DBHandle.pm,v 1.9 2005-02-16 15:13:37 chris Exp $
 #
+
+package mySociety::DBHandle::Error;
+
+use Error;
+
+@mySociety::DBHandle::Error::ISA = qw(Error::Simple);
 
 package mySociety::DBHandle;
 
@@ -21,6 +27,10 @@ BEGIN {
     our @ISA = qw(Exporter);
     our @EXPORT_OK = qw(&dbh &new_dbh);
 }
+
+use DBD::Pg;
+use DBI;
+use Error qw(:try);
 
 $mySociety::DBHandle::conf_ok = 0;
 %mySociety::DBHandle::conf = ( );
@@ -99,10 +109,18 @@ sub new_dbh () {
     return DBI->connect($connstr,
                         $mySociety::DBHandle::conf{User},
                         $mySociety::DBHandle::conf{Password}, {
-                            RaiseError => 1,
+                            RaiseError => 0,
                             AutoCommit => 0,
                             PrintError => 0,
-                            PrintWarn => 0
+                            PrintWarn => 0,
+                            HandleError => sub ($$$) {
+                                my ($err, $dbh, $val) = @_;
+                                # Let's not make any unwise assumptions about
+                                # reentrancy here.
+                                local $dbh->{HandleError} = sub ($$$) { };
+                                $dbh->rollback();
+                                throw mySociety::DBHandle::Error($err);
+                            }
                         });
 }
 
@@ -114,6 +132,7 @@ Return a shared database handle.
 sub dbh () {
     our $dbh;
     our $dbh_process;
+
     # If the connection to the database has gone away, try to detect the
     # condition here. Also detect a fork which has occured since dbh() was last
     # called. XXX this means we could restart a transaction half-way through. 
