@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: VotingArea.pm,v 1.7 2004-10-20 16:56:24 chris Exp $
+# $Id: VotingArea.pm,v 1.8 2004-11-02 14:24:33 chris Exp $
 #
 
 package mySociety::VotingArea;
@@ -24,8 +24,10 @@ DaDem, MaPit, etc.
 
 =head1 CONSTANTS
 
+=head2 Area type codes
+
 (The three-letter codes used here are the mostly those used in the Ordnance
-Survey's BoundaryLine product to identify different types of areas.)
+Survey's Boundary Line product to identify different types of areas.)
 
 =over 4
 
@@ -44,6 +46,11 @@ London Assembly
 =item LAC (202)
 
 London constituency
+
+=item LAE (203)
+
+London electoral region -- this is a fictional area type used as a placeholder
+for London-wide assembly members.
 
 =item CTY (301)
 
@@ -130,6 +137,7 @@ use constant LBW => 102; # ... ward
 
 use constant GLA => 201; # Greater London Assembly
 use constant LAC => 202; # London constituency
+use constant LAE => 203; # ... electoral region
 
 use constant CTY => 301; # County
 use constant CED => 302; # ... electoral division
@@ -158,6 +166,43 @@ use constant WMC => 902; # ... constituency
 use constant EUP => 1001; # European Parliament
 use constant EUR => 1002; # ... region
 
+=head2 Special area IDs
+
+These represent regions which should exist in the schema but which are not
+present in Boundary Line.
+
+=over 4
+
+=item LAE_AREA_ID
+
+ID for the area for which "London-wide" members of the London assembly are
+elected. Coterminous with the GLA region.
+
+=cut
+use constant LAE_AREA_ID => 900002;
+
+=item WMP_AREA_ID
+
+ID for the area over which the House of Commons has jurisdiction (i.e., the
+union of all WMCs).
+
+=cut
+use constant WMP_AREA_ID => 900000;
+
+=item EUP_AREA_ID
+
+Same, for European Parliament.
+
+=cut
+use constant EUP_AREA_ID => 900001;
+
+
+=back
+
+=head1 DATA
+
+=over 4
+
 =item %type_to_id
 
 Map a 3-letter type string (like "WMC") to its corresponding numeric type.
@@ -166,24 +211,26 @@ Map a 3-letter type string (like "WMC") to its corresponding numeric type.
 {
     no strict 'refs';
     %mySociety::VotingArea::type_to_id = map { $_ => &$_ } qw(
-            LBO LBW GLA LAC CTY CED DIS DIW UTA UTE UTW MTD MTW SPA SPE SPC WAS WAE WAC WMP WMC EUP EUR
+            LBO LBW GLA LAC LAE CTY CED DIS DIW UTA UTE UTW MTD MTW SPA SPE SPC WAS WAE WAC WMP WMC EUP EUR
         );
 }
 
-=item type_name
+=item %type_name
 
-Names of types of areas. For administrative areas, this is their full name, for
-instance "County" or "London Borough"; for voting areas, it's a short name, for
-instance "Ward" or "Electoral Division".
+Map names of types of areas. For administrative areas, this is their full name,
+for instance "County" or "London Borough"; for voting areas, it's a short name,
+for instance "Ward" or "Electoral Division".
 
 =cut
-
 %mySociety::VotingArea::type_name = (
+    # NB commas not => here, since otherwise the keys are interpreted as
+    # strings, not their numeric values.
         LBO,  "London Borough",
         LBW,  "Ward",
 
         GLA,  "London Assembly",
         LAC,  "Constituency",
+        LAE,  "Electoral Region",
 
         CTY,  "County",
         CED,  "Electoral Division",
@@ -213,7 +260,7 @@ instance "Ward" or "Electoral Division".
         EUR,  "Region"
     );
 
-=item attend_prep
+=item %attend_prep
 
 Whether to use the preposition "on" or "at the" to describe someone attending
 the elected body. For instance, "Your District Councillors represent you on
@@ -223,6 +270,8 @@ you in the European Parliament".
 =cut
 
 %mySociety::VotingArea::attend_prep = (
+    # NB commas not => here, since otherwise the keys are interpreted as
+    # strings, not their numeric values.
         LBO,  "on the",
 
         GLA,  "on the",
@@ -245,17 +294,20 @@ you in the European Parliament".
     );
 
 
-=item rep_name
+=item %rep_name
 
-For voting areas, gives the short name of the type of person who
-represents that area.  For example, "Councillor" or "MEP".
+For voting areas, gives the short name of the type of person who represents
+that area.  For example, "Councillor" or "MEP".
 
 =cut
 %mySociety::VotingArea::rep_name = (
+    # NB commas not => here, since otherwise the keys are interpreted as
+    # strings, not their numeric values.
         LBW, 'Councillor',
 
         GLA, 'Mayor', # "of London"? 
         LAC, 'Assembly Member',
+        LAE, 'Assembly Member',
 
         CED, 'County Councillor',
 
@@ -277,17 +329,20 @@ represents that area.  For example, "Councillor" or "MEP".
         EUR, 'MEP'
     );
 
-=item rep_name_long
+=item %rep_name_long
 
 For voting areas, gives the long name of the type of person who represents that
 area.  For example, "Councillor" or "Member of the European Parliament".
 
 =cut
 %mySociety::VotingArea::rep_name_long = (
+    # NB commas not => here, since otherwise the keys are interpreted as
+    # strings, not their numeric values.
         LBW, 'Councillor',
 
         GLA, 'Mayor', # "of London"? 
         LAC, 'Assembly Member',
+        LAE, 'Assembly Member',
 
         CED, 'County Councillor',
 
@@ -310,17 +365,19 @@ area.  For example, "Councillor" or "Member of the European Parliament".
     );
 
 
-=item rep_name_plural
+=item %rep_name_plural
 
 Plural short version of rep_name.
 
 =cut
-
 %mySociety::VotingArea::rep_name_plural = (
+    # NB commas not => here, since otherwise the keys are interpreted as
+    # strings, not their numeric values.
         LBW, 'Councillors',
 
         GLA, 'Mayors', # "of London"?
         LAC, 'Assembly Members',
+        LAE, 'Assembly Members',
 
         CED, 'County Councillors',
 
@@ -342,17 +399,19 @@ Plural short version of rep_name.
         EUR, 'MEPs'
     );
 
-=item rep_name_long_plural
+=item %rep_name_long_plural
 
 Plural long version of rep_name.
 
 =cut
-
 %mySociety::VotingArea::rep_name_long_plural = (
+    # NB commas not => here, since otherwise the keys are interpreted as
+    # strings, not their numeric values.
         LBW, 'Councillors',
 
         GLA, 'Mayors', # "of London"?
         LAC, 'Assembly Members',
+        LAE, 'Assembly Members',
 
         CED, 'County Councillors',
 
@@ -376,18 +435,20 @@ Plural long version of rep_name.
 
 
 
-=item rep_suffix
+=item %rep_suffix
 
 For voting areas, gives the suffix to the title of the person who repesents
 that area.  For example, "AM" for Assembly Members.
 
 =cut
-
 %mySociety::VotingArea::rep_suffix = (
+    # NB commas not => here, since otherwise the keys are interpreted as
+    # strings, not their numeric values.
         LBW, '',
 
         GLA, '',
         LAC, 'AM',
+        LAE, 'AM',
 
         CED, '',
 
@@ -409,17 +470,20 @@ that area.  For example, "AM" for Assembly Members.
         EUR, 'MEP'
     );
 
-=item rep_prefix
+=item %rep_prefix
 
 For voting areas, gives the prefix to the title of the person who repesents
 that area.  For example, "Cllr" for Councillors.
 
 =cut
 %mySociety::VotingArea::rep_prefix = (
+    # NB commas not => here, since otherwise the keys are interpreted as
+    # strings, not their numeric values.
         LBW, 'Cllr',
 
         GLA, 'Mayor', # "of London"? 
         LAC, '',
+        LAE, '',
 
         CED, 'Cllr',
 
@@ -440,6 +504,12 @@ that area.  For example, "Cllr" for Councillors.
 
         EUR, ''
     );
+
+=back
+
+=head1 FUNCTIONS
+
+=over 4
 
 =item style_rep TYPE NAME
 
