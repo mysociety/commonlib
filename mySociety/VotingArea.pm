@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: VotingArea.pm,v 1.14 2004-12-06 23:59:19 francis Exp $
+# $Id: VotingArea.pm,v 1.15 2004-12-07 00:08:18 francis Exp $
 #
 
 package mySociety::VotingArea;
@@ -84,7 +84,7 @@ Unitary Authority ward
 
 Local Government District
 
-=item LGE
+=item LGW
 
 Local Government District electoral area
 
@@ -163,7 +163,7 @@ use constant UTE => 402; # ... electoral division
 use constant UTW => 403; # ... ward
 
 use constant LGD => 451; # Local Government District
-use constant LGE => 453; # ... electoral area
+use constant LGW => 453; # ... electoral area
 
 use constant CTY => 501; # County
 use constant CED => 502; # ... electoral division
@@ -269,7 +269,7 @@ for instance "Ward" or "Electoral Division".
         DIW,  "Ward",
 
         LGD,  "Local Government District",
-        'LGW',  "Electoral Area",
+        LGW,  "Electoral Area",
 
         UTA,  "Unitary Authority",
         UTE,  "Electoral Division",
@@ -357,7 +357,7 @@ that area.  For example, "Councillor" or "MEP".
 
         DIW, 'District Councillor',
 
-        'LGW', 'Councillor',
+        LGW, 'Councillor',
 
         UTE, 'Councillor',
         UTW, 'Councillor',
@@ -396,7 +396,7 @@ area.  For example, "Councillor" or "Member of the European Parliament".
 
         DIW, 'District Councillor',
 
-        'LGW', 'Councillor',
+        LGW, 'Councillor',
 
         UTE, 'Councillor',
         UTW, 'Councillor',
@@ -438,7 +438,7 @@ Plural short version of rep_name.
         UTE, 'Councillors',
         UTW, 'Councillors',
 
-        'LGW', 'Councillors',
+        LGW, 'Councillors',
 
         MTW, 'Councillors',
 
@@ -476,7 +476,7 @@ Plural long version of rep_name.
         UTE, 'Councillors',
         UTW, 'Councillors',
 
-        'LGW', 'Councillors',
+        LGW, 'Councillors',
 
         MTW, 'Councillors',
 
@@ -517,7 +517,7 @@ that area.  For example, "AM" for Assembly Members.
         UTE, '',
         UTW, '',
 
-        'LGW', '',
+        LGW, '',
 
         MTW, '',
 
@@ -556,7 +556,7 @@ that area.  For example, "Cllr" for Councillors.
         UTE, 'Cllr',
         UTW, 'Cllr',
 
-        'LGW', 'Cllr',
+        LGW, 'Cllr',
 
         MTW, 'Cllr',
 
