@@ -7,7 +7,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: CouncilMatch.pm,v 1.20 2005-02-07 13:46:02 francis Exp $
+# $Id: CouncilMatch.pm,v 1.21 2005-02-07 14:44:03 francis Exp $
 #
 
 package mySociety::CouncilMatch;
@@ -110,11 +110,11 @@ sub refresh_live_data($$) {
 
         # ... calculate method
         my $method = 'via';
-        if ($row->{fax} and $row->{email}) {
+        if ($row->{rep_fax} and $row->{rep_email}) {
             $method = 'either';
-        } elsif ($row->{fax}) {
+        } elsif ($row->{rep_fax}) {
             $method = 'fax';
-        } elsif ($row->{email}) {
+        } elsif ($row->{rep_email}) {
             $method = 'email';
         }
         $row->{method} = $method;
@@ -141,7 +141,11 @@ sub refresh_live_data($$) {
                 $row->{rep_email}, $row->{rep_fax},
                 $update_key);
             throw Error::Simple("refresh_live_data: update affected $rows_affected rows, not one") if $rows_affected != 1;
-            $details .= "Making live: Updated $update_key ".$row->{rep_first}." ".$row->{rep_last}."\n";
+            $details .= "Making live: Updated $update_key ".$row->{rep_first}." ".$row->{rep_last}
+                . " (" . $row->{rep_party} . ")"
+                . " method: " . $row->{method}
+                . " fax: " . $row->{rep_fax} . " email: " . $row->{rep_email} 
+                . "\n";
         } else {
             # insert into
             $d_dbh->do(q#insert into representative 
