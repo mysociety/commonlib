@@ -7,7 +7,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: CouncilMatch.pm,v 1.16 2005-02-02 19:21:59 francis Exp $
+# $Id: CouncilMatch.pm,v 1.17 2005-02-04 14:21:13 francis Exp $
 #
 
 package mySociety::CouncilMatch;
@@ -29,6 +29,8 @@ sub set_db_handles($$) {
     $d_dbh = shift;
 }
 
+# These are the types for local councils, which include districts, counties,
+# boroughs...
 our $parent_types = [qw(DIS LBO MTD UTA LGD CTY)];
 our $child_types = [qw(DIW LBW MTW UTE UTW LGW CED)];
 
@@ -90,6 +92,63 @@ sub set_process_status ($$$$) {
     $d_dbh->do(q#delete from raw_process_status where council_id=?#, {}, $area_id);
     $d_dbh->do(q#insert into raw_process_status (council_id, status, error, details)
         values (?,?,?,?)#, {}, $area_id, $status, $error, $details);
+}
+
+# canonicalise_constituency_name NAME
+# Convert the NAME of a constituency (all voting areas except councils,
+# basically) into a "canonical" version of the name. That is, one with all the
+# parts which often vary between spellings reduced to the simplest form. This
+# simple form can then be used with exact matching.
+sub canonicalise_constituency_name ($) {
+    $_ = shift;
+
+    # Europe regions
+    s#^Greater ##i;
+    s# Euro Region$##;
+    s#N\. Ireland#Northern Ireland#;
+
+    # Westminster constituencies
+    s# Burgh Const$##;
+    s# Co Const$##;
+    s# Boro Const$##;
+    s# The$##;
+    s#^The##;
+    s# City of$##;
+    s#^City of##;
+    s#ô#o#g;
+
+    # Scottish constituencies/electoral regions
+    s#Orkney Islands#Orkney#;
+    s#Shetland Islands#Shetland#;
+    s# P Const$##;
+    s# PER$##;
+    s# Region$##;
+    s# P$##;    # ?
+    s#N\. #North #;
+    s#E\. #East #;
+    s#S\. #South #;
+    s#W\. #West #;
+
+    # Welsh Assembly regions
+    s# Assembly ER$##;
+    s# Assembly Const$##;
+
+    # London Assembly
+    s# London$##;
+    s# GL$##;
+
+    # General
+    $_ = lc;
+    s#&#and#g;
+    s#-# #g;
+    s#'##g;
+    s#,##g;
+    s#\.##g;
+    s#\s+# #g;
+    s#^\s+##g;
+    s#\s+$##g;
+
+    return $_;
 }
 
 

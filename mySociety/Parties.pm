@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Parties.pm,v 1.4 2005-02-03 13:53:08 chris Exp $
+# $Id: Parties.pm,v 1.5 2005-02-04 14:21:14 francis Exp $
 #
 
 package mySociety::Parties;
@@ -71,7 +71,10 @@ Map names of parties to their canonical name.
     "UUP" => "UUP",
 
     # Latest Robert Kilroy-Silk vehicle
-    "Veritas" => "Veritas"
+    "Veritas" => "Veritas",
+
+    # For Democratic Services etc.
+    "NOT A PERSON" => "NOT A PERSON"
 );
 
 # Ensure that canonical party values are themselves canonical....
