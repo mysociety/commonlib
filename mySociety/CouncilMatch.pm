@@ -7,7 +7,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: CouncilMatch.pm,v 1.25 2005-02-09 16:48:31 francis Exp $
+# $Id: CouncilMatch.pm,v 1.26 2005-02-09 17:58:59 francis Exp $
 #
 
 package mySociety::CouncilMatch;
@@ -433,10 +433,14 @@ sub match_council_wards ($$) {
     do { push @{$wards_goveval}, { name => $_} } for @wards_array;
 
     # Set of wards already in database (from Ordnance Survey / ONS / mySociety / legislation)
-    my $rows = $m_dbh->selectall_arrayref(q#select distinct on (area_id) area_id, name from area_name, area where
+    my $rows = $m_dbh->selectall_arrayref(q#
+        select distinct on (area_id) area_id, name,
+        case when name_type = 'M' then 0 else 1 end as o
+        from area_name, area where
         area_name.area_id = area.id and parent_area_id = ? and 
         (name_type = 'O' or name_type = 'S' or name_type = 'M' or name_type = 'L') and
         (# . join(' or ', map { "type = '$_'" } @$mySociety::VotingArea::council_child_types) . q#) 
+        order by area_id, o
         #, {}, $area_id);
     my $wards_database = [];
     foreach my $row (@$rows) { 
