@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Util.pm,v 1.19 2005-04-01 09:40:29 chris Exp $
+# $Id: Util.pm,v 1.20 2005-04-06 13:50:52 chris Exp $
 #
 
 package mySociety::Util::Error;
@@ -513,7 +513,7 @@ sub ordinal ($) {
         return "${num}th";
     } else {
         my $n = $num % 10;
-        my @ending = qw(th nd rd);
+        my @ending = qw(th st nd rd);
         if ($n < @ending) {
             return $num . $ending[$n];
         } else {
