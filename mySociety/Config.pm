@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Config.pm,v 1.4 2004-11-10 10:41:53 francis Exp $
+# $Id: Config.pm,v 1.5 2004-11-10 12:18:19 chris Exp $
 #
 
 package mySociety::Config;
@@ -72,12 +72,11 @@ sub read_config ($;$) {
         my ($key, $val) = ($1, $2);
         fixup($key);
         fixup($val);
-        $key =~ s/OPTION_//;
+        $key =~ s/^OPTION_//;
         $config->{$key} = $val;
     }
 
     return $config;
-
 }
 
 =item set_file FILENAME
@@ -92,29 +91,31 @@ sub set_file ($) {
     ($main_config_filename) = @_;
 }
 
-=item get KEY
+=item get KEY [DEFAULT]
 
-Returns constants from the configuration file specified in
-set_config_file.  The file is automatically loaded and cached.  An
-exception is thrown if the value isn't present.
+Returns the constants set for KEY from the configuration file specified in
+set_config_file. The file is automatically loaded and cached. An exception is
+thrown if the value isn't present and no DEFAULT is specified.
 
 =cut
-
 my %cached_configs;
-
-sub get ($) {
-    my ($key) = @_;
+sub get ($;$) {
+    my ($key, $default) = @_;
 
     my $filename = $main_config_filename;
-    die "Please call mySociety::Config::set_file to specify config file" if !defined $filename;
+    die "Please call mySociety::Config::set_file to specify config file" if (!defined($filename));
 
     if (!defined($cached_configs{$filename})) {
         $cached_configs{$filename} = read_config($filename);
     }
-    my $value = $cached_configs{$filename}->{$key};
-    die "Value for '$key' not in mySociety configuration" if !defined $value;
-
-    return $value;
+    
+    if (exists($cached_configs{$filename}->{$key})) {
+        return $cached_configs{$filename}->{$key};
+    } elsif (@_ == 2) {
+        return $default;
+    } else {
+        die "No value for '$key' in $main_config_filename, and no default specified";
+    }
 }
 
 1;
