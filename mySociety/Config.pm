@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Config.pm,v 1.5 2004-11-10 12:18:19 chris Exp $
+# $Id: Config.pm,v 1.6 2004-11-10 12:22:03 chris Exp $
 #
 
 package mySociety::Config;
@@ -15,6 +15,29 @@ use strict;
 use IO::File;
 use Error qw(:try);
 use Data::Dumper;
+
+=head1 NAME
+
+mySociety::Config
+
+=head1 SYNOPSIS
+
+    mySociety::Config::set_file('../conf/general');
+    my $opt = mySociety::Config::get('CONFIG_VARIABLE', DEFAULT_VALUE);
+
+=head1 DESCRIPTION
+
+Parse config files (written in a sort of cod-php, using
+
+    define(OPTION_VALUE_NAME, "value of option");
+
+to define individual elements.
+
+=head1 FUNCTIONS
+
+=over 4
+
+=cut
 
 sub fixup ($) {
     if ($_[0] =~ m#^'(.+)'$#) {
@@ -30,7 +53,8 @@ sub fixup ($) {
 Read configuration from FILE, which may be either a name or a filehandle.
 Returns a reference to a hash of parameter to value. Config files are in a
 sort of cod-PHP; basically only define('...', '...') is handled, though we
-do process comments. If specified, values from DEFAULTS are merged.
+do process comments. If specified, values from DEFAULTS are merged. (Most users
+should just call set_file and get, though. See below.)
 
 =cut
 sub read_config ($;$) {
