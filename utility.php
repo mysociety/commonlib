@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.6 2004-10-28 11:00:20 chris Exp $
+ * $Id: utility.php,v 1.7 2004-10-28 15:05:25 chris Exp $
  * 
  */
 
@@ -754,6 +754,27 @@ function debug_timestamp() {
     debug("TIMESTAMP", sprintf("%f seconds since start; %f seconds since last",
             $t - $timestamp_start, $t - $timestamp_last));
     $timestamp_last = $t;
+}
+
+/* invoked_url
+ * Return the URL under which the script was invoked. The port is specified
+ * only if it is not the default (i.e. 80 for HTTP and 443 for HTTPS). */
+function invoked_url() {
+    $url = 'http';
+    $ssl = FALSE;
+    if (array_key_exists('SSL', $_SERVER)) {
+        $url .= "s";
+        $ssl = TRUE;
+    }
+    $url .= "://" . $_SERVER['SERVER_NAME'];
+
+    if ((!$ssl && $_SERVER['SERVER_PORT'] != 80)
+        || ($ssl && $_SERVER['SERVER_PORT'] != 443))
+        $url .= ":" . $_SERVER['SERVER_PORT'];
+
+    $url .= preg_replace("/\?.*/", "", $_SERVER['REQUEST_URI']);
+
+    return $url;
 }
 
 ?>
