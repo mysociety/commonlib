@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Util.pm,v 1.1 2004-10-05 16:42:02 chris Exp $
+# $Id: Util.pm,v 1.2 2004-10-19 16:46:31 chris Exp $
 #
 
 package mySociety::Util;
@@ -65,6 +65,48 @@ sub named_tempfile (;$) {
     }
 
     die "unable to create temporary file; last attempted name was \"$name\" and open failed with error $!";
+}
+
+=item send_email TEXT SENDER RECIPIENT ...
+
+Send an email. TEXT is the full, already-formatted, with-headers, on-the-wire
+form of the email (except that line-endings should be "\n" not "\r\n"). SENDER
+is the B<envelope> sender of the mail (B<not> the From: address, which you
+should specify yourself). RECIPIENTs are the B<envelope> recipients of the
+mail. Returns undef on success or an error string on failure.
+
+=cut
+sub send_email ($$@) {
+    my ($text, $sender, @recips) = @_;
+    my $pid;
+    try {
+        my $pid;
+        defined($pid = open(SENDMAIL, '|-')) or die "fork: $!\n";
+        if (0 == $pid) {
+            # Child.
+            # XXX should close all other fds
+            exec('/usr/libexec/sendmail',
+                    '-i',
+                    '-f', $sender,
+                    @recips);
+            die;
+        }
+
+        print SENDMAIL $text or die "write: $!\n";
+
+        close SENDMAIL or die "close: $!\n";
+
+        if ($? & 127) {
+            die sprintf("sendmail: killed by signal %d\n", $? & 127);
+        } elsif ($?) {
+            die sprintf("sendmail: failure exit status %d\n", $? >> 8);
+        }
+    } catch Error::Simple with {
+        my $e = shift;
+        close(SENDMAIL);
+        return $e->text();
+    };
+    return undef;
 }
 
 1;
