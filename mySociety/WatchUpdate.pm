@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WatchUpdate.pm,v 1.1 2004-10-14 16:06:48 chris Exp $
+# $Id: WatchUpdate.pm,v 1.2 2004-10-15 09:16:31 francis Exp $
 #
 
 package mySociety::WatchUpdate;
@@ -61,7 +61,9 @@ sub changed ($) {
     foreach (($0, values %INC)) {
         my $s = stat($_);
         if (exists($self->{size}->{$_}) and exists($self->{time}->{$_})) {
-            return 1 if ($s->size() != $self->{size}->{$_} or $s->mtime() != $self->{time}->{$_});
+            if ($s->size() != $self->{size}->{$_} or $s->mtime() != $self->{time}->{$_}) {
+                return 1;
+            }
         }
 
         $self->{size}->{$_} = $s->size();
@@ -80,5 +82,17 @@ sub reexec_if_changed ($) {
     my ($self) = @_;
     exec($0, @ARGV) if ($self->changed());
 }
+
+=item exit_if_changed
+
+I<Instance method.> Check whether any file changes have taken place and, if they
+have, exit the script with no error code.
+
+=cut
+sub exit_if_changed ($) {
+    my ($self) = @_;
+    exit 0 if ($self->changed());
+}
+
 
 1;
