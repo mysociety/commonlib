@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: VotingArea.pm,v 1.19 2005-01-07 20:20:12 chris Exp $
+# $Id: VotingArea.pm,v 1.20 2005-01-19 14:45:31 francis Exp $
 #
 
 package mySociety::VotingArea;
@@ -144,7 +144,7 @@ for instance "Ward" or "Electoral Division".
         SPE =>  "Electoral Region",
         SPC =>  "Constituency",
 
-        WAS =>  "Welsh Assembly",
+        WAS =>  "National Assembly for Wales",
         WAE =>  "Electoral Region",
         WAC =>  "Constituency",
 
@@ -208,8 +208,8 @@ that area.  For example, "Councillor" or "MEP".
         LBW => 'Councillor',
 
         GLA => 'Mayor', # "of London"? 
-        LAC => 'Assembly Member',
-        LAE => 'Assembly Member',
+        LAC => 'London Assembly Member',
+        LAE => 'London Assembly Member',
 
         CED => 'County Councillor',
 
@@ -245,8 +245,8 @@ area.  For example, "Councillor" or "Member of the European Parliament".
         LBW => 'Councillor',
 
         GLA => 'Mayor', # "of London"? 
-        LAC => 'Assembly Member',
-        LAE => 'Assembly Member',
+        LAC => 'London Assembly Member',
+        LAE => 'London Assembly Member',
 
         CED => 'County Councillor',
 
@@ -264,8 +264,8 @@ area.  For example, "Councillor" or "Member of the European Parliament".
 
         NIE => 'Member of the Legislative Assembly',
 
-        WAE => 'Welsh Assembly Member',
-        WAC => 'Welsh Assembly Member',
+        WAE => 'Assembly Member',
+        WAC => 'Assembly Member',
 
         WMC => 'Member of Parliament',
 
@@ -282,8 +282,8 @@ Plural short version of rep_name.
         LBW => 'Councillors',
 
         GLA => 'Mayors', # "of London"?
-        LAC => 'Assembly Members',
-        LAE => 'Assembly Members',
+        LAC => 'London Assembly Members',
+        LAE => 'London Assembly Members',
 
         CED => 'County Councillors',
 
@@ -318,8 +318,8 @@ Plural long version of rep_name.
         LBW => 'Councillors',
 
         GLA => 'Mayors', # "of London"?
-        LAC => 'Assembly Members',
-        LAE => 'Assembly Members',
+        LAC => 'London Assembly Members',
+        LAE => 'London Assembly Members',
 
         CED => 'County Councillors',
 
@@ -335,8 +335,8 @@ Plural long version of rep_name.
         SPE => 'Members of the Scottish Parliament',
         SPC => 'Members of the Scottish Parliament',
 
-        WAE => 'Welsh Assembly Members',
-        WAC => 'Welsh Assembly Members',
+        WAE => 'Assembly Members',
+        WAC => 'Assembly Members',
 
         NIE => 'Members of the Legislative Assembly',
 
