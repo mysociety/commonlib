@@ -9,7 +9,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: DBHandle.pm,v 1.1 2005-01-31 19:44:51 chris Exp $
+# $Id: DBHandle.pm,v 1.2 2005-01-31 19:49:04 chris Exp $
 #
 
 package mySociety::DBHandle;
@@ -18,6 +18,18 @@ use strict;
 
 $mySociety::DBHandle::conf_ok = 0;
 %mySociety::DBHandle::conf = ( );
+
+=head1 NAME
+
+mySociety::DBHandle
+
+=head1 DESCRIPTION
+
+Common functionality for shared database handles.
+
+=head1 FUNCTIONS
+
+=over 4
 
 =item configure KEY VALUE ...
 
@@ -48,11 +60,14 @@ port on which to contact database server.
 
 =back
 
+A key whose value is not defined is treated as if it were not present.
+
 =cut
 sub configure (%) {
     my %conf = @_;
     my %allowed = map { $_ => 1 } qw(Host Port Name User Password);
     foreach (keys %conf) {
+        delete($conf{$_}) if (!defined($conf{$_}));
         die "Unknown key '$_' passed to configure" if (!exists($allowed{$_}));
     }
     foreach (qw(Name User)) {
