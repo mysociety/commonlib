@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: DaDem.pm,v 1.4 2004-10-20 16:55:39 chris Exp $
+# $Id: DaDem.pm,v 1.5 2004-11-08 18:09:31 francis Exp $
 #
 
 package mySociety::DaDem;
@@ -46,9 +46,9 @@ Area ID refers to an area for which no representatives are returned.
 
 =cut
 
-use constant UNKNOWN_AREA       => 1;
-use constant REP_NOT_FOUND      => 2;
-use constant AREA_WITHOUT_REPS  => 3;
+use constant UNKNOWN_AREA       => 3001;
+use constant REP_NOT_FOUND      => 3002;
+use constant AREA_WITHOUT_REPS  => 3003;
 
 =head2 Other codes
 

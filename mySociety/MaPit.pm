@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: MaPit.pm,v 1.2 2004-10-20 16:55:39 chris Exp $
+# $Id: MaPit.pm,v 1.3 2004-11-08 18:09:31 francis Exp $
 #
 
 package mySociety::MaPit;
@@ -45,9 +45,9 @@ The area ID refers to a non-existent area.
 =back
 =cut
 
-use constant BAD_POSTCODE => 1;
-use constant POSTCODE_NOT_FOUND => 2;
-use constant AREA_NOT_FOUND => 3;
+use constant BAD_POSTCODE => 2001;
+use constant POSTCODE_NOT_FOUND => 2002;
+use constant AREA_NOT_FOUND => 2003;
 
 =head1 FUNCTIONS
 
