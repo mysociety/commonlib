@@ -1,30 +1,50 @@
 <?php
 /*
  * utility.php:
- * General utility functions.  Taken from the TheyWorkForYou.com source
+ * General utility functions. Taken from the TheyWorkForYou.com source
  * code, and licensed under a BSD-style license.
  * 
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.22 2005-01-07 21:14:56 matthew Exp $
+ * $Id: utility.php,v 1.23 2005-01-08 02:27:19 chris Exp $
  * 
  */
 
-/* Disable all magic quoting for good */
+/*
+ * Magic quotes: these are a unique and unedifying feature of the whole PHP
+ * trainwreck. Here we do our best to undo any damage we may have sustained,
+ * at the small cost of inserting bowdlerised profanities into our code.
+ */
 
-if (get_magic_quotes_gpc()) unfck_gpc();
-
+/* unfck VAL
+ * If VAL is a scalar, return the result of stripslashes(VAL) (i.e. with any
+ * character preceded by a backslash replaced by that character). If VAL is an
+ * array, return an array whose elements are the result of this function
+ * applied to each element of that array. */
 function unfck($v) {
     return is_array($v) ? array_map('unfck', $v) : stripslashes($v);
 }
 
+/* unfck_gpc
+ * Apply the unfck function to elements of the global POST, GET, REQUEST and
+ * COOKIE arrays, in place. */
 function unfck_gpc() {
     foreach (array('POST', 'GET', 'REQUEST', 'COOKIE') as $gpc)
     $GLOBALS["_$gpc"] = array_map('unfck', $GLOBALS["_$gpc"]);
 }
 
+/* If magic_quotes_gpc is ON (in which case values in the global GET, POST and
+ * COOKIE arrays will have been "escaped" by arbitrary insertion of
+ * backslashes), try to undo this. */
+if (get_magic_quotes_gpc()) unfck_gpc();
+
+/* Make some vague effort to turn off the "magic quotes" nonsense. */
 set_magic_quotes_runtime(0);
+
+/*
+ * Actually useful functions begin below here.
+ */
 
 /* debug HEADER TEXT [VARIABLE]
  * Print, to the page, a debugging variable, if a debug=... parameter is
@@ -85,123 +105,8 @@ function debug ($header, $text="", $complex_variable=null) {
 }
 
 
-function error_handler ($errno, $errmsg, $filename, $linenum, $vars) {
-	// Custom error-handling function.
-	// Sends an email to BUGSLIST.
-	global $PAGE;
-
-   // define an assoc array of error string
-   // in reality the only entries we should
-   // consider are E_WARNING, E_NOTICE, E_USER_ERROR,
-   // E_USER_WARNING and E_USER_NOTICE
-   $errortype = array (
-		E_ERROR				=> "Error",
-		E_WARNING			=> "Warning",
-		E_PARSE				=> "Parsing Error",
-		E_NOTICE			=> "Notice",
-		E_CORE_ERROR		=> "Core Error",
-		E_CORE_WARNING		=> "Core Warning",
-		E_COMPILE_ERROR		=> "Compile Error",
-		E_COMPILE_WARNING	=> "Compile Warning",
-		E_USER_ERROR		=> "User Error",
-		E_USER_WARNING		=> "User Warning",
-		E_USER_NOTICE		=> "User Notice",
-		// PHP 5 only
-		//E_STRICT			=> "Runtime Notice"
-	);
-
-	$err = "URL:\t\thttp://" . DOMAIN . $_SERVER['REQUEST_URI'] . "\n";
-	if (isset($_SERVER['HTTP_REFERER'])) {
-		$err .= "Referer:\t" . $_SERVER['HTTP_REFERER'] . "\n";
-	} else {
-		$err .= "Referer:\tNone\n";
-	}
-	$err .= "User-Agent:\t" . $_SERVER['HTTP_USER_AGENT'] . "\n";
-	$err .= "Number:\t\t$errno\n";
-	$err .= "Type:\t\t" . $errortype[$errno] . "\n";
-	$err .= "Message:\t$errmsg\n";
-	$err .= "File:\t\t$filename\n";
-	$err .= "Line:\t\t$linenum\n";
-
-
-// I'm not sure this bit is actually any use!
-
-	// set of errors for which a var trace will be saved.
-//	$user_errors = array(E_USER_ERROR, E_USER_WARNING, E_USER_NOTICE);
-//	if (in_array($errno, $user_errors)) {
-//		$err .= "Variables:\t" . serialize($vars) . "\n";
-//	}
-	
-	
-	// Add the problematic line if possible.
-	if (is_readable($filename)) {
-		$source = file($filename);
-		$err .= "\nSource:\n\n";
-		// Show the line, plus prev and next, with line numbers.
-		$err .= $linenum-2 . " " . $source[$linenum-3];
-		$err .= $linenum-1 . " " . $source[$linenum-2];
-		$err .= $linenum . " " . $source[$linenum-1];
-		$err .= $linenum+1 . " " . $source[$linenum];
-		$err .= $linenum+2 . " " . $source[$linenum+1];
-	}
-	
-	
-	// Will we need to exit after this error?
-	$fatal_errors = array(E_ERROR, E_USER_ERROR);
-	if (in_array($errno, $fatal_errors)) {
-		$fatal = true;
-	} else {
-		$fatal = false;
-	}
-
-
-	// Finally, display errors and stuff...
-
-	if (DEVSITE) {
-		// On a devsite we just display the problem.
-		$message = array(
-			'title' => "Error",
-			'text' => "<pre>$err</pre>\n"
-		);
-		if (is_object($PAGE)) {
-			$PAGE->error_message($message, $fatal);
-		} else {
-			var_dump($message);
-		}
-		
-	} else {
-		// On live sites we display a nice message and email the problem.
-		
-		$message = array(
-			'title' => "Sorry, an error has occurred",
-			'text' => "We've been notified by email and will try to fix the problem soon!"
-		);
-
-		if (is_object($PAGE)) {
-			$PAGE->error_message($message, $fatal);
-		} else {
-			print "<p>Oops, sorry, an error has occurred!</p>\n";
-		}
-		mail(BUGSLIST, "TheyWorkForYou.com error: $errmsg", $err,
-			"From: Bug <gyford@gmail.com>\n".
-			"X-Mailer: PHP/" . phpversion()
-		);
-	}	
-	
-
-	// Do we need to exit?
-	
-	if ($fatal) {
-		exit(1);
-	}
-
-}
-
-
-
-
 /* vardump VARIABLE
- * Dump VARIABLE to the page, wrapped in <pre> tags. */
+ * Dump VARIABLE to the page, properly escaped and wrapped in <pre> tags. */
 function vardump($blah) {
     /* Miserable. We need to encode entities in the output, which means messing
      * about with output buffering. */
@@ -227,538 +132,131 @@ function validate_email ($string) {
 	}
 }
 
-
+/* validate_postcode POSTCODE
+ * Return true is POSTCODE is in the proper format for a UK postcode. Does not
+ * require spaces in the appropriate place. */
 function validate_postcode ($postcode) {
-	// See http://www.govtalk.gov.uk/gdsc/html/noframes/PostCode-2-1-Release.htm
-	
-	$in  = 'ABDEFGHJLNPQRSTUWXYZ';
-	$fst = 'ABCDEFGHIJKLMNOPRSTUWYZ';
-	$sec = 'ABCDEFGHJKLMNOPQRSTUVWXY';
-	$thd = 'ABCDEFGHJKSTUW';
-	$fth = 'ABEHMNPRVWXY';
-	$num = '0123456789';
-	$nom = '0123456789';
-	$gap = '\s\.';	
+    // See http://www.govtalk.gov.uk/gdsc/html/noframes/PostCode-2-1-Release.htm
+    $in  = 'ABDEFGHJLNPQRSTUWXYZ';
+    $fst = 'ABCDEFGHIJKLMNOPRSTUWYZ';
+    $sec = 'ABCDEFGHJKLMNOPQRSTUVWXY';
+    $thd = 'ABCDEFGHJKSTUW';
+    $fth = 'ABEHMNPRVWXY';
+    $num = '0123456789';
+    $nom = '0123456789';
+    $gap = '\s\.';	
 
-	if (	preg_match("/^[$fst][$num][$gap]*[$nom][$in][$in]$/i", $postcode) ||
-			preg_match("/^[$fst][$num][$num][$gap]*[$nom][$in][$in]$/i", $postcode) ||
-			preg_match("/^[$fst][$sec][$num][$gap]*[$nom][$in][$in]$/i", $postcode) ||
-			preg_match("/^[$fst][$sec][$num][$num][$gap]*[$nom][$in][$in]$/i", $postcode) ||
-			preg_match("/^[$fst][$num][$thd][$gap]*[$nom][$in][$in]$/i", $postcode) ||
-			preg_match("/^[$fst][$sec][$num][$fth][$gap]*[$nom][$in][$in]$/i", $postcode)
-		) {
-		return true;
-	} else {
-		return false;
-	}
+    if (preg_match("/^[$fst][$num][$gap]*[$nom][$in][$in]$/i", $postcode) ||
+        preg_match("/^[$fst][$num][$num][$gap]*[$nom][$in][$in]$/i", $postcode) ||
+        preg_match("/^[$fst][$sec][$num][$gap]*[$nom][$in][$in]$/i", $postcode) ||
+        preg_match("/^[$fst][$sec][$num][$num][$gap]*[$nom][$in][$in]$/i", $postcode) ||
+        preg_match("/^[$fst][$num][$thd][$gap]*[$nom][$in][$in]$/i", $postcode) ||
+        preg_match("/^[$fst][$sec][$num][$fth][$gap]*[$nom][$in][$in]$/i", $postcode)) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
-
-// Returns the unixtime in microseconds.
+/* getmicrotime
+ * Return time since the epoch, including fractional seconds. */
 function getmicrotime() {
-	$mtime = microtime();
-	$mtime = explode(" ",$mtime);
-	$mtime = $mtime[1] + $mtime[0];
+    $mtime = microtime();
+    $mtime = explode(" ",$mtime);
+    $mtime = $mtime[1] + $mtime[0];
 
-	return $mtime;
+    return $mtime;
 }
 
-
-
-function format_timestamp ($timestamp, $format) {
-	// Pass it a MYSQL TIMESTAMP (YYYYMMDDHHMMSS) and a
-	// PHP date format string (eg, "Y-m-d H:i:s")
-	// and it returns a nicely formatted string according to requirements.
-	
-	// Because strtotime can't handle TIMESTAMPS.
-	
-	if (preg_match("/^(\d\d\d\d)(\d\d)(\d\d)(\d\d)(\d\d)(\d\d)$/", $timestamp, $matches)) {
-		list($string, $year, $month, $day, $hour, $min, $sec) = $matches;
-	
-		return gmdate ($format, gmmktime($hour, $min, $sec, $month, $day, $year));
-	} else {
-		return "";
-	}
-
-}
-
-
-function format_date ($date, $format) {
-	// Pass it a date (YYYY-MM-DD) and a
-	// PHP date format string (eg, "Y-m-d H:i:s")
-	// and it returns a nicely formatted string according to requirements.
-
-	if (preg_match("/^(\d\d\d\d)-(\d\d)-(\d\d)$/", $date, $matches)) {
-		list($string, $year, $month, $day) = $matches;
-	
-		return gmdate ($format, gmmktime(0, 0, 0, $month, $day, $year));
-	} else {
-		return "";
-	}
-
-}
-
-
-function format_time ($time, $format) {
-	// Pass it a time (HH:MM:SS) and a
-	// PHP date format string (eg, "H:i")
-	// and it returns a nicely formatted string according to requirements.
-
-	if (preg_match("/^(\d\d):(\d\d):(\d\d)$/", $time, $matches)) {
-		list($string, $hour, $min, $sec) = $matches;
-
-		return gmdate ($format, gmmktime($hour, $min, $sec));
-	} else {
-		return "";
-	}
-}
-
-
-
-function relative_time ($datetime) {
-	// Pass it a 'YYYY-MM-DD HH:MM:SS' and it will return something
-	// like "Two hours ago", "Last week", etc.
-	
-	// http://maniacalrage.net/projects/relative/
-	
-	if (!preg_match("/\d\d\d\d-\d\d-\d\d \d\d\:\d\d\:\d\d/", $datetime)) {
-		return '';
-	}
-
-	$in_seconds = strtotime($datetime);
-	$now = mktime();
-
-	$diff 	=  $now - $in_seconds;
-	$months	=  floor($diff/2419200);
-	$diff 	-= $months * 2419200;
-	$weeks 	=  floor($diff/604800);
-	$diff	-= $weeks*604800;
-	$days 	=  floor($diff/86400);
-	$diff 	-= $days * 86400;
-	$hours 	=  floor($diff/3600);
-	$diff 	-= $hours * 3600;
-	$minutes = floor($diff/60);
-	$diff 	-= $minutes * 60;
-	$seconds = $diff;
-    
-	
-	if ($months > 0) {
-		// Over a month old, just show the actual date.
-		$date = substr($datetime, 0, 9);
-		return format_date($date, LONGDATEFORMAT);
-
-	} else {
-		$relative_date = '';
-		if ($weeks > 0) {
-			// Weeks and days
-			$relative_date .= ($relative_date?', ':'').$weeks.' week'.($weeks>1?'s':'');
-			$relative_date .= $days>0?($relative_date?', ':'').$days.' day'.($days>1?'s':''):'';
-		} elseif ($days > 0) {
-			// days and hours
-			$relative_date .= ($relative_date?', ':'').$days.' day'.($days>1?'s':'');
-			$relative_date .= $hours>0?($relative_date?', ':'').$hours.' hour'.($hours>1?'s':''):'';
-		} elseif ($hours > 0) {
-			// hours and minutes
-			$relative_date .= ($relative_date?', ':'').$hours.' hour'.($hours>1?'s':'');
-			$relative_date .= $minutes>0?($relative_date?', ':'').$minutes.' minute'.($minutes>1?'s':''):'';
-		} elseif ($minutes > 0) {
-			// minutes only
-			$relative_date .= ($relative_date?', ':'').$minutes.' minute'.($minutes>1?'s':'');
-		} else {
-			// seconds only
-			$relative_date .= ($relative_date?', ':'').$seconds.' second'.($seconds>1?'s':'');
-		}
-	}
-	
-	// Return relative date and add proper verbiage
-	return $relative_date.' ago';
-	
-}
-
-
-
-// Alternative to strip_tags which replaces some tags with spaces,
-// so words don't end up stuck together. For example, if they were only
-// separated by a <p>.
+/* strip_tags_tospaces TEXT
+ * Return a copy of TEXT in which certain block-level HTML tags have been
+ * replaced by single spaces, and other HTML tags have been removed. */
 function strip_tags_tospaces($text) {
     $text = preg_replace("#\<(p|br|div|td|tr|th|table)[^>]*\>#i", " ", $text);
-    return strip_tags(trim($text));
+    return strip_tags(trim($text)); 
 }
 
+/* trim_characters TEXT START LENGTH
+ * Return a copy of TEXT with (optionally) chararacters stripped from the
+ * beginning and/or end. HTML tags are first stripped from TEXT and/or replaced
+ * with spaces per strip_tags_tospaces; then, if START is positive, whole words
+ * are removed from the beginning of TEXT until at least START characters have
+ * been removed. Any removed characters are replaced with "...". If the length
+ * of the resulting string exceeds LENGTH, then whole words are removed from
+ * the end of TEXT until its total length is smaller than LENGTH, including an
+ * ellipsis ("...") which is appended to the end. Long words (i.e. runs of
+ * nonspace characters) have spaces inserted in them for neater
+ * line-wrapping. */
 function trim_characters ($text, $start, $length) {
-	// Pass it a string, a numeric start position and a numeric length.
-	// If the start position is > 0, the string will be trimmed to start at the
-	// nearest word boundary after (or at) that position.
-	// If the string is then longer than $length, it will be trimmed to the nearest
-	// word boundary below (or at) that length.
-	// If either end is trimmed, ellipses will be added.
-	// The modified string is then returned - its *maximum* length is $length.
-	// HTML is always stripped (must be for trimming to prevent broken tags).
+    $text = strip_tags_tospaces($text);
 
-	$text = strip_tags_tospaces($text);
-	
-	// Split long strings up so they don't go too long.
-	// Mainly for URLs which are displayed, but aren't links when trimmed.
-	$text = preg_replace("/(\S{60})/", "\$1 ", $text);
+    // Split long strings up so they don't go too long.
+    // Mainly for URLs which are displayed, but aren't links when trimmed.
+    $text = preg_replace("/(\S{60})/", "\$1 ", $text);
 
-	// Otherwise the word boundary matching goes odd...
-	$text = preg_replace("/[\n\r]/", " ", $text);
-	
-	// Trim start.
-	if ($start > 0) {
-		$text = substr($text, $start);
-		
-		// Word boundary.         
-		if (preg_match ("/.+?\b(.*)/", $text, $matches)) {
-			$text = $matches[1];
-			// Strip spare space at the start.
-			$text = preg_replace ("/^\s/", '', $text);
-		}
-		$text = '...' . $text;
-	}
-	
-	// Trim end.
-	if (strlen($text) > $length) {
+    // Otherwise the word boundary matching goes odd...
+    $text = preg_replace("/[\n\r]/", " ", $text);
 
-		// Allow space for ellipsis.
-		$text = substr($text, 0, $length - 3); 
+    // Trim start.
+    if ($start > 0) {
+        $text = substr($text, $start);
 
-		// Word boundary.         
-		if (preg_match ("/(.*)\b.+/", $text, $matches)) {
-			$text = $matches[1];
-			// Strip spare space at the end.
-			$text = preg_replace ("/\s$/", '', $text);
-		}
-		// We don't want to use the HTML entity for an ellipsis (&#8230;), because then 
-		// it screws up when we subsequently use htmlentities() to print the returned
-		// string!
-		$text .= '...'; 
-	}
+        // Word boundary.         
+        if (preg_match ("/.+?\b(.*)/", $text, $matches)) {
+            $text = $matches[1];
+            // Strip spare space at the start.
+            $text = preg_replace ("/^\s/", '', $text);
+        }
+        $text = '...' . $text;
+    }
 
-	return $text;
+    // Trim end.
+    if (strlen($text) > $length) {
+
+        // Allow space for ellipsis.
+        $text = substr($text, 0, $length - 3); 
+
+        // Word boundary.         
+        if (preg_match ("/(.*)\b.+/", $text, $matches)) {
+            $text = $matches[1];
+            // Strip spare space at the end.
+            $text = preg_replace ("/\s$/", '', $text);
+        }
+        // We don't want to use the HTML entity for an ellipsis (&#8230;), because then 
+        // it screws up when we subsequently use htmlentities() to print the returned
+        // string!
+        $text .= '...'; 
+    }
+
+    return $text;
 }
 
-
-function filter_user_input ($text, $filter_type) {
-	// We use this to filter any major user input, especially comments.
-	// Gets rid of bad HTML, basically.
-	// Uses iamcal.com's lib_filter class.
-	
-	// $filter_type is the level of filtering we want:
-	// 	'comment' allows <b> and <i> tags.
-	//	'strict' strips all tags.
-	
-	global $filter;
-	
-	$text = trim($text);
-	
-	// Replace 3 or more newlines with just two newlines.
-	//$text = preg_replace("/(\n){3,}/", "\n\n", $text);
-	
-	if ($filter_type == 'strict') {
-		// No tags allowed at all!
-		$filter->allowed = array ();
-		
-	} else {
-		// Comment.
-		// Only allowing <b> and <i> tags.
-		$filter->allowed = array (
-			'b' => array(),
-			'i' => array(),
-		);
-	}
-	
-	$text = $filter->go($text);
-
-
-	return $text;
-
-}
-
+/* convert_to_unix_newlines TEXT
+ * Return a copy of TEXT in which all DOS/RFC822-style line-endings (CRLF,
+ * "\r\n") have been converted to UNIX-style line-endings (LF, "\n"). */
 function convert_to_unix_newlines($text) {
     $text = preg_replace("/(\r\n|\n|\r)/\n", "\n", $text);
     return $text;
 }
 
-function prepare_comment_for_display ($text) {
-	// Makes any URLs into HTML links.
-	// Turns \n's into <br />
-
-	preg_match_all(
-		"/((http(s?):\/\/)|(www\.))([a-zA-Z0-9\_\.\,\?\%\~\-\/\#\='\*\$\!\(\)\&]+)/",
-		$text,
-		$matches);
-
-	// Encode HTML entities.
-	// Can't do htmlentities() because it'll turn the few tags we allow into &lt;
-	// Must go before the URL stuff.
-	$text = htmlentities_notags($text);
-	
-	// ...and finally replace all the urls with truncated links to the original full url.
-	foreach ($matches[0] as $match){
-		$link_length = 60;
-		$short_match = substr($match, 0, $link_length);
-		// Did we actually truncateanything?
-		if (strlen($match) > $link_length) {
-			$short_match .= "...";
-		}
-		// because we cleaned up the body text above, all our links are htmlentitied now.
-		// So we'll need to translate the ones we ripped out before we can match them.
-		$old_match = htmlentities($match);
-		$text = str_replace($old_match, "<a href=\"$match\">$short_match</a>", $text);
-	}
-		
-	$text = preg_replace("/([\w\.]+)(@)([\w\.\-]+)/i", "<a href=\"mailto:$0\">$0</a>", $text); 
-
-
-	$text = nl2br($text);
-	
-	return $text;	
+/* get_http_var NAME [DEFAULT]
+ * Return the value of the GET or POST parameter with the given NAME; or, if no
+ * such parameter is present, DEFAULT; or, if DEFAULT is not specified, the
+ * empty string (""). */
+function get_http_var($name, $default='') {
+    global $_GET, $_POST;
+    if (array_key_exists($name, $_GET))
+        return $_GET[$name];
+    else if (array_key_exists($name, $_POST))
+        return $_POST[$name];
+    else 
+        return $default;
 }
 
-
-function htmlentities_notags ($text) {
-	// If you want to do htmlentities() on some text that has HTML tags
-	// in it, then you need this function.
-	
-	$tbl = get_html_translation_table(HTML_ENTITIES);
-
-	// You could encode extra stuff...
-	//$tbl["“"] = "&quot;";
-	//$tbl["”"] = "&quot;";
-	//$tbl["…"] = "...";
-	//$tbl["—"] = "-";
-	//$tbl["»"] = "&raquo;";
-	//$tbl["«"] = "&laquo;";
-		 
-	// Don't want to encode these things
-	unset ($tbl["<"]);
-	unset ($tbl[">"]);
-	unset ($tbl["'"]);
-	unset ($tbl['"']);
-	
-	// Need to do & separetly, or else things like £ end up as &amp;pound;
-	// No idea why. But this seems to work.
-	unset ($tbl['&']);
-	$text = str_replace('&', '&amp;', $text);
-
-	$text = str_replace(array_keys($tbl), array_values($tbl), $text);
-
-	return $text;
-
-}
-
-function send_template_email ($data, $merge) {
-	// We should have some email templates in INCLUDESPATH/easyparliament/templates/emails/.
-	
-	// $data is like:
-	// array (
-	//	'template' 	=> 'send_confirmation',
-	//	'to'		=> 'phil@gyford.com',
-	//	'subject'	=> 'Your confirmation email'
-	// );
-	
-	// $merge is like:
-	// array (
-	//	'FIRSTNAME' => 'Phil',
-	//	'LATNAME'	=> 'Gyford'
-	// 	etc...
-	// );
-	
-	// In $data, 'template' and 'to' are mandatory. 'template' is the 
-	// name of the file (when it has '.txt' added to it).
-	
-	// We'll get the text of the template and replace all the $merge
-	// keys with their tokens. eg, if '{FIRSTNAME}' in the template will 
-	// be replaced with 'Phil'.
-	
-	// Additionally, the first line of a template may start with 
-	// 'Subject:'. Any text immediately following that, on the same line
-	// will be the subject of the email (it will also have its tokens merged).
-	// But this subject can be overridden by sending including a 'subject'
-	// pair in $data.
-	
-	global $PAGE;
-	
-	if (!isset($data['to']) || $data['to'] == '') {
-		$PAGE->error_message ("We need an email address to send to.");
-		return false;
-	}
-
-	$filename = INCLUDESPATH . "easyparliament/templates/emails/" . $data['template'] . ".txt";
-
-	if (!file_exists($filename)) {
-		$PAGE->error_message("Sorry, we could not find the email template '" . htmlentities($data['template']) . "'.");
-		return false;
-	}
-	
-	// Get the text from the template.
-	$handle = fopen($filename, "r");
-	$emailtext = fread($handle, filesize($filename));
-	fclose($handle);
-
-	// See if there's a default subject in the template.
-	$firstline = substr($emailtext, 0, strpos($emailtext, "\n"));
-	
-	// Work out what the subject line is.
-	if (preg_match("/Subject:/", $firstline)) {
-		if (isset($data['subject'])) {
-			$subject = trim($data['subject']);
-		} else {
-			$subject = trim( substr($firstline, 8) );
-		}
-		
-		// Either way, remove this subject line from the template.
-		$emailtext = substr($emailtext, strpos($emailtext, "\n"));
-		
-	} elseif (isset($data['subject'])) {
-		$subject = $data['subject'];
-	} else {
-		$PAGE->error_message ("We don't have a subject line for the email, so it wasn't sent.");
-		return false;
-	}
-	
-
-	// Now merge all the tokens from $merge into $emailtext...
-	$search = array();
-	$replace = array();
-	
-	foreach ($merge as $key => $val) {
-		$search[] = '/{'.$key.'}/';
-		$replace[] = $val;
-	}
-	
-	$emailtext = preg_replace($search, $replace, $emailtext);
-	
-	// Send it!
-	$success = send_email ($data['to'], $subject, $emailtext);
-
-	return $success;
-
-}
-
-
-
-function send_email ($to, $subject, $message) {
-	// Use this rather than PHP's mail() direct, so we can make alterations
-	// easily to all the emails we send out from the site.
-	
-	// eg, we might want to add a .sig to everything here...
-	
-	// Everything is BCC'd to REPORTLIST (unless it's already going to the list!).
-	
-	$headers = 
-	 "From: TheyWorkForYou.com <" . CONTACTEMAIL . ">\r\n" .
-     "Reply-To: TheyWorkForYou.com <" . CONTACTEMAIL . ">\r\n" .
-     "X-Mailer: PHP/" . phpversion();
-     
-	if ($to != REPORTLIST) {
-  		$headers .= "\r\nBcc: " . BCCADDRESS;
-	}
-     
-	debug('EMAIL', "Sending email to $to with subject of '$subject'");
-
-	$success = mail ($to, $subject, $message, $headers);
-
-	return $success;
-}
-
-
-
-///////////////////////////////
-// Cal's functions from
-// http://www.iamcal.com/publish/article.php?id=13
-
-// Call this with a key name to get a GET or POST variable.
-function get_http_var ($name, $default=''){
-	global $_GET, $_POST;
-	if (arrayKeyExists($name, $_GET)) {
-		return clean_var($_GET[$name]);
-	}
-	if (arrayKeyExists($name, $_POST)) {
-		return clean_var($_POST[$name]);
-	}
-	return $default;
-}
-
-function clean_var ($a){
-    // this replaced by unfck_gpc above
-
-	//return (ini_get("magic_quotes_gpc") == 1) ? recursive_strip($a) : $a;
-    return $a;
-}
-
-function recursive_strip ($a){
-	if (is_array($a)) {
-		while (list($key, $val) = each($a)) {
-			$a[$key] = recursive_strip($val);
-		}
-	} else {
-		$a = StripSlashes($a);
-	}
-	return $a;
-}
-
-
-// Call this with a key name to get a COOKIE variable.
-function get_cookie_var($name, $default=''){
-	global $_COOKIE;
-	if (arrayKeyExists($name, $_COOKIE)) {
-		return clean_var($_COOKIE[$name]);
-	}
-	return $default;
-}
-///////////////////////////////
-
-
-
-// Because array_key_exists() doesn't exist prior to PHP v4.1.0
-function arrayKeyExists($key, $search) {
-   if (in_array($key, array_keys($search))) {
-       return true;
-   } else {
-       return false;
-   }
-}
-
-
-// Pass it an array of key names that should not be generated as
-// hidden form variables. It then outputs hidden form variables 
-// based on the session_vars for this page.
-function hidden_form_vars ($omit = array()) {
-	global $DATA, $this_page;
-	
-	$session_vars = $DATA->page_metadata($this_page, "session_vars");
-
-	foreach ($session_vars as $n => $key) {
-		if (!in_array($key, $omit)) {
-			print "<input type=\"hidden\" name=\"$key\" value=\"" . htmlentities(get_http_var($key)) . "\" />\n";
-		}
-	}
-}
-
-
-
-function make_ranking($rank)
-{
-    # 11th, 12th, 13th use "th" not "st", "nd", "rd"
-    if (floor(($rank % 100) / 10) == 1)
-        return $rank . "th"; 
-    # 1st
-    if ($rank % 10 == 1)
-        return $rank . "st";
-    # 2nd
-    if ($rank % 10 == 2)
-        return $rank . "nd"; 
-    # 3rd
-    if ($rank % 10 == 3)
-        return $rank . "rd"; 
-    # Everything else use th
-    return $rank . "th";
-}
-
-function make_plural($word, $number)
-{
+/* make_plural WORD NUMBER
+ * If NUMBER is 1, return WORD; if NUMBER is not 1, return WORD catenated with
+ * "s". */
+function make_plural($word, $number) {
     if ($number == 1)
         return $word;
     return $word . "s";
@@ -856,22 +354,79 @@ function new_url($page, $retain) {
     return $url;
 }
 
-
 /* http_auth_user
- * Return the user name authenticated by hTTP, or *unknown* if none.  */
-function http_auth_user()
-{
+ * Return the user name authenticated by HTTP, or *unknown* if none.
+ * XXX should this not return null? */
+function http_auth_user() {
     $editor = $_SERVER["REMOTE_USER"];
     if (!$editor) $editor = "*unknown*";
     return $editor;
 }
 
-/* add_tooltip
-* Returns HTML with a span containing a tooltip.
-*/
-function add_tooltip($text, $tip)
-{
-    return "<span title=\"" .  $tip. "\">" .  $text . "</span>";
+/* add_tooltip TEXT TIP
+ * Return an HTML <span>...</span> containing TEXT with TIP passed as the title
+ * attribute of the span, so that it appears as a tooltip in common graphical
+ * browsers. */
+function add_tooltip($text, $tip) {
+    return "<span title=\"" . htmlspecialchars($tip) . "\">$text</span>";
 }
+
+/*
+
+// some tests of the above
+
+define('OPTION_PHP_DEBUG_LEVEL', 4);
+print "debug(...)\n";
+debug('header', 'text');
+debug('header', 'text', array(1, 2, 3));
+print "done\n";
+
+print "vardump(...)\n";
+vardump(array(1, 2, 3));
+print "done\n";
+
+foreach (array('chris@ex-parrot.com', 'fish soup') as $e) {
+    print "validate_email('$e') = " . validate_email($e) . "\n";
+}
+
+foreach (array('CB4 1EP', 'fish soup') as $pc) {
+    print "validate_postcode('$pc') = " . validate_postcode($pc) . "\n";
+}
+
+print "getmicrotime() = " . getmicrotime() . "\n";
+
+$text = 'I returned and saw under the sun, that the race is not to the swift, nor the battle to the strong, neither yet bread to the wise, nor yet riches to men of understanding, nor yet favour to men of skill; but time and chance happeneth to them all.';
+
+print "\$text = '$text'\n";
+print "trim_characters(\$text, 50, 999) = '" . trim_characters($text, 15, 999) . "'\n";
+print "trim_characters(\$text, 0, 50) = '" . trim_characters($text, 0, 50) . "'\n";
+
+$text = "fish\r\nsoup";
+print "\$text = '$text'\n";
+print "convert_to_unix_newlines(\$text) = '" . convert_to_unix_newlines($text) . "'\n";
+
+// hard to test get_http_var in this environment
+
+print "make_plural('fish', 1) = '" . make_plural('fish', 1) . "'\n";
+print "make_plural('fish', -1) = '" . make_plural('fish', -1) . "'\n";
+
+print "debug_timestamp():";
+debug_timestamp();
+sleep(1);
+debug_timestamp();
+
+print "invoked_url() = '" . invoked_url() . "'\n";
+
+foreach (array('\w*\s*\w*', 'fish soup', '**') as $re) {
+    print "check_is_valid_regexp('$re') = " . check_is_valid_regexp($re) . "\n";
+}
+
+print "new_url('http://www.microsoft.com', 0, 'fish', 'soup') = '" . new_url('http://www.microsoft.com', 0, 'fish', 'soup')  . "'\n";
+
+print "http_auth_user() = '" . http_auth_user() . "'\n";
+
+print "add_tooltip('fish', '\"soup\"') = '" . add_tooltip('fish', '"soup"') . "'\n";
+
+*/
 
 ?>
