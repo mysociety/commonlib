@@ -4,7 +4,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: deployfns,v 1.9 2005-02-10 16:37:50 francis Exp $
+# $Id: deployfns,v 1.10 2005-03-12 00:56:31 francis Exp $
 #
 
 # Warnings and errors
@@ -17,21 +17,26 @@ warn () {
     echo "$SCRIPT_COMMAND:" "$@" 1>&2
 }
 
-# Check we are root@$EXPECTED_HOST and $MYSOCIETY_BIN exists
+# check_who_where EXPECTED_HOST CHECK_ROOT
+# Check we are root@$EXPECTED_HOST and $MYSOCIETY_BIN exists.  If
+# CHECK_ROOT is 'root', check we are root.
 check_who_where () {
     if [ ! -d "$MYSOCIETY_BIN" ] 
     then 
         die "must run with mysociety/fyr/bin as current directory"
     fi
 
-    if [ "`id -u`" != "0" ]
+    if [ -n "$1" -a `hostname` != "$1" ]
     then
-        die "must run as root"
+        die "this script is only for $1"
     fi
 
-    if [ `hostname` != "$EXPECTED_HOST" ]
+    if [ "$2" = "root" ]
     then
-        die "this script is only for $EXPECTED_HOST"
+        if [ "`id -u`" != "0" ]
+        then
+            die "must run as root"
+        fi
     fi
 }
 
@@ -160,8 +165,5 @@ daemon_start () {
     /usr/local/etc/rc.d/$1.sh start
 }
 
-
-# Stuff to automatically run
-check_who_where
 
 
