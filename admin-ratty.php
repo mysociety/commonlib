@@ -6,7 +6,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-ratty.php,v 1.29 2005-01-13 15:15:38 francis Exp $
+ * $Id: admin-ratty.php,v 1.30 2005-01-13 15:44:24 francis Exp $
  * 
  */
 
@@ -199,18 +199,18 @@ class ADMIN_PAGE_RATTY {
             
             if ($action == "editrule") {
                 admin_render_form($form);
-            }
 
-            print "<h2>Help &mdash What do all the fields mean?</h2>";
-            print "<p>";
-            foreach ($fieldarray as $row) {
-                list($field_name, $field_description, $field_examples) = $row;
-                print "<b>$field_name:</b> $field_description. ";
-                print "e.g. " . implode(",", array_map(
-                create_function('$a', 'return "\"".trim_characters($a, 0, 50)."\"";'), $field_examples));
-                print "<br>";
+                print "<h2>Help &mdash What do all the fields mean?</h2>";
+                print "<p>";
+                foreach ($fieldarray as $row) {
+                    list($field_name, $field_description, $field_examples) = $row;
+                    print "<b>$field_name:</b> $field_description. ";
+                    print "e.g. " . implode(",", array_map(
+                    create_function('$a', 'return "\"".trim_characters($a, 0, 50)."\"";'), $field_examples));
+                    print "<br>";
+                }
+                print "</p>";
             }
-            print "</p>";
         }
         if ($action == "listrules") {
             $rules = ratty_admin_get_rules($this->scope);
