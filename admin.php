@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin.php,v 1.18 2005-01-17 15:41:53 francis Exp $
+ * $Id: admin.php,v 1.19 2005-01-17 17:56:47 francis Exp $
  * 
  */
 
@@ -53,6 +53,7 @@ function admin_page_display($site_name, $pages) {
    
     // display
     $title = $page->navname . " &mdash; $site_name Admin";
+    ob_start();
     admin_html_header($title);
     $self_link = "?page=$id";
     $page->display($self_link);
@@ -87,7 +88,7 @@ h2 {font-size: 125%; }
 .h {background-color: #9999cc;  color: #000000; }
 .v {background-color: #cccccc;  color: #000000; }
 i {color: #666666;  background-color: #cccccc; }
-img {float: right;  border: 0px; }
+img.mslogo {float: right;  border: 0px; }
 hr {width: 600px;  background-color: #cccccc;  border: 0px;  height: 1px;  color: #000000; }
 //--></style>
 </head>
@@ -100,7 +101,7 @@ hr {width: 600px;  background-color: #cccccc;  border: 0px;  height: 1px;  color
 // Footer at bottom
 function admin_html_footer($navlinks) {
 ?>
-<p><a href="http://www.mysociety.org/"><img src="/mysociety_sm.gif" border="0" alt="mySociety"></a></p>
+<p><a href="http://www.mysociety.org/"><img class="mslogo" src="/mysociety_sm.gif" border="0" alt="mySociety"></a></p>
 </td>
 <td valign=top>
 <?=$navlinks?>

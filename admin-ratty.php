@@ -6,7 +6,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-ratty.php,v 1.31 2005-01-13 16:59:13 francis Exp $
+ * $Id: admin-ratty.php,v 1.32 2005-01-17 17:56:47 francis Exp $
  * 
  */
 
@@ -223,10 +223,11 @@ class ADMIN_PAGE_RATTY {
 <p>$this->scope_description</h1></p>
 <table border="1" width="100%">
     <tr>
-        <th>Eval Order</th>
+        <th>Order</th>
         <th>Description</th>
         <th>Hit limit</th>
-        <th>Matches</th>
+        <th>Action</th>
+        <th>Matches [1]</th>
     </tr>
 EOF;
             $c = 1;
@@ -242,6 +243,7 @@ EOF;
                 } else {
                     print "<td>" . $rule['requests'] . " hits / " . $rule['interval'] . " " . make_plural($rule['interval'], 'sec'). "</td>";
                 }
+                print "<td>" . trim_characters($rule['message'], 0, 40) . "</td>";
                 print "<td>" . $rule['hits'] . "</td>";
                 print "</tr>";
 
@@ -270,6 +272,14 @@ distinct representatives which can be viewed per unit time.
 Rules are applied in order. Each request is tested against each rule in turn
 until one matches, in which case the request is denied; or until there are no
 more rules, in which case the request is permitted.
+</p>
+<p>[1] <b>Matches</b> has slightly different meanings for different rules types.
+For straightforward filter rules, it means the number of hits in the last 
+time period (roughly - it actually means the number of hits in the time period
+up until the last hit).  "Time period" here is the number of seconds in the
+"Hit limit" column.  For more complicated "Limit hits separately..." and "Limit
+number of distinct..." rules, matches is a count of how many times just the 
+simple filter conditions were met, not how many times the rule actually triggered.
 </p>
 <?
         }
