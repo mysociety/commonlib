@@ -6,10 +6,12 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: VotingArea.pm,v 1.2 2004-10-15 16:35:47 francis Exp $
+# $Id: VotingArea.pm,v 1.3 2004-10-17 13:24:56 chris Exp $
 #
 
 package mySociety::VotingArea;
+
+use strict;
 
 =head1 NAME
 
@@ -156,13 +158,27 @@ use constant WMC => 902; # ... constituency
 use constant EUP => 1001; # European Parliament
 use constant EUR => 1002; # ... region
 
-=item name
-Names of areas. For administrative areas, this is their full name, for instance
-"County" or "London Borough"; for voting areas, it's a short name, for instance
-"Ward" or "Electoral Division".
+=item %type_to_id
+
+Map a 3-letter type string (like "WMC") to its corresponding numeric type.
+
+=cut
+{
+    no strict 'refs';
+    %mySociety::VotingArea::type_to_id = map { $_ => &$_ } qw(
+            LBO LBW GLA LAC CTY CED DIS DIW UTA UTE UTW MTD MTW SPA SPE SPC WAS WAE WAC WMP WMC EUP EUR
+        );
+}
+
+=item type_name
+
+Names of types of areas. For administrative areas, this is their full name, for
+instance "County" or "London Borough"; for voting areas, it's a short name, for
+instance "Ward" or "Electoral Division".
+
 =cut
 
-%name = (
+%mySociety::VotingArea::type_name = (
         LBO,  "London Borough",
         LBW,  "Ward",
 
@@ -198,13 +214,15 @@ Names of areas. For administrative areas, this is their full name, for instance
     );
 
 =item attend_prep
-Whether to use the preposition "on" or "at the" to describe someone
-attending the council.
-"Your District Councillors represent you on Cambridge District Council."
-"Your Members of the European Parliament represent you at the European Parliament."
+
+Whether to use the preposition "on" or "at the" to describe someone attending
+the elected body. For instance, "Your District Councillors represent you on
+Cambridge District Council"; "Your Members of the European Parliament represent
+you in the European Parliament".
+
 =cut
 
-%attend_prep = (
+%mySociety::VotingArea::attend_prep = (
         LBO,  "on the",
 
         GLA,  "on the",
@@ -228,11 +246,12 @@ attending the council.
 
 
 =item rep_name
+
 For voting areas, gives the name of the type of person who represents that
 area.  For example, "Councillor" or "Member of the European Parliament".
-=cut
 
-%rep_name = (
+=cut
+%mySociety::VotingArea::rep_name = (
         LBW, 'Councillor',
 
         GLA, 'Mayor', # "of London"? 
@@ -259,13 +278,15 @@ area.  For example, "Councillor" or "Member of the European Parliament".
     );
 
 =item rep_name_plural
+
 Plural version of rep_name.
+
 =cut
 
-%rep_name_plural = (
+%mySociety::VotingArea::rep_name_plural = (
         LBW, 'Councillors',
 
-        GLA, 'Mayors', # "of London"? 
+        GLA, 'Mayors', # "of London"?
         LAC, 'Assembly Members',
 
         CED, 'County Councillors',
@@ -290,11 +311,13 @@ Plural version of rep_name.
 
 
 =item rep_suffix
+
 For voting areas, gives the suffix to the title of the person who repesents
 that area.  For example, "AM" for Assembly Members.
+
 =cut
 
-%rep_suffix = (
+%mySociety::VotingArea::rep_suffix = (
         LBW, '',
 
         GLA, '',
@@ -321,11 +344,12 @@ that area.  For example, "AM" for Assembly Members.
     );
 
 =item rep_prefix
+
 For voting areas, gives the prefix to the title of the person who repesents
 that area.  For example, "Cllr" for Councillors.
-=cut
 
-%rep_suffix = (
+=cut
+%mySociety::VotingArea::rep_suffix = (
         LBW, 'Cllr',
 
         GLA, 'Mayor', # "of London"? 
@@ -350,6 +374,5 @@ that area.  For example, "Cllr" for Councillors.
 
         EUR, ''
     );
-
 
 1;
