@@ -8,7 +8,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: votingarea.php,v 1.6 2004-11-18 13:14:45 francis Exp $
+ * $Id: votingarea.php,v 1.7 2004-11-22 12:11:45 chris Exp $
  * 
  */
 
@@ -23,8 +23,12 @@ define('VA_MTD', 301);  /* Metropolitan district */
 define('VA_MTW', 302);  /* ... ward */
 
 define('VA_UTA', 401);  /* Unitary authority */
-define('VA_UTE', 402);  /* ... electoral division (in wales and isle of wight)*/
+define('VA_UTE', 402);  /* ... electoral division (in Wales and Isle of
+                         * Wight) */
 define('VA_UTW', 403);  /* ... ward (elsewhere)*/
+
+define('VA_LGD', 451);  /* Local Government District (NI) */
+define('VA_LGW', 452);  /* ... ward */
 
 define('VA_CTY', 501);  /* County */
 define('VA_CED', 502);  /* ... electoral division */
@@ -40,6 +44,10 @@ define('VA_WAC', 703);  /* ... constituency */
 define('VA_SPA', 801);  /* Scottish Parliament */
 define('VA_SPE', 802);  /* ... electoral region (for top-up members)*/
 define('VA_SPC', 803);  /* ... constituency */
+
+define('VA_NIA', 851);  /* Northern Ireland Assembly */
+define('VA_NIE', 852);  /* ... electoral region (actually coterminous with the
+                         * Westminster constituencies) */
 
 define('VA_WMP', 901);  /* Westminster Parliament */
 define('VA_WMC', 902);  /* ... constituency */
@@ -64,6 +72,8 @@ $va_inside = array(
         VA_UTE => VA_UTA,
         VA_UTW => VA_UTA,
 
+        VA_LGW => VA_LGD,
+
         VA_MTW => VA_MTD,
 
         VA_SPE => VA_SPA,
@@ -72,6 +82,8 @@ $va_inside = array(
         VA_WAE => VA_WAP,
         VA_WAC => VA_WAC,
 
+        VA_NIE => VA_NIA,
+
         VA_WMC => VA_WMP,
 
         VA_EUR => VA_EUP
@@ -79,11 +91,25 @@ $va_inside = array(
 
 /* va_display_order
  * Suggested "increasing power" display order for representatives. */
-$va_display_order = array(VA_DIW, VA_LBW, VA_MTW, VA_UTW, VA_UTE, VA_CED,
-    VA_LAC, VA_LAE, VA_WAC, VA_WAE, VA_SPC, VA_SPE, VA_WMC, VA_EUR);
+$va_display_order = array(
+        /* District councils */
+        VA_DIW, VA_LBW,
+        /* unitary-type councils */
+        VA_MTW, VA_UTW, VA_UTE, VA_LGW,
+        /* county council */
+        VA_CED,
+        /* various devolved assemblies */
+        VA_LAC, VA_LAE,
+        VA_WAC, VA_WAE,
+        VA_SPC, VA_SPE,
+        VA_NIE,
+        /* HoC and European Parliament */
+        VA_WMC, VA_EUR
+    );
 
-// Lookup table of long description XXX should copy these out of Whittaker's
-// Almanac or whatever.
+/* va_responsibility_description
+ * Responsibilities of each elected body. XXX should copy these out of
+ * Whittaker's Almanac or whatever. */
 $va_responsibility_description = array(
     VA_DIS =>
             "The District Council is responsible for
@@ -99,6 +125,9 @@ $va_responsibility_description = array(
             "The County Council is responsible for local
             services, including education, social services, transport and
             libraries.",
+    VA_LGD =>
+            "The Local Government District is responsible for all local
+            services and policy.", /* FIXME */
     VA_WMP =>
             "The House of Commons is responsible for
             making laws in the UK and for overall scrutiny of all aspects of
@@ -107,7 +136,7 @@ $va_responsibility_description = array(
             "They scrutinise European laws (called
             \"directives\") and the budget of the European Union, and provides
             oversight of the other decision-making bodies of the Union,
-            including the Council of Ministers and the Commission."
+            including the Council of Ministers and the Commission.",
 )
 
  
