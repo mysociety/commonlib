@@ -8,7 +8,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: votingarea.php,v 1.14 2005-01-07 20:01:13 chris Exp $
+ * $Id: votingarea.php,v 1.15 2005-01-07 20:02:55 chris Exp $
  * 
  */
 
@@ -141,5 +141,8 @@ The National Assembly for Wales has a wide range of powers over areas including
 Language</strong>.
 "
     );
+
+$va_responsibility_description['SPE'] = $va_responsibility_description['SPC'];
+$va_responsibility_description['WAE'] = $va_responsibility_description['WAC'];
 
 ?>
