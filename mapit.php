@@ -7,10 +7,11 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: mapit.php,v 1.3 2004-10-18 10:29:22 chris Exp $
+ * $Id: mapit.php,v 1.4 2004-10-28 11:00:03 chris Exp $
  * 
  */
 
+include_once('rabx.php');
 include_once('votingarea.php');
 
 /* Error codes */
@@ -27,23 +28,17 @@ $mapit_error_strings = array(
 /* mapit_is_error R
  * Does R (the return value from another MaPit function) indicate an error? */
 function mapit_is_error($e) {
-    return is_integer($e);
+    return rabx_is_error($e);
 }
 
 /* mapit_strerror CODE
  * Return a human-readable string describing CODE. */
 function mapit_strerror($e) {
     global $mapit_error_strings;
-    if (is_array($e))
+    if (!rabx_is_error($e))
         return "Success";
-    else if ($e == FALSE)
-        return "Failed to make remote procedure call";
-    else if (!is_integer($e))
-        return "Unexpectedly got a " . gettype($e) . " back from MapIt";
-    else if (!array_key_exists($e, $mapit_error_strings))
-        return "Unknown MaPit error";
     else
-        return $mapit_error_strings[$e];
+        return $e->text;
 }
 
 /* mapit_get_error R
@@ -55,12 +50,16 @@ function mapit_get_error($e) {
         return mapit_strerror($e);
 }
 
+$mapit_client = new RABX_Client("http://" . OPTION_MAPIT_HOST . ":" . OPTION_MAPIT_PORT . OPTION_MAPIT_PATH);
+
 /* mapit_get_voting_areas POSTCODE
  * On success, return an array mapping voting/administrative area type to
  * voting area ID. On failure, returns an error code. */
 function mapit_get_voting_areas($postcode) {
+    global $mapit_client;
     debug("MAPIT", "Looking up areas for postcode $postcode");
-    $result = sxr_call(OPTION_MAPIT_HOST, OPTION_MAPIT_PORT, OPTION_MAPIT_PATH, 'MaPit.get_voting_areas', array($postcode));
+//    $result = sxr_call(OPTION_MAPIT_HOST, OPTION_MAPIT_PORT, OPTION_MAPIT_PATH, 'MaPit.get_voting_areas', array($postcode));
+    $result = $mapit_client->call('MaPit.get_voting_areas', array($postcode));
     debug("MAPITRESULT", "Result is:", $result);
     return $result;
 }
@@ -71,8 +70,21 @@ function mapit_get_voting_areas($postcode) {
  * of the area (e.g. "VA_CTY"); and name, the name of the area (e.g., "Norfolk
  * County Council"). On failure, returns an error code. */
 function mapit_get_voting_area_info($va_id) {
+    global $mapit_client;
     debug("MAPIT", "Looking up info on area $va_id");
-    $result = sxr_call(OPTION_MAPIT_HOST, OPTION_MAPIT_PORT, OPTION_MAPIT_PATH, 'MaPit.get_voting_area_info', array($va_id));
+//    $result = sxr_call(OPTION_MAPIT_HOST, OPTION_MAPIT_PORT, OPTION_MAPIT_PATH, 'MaPit.get_voting_area_info', array($va_id));
+    $result = $mapit_client->call('MaPit.get_voting_area_info', array($va_id));
+    debug("MAPITRESULT", "Result is:", $result);
+    return $result;
+}
+
+/* mapit_get_voting_areas_info ARRAY
+ */
+function mapit_get_voting_areas_info($array) {
+    global $mapit_client;
+    debug("MAPIT", "Looking up info on areas");
+//    $result = sxr_call(OPTION_MAPIT_HOST, OPTION_MAPIT_PORT, OPTION_MAPIT_PATH, 'MaPit.get_voting_area_info', array($va_id));
+    $result = $mapit_client->call('MaPit.get_voting_areas_info', array($array));
     debug("MAPITRESULT", "Result is:", $result);
     return $result;
 }
