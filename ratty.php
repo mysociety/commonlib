@@ -6,7 +6,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: ratty.php,v 1.5 2004-11-08 18:27:17 francis Exp $
+ * $Id: ratty.php,v 1.6 2004-11-11 18:15:14 francis Exp $
  * 
  */
 
@@ -43,6 +43,19 @@ function ratty_test($vals) {
     }
     debug("RATTYRESULT", "Result is:", $res);
     return $res != 0;
+}
+
+/* ratty_admin_available_fields
+ * Returns all the fields ratty has seen as an array of pairs (field,
+ * example) */
+function ratty_admin_available_fields() {
+    global $ratty_client;
+    $res = $ratty_client->call('Ratty.admin_available_fields', array());
+    if ($fyr_error_message = ratty_get_error($res)) {
+        include "../templates/generalerror.html";
+        exit;
+    }
+    return $res;
 }
 
 ?>

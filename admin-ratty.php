@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-ratty.php,v 1.3 2004-11-11 17:10:20 francis Exp $
+ * $Id: admin-ratty.php,v 1.4 2004-11-11 18:15:14 francis Exp $
  * 
  */
 
@@ -42,12 +42,19 @@ class ADMIN_PAGE_RATTY {
             $form->addElement('textarea', 'note', "Description of rule:", array('rows' => 3, 'cols' => 40));
             $form->addElement('text', 'requests', "Limit to this many hits:", array('size' => 20, 'maxlength' => 20));
             $form->addElement('text', 'interval', "Every this many seconds:", array('size' => 20, 'maxlength' => 20));
+    
+            // Get list of fields from ratty
+            $fieldarray = ratty_admin_available_fields();
+            $fields = array();
+            foreach ($fieldarray as $row) {
+                $fields[$row[0]] = $row[0];
+            }
 
             // Grouped elements
             $ix = 0;
             foreach ($conditiondata as $condition) {
                 $ix++;
-                $condgroup[0] = &HTML_QuickForm::createElement('text', "field$ix", 'Field:', array('size' => 15));
+                $condgroup[0] = &HTML_QuickForm::createElement('select', "field$ix", 'Field:', $fields);
                 
                 if ($condition['condition'] == 'S') {
                     $condgroup[1] = &HTML_QuickForm::createElement('select', "condition$ix", "Operator:", array('S'=>'exactly equal to'));
