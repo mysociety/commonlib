@@ -6,12 +6,13 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Config.pm,v 1.11 2004-11-25 14:49:57 chris Exp $
+# $Id: Config.pm,v 1.12 2004-12-16 14:15:37 chris Exp $
 #
 
 package mySociety::Config;
 
 use strict;
+
 use IO::Handle;
 use IO::Pipe;
 use Error qw(:try);
