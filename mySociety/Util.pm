@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Util.pm,v 1.12 2005-02-15 09:58:57 chris Exp $
+# $Id: Util.pm,v 1.13 2005-02-15 09:59:29 chris Exp $
 #
 
 package mySociety::Util::Error;
@@ -72,6 +72,8 @@ sub random_bytes ($) {
     }
 
     $f->close();
+
+    die "wanted $count bytes, got " . length($l) . " bytes" unless (length($l) == $count);
 
     return $l;
 }
