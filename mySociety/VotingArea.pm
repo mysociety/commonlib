@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: VotingArea.pm,v 1.5 2004-10-19 16:46:21 chris Exp $
+# $Id: VotingArea.pm,v 1.6 2004-10-20 13:43:07 francis Exp $
 #
 
 package mySociety::VotingArea;
@@ -247,11 +247,43 @@ you in the European Parliament".
 
 =item rep_name
 
-For voting areas, gives the name of the type of person who represents that
-area.  For example, "Councillor" or "Member of the European Parliament".
+For voting areas, gives the short name of the type of person who
+represents that area.  For example, "Councillor" or "MEP".
 
 =cut
 %mySociety::VotingArea::rep_name = (
+        LBW, 'Councillor',
+
+        GLA, 'Mayor', # "of London"? 
+        LAC, 'Assembly Member',
+
+        CED, 'County Councillor',
+
+        DIW, 'District Councillor',
+
+        UTE, 'Councillor',
+        UTW, 'Councillor',
+
+        MTW, 'Councillor',
+
+        SPE, 'MSP',
+        SPC, 'MSP',
+
+        WAE, 'AM',
+        WAC, 'AM',
+
+        WMC, 'MP',
+
+        EUR, 'MEP'
+    );
+
+=item rep_name_long
+
+For voting areas, gives the long name of the type of person who represents that
+area.  For example, "Councillor" or "Member of the European Parliament".
+
+=cut
+%mySociety::VotingArea::rep_name_long = (
         LBW, 'Councillor',
 
         GLA, 'Mayor', # "of London"? 
@@ -277,13 +309,46 @@ area.  For example, "Councillor" or "Member of the European Parliament".
         EUR, 'Member of the European Parliament'
     );
 
+
 =item rep_name_plural
 
-Plural version of rep_name.
+Plural short version of rep_name.
 
 =cut
 
 %mySociety::VotingArea::rep_name_plural = (
+        LBW, 'Councillors',
+
+        GLA, 'Mayors', # "of London"?
+        LAC, 'Assembly Members',
+
+        CED, 'County Councillors',
+
+        DIW, 'District Councillors',
+
+        UTE, 'Councillors',
+        UTW, 'Councillors',
+
+        MTW, 'Councillors',
+
+        SPE, 'MSPs',
+        SPC, 'MSPs',
+
+        WAE, 'AMs',
+        WAC, 'AMs',
+
+        WMC, 'MPs',
+
+        EUR, 'MEPs'
+    );
+
+=item rep_name_long_plural
+
+Plural long version of rep_name.
+
+=cut
+
+%mySociety::VotingArea::rep_name_long_plural = (
         LBW, 'Councillors',
 
         GLA, 'Mayors', # "of London"?
@@ -308,6 +373,7 @@ Plural version of rep_name.
 
         EUR, 'Members of the European Parliament'
     );
+
 
 
 =item rep_suffix
