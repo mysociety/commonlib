@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Util.pm,v 1.18 2005-03-30 16:10:03 sandpit Exp $
+# $Id: Util.pm,v 1.19 2005-04-01 09:40:29 chris Exp $
 #
 
 package mySociety::Util::Error;
@@ -276,6 +276,19 @@ sub open_log ($) {
     $logopen = $_[0];
 }
 
+=item log_to_stderr [FLAG]
+
+Get or set the flag for sending log messages to standard error as well as the
+system log. By default this is on.
+
+=cut
+my $logtostderr = 1;
+sub log_to_stderr (;$) {
+    my $r = $logtostderr;
+    $logtostderr = $_[0] if (defined($_[0]));
+    return $r;
+}
+
 =item print_log PRIORITY TEXT
 
 Log TEXT to the system log (under PRIORITY) and to standard error. Designed for
@@ -291,7 +304,7 @@ sub print_log ($$) {
     my ($pri, @a) = @_;
     my $str = join('', @a);
     chomp($str);
-    STDERR->print("$logopen: ", $str, "\n");
+    STDERR->print("$logopen: ", $str, "\n") if ($logtostderr);
     syslog($pri, '%s', $str);
 }
 
