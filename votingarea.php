@@ -8,7 +8,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: votingarea.php,v 1.24 2005-01-31 18:02:04 chris Exp $
+ * $Id: votingarea.php,v 1.25 2005-02-08 15:50:21 francis Exp $
  * 
  */
 
@@ -121,12 +121,14 @@ Mayor's budget, <strong>culture</strong>, <strong>sport and tourism</strong>,
 ",
     'MTD' =>
             "The Metropolitan District Council is
-            responsible for all aspects of local services and policy, including
-            planning, transport, education, social services and libraries.",
+            responsible for all aspects of <strong>local services and policy</strong>, including
+            <strong>planning</strong>, <strong>transport</strong>, <strong>education</strong>, 
+            <strong>social services</strong> and <strong>libraries</strong>.",
     'UTA' => 
             "The Unitary Authority is
-            responsible for all aspects of local services and policy, including
-            planning, transport, education, social services and libraries.",
+            responsible for all aspects of <strong>local services and policy</strong>, including
+            <strong>planning</strong>, <strong>transport</strong>, <strong>education</strong>, 
+            <strong>social services</strong> and <strong>libraries</strong>.",
     'CTY' =>
             "The County Council is responsible for <strong>local
             services</strong>, including <strong>education</strong>, <strong>social services</strong>, <strong>transport</strong> and
