@@ -7,7 +7,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: CouncilMatch.pm,v 1.12 2005-02-02 00:10:01 francis Exp $
+# $Id: CouncilMatch.pm,v 1.13 2005-02-02 03:22:14 francis Exp $
 #
 
 package mySociety::CouncilMatch;
@@ -199,7 +199,8 @@ sub canonicalise_person_name ($) {
     s/^([^,]+),([^,]+)$/$2 $1/;  
 
     # Clear up spaces and punctuation
-    s#[[:punct:]]##g;
+    s#\@.*$##; # sometimes usefully match names in emails, so strip all
+    s#[[:punct:]]# #g;
     $_ = trim($_);
     $_ = merge_spaces($_);
 
@@ -224,7 +225,7 @@ sub canonicalise_person_name ($) {
 # Returns Ward name with extra suffixes (e.g. Ward) removed, and in lowercase.
 sub canonicalise_ward_name ($) {
     ($_) = @_;
-    s# Ward$##;
+    s# Ward\b.*$##;
     return mySociety::CouncilMatch::canonicalise_council_name($_);
 }
 
@@ -581,7 +582,7 @@ sub edit_raw_data($$$$$$) {
 # Break parts of array separated by various sorts of punctuation
 sub split_lumps_further($) {
     my ($lumps) = @_;
-    my @lumps = map { split / - | \(| \)/, $_ } @$lumps;
+    my @lumps = map { split / - | \(| \)|:|;|\band\b/, $_ } @$lumps;
     return @lumps;
 }
 
@@ -693,9 +694,12 @@ sub check_councillors_against_website($$) {
             }
 
             my $canonlump = canonicalise_ward_name($lump);
-            if (exists($wardnamescanon->{$canonlump})) {
+            my $found = 0;
+            do { $found = $wardnamescanon->{$_}->{id} if ($canonlump =~ m/\b$_\b/) } for (keys %$wardnamescanon);
+#            $found = 0 if ($lump !~ m/(^\d+\.)/);
+            if ($found) {
                 print "ward matched '$canonlump'\n" if $verbose;
-                $lastwardid = $wardnamescanon->{$canonlump}->{id};
+                $lastwardid = $found;
                 push @{$warddone->{$lastwardid}}, $lump;
                 if ($pattern eq "CWCWCW") {
                     # check councillor right

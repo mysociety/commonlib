@@ -6,7 +6,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: StringUtils.pm,v 1.5 2005-02-01 16:18:04 francis Exp $
+# $Id: StringUtils.pm,v 1.6 2005-02-02 03:22:14 francis Exp $
 #
 
 package mySociety::StringUtils;
@@ -116,6 +116,7 @@ sub break_into_lumps ($) {
     my ($content) = @_;
 
     $content =~ s/&amp;/&/g;  # make ampersands normal
+    $content =~ s/&nbsp;/ /g;  # make ampersands normal
     $content =~ s/<!--[^>]*-->//g;  # remove comments
 
     # Remove, without replacing with spaces, all the tags which are character
