@@ -9,7 +9,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: DBHandle.pm,v 1.5 2005-01-31 20:03:50 chris Exp $
+# $Id: DBHandle.pm,v 1.6 2005-01-31 20:11:15 chris Exp $
 #
 
 package mySociety::DBHandle;
@@ -97,7 +97,7 @@ sub new_dbh () {
     $connstr .= ";port=$mySociety::DBHandle::conf{Port}"
         if (exists($mySociety::DBHandle::conf{Port}));
     return DBI->connect($connstr,
-                        $mySociety::DBHandle::conf{Username},
+                        $mySociety::DBHandle::conf{User},
                         $mySociety::DBHandle::conf{Password}, {
                             RaiseError => 1,
                             AutoCommit => 0,
