@@ -9,12 +9,18 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: DBHandle.pm,v 1.2 2005-01-31 19:49:04 chris Exp $
+# $Id: DBHandle.pm,v 1.3 2005-01-31 19:50:23 chris Exp $
 #
 
 package mySociety::DBHandle;
 
 use strict;
+
+BEGIN {
+    use Exporter ();
+    our @ISA = qw(Exporter);
+    our @EXPORT_OK = qw(&dbh &new_dbh);
+}
 
 $mySociety::DBHandle::conf_ok = 0;
 %mySociety::DBHandle::conf = ( );
