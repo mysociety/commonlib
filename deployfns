@@ -4,7 +4,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: deployfns,v 1.13 2005-03-17 18:44:33 francis Exp $
+# $Id: deployfns,v 1.14 2005-04-05 17:12:32 francis Exp $
 #
 
 # Warnings and errors
@@ -55,7 +55,10 @@ cvs_export () {
     cd $2
     for X in mysociety/*/conf/general 
     do
-        cp $X $3/$X
+        if [ -e $X ]
+        then
+            cp $X $3/$X
+        fi
     done
 }
 
