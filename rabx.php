@@ -10,7 +10,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: rabx.php,v 1.12 2005-01-26 16:34:06 chris Exp $
+ * $Id: rabx.php,v 1.13 2005-01-31 11:00:19 chris Exp $
  * 
  */
 
@@ -156,7 +156,7 @@ function rabx_wire_wr(&$x, &$buffer) {
         if (is_null($x)) {
             $buffer .= 'N';
             return TRUE;
-        } else if (is_int($x))
+        } else if (is_int($x) || is_bool($x))
             $buffer .= 'I';
         else if (is_float($x))
             $buffer .= 'R';
