@@ -8,7 +8,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: votingarea.php,v 1.26 2005-02-09 08:37:05 francis Exp $
+ * $Id: votingarea.php,v 1.27 2005-02-09 11:59:50 chris Exp $
  * 
  */
 
@@ -68,8 +68,8 @@ $va_display_order = array(
     );
 
 /* va_salaried
- * Array indicating whether representatives at the various levels receive a
- * salary for their work. */
+ * Array indicating whether representatives at the various levels typically
+ * receive a salary for their work. */
 $va_salaried = array(
         'LBW' => 0,
 
