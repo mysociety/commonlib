@@ -10,7 +10,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: rabx.php,v 1.5 2004-12-14 20:29:28 chris Exp $
+ * $Id: rabx.php,v 1.6 2004-12-16 12:36:15 francis Exp $
  * 
  */
 
@@ -36,7 +36,8 @@ class RABX_Error {
     var $code, $text, $extra;
     function RABX_Error($code, $text, $extra = null) {
         $this->code = $code;
-        $this->text = $text;
+        // for PHP, we want any HTML escaped to avoid cross site scripting attacks
+        $this->text = htmlentities($text); 
         $this->extra = $extra;
     }
 };
