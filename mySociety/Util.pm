@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Util.pm,v 1.9 2004-11-18 20:03:49 chris Exp $
+# $Id: Util.pm,v 1.10 2004-11-18 20:59:01 chris Exp $
 #
 
 package mySociety::Util::Error;
@@ -100,7 +100,7 @@ sub named_tempfile (;$) {
 
 Sets up a pipe via the given PROGRAM (passing it the given ARGs), and (if
 given) connecting its standard output to HANDLE. If called in list context,
-returns the handle and the PID of the child process.
+returns the handle and the PID of the child process. Dies on error.
 
 =cut
 sub pipe_via (@) {
@@ -129,10 +129,10 @@ sub pipe_via (@) {
         exit(1);
     }
 
-    POSIX::close($rd);
+    POSIX::close($rd) or die "close: $!";
 
-    my $p = new IO::Handle();
-    $p->fdopen($wr, "w");
+    my $p = new IO::Handle() or die "create handle: $!";
+    $p->fdopen($wr, "w") or die "fdopen: $!";
     if (wantarray()) {
         return ($p, $child);
     } else {
@@ -238,7 +238,8 @@ sub daemon () {
     my $p;
     die "fork: $!" if (!defined($p = fork()));
     exit(0) unless ($p == 0);
-    chdir("/");
+    # Should chdir("/"), but that's a bad idea because of the way we locate
+    # config files etc.
     open(STDIN, "/dev/null") or die "/dev/null: $!";
     open(STDOUT, ">/dev/null") or die "/dev/null: $!";
     # Close all other fds.
