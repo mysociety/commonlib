@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-ratty.php,v 1.19 2005-01-08 00:06:27 francis Exp $
+ * $Id: admin-ratty.php,v 1.20 2005-01-08 10:28:16 matthew Exp $
  * 
  */
 
@@ -182,7 +182,7 @@ limit</th><th>Matches</th></tr>
                 print "<td>" . $rule['sequence'] . "</td>";
                 print "<td><a href=\"$self_link&action=editrule&rule_id=" .
                     $rule['id'] . "\">" . $rule['note'] . "</a></td>";
-                print "<td>" . $rule['requests'] . " hits / " . $rule['interval'] . " " . make_plural("sec", $rule['interval']). "</td>";
+                print "<td>" . $rule['requests'] . " hits / " . $rule['interval'] . " " . make_plural($rule['interval'], 'sec'). "</td>";
                 print "<td>" . $rule['hits'] . "</td>";
                 print "</tr>";
             }

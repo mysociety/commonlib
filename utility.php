@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.23 2005-01-08 02:27:19 chris Exp $
+ * $Id: utility.php,v 1.24 2005-01-08 10:28:16 matthew Exp $
  * 
  */
 
@@ -253,13 +253,15 @@ function get_http_var($name, $default='') {
         return $default;
 }
 
-/* make_plural WORD NUMBER
- * If NUMBER is 1, return WORD; if NUMBER is not 1, return WORD catenated with
- * "s". */
-function make_plural($word, $number) {
-    if ($number == 1)
-        return $word;
-    return $word . "s";
+/* make_plural NUMBER SINGULAR PLURAL
+ * If NUMBER is 1, return SINGULAR; if NUMBER is not 1, return PLURAL
+ * if it's there, otherwise WORD catenated with "s". */
+function make_plural($number, $singular, $plural='') {
+	if ($number == 1)
+		return $singular;
+	if ($plural)
+		return $plural;
+	return $singular . 's';
 }
 
 /* debug_timestamp
@@ -407,8 +409,8 @@ print "convert_to_unix_newlines(\$text) = '" . convert_to_unix_newlines($text) .
 
 // hard to test get_http_var in this environment
 
-print "make_plural('fish', 1) = '" . make_plural('fish', 1) . "'\n";
-print "make_plural('fish', -1) = '" . make_plural('fish', -1) . "'\n";
+print "make_plural(1, 'fish', 'fishes') = '" . make_plural(1, 'fish', 'fishes') . "'\n";
+print "make_plural(-1, 'fish', 'fishes') = '" . make_plural(-1, 'fish', 'fishes') . "'\n";
 
 print "debug_timestamp():";
 debug_timestamp();
