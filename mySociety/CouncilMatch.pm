@@ -7,7 +7,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: CouncilMatch.pm,v 1.4 2005-01-27 09:39:05 francis Exp $
+# $Id: CouncilMatch.pm,v 1.5 2005-01-28 12:07:21 francis Exp $
 #
 
 package mySociety::CouncilMatch;
@@ -78,7 +78,7 @@ sub match_council_wards ($$$$) {
     my $error = "";
 
     # Set of wards GovEval have
-    @raw_data = get_raw_data($area_id, $d_dbh);
+    my @raw_data = get_raw_data($area_id, $d_dbh);
     # ... find unique set
     my %wards_hash;
     do { $wards_hash{$_->{'ward_name'}} = 1 } for @raw_data;
@@ -89,7 +89,7 @@ sub match_council_wards ($$$$) {
 
     # Set of wards already in database (from Ordnance Survey / ONS)
     my $rows = $m_dbh->selectall_arrayref(q#select distinct on (area_id) area_id, name from area_name, area where
-        area_name.area_id = area.id and parent_area_id = ? and
+        area_name.area_id = area.id and parent_area_id = ? and (name_type = 'O' or name_type = 'S') and
         (# . join(' or ', map { "type = '$_'" } @$mySociety::CouncilMatch::child_types) . q#) 
         #, {}, $area_id);
     my $wards_database = [];
@@ -224,13 +224,35 @@ sub match_council_wards ($$$$) {
     # Store textual version of what we did
     $matchesdump = &$dump_wards();
 
+    # Make it an error when a ward has two 'G' spellings, as it happens rarely
+=comment
+    if (!$error) {
+        my $wardnames;
+        foreach my $g (@$wards_goveval) {
+            die if (!exists($g->{matches}));
+            die if (scalar(@{$g->{matches}}) != 1);
+            my $dd = @{$g->{matches}}[0];
+            if (exists($wardnames->{$dd->{id}})) {
+                if ($wardnames->{$dd->{id}} ne $g->{name}) {
+                    $error .= "${area_id}: Ward has multiple GovEval spellings '" . $g->{name} . "', '" . $wardnames->{$dd->{id}} ."'\n";
+                }
+            }
+            $wardnames->{$dd->{id}} = $g->{name};
+        }
+    }
+=cut
+
+    # Delete any old aliases
+    foreach my $d (@$wards_database) {
+        $m_dbh->do(q#delete from area_name where area_id = ? and name_type = 'G'#, {}, $d->{id});
+    }
+
     # Store name aliases in DB
     if (!$error) {
         foreach my $g (@$wards_goveval) {
             die if (!exists($g->{matches}));
             die if (scalar(@{$g->{matches}}) != 1);
             my $dd = @{$g->{matches}}[0];
-            $m_dbh->do(q#delete from area_name where area_id = ? and name_type = 'G'#, {}, $dd->{id});
             $m_dbh->do(q#insert into area_name (area_id, name_type, name)
                 values (?,?,?)#, {}, $dd->{id}, 'G', $g->{name});
         }
@@ -300,7 +322,7 @@ sub get_raw_data($$) {
     return values(%$council);
 }
 
-# edit_raw_data COUNCIL_ID COUNCIL_NAME COUNCIL_TYPE DADEM_DB DATA ADMIN_USER
+# edit_raw_data COUNCIL_ID COUNCIL_NAME COUNCIL_TYPE ONS_CODE DADEM_DB DATA ADMIN_USER
 # Alter raw input data as a transaction log (keeping history).
 # DATA is in the form of a reference to an array of references to hashes.  Each
 # hash contains the ward_name, rep_first, rep_last, rep_party, rep_email, rep_fax, key
@@ -308,8 +330,8 @@ sub get_raw_data($$) {
 # applied.  ADMIN_USER is name of person who made this edit.
 # COUNCIL_NAME and COUNCIL_TYPE are stored in the edit for reference later if
 # for some reason ids get broken, really only COUNCIL_ID matters.
-sub edit_raw_data($$$$$$) {
-    my ($area_id, $area_name, $area_type, $d_dbh, $newref, $user) = @_;
+sub edit_raw_data($$$$$$$) {
+    my ($area_id, $area_name, $area_type, $area_ons_code, $d_dbh, $newref, $user) = @_;
     my @new = @$newref;
 
     my @old = get_raw_data($area_id, $d_dbh);
@@ -349,7 +371,7 @@ sub edit_raw_data($$$$$$) {
 
         # Insert alteration
         my $sth = $d_dbh->prepare(q#insert into raw_input_data_edited
-            (ge_id, newrow_id, alteration, council_id, council_name, council_type,
+            (ge_id, newrow_id, alteration, council_id, council_name, council_type, council_ons_code,
             ward_name, rep_first, rep_last, rep_party, 
             rep_email, rep_fax, 
             editor, whenedited, note)
@@ -357,7 +379,7 @@ sub edit_raw_data($$$$$$) {
                     ?, ?, ?, ?,
                     ?, ?,
                     ?, ?, ?) #);
-        $sth->execute($ge_id, $newrow_id, 'modify', $area_id, $area_name, $area_type,
+        $sth->execute($ge_id, $newrow_id, 'modify', $area_id, $area_name, $area_type, $area_ons_code,
             $rep->{'ward_name'}, $rep->{'rep_first'}, $rep->{'rep_last'}, $rep->{'rep_party'},
                 $rep->{'rep_email'}, $rep->{'rep_fax'},
             $user, time(), "");
