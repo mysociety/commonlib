@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Config.pm,v 1.8 2004-11-18 22:41:42 chris Exp $
+# $Id: Config.pm,v 1.9 2004-11-24 23:11:39 francis Exp $
 #
 
 package mySociety::Config;
@@ -59,9 +59,11 @@ should just call set_file and get, though. See below.)
 =cut
 sub read_config ($;$) {
     my ($f, $defaults) = @_;
+    my $filename = "<unknown>";
 
     if (!ref($f)) {
         my $F = new IO::File($f, O_RDONLY) or die "$f: $!";
+        $filename = $f;
         $f = $F;
     }
 
@@ -102,6 +104,8 @@ sub read_config ($;$) {
         $config->{$key} = $val;
     }
 
+    $config->{"CONFIG_FILE_NAME"} = $filename;
+
     return $config;
 }
 
@@ -117,6 +121,23 @@ sub set_file ($) {
     ($main_config_filename) = @_;
 }
 
+=item load_default
+
+Loads and caches default config file, as set with set_file.  This
+function is implicitly called by get and get_all.
+
+=cut
+my %cached_configs;
+sub load_default() {
+    my $filename = $main_config_filename;
+    die "Please call mySociety::Config::set_file to specify config file" if (!defined($filename));
+
+    if (!defined($cached_configs{$filename})) {
+        $cached_configs{$filename} = read_config($filename);
+    }
+    return $cached_configs{$filename};
+}
+
 =item get KEY [DEFAULT]
 
 Returns the constants set for KEY from the configuration file specified in
@@ -124,23 +145,17 @@ set_config_file. The file is automatically loaded and cached. An exception is
 thrown if the value isn't present and no DEFAULT is specified.
 
 =cut
-my %cached_configs;
 sub get ($;$) {
     my ($key, $default) = @_;
 
-    my $filename = $main_config_filename;
-    die "Please call mySociety::Config::set_file to specify config file" if (!defined($filename));
-
-    if (!defined($cached_configs{$filename})) {
-        $cached_configs{$filename} = read_config($filename);
-    }
+    my $config = load_default();
     
-    if (exists($cached_configs{$filename}->{$key})) {
-        return $cached_configs{$filename}->{$key};
+    if (exists($config->{$key})) {
+        return $config->{$key};
     } elsif (@_ == 2) {
         return $default;
     } else {
-        die "No value for '$key' in $main_config_filename, and no default specified";
+        die "No value for '$key' in '" . $config->{'CONFIG_FILE_NAME'} .  "', and no default specified";
     }
 }
 
