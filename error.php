@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: error.php,v 1.1 2005-01-10 15:37:20 chris Exp $
+ * $Id: error.php,v 1.2 2005-01-10 15:45:42 chris Exp $
  * 
  */
 
@@ -29,7 +29,7 @@
  *   - Install a default error handler which calls an error logging handler,
  *     and an error display handler, and then aborts.
  *
- *   - By the default error logging handler takes steps to dump the error in
+ *   - The default error logging handler takes steps to dump the error in
  *     the proper server error log (PHP makes this quite hard, as you will
  *     see below); the default error display handler does nothing.
  * 
