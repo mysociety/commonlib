@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-serverinfo.php,v 1.2 2004-11-15 16:51:30 fyr Exp $
+ * $Id: admin-serverinfo.php,v 1.3 2004-11-18 21:32:32 francis Exp $
  * 
  */
 
@@ -25,7 +25,7 @@ class ADMIN_PAGE_SERVERINFO {
     }
 
     function display($self_link) {
-        $form = new HTML_QuickForm('adminRattyForm', 'get', $self_link);
+        $form = new HTML_QuickForm('adminServerInfoForm', 'get', $self_link);
 
         $form->addElement('header', '', 'System Name');
         $form->addElement('html', $this->run("uname -a | fmt"));
