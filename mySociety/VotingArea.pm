@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: VotingArea.pm,v 1.8 2004-11-02 14:24:33 chris Exp $
+# $Id: VotingArea.pm,v 1.9 2004-11-18 08:58:38 francis Exp $
 #
 
 package mySociety::VotingArea;
@@ -31,100 +31,100 @@ Survey's Boundary Line product to identify different types of areas.)
 
 =over 4
 
-=item LBO (101)
+=item LBO 
 
 London Borough
 
-=item LBW (102)
+=item LBW 
 
 London Borough ward
 
-=item GLA (201)
+=item GLA 
 
 London Assembly
 
-=item LAC (202)
+=item LAC 
 
 London constituency
 
-=item LAE (203)
+=item LAE 
 
 London electoral region -- this is a fictional area type used as a placeholder
 for London-wide assembly members.
 
-=item CTY (301)
+=item CTY 
 
 County
 
-=item CED (302)
+=item CED 
 
 County electoral division
 
-=item DIS (401)
+=item DIS 
 
 District
 
-=item DIW (402)
+=item DIW 
 
 District ward
 
-=item UTA (501)
+=item UTA 
 
 Unitary Authority
 
-=item UTE (502)
+=item UTE 
 
 Unitary Authority electoral division
 
-=item UTW (503)
+=item UTW 
 
 Unitary Authority ward
 
-=item MTD (601)
+=item MTD 
 
 Metropolitan District
 
-=item MTW (602)
+=item MTW 
 
 Metropolitan District ward
 
-=item SPA (701)
+=item SPA 
 
 Scottish Parliament (this code is a placeholder).
 
-=item SPE (702)
+=item SPE 
 
 Scottish Parliament electoral region
 
-=item SPC (703)
+=item SPC 
 
 Scottish Parliament constituency
 
-=item WAS (801)
+=item WAS 
 
 Welsh Assembly
 
-=item WAE (802)
+=item WAE 
 
 Welsh Assembly electoral region
 
-=item WAC (803)
+=item WAC 
 
 Welsh Assembly constituency
 
-=item WMP (901)
+=item WMP 
 
 House of Commons
 
-=item WMC (902)
+=item WMC
 
 Westminster constituency
 
-=item EUP (1001)
+=item EUP
 
 European Parliament
 
-=item EUR (1002)
+=item EUR 
 
 European Parliament region
 
@@ -132,33 +132,33 @@ European Parliament region
 
 =cut
 
-use constant LBO => 101; # London Borough
-use constant LBW => 102; # ... ward
+use constant DIS => 101; # District
+use constant DIW => 102; # ... ward
 
-use constant GLA => 201; # Greater London Assembly
-use constant LAC => 202; # London constituency
-use constant LAE => 203; # ... electoral region
+use constant LBO => 201; # London Borough
+use constant LBW => 202; # ... ward
 
-use constant CTY => 301; # County
-use constant CED => 302; # ... electoral division
+use constant MTD => 301; # Metropolitan district
+use constant MTW => 302; # ... ward
 
-use constant DIS => 401; # District
-use constant DIW => 402; # ... ward
+use constant UTA => 401; # Unitary authority
+use constant UTE => 402; # ... electoral division
+use constant UTW => 403; # ... ward
 
-use constant UTA => 501; # Unitary authority
-use constant UTE => 502; # ... electoral division
-use constant UTW => 503; # ... ward
+use constant CTY => 501; # County
+use constant CED => 502; # ... electoral division
 
-use constant MTD => 601; # Metropolitan district
-use constant MTW => 602; # ... ward
+use constant GLA => 601; # Greater London Assembly
+use constant LAC => 602; # London constituency
+use constant LAE => 603; # ... electoral region
 
-use constant SPA => 701; # Scottish Parliament
-use constant SPE => 702; # ... electoral region
-use constant SPC => 703; # ... constituency
+use constant WAS => 701; # Welsh Assembly
+use constant WAE => 702; # ... electoral region
+use constant WAC => 703; # ... constituency
 
-use constant WAS => 801; # Welsh Assembly
-use constant WAE => 802; # ... electoral region
-use constant WAC => 803; # ... constituency
+use constant SPA => 801; # Scottish Parliament
+use constant SPE => 802; # ... electoral region
+use constant SPC => 803; # ... constituency
 
 use constant WMP => 901; # Westminster Parliament
 use constant WMC => 902; # ... constituency
