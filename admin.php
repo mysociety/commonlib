@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin.php,v 1.19 2005-01-17 17:56:47 francis Exp $
+ * $Id: admin.php,v 1.20 2005-01-18 21:05:11 francis Exp $
  * 
  */
 
@@ -26,8 +26,8 @@ header("Content-Type:", "text/html; charset=utf-8");
 
 // Error display
 require_once "../../phplib/error.php";
-function admin_display_error($num, $message) {
-    print $message;
+function admin_display_error($num, $message, $file, $line, $context) {
+    print "<p><strong>$message</strong> in $file:$line</p>";
 }
 err_set_handler_display('admin_display_error');
 
