@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin.php,v 1.6 2004-11-12 10:02:33 francis Exp $
+ * $Id: admin.php,v 1.7 2004-11-15 12:36:56 francis Exp $
  * 
  */
 
@@ -23,7 +23,7 @@ function admin_page_display($site_name, $pages) {
     // generate navigation bar
     $navlinks = "";
     foreach ($pages as $page) {
-        $navlinks .= "<a href=\"admin?page=". $page->id."\">" . $page->navname. "</a><br>";
+        $navlinks .= "<a href=\"?page=". $page->id."\">" . $page->navname. "</a><br>";
     }
 
     // find page
@@ -39,7 +39,7 @@ function admin_page_display($site_name, $pages) {
     // display
     $title = $page->navname . " &mdash; $site_name Admin Pages";
     admin_html_header($title);
-    $self_link = "admin?page=$id";
+    $self_link = "?page=$id";
     $page->display($self_link);
     admin_html_footer($navlinks);
 }
