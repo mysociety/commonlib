@@ -1,18 +1,19 @@
 <?php
 /*
- * PHP info admin page.
+ * admin-ratty.php:
+ * Administration pages for rate limiter.
  * 
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-ratty.php,v 1.20 2005-01-08 10:28:16 matthew Exp $
+ * $Id: admin-ratty.php,v 1.21 2005-01-12 17:03:19 chris Exp $
  * 
  */
 
 require_once "ratty.php";
 
 class ADMIN_PAGE_RATTY {
-    function ADMIN_PAGE_RATTY () {
+    function ADMIN_PAGE_RATTY($scope) {
         $this->id = "ratty";
         $this->name = "Ratty";
         $this->navname = "Ratty the Rate Limiter";
@@ -98,7 +99,7 @@ class ADMIN_PAGE_RATTY {
             $fieldarray = ratty_admin_available_fields();
             $fields = array();
             foreach ($fieldarray as $row) {
-                $fields[$row[0]] = $row[0] . " (e.g. " .  trim_characters($row[1], 0, 15) . ")";
+                $fields[$row[0]] = $row[0] . " (e.g. " .  trim_characters($row[1], 0, 30) . ")";
             }
 
             // Grouped elements
@@ -118,7 +119,14 @@ class ADMIN_PAGE_RATTY {
                 }
                 else {
                     $condgroup[1] = &HTML_QuickForm::createElement('select', "condition$ix", null, 
-                        array('E'=>'exactly equals', 'R'=>'matches regexp', 'I'=>'matches IP mask'));
+                            array(
+                                'E' => 'exactly equals',
+                                'R' => 'matches regexp',
+                                'I' => 'matches IP mask',
+                                '>' => 'is greater than',
+                                '<' => 'is smaller than'
+                            )
+                        );
                     $desc = 'Applies only when:';
                     $condgroup[2] = &HTML_QuickForm::createElement('text', "value$ix", null, array('size' => 15));
                 }
@@ -162,25 +170,40 @@ class ADMIN_PAGE_RATTY {
         }
         if ($action == "listrules") {
             $rules = ratty_admin_get_rules();
-?>
-<p>Rules enforce limits on access to web pages.  Each rule has a hit rate
-limit, which you can set to 0 per second to completely block access.
-Conditions within the rule let you specify when it applies.  For
-example, you can apply the rule only for certain URLs.  You can also
-make the rule count limits separately for each distinct, for example, IP
-address.  Or alternatively limit the number of distinct representatives
-which can be viewed per unit time.
+            print <<<EOF
+<p>
+Rules enforce limits on access to web pages or other resources, or on when a
+more general operation can take place. Each rule has a hit rate limit, which
+limits the number of times a request or operation is permitted to, at most, the
+maximum number of hits in any given specific time period.  (You can set the hit
+limit to 0 to completely block access.)
 </p>
-<table border=1
-width=100%><tr><th>Position</th><th>Description</th><th>Hit
-limit</th><th>Matches</th></tr>
-<?
+<p>
+Conditions within the rule let you specify when it applies.  For example, you
+can apply the rule only for certain URLs, IP addresses or postcodes. You can
+also make the rule count limits separately for each distinct value of
+something, for example, IP addresses, or alternatively limit the number of
+distinct representatives which can be viewed per unit time.
+</p>
+<p>
+Rules are applied in order. Each request is tested against each rule in turn
+until one matches, in which case the request is denied; or until there are no
+more rules, in which case the request is permitted.
+</p>
+<table border="1" width="100%">
+    <tr>
+        <th>Position</th>
+        <th>Description</th>
+        <th>Hit limit</th>
+        <th>Matches</th>
+    </tr>
+EOF
             foreach ($rules as $rule) {
                 if ($rule['note'] == "") 
                     $rule['note'] = "&lt;unnamed&gt;";
                 print "<tr>";
                 print "<td>" . $rule['sequence'] . "</td>";
-                print "<td><a href=\"$self_link&action=editrule&rule_id=" .
+                print "<td><a href=\"$self_link&action=editrule&rule_id=" .     /* XXX use new_url... */
                     $rule['id'] . "\">" . $rule['note'] . "</a></td>";
                 print "<td>" . $rule['requests'] . " hits / " . $rule['interval'] . " " . make_plural($rule['interval'], 'sec'). "</td>";
                 print "<td>" . $rule['hits'] . "</td>";
