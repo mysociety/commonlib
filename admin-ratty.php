@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-ratty.php,v 1.11 2004-11-15 16:58:14 francis Exp $
+ * $Id: admin-ratty.php,v 1.12 2004-11-15 18:35:24 francis Exp $
  * 
  */
 
@@ -199,6 +199,7 @@ limit</th><th>Matches</th></tr>
         }
         if ($cond == "R") 
             return check_is_valid_regexp($value);
+// TODO: add IP mask matching
 //        if ($cond == "I") 
 //            return check_is_valid_ipmask($value);
         return TRUE;
