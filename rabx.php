@@ -10,7 +10,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: rabx.php,v 1.1 2004-10-27 19:20:50 chris Exp $
+ * $Id: rabx.php,v 1.2 2004-10-27 20:15:47 chris Exp $
  * 
  */
 
@@ -281,11 +281,23 @@ function rabx_return_string_parse (&$string) {
  * Implementation of client.
  */
 
+function microtime_float()
+{
+    list($usec, $sec) = explode(" ", microtime());
+    return ((float)$usec + (float)$sec);
+}
+ 
+
 class RABX_Client {
-    var $http_req, $url, $use_post = FALSE;
+    var $ch, $url, $use_post = FALSE;
+    var $lastt;
 
     function RABX_Client($url) {
-        $this->http_req = new HTTP_Request($this->url = $url);
+        $this->url = $url;
+        $this->ch = curl_init();
+        curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($this->ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+        $use_post = FALSE;
     }
 
     /* call FUNCTION ARGUMENTS
@@ -294,28 +306,28 @@ class RABX_Client {
         $callstr = rabx_call_string($function, &$args);
         if (rabx_is_error($callstr))
             return $callstr;
+
         $c = urlencode($callstr);
         $post = $use_post;
         if (!$post and strlen($u = $this->url. "?$c") > 1024)
             $post = TRUE;
 
         if ($post) {
-            $this->http_req->addRawPostData($callstr);
-            $this->http_req->setURL($this->url);
-            $this->http_req->setMethod(HTTP_REQUEST_METHOD_POST);
+            curl_setopt($this->ch, CURLOPT_URL, $this->url);
+            curl_setopt($this->ch, CURLOPT_POST, 1);
+            curl_setopt($this->ch, CURLOPT_POSTFIELDS, $callstr);
         } else {
-            $this->http_req->setURL($u);
-            $this->http_req->setMethod(HTTP_REQUEST_METHOD_GET);
+            curl_setopt($this->ch, CURLOPT_URL, $u);
+            curl_setopt($this->ch, CURLOPT_HTTPGET, 1);
         }
 
-        $this->http_req->sendRequest();
+        $r = curl_exec($this->ch);
+        $C = curl_getinfo($this->ch, CURLINFO_HTTP_CODE);
 
-        $C = $this->http_req->getResponseCode();
-        
         if ($C != 200)
             return rabx_error(RABX_ERROR_TRANSPORT, "$C");
         else
-            return rabx_return_string_parse($this->http_req->getResponseBody());
+            return rabx_return_string_parse($r);
     }
 }
 
