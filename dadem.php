@@ -7,13 +7,14 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: dadem.php,v 1.11 2004-12-20 22:46:07 francis Exp $
+ * $Id: dadem.php,v 1.12 2005-01-11 10:23:30 chris Exp $
  * 
  */
 
-include_once('rabx.php');
-include_once('utility.php');
-include_once('votingarea.php');
+require_once('error.php');
+require_once('rabx.php');
+require_once('utility.php');
+require_once('votingarea.php');
 
 /* Error codes */
 define('DADEM_UNKNOWN_AREA', 3001);        /* unknown area */
@@ -33,12 +34,10 @@ function dadem_get_error($e) {
 }
 
 /* dadem_check_error R
- * If R indicates failure, displays error message and stops procesing.
- */
+ * If R indicates failure, displays error message and stops procesing. */
 function dadem_check_error($data) {
-    if ($error_message = dadem_get_error($data)) {
-        template_show_error($error_message);
-    }
+    if ($error_message = dadem_get_error($data))
+        err($error_message);
 }
 
 $dadem_client = new RABX_Client(OPTION_DADEM_URL);
