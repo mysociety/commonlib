@@ -1,12 +1,12 @@
 #!/usr/bin/perl
 #
-# mySociety/VotingArea.pm:
+# mySociety/Parties.pm:
 # Political party definitions.
 #
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Parties.pm,v 1.3 2005-01-07 11:09:23 chris Exp $
+# $Id: Parties.pm,v 1.4 2005-02-03 13:53:08 chris Exp $
 #
 
 package mySociety::Parties;
@@ -69,6 +69,9 @@ Map names of parties to their canonical name.
 
     "UU" => "UUP",
     "UUP" => "UUP",
+
+    # Latest Robert Kilroy-Silk vehicle
+    "Veritas" => "Veritas"
 );
 
 # Ensure that canonical party values are themselves canonical....
