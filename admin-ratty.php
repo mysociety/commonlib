@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-ratty.php,v 1.6 2004-11-12 10:02:33 francis Exp $
+ * $Id: admin-ratty.php,v 1.7 2004-11-15 13:00:26 francis Exp $
  * 
  */
 
@@ -25,9 +25,14 @@ class ADMIN_PAGE_RATTY {
 
         if ($action == "editrule") {
             if (!array_key_exists('sequence', $_POST)) {
-                $ruledata = ratty_admin_get_rule(get_http_var('rule_id'));
-                $ruledata['rule_id'] = get_http_var('rule_id');
-                $conditiondata = ratty_admin_get_conditions(get_http_var('rule_id'));
+                if (get_http_var('rule_id') == "") {
+                    $ruledata = array();
+                    $conditiondata = array();
+                } else {
+                    $ruledata = ratty_admin_get_rule(get_http_var('rule_id'));
+                    $ruledata['rule_id'] = get_http_var('rule_id');
+                    $conditiondata = ratty_admin_get_conditions(get_http_var('rule_id'));
+                }
             } else {
                 // Load data from form
                 $ruledata = array();
@@ -78,6 +83,9 @@ class ADMIN_PAGE_RATTY {
             $form->addRule('sequence', 'Rule position must be numeric', 'numeric', null, 'server');
             $form->addRule('requests', 'Hit count must be numeric', 'numeric', null, 'server');
             $form->addRule('interval', 'Time period must be numeric', 'numeric', null, 'server');
+            $form->addRule('note', 'Description is required', 'required', null, 'server');
+            $form->addRule('requests', 'Requests is required', 'required', null, 'server');
+            $form->addRule('interval', 'Interval is required', 'required', null, 'server');
 
             $form->addElement('header', '', 'Conditions for Rule');
     
@@ -122,14 +130,25 @@ class ADMIN_PAGE_RATTY {
             $form->addElement('hidden', 'page', $this->id);
             $form->addElement('hidden', 'action', $action);
             $form->addElement('header', '', 'Submit Changes');
-            $form->addElement('submit', 'done', 'Done');
+            $finalgroup[] = &HTML_QuickForm::createElement('submit', 'done', 'Done');
+            $finalgroup[] = &HTML_QuickForm::createElement('submit', 'cancel', 'Cancel');
+            $finalgroup[] = &HTML_QuickForm::createElement('submit', 'deleterule', 'Delete Rule');
+            $form->addGroup($finalgroup, "finalgroup", "",' ', false);
 
-            if ($form->validate()) {
-                if (get_http_var('done') != "") {
+            if (get_http_var('done') != "") {
+                if ($form->validate()) {
                     $new_rule_id = ratty_admin_update_rule($ruledata, $conditiondata);
                     $action = "listrules";
                 }
+            } else if (get_http_var('cancel') != "") {
+                $action = "listrules";
+            } else if (get_http_var('deleterule') != "") {
+                if ($ruledata['rule_id'] != "") {
+                    ratty_admin_delete_rule($ruledata['rule_id']);
+                }
+                $action = "listrules";
             }
+            
             if ($action == "editrule") {
                 admin_render_form($form);
             }
@@ -148,6 +167,8 @@ which can be viewed per unit time.
 <table border=1 width=100%><tr><th>Position</th><th>Description</th><th>Hit limit</th></tr>
 <?
             foreach ($rules as $rule) {
+                if ($rule['note'] == "") 
+                    $rule['note'] = "&lt;unnamed&gt;";
                 print "<tr>";
                 print "<td>" . $rule['sequence'] . "</td>";
                 print "<td><a href=\"$self_link&action=editrule&rule_id=" .
