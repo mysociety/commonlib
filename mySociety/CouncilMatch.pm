@@ -7,7 +7,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: CouncilMatch.pm,v 1.22 2005-02-08 00:32:09 francis Exp $
+# $Id: CouncilMatch.pm,v 1.23 2005-02-09 15:18:06 francis Exp $
 #
 
 package mySociety::CouncilMatch;
@@ -124,9 +124,14 @@ sub refresh_live_data($$) {
     }
 
     # Get any existing data from representatives table
-    my $current_keys = $d_dbh->selectall_hashref(q#select * from representative
-        where area_id in (# . join(",", map { '?' } keys %$ward_ids) . q#)#, 'import_key',
+    my $current_by_id = $d_dbh->selectall_hashref(q#select * from representative
+        where area_id in (# . join(",", map { '?' } keys %$ward_ids) .  q#)#, 'id',
         {}, keys %$ward_ids);
+    my $current_keys;
+    foreach $curr (values %$current_by_id) {
+        throw Error::Simple("refresh_live_data: Existing data does not have import key for rep id " . $curr->{id}) if (!defined($curr->{import_key}));
+        $current_keys->{$curr->{import_key}} = $curr;
+    }
 
     # Go through all updated data, and either insert or replace
     foreach $update_key (keys %$update_keys) {
@@ -172,7 +177,7 @@ sub refresh_live_data($$) {
         if (!exists($update_keys->{$current_key})) {
             my $rows_affected = $d_dbh->do(q#delete from representative where import_key = ?#, {},
                 $current_key);
-            throw Error::Simple("refresh_live_data: delete affected $rows_affected rows, not one") if $rows_affected != 1;
+            throw Error::Simple("refresh_live_data: delete affected $rows_affected rows, not one for key $current_key") if $rows_affected != 1;
             $details .= "Making live: Deleted $current_key ".$current_row->{name}."\n";
         }
     }
