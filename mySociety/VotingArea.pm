@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: VotingArea.pm,v 1.1 2004-10-08 14:02:27 chris Exp $
+# $Id: VotingArea.pm,v 1.2 2004-10-15 16:35:47 francis Exp $
 #
 
 package mySociety::VotingArea;
@@ -37,7 +37,7 @@ London Borough ward
 
 =item GLA (201)
 
-Greater London Assembly
+London Assembly
 
 =item LAC (202)
 
@@ -91,31 +91,31 @@ Scottish Parliament electoral region
 
 Scottish Parliament constituency
 
-=item WAS (701)
+=item WAS (801)
 
 Welsh Assembly
 
-=item WAE (702)
+=item WAE (802)
 
 Welsh Assembly electoral region
 
-=item WAC (702)
+=item WAC (803)
 
 Welsh Assembly constituency
 
-=item WMP (801)
+=item WMP (901)
 
 House of Commons
 
-=item WMC (802)
+=item WMC (902)
 
 Westminster constituency
 
-=item EUP (901)
+=item EUP (1001)
 
 European Parliament
 
-=item EUR (902)
+=item EUR (1002)
 
 European Parliament region
 
@@ -146,14 +146,210 @@ use constant SPA => 701; # Scottish Parliament
 use constant SPE => 702; # ... electoral region
 use constant SPC => 703; # ... constituency
 
-use constant WAS => 701; # Welsh Assembly
-use constant WAE => 702; # ... electoral region
-use constant WAC => 702; # ... constituency
+use constant WAS => 801; # Welsh Assembly
+use constant WAE => 802; # ... electoral region
+use constant WAC => 803; # ... constituency
 
-use constant WMP => 801; # Westminster Parliament
-use constant WMC => 802; # ... constituency
+use constant WMP => 901; # Westminster Parliament
+use constant WMC => 902; # ... constituency
 
-use constant EUP => 901; # European Parliament
-use constant EUR => 902; # ... region
+use constant EUP => 1001; # European Parliament
+use constant EUR => 1002; # ... region
+
+=item name
+Names of areas. For administrative areas, this is their full name, for instance
+"County" or "London Borough"; for voting areas, it's a short name, for instance
+"Ward" or "Electoral Division".
+=cut
+
+%name = (
+        LBO,  "London Borough",
+        LBW,  "Ward",
+
+        GLA,  "London Assembly",
+        LAC,  "Constituency",
+
+        CTY,  "County",
+        CED,  "Electoral Division",
+
+        DIS,  "District",
+        DIW,  "Ward",
+
+        UTA,  "Unitary Authority",
+        UTE,  "Electoral Division",
+        UTW,  "Ward",
+
+        MTD,  "Metropolitan District",
+        MTW,  "Ward",
+
+        SPA,  "Scottish Parliament",
+        SPE,  "Electoral Region",
+        SPC,  "Constituency",
+
+        WAS,  "Welsh Assembly",
+        WAE,  "Electoral Region",
+        WAC,  "Constituency",
+
+        WMP,  "House of Commons",
+        WMC,  "Constituency",
+
+        EUP,  "European Parliament",
+        EUR,  "Region"
+    );
+
+=item attend_prep
+Whether to use the preposition "on" or "at the" to describe someone
+attending the council.
+"Your District Councillors represent you on Cambridge District Council."
+"Your Members of the European Parliament represent you at the European Parliament."
+=cut
+
+%attend_prep = (
+        LBO,  "on the",
+
+        GLA,  "on the",
+
+        CTY,  "on",
+
+        DIS,  "on",
+
+        UTA,  "on",
+
+        MTD,  "on",
+
+        SPA,  "in the",
+
+        WAS,  "on the",
+
+        WMP,  "in the",
+
+        EUP,  "in the",
+    );
+
+
+=item rep_name
+For voting areas, gives the name of the type of person who represents that
+area.  For example, "Councillor" or "Member of the European Parliament".
+=cut
+
+%rep_name = (
+        LBW, 'Councillor',
+
+        GLA, 'Mayor', # "of London"? 
+        LAC, 'Assembly Member',
+
+        CED, 'County Councillor',
+
+        DIW, 'District Councillor',
+
+        UTE, 'Councillor',
+        UTW, 'Councillor',
+
+        MTW, 'Councillor',
+
+        SPE, 'Member of the Scottish Parliament',
+        SPC, 'Member of the Scottish Parliament',
+
+        WAE, 'Welsh Assembly Member',
+        WAC, 'Welsh Assembly Member',
+
+        WMC, 'Member of Parliament',
+
+        EUR, 'Member of the European Parliament'
+    );
+
+=item rep_name_plural
+Plural version of rep_name.
+=cut
+
+%rep_name_plural = (
+        LBW, 'Councillors',
+
+        GLA, 'Mayors', # "of London"? 
+        LAC, 'Assembly Members',
+
+        CED, 'County Councillors',
+
+        DIW, 'District Councillors',
+
+        UTE, 'Councillors',
+        UTW, 'Councillors',
+
+        MTW, 'Councillors',
+
+        SPE, 'Members of the Scottish Parliament',
+        SPC, 'Members of the Scottish Parliament',
+
+        WAE, 'Welsh Assembly Members',
+        WAC, 'Welsh Assembly Members',
+
+        WMC, 'Members of Parliament',
+
+        EUR, 'Members of the European Parliament'
+    );
+
+
+=item rep_suffix
+For voting areas, gives the suffix to the title of the person who repesents
+that area.  For example, "AM" for Assembly Members.
+=cut
+
+%rep_suffix = (
+        LBW, '',
+
+        GLA, '',
+        LAC, 'AM',
+
+        CED, '',
+
+        DIW, '',
+
+        UTE, '',
+        UTW, '',
+
+        MTW, '',
+
+        SPE, 'MSP',
+        SPC, 'MSP',
+
+        WAE, 'AM',
+        WAC, 'AM',
+
+        WMC, 'MP',
+
+        EUR, 'MEP'
+    );
+
+=item rep_prefix
+For voting areas, gives the prefix to the title of the person who repesents
+that area.  For example, "Cllr" for Councillors.
+=cut
+
+%rep_suffix = (
+        LBW, 'Cllr',
+
+        GLA, 'Mayor', # "of London"? 
+        LAC, '',
+
+        CED, 'Cllr',
+
+        DIW, 'Cllr',
+
+        UTE, 'Cllr',
+        UTW, 'Cllr',
+
+        MTW, 'Cllr',
+
+        SPE, '',
+        SPC, '',
+
+        WAE, '',
+        WAC, '',
+
+        WMC, '',
+
+        EUR, ''
+    );
+
 
 1;
