@@ -5,9 +5,11 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-ratty.php,v 1.18 2004-12-20 17:18:29 francis Exp $
+ * $Id: admin-ratty.php,v 1.19 2005-01-08 00:06:27 francis Exp $
  * 
  */
+
+require_once "ratty.php";
 
 class ADMIN_PAGE_RATTY {
     function ADMIN_PAGE_RATTY () {
