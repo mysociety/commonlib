@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.30 2005-03-04 13:16:43 matthew Exp $
+ * $Id: utility.php,v 1.31 2005-03-04 18:55:00 chris Exp $
  * 
  */
 
@@ -398,6 +398,21 @@ function http_auth_user() {
  * browsers. */
 function add_tooltip($text, $tip) {
     return "<span title=\"" . htmlspecialchars($tip) . "\">$text</span>";
+}
+
+/* random_bytes NUM
+ * Return NUM bytes of random data. */
+function random_bytes($num) {
+    global $random_bytes_filehandle;
+    if ($num < 0)
+        err("NUM must be nonnegative in random_bytes");
+    if (!isset($random_bytes_filehandle)
+        && !($random_bytes_filehandle = fopen("/dev/random", "r")))
+            err("Unable to open /dev/random");
+    $res = '';
+    while (strlen($res) < $num)
+        $res .= fread($random_bytes_filehandle, $num - strlen($res));
+    return $res;
 }
 
 /*
