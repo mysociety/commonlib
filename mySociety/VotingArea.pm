@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: VotingArea.pm,v 1.22 2005-02-07 13:46:02 francis Exp $
+# $Id: VotingArea.pm,v 1.23 2005-02-09 17:05:53 chris Exp $
 #
 
 package mySociety::VotingArea;
@@ -98,7 +98,7 @@ Known 3-letter area types.
         'LBO', 'LBW',  # London Borough, Ward
         'GLA',         # Greater London Authority 
         'LAS', 'LAC', 'LAE', # London Assembly, Constituency, Electoral Region
-        'LGD', 'LGW',  # Local Government District, Electoral Area
+        'LGD', 'LGE',  # Local Government District, Electoral Area
         'CTY', 'CED',  # County, Electoral Division
         'DIS', 'DIW',  # District, Ward
         'UTA', 'UTE', 'UTW', # Unitary Authority, Electoral Division, Ward
@@ -141,7 +141,7 @@ for instance "Ward" or "Electoral Division".
         DIW =>  "Ward",
 
         LGD =>  "Local Government District",
-        LGW =>  "Electoral Area",
+        LGE =>  "Electoral Area",
 
         UTA =>  "Unitary Authority",
         UTE =>  "Electoral Division",
@@ -226,7 +226,7 @@ that area.  For example, "Councillor" or "MEP".
 
         DIW => 'District Councillor',
 
-        LGW => 'Councillor',
+        LGE => 'Councillor',
 
         UTE => 'Councillor',
         UTW => 'Councillor',
@@ -264,7 +264,7 @@ area.  For example, "Councillor" or "Member of the European Parliament".
 
         DIW => 'District Councillor',
 
-        LGW => 'Councillor',
+        LGE => 'Councillor',
 
         UTE => 'Councillor',
         UTW => 'Councillor',
@@ -305,7 +305,7 @@ Plural short version of rep_name.
         UTE => 'Councillors',
         UTW => 'Councillors',
 
-        LGW => 'Councillors',
+        LGE => 'Councillors',
 
         MTW => 'Councillors',
 
@@ -342,7 +342,7 @@ Plural long version of rep_name.
         UTE => 'Councillors',
         UTW => 'Councillors',
 
-        LGW => 'Councillors',
+        LGE => 'Councillors',
 
         MTW => 'Councillors',
 
@@ -382,7 +382,7 @@ that area.  For example, "AM" for Assembly Members.
         UTE => '',
         UTW => '',
 
-        LGW => '',
+        LGE => '',
 
         MTW => '',
 
@@ -420,7 +420,7 @@ that area.  For example, "Cllr" for Councillors.
         UTE => 'Cllr',
         UTW => 'Cllr',
 
-        LGW => 'Cllr',
+        LGE => 'Cllr',
 
         MTW => 'Cllr',
 
@@ -450,8 +450,7 @@ our $council_parent_types = [qw(DIS LBO MTD UTA LGD CTY)];
 Types which are wards or electoral divisions in councils.
 
 =cut
-our $council_child_types = [qw(DIW LBW MTW UTE UTW LGW CED)];
-
+our $council_child_types = [qw(DIW LBW MTW UTE UTW LGE CED)];
 
 =back
 
