@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.31 2005-03-04 18:55:00 chris Exp $
+ * $Id: utility.php,v 1.32 2005-03-30 18:12:06 francis Exp $
  * 
  */
 
@@ -414,6 +414,14 @@ function random_bytes($num) {
         $res .= fread($random_bytes_filehandle, $num - strlen($res));
     return $res;
 }
+
+/* merge_spaces TEXT
+ * Converts all consecutive spaces, including newlines, into one space each. */
+function merge_spaces($text) {
+    $text = preg_replace("/\s+/s", " ", $text);
+    return $text;
+}
+
 
 /*
 

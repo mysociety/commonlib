@@ -5,17 +5,14 @@
  * evel.php:
  * Generic email sending and mailing list functionality, with bounce detection
 etc.
-
-
  *
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: evel.php,v 1.1 2005-03-30 11:37:16 francis Exp $
+ * $Id: evel.php,v 1.2 2005-03-30 18:12:06 francis Exp $
  *
  */
 
-require_once('error.php');
 require_once('rabx.php');
 
 /* evel_get_error R
@@ -42,7 +39,8 @@ $evel_client = new RABX_Client(OPTION_EVEL_URL);
   MESSAGE is the full text of a message to be sent to the given RECIPIENTS. */
 function evel_send($message, $recipient) {
     global $evel_client;
-    $result = $evel_client->call('EvEl.send', func_get_args());
+    $params = func_get_args();
+    $result = $evel_client->call('EvEl.send', $params);
     return $result;
 }
 
@@ -51,7 +49,8 @@ function evel_send($message, $recipient) {
   Return true if we have received bounces for the ADDRESS. */
 function evel_is_address_bouncing($address) {
     global $evel_client;
-    $result = $evel_client->call('EvEl.is_address_bouncing', func_get_args());
+    $params = func_get_args();
+    $result = $evel_client->call('EvEl.is_address_bouncing', $params);
     return $result;
 }
 
@@ -84,7 +83,8 @@ function evel_is_address_bouncing($address) {
   specified, LOCALPART "@" DOMAIN must form a valid mail address. */
 function evel_list_create($scope, $tag, $name, $mode, $localpart = null, $domain = null) {
     global $evel_client;
-    $result = $evel_client->call('EvEl.list_create', func_get_args());
+    $params = func_get_args();
+    $result = $evel_client->call('EvEl.list_create', $params);
     return $result;
 }
 
@@ -93,7 +93,8 @@ function evel_list_create($scope, $tag, $name, $mode, $localpart = null, $domain
   Delete the list identified by the given SCOPE and TAG. */
 function evel_list_destroy($scope, $tag) {
     global $evel_client;
-    $result = $evel_client->call('EvEl.list_destroy', func_get_args());
+    $params = func_get_args();
+    $result = $evel_client->call('EvEl.list_destroy', $params);
     return $result;
 }
 
@@ -104,7 +105,8 @@ function evel_list_destroy($scope, $tag) {
   list, then set their administrator status according to ISADMIN. */
 function evel_list_subscribe($scope, $tag, $address, $isadmin = null) {
     global $evel_client;
-    $result = $evel_client->call('EvEl.list_subscribe', func_get_args());
+    $params = func_get_args();
+    $result = $evel_client->call('EvEl.list_subscribe', $params);
     return $result;
 }
 
@@ -113,14 +115,16 @@ function evel_list_subscribe($scope, $tag, $address, $isadmin = null) {
   Remove ADDRESS from the list identified by SCOPE and TAG. */
 function evel_list_unsubscribe($scope, $tag, $address) {
     global $evel_client;
-    $result = $evel_client->call('EvEl.list_unsubscribe', func_get_args());
+    $params = func_get_args();
+    $result = $evel_client->call('EvEl.list_unsubscribe', $params);
     return $result;
 }
 
 /* evel_list_attribute */
 function evel_list_attribute() {
     global $evel_client;
-    $result = $evel_client->call('EvEl.list_attribute', func_get_args());
+    $params = func_get_args();
+    $result = $evel_client->call('EvEl.list_attribute', $params);
     return $result;
 }
 
@@ -130,14 +134,16 @@ function evel_list_attribute() {
   list identified by SCOPE and TAG. */
 function evel_list_send($scope, $tag, $message) {
     global $evel_client;
-    $result = $evel_client->call('EvEl.list_send', func_get_args());
+    $params = func_get_args();
+    $result = $evel_client->call('EvEl.list_send', $params);
     return $result;
 }
 
 /* evel_list_members */
 function evel_list_members() {
     global $evel_client;
-    $result = $evel_client->call('EvEl.list_members', func_get_args());
+    $params = func_get_args();
+    $result = $evel_client->call('EvEl.list_members', $params);
     return $result;
 }
 
