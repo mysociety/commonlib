@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Config.pm,v 1.13 2005-01-25 17:15:04 francis Exp $
+# $Id: Config.pm,v 1.14 2005-03-03 12:58:32 francis Exp $
 #
 
 package mySociety::Config;
@@ -41,15 +41,6 @@ to define individual elements.
 =over 4
 
 =cut
-
-sub fixup ($) {
-    if ($_[0] =~ m#^'(.+)'$#) {
-        $_[0] = $1;
-    } elsif ($_[0] =~ m#^"(.+)"$#) {
-        $_[0] = $1;
-        $_[0] =~ s#\\(.)#$1#g;
-    }
-}
 
 # find_php
 # Try to locate the PHP binary in various sensible places.
