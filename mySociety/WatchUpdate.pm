@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WatchUpdate.pm,v 1.2 2004-10-15 09:16:31 francis Exp $
+# $Id: WatchUpdate.pm,v 1.3 2005-02-23 12:27:45 chris Exp $
 #
 
 package mySociety::WatchUpdate;
@@ -58,6 +58,8 @@ they have, or false otherwise.
 =cut
 sub changed ($) {
     my ($self) = @_;
+    # Check at most once per second.
+    return 0 if (exists($self->{lastcheck}) && $self->{lastcheck} >= time());
     foreach (($0, values %INC)) {
         my $s = stat($_);
         if (exists($self->{size}->{$_}) and exists($self->{time}->{$_})) {
@@ -69,6 +71,7 @@ sub changed ($) {
         $self->{size}->{$_} = $s->size();
         $self->{time}->{$_} = $s->mtime();
     }
+    $self->{lastcheck} = time();
     return 0;
 }
 
