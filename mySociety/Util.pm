@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Util.pm,v 1.15 2005-03-24 15:33:57 chris Exp $
+# $Id: Util.pm,v 1.16 2005-03-26 16:34:28 chris Exp $
 #
 
 package mySociety::Util::Error;
@@ -320,8 +320,8 @@ sub manage_child_processes ($;$) {
     
     # For safety, do everything here with POSIX signal handling.
     my %oldSIG;
-    $oldSIG{POSIX::SIGCHLD} = new POSIX::SigAction();
-    POSIX::sigaction(POSIX::SIGCHLD, new POSIX::SigAction(sub { }, undef, POSIX::SA_RESTART), $oldSIG{POSIX::SIGCHLD});
+    $oldSIG{&POSIX::SIGCHLD} = new POSIX::SigAction();
+    POSIX::sigaction(POSIX::SIGCHLD, new POSIX::SigAction(sub { }, undef, POSIX::SA_RESTART), $oldSIG{&POSIX::SIGCHLD});
 
     # Need to be able to block and unblock SIGCHLD too.
     my $schld = new POSIX::SigSet(POSIX::SIGCHLD) or die "sigset: $!";
@@ -339,6 +339,7 @@ sub manage_child_processes ($;$) {
         }
         # Need to be able to restore old signal handler in child.
         my $act = new POSIX::SigAction(sub { $foad = $s }, undef, POSIX::SA_RESTART);
+        $act->safe(1);
         $oldSIG{$s} = new POSIX::SigAction();
         POSIX::sigaction($s, $act, $oldSIG{$s});
     }
@@ -371,6 +372,8 @@ sub manage_child_processes ($;$) {
                     foreach (keys %oldSIG) {
                         POSIX::sigaction($_, $oldSIG{$_});
                     }
+                    # Don't leave SIGCHLD blocked in the child.
+                    POSIX::sigprocmask(POSIX::SIG_UNBLOCK, $schld);
                     try {
                         &{$spec->{$_}->[1]}();
                     } catch Error with {
@@ -442,8 +445,11 @@ sub manage_child_processes ($;$) {
     }
 
     print_log('info', "caught signal $foad");
-    kill(POSIX::SIGTERM, keys(%processes));
-        # XXX at this point we should wait for the processes to terminate
+    foreach (keys %processes) {
+        POSIX::kill($_, POSIX::SIGTERM);
+    }
+    
+    # XXX at this point we should wait for the processes to terminate
 
     foreach (keys %oldSIG) {
         POSIX::sigaction($_, $oldSIG{$_});
