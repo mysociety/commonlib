@@ -1,19 +1,20 @@
 #!/usr/bin/perl
 #
 # MaPit.pm:
-# Client interface to MaPit (via XMLRPC).
+# Client interface to MaPit (via RABX).
 #
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: MaPit.pm,v 1.3 2004-11-08 18:09:31 francis Exp $
+# $Id: MaPit.pm,v 1.4 2004-11-10 11:13:11 francis Exp $
 #
 
 package mySociety::MaPit;
 
 use strict;
 
-use XMLRPC::Lite;
+use RABX;
+use mySociety::Config;
 
 =head1 NAME
 
@@ -21,7 +22,7 @@ mySociety::MaPit
 
 =head1 DESCRIPTION
 
-Constants and XMLRPC I<client> interface for MaPit, the Magic Postcode
+Constants and RABX I<client> interface for MaPit, the Magic Postcode
 Interrogation Tool.
 
 =head1 CONSTANTS
@@ -53,15 +54,18 @@ use constant AREA_NOT_FOUND => 2003;
 
 =over 4
 
-=item configure URL
+=item configure [URL]
 
 Set the "XML-RPC proxy" URL which will be used to call the functions.
+If you don't specify the URL, mySociety configuration variable MAPIT_URL
+will be used instead.
 
 =cut
-my $proxy = undef;
-sub configure ($) {
+my $rabx_client = undef;
+sub configure (;$) {
     my ($url) = @_;
-    $proxy = XMLRPC::Lite->proxy($url) or die qq(Bad XMLRPC proxy URL "$url");
+    $url = mySociety::Config::get('MAPIT_URL') if !defined($url);
+    $rabx_client = new RABX::Client($url) or die qq(Bad RABX proxy URL "$url");
 }
 
 =item get_voting_areas POSTCODE
@@ -74,7 +78,8 @@ error code.
 =cut
 sub get_voting_areas ($) {
     my ($postcode) = @_;
-    return $proxy->call('MaPit.get_voting_areas', $postcode)->result();
+    configure() if !defined $rabx_client;
+    return $rabx_client->call('MaPit.get_voting_areas', $postcode);
 }
 
 =item get_voting_area_info ID
@@ -97,7 +102,8 @@ The name of the area, as defined by the Ordnance Survey; for instance,
 =cut
 sub get_voting_area_info ($) {
     my ($id) = @_;
-    return $proxy->call('MaPit.get_voting_area_info', $id)->result();
+    configure() if !defined $rabx_client;
+    return $rabx_client->call('MaPit.get_voting_area_info', $id);
 }
 
 1;

@@ -1,19 +1,20 @@
 #!/usr/bin/perl
 #
 # mySociety/DaDem.pm:
-# Client interface to DaDem (via XMLRPC).
+# Client interface to DaDem (via RABX).
 #
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: DaDem.pm,v 1.5 2004-11-08 18:09:31 francis Exp $
+# $Id: DaDem.pm,v 1.6 2004-11-10 11:13:11 francis Exp $
 #
 
 package mySociety::DaDem;
 
 use strict;
 
-use XMLRPC::Lite;
+use RABX;
+use mySociety::Config;
 
 =head1 NAME
 
@@ -21,7 +22,7 @@ mySociety::DaDem
 
 =head1 DESCRIPTION
 
-Constants and XMLRPC I<client> interface for DaDem, the Database of Democratic
+Constants and RABX I<client> interface for DaDem, the Database of Democratic
 Representatives.
 
 =head1 CONSTANTS
@@ -73,15 +74,18 @@ use constant CONTACT_EMAIL      => 102;
 
 =over 4
 
-=item configure URL
+=item configure [URL]
 
 Set the "XML-RPC proxy" URL which will be used to call the functions.
+If you don't specify the URL, mySociety configuration variable DADEM_URL
+will be used instead.
 
 =cut
-my $proxy = undef;
-sub configure ($) {
+my $rabx_client = undef;
+sub configure (;$) {
     my ($url) = @_;
-    $proxy = XMLRPC::Lite->proxy($url) or die qq(Bad XMLRPC proxy URL "$url");
+    $url = mySociety::Config::get('DADEM_URL') if !defined($url);
+    $rabx_client = new RABX::Client($url) or die qq(Bad RABX URL "$url");
 }
 
 =item get_representatives ID
@@ -92,7 +96,8 @@ area, or, on failure, an error code.
 =cut
 sub get_representatives ($) {
     my ($id) = @_;
-    return $proxy->call('DaDem.get_representatives', $id)->result();
+    configure() if !defined $rabx_client;
+    return $rabx_client->call('DaDem.get_representatives', $id);
 }
 
 =item get_representative_info ID
@@ -132,7 +137,8 @@ or, on failure, an error code.
 =cut
 sub get_representative_info ($) {
     my ($id) = @_;
-    return $proxy->call('DaDem.get_representative_info', $id)->result();
+    configure() if !defined $rabx_client;
+    return $rabx_client->call('DaDem.get_representative_info', $id);
 }
 
 1;
