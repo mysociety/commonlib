@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Util.pm,v 1.10 2004-11-18 20:59:01 chris Exp $
+# $Id: Util.pm,v 1.11 2005-02-08 17:31:29 chris Exp $
 #
 
 package mySociety::Util::Error;
@@ -206,6 +206,10 @@ sub send_email ($$@) {
         #   EX_NOHOST       Host name not recognized.
         #   EX_TEMPFAIL     Message could not be sent immediately, but was
         #                   queued.
+        #
+        # BUT Exim only returns EXIT_SUCCESS (0) or EXIT_FAILURE (1), and does
+        # not distinguish permanent from temporary failure. Which means that
+        # this isn't a lot of good.
         my $ex = ($? >> 8);
 
         my %return_codes = (
