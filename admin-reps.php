@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-reps.php,v 1.8 2005-02-07 13:46:02 francis Exp $
+ * $Id: admin-reps.php,v 1.9 2005-02-07 23:59:59 francis Exp $
  * 
  */
 
@@ -49,6 +49,13 @@ class ADMIN_PAGE_REPS {
         }
         else
             $search = null;
+        $ds_va_id = get_http_var('ds_va_id');
+        if (!$rep_id && $ds_va_id) {
+            // Democratic services
+            $ds_vainfo = dadem_get_representatives($ds_va_id);
+            dadem_check_error($ds_vainfo);
+            $rep_id = $ds_vainfo[0];
+        }
         $pc = get_http_var('pc');
         if (get_http_var('gopc')) {
             $rep_id = null;
