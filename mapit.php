@@ -7,7 +7,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: mapit.php,v 1.9 2004-12-20 22:46:07 francis Exp $
+ * $Id: mapit.php,v 1.10 2004-12-30 19:46:20 francis Exp $
  * 
  */
 
@@ -61,7 +61,7 @@ function mapit_get_example_postcode($va_id) {
 /* mapit_get_voting_area_info ID
  * On success, returns an array giving information about the
  * voting/administrative area ID. This array contains elements type, the type
- * of the area (e.g. "VA_CTY"); and name, the name of the area (e.g., "Norfolk
+ * of the area (e.g. "CTY"); and name, the name of the area (e.g., "Norfolk
  * County Council"). On failure, returns an error code. */
 function mapit_get_voting_area_info($va_id) {
     global $mapit_client;
