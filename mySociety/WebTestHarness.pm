@@ -11,7 +11,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.5 2005-03-23 12:49:36 francis Exp $
+# $Id: WebTestHarness.pm,v 1.6 2005-03-23 17:24:12 francis Exp $
 #
 
 package mySociety::WebTestHarness;
@@ -155,7 +155,6 @@ sub log_watcher_get_errors ($) {
         $self->{http_logoffset} = $self->{http_logobj}->nextline($self->{http_logoffset});
         $error .= $self->{http_logobj}->getline($self->{http_logoffset}) . "\n";
     }
-return "";
     return $error;
 }
 
