@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin.php,v 1.4 2004-11-11 17:10:20 francis Exp $
+ * $Id: admin.php,v 1.5 2004-11-12 06:11:22 francis Exp $
  * 
  */
 
@@ -61,8 +61,7 @@ table {border-collapse: collapse; }
 .center {text-align: center; }
 .center table { margin-left: auto;  margin-right: auto;  text-align: left; }
 .center th { text-align: center !important;  }
-/*td,  th { border: 1px solid #000000;  font-size: 75%; vertical-align: * baseline; }*/
-td,  th { border: 1px solid #000000;  font-size: 75%; }
+td,  th { font-size: 75%; vertical-align: * baseline; }
 h1 {font-size: 150%; }
 h2 {font-size: 125%; }
 .p {text-align: left; }
@@ -76,7 +75,7 @@ hr {width: 600px;  background-color: #cccccc;  border: 0px;  height: 1px;  color
 </head>
 <body>
 <h1><?=$title?></h1>
-<table cellpadding=10 width=100%><tr><td width=80%>
+<table border=1 cellpadding=10 width=100%><tr><td width=80%>
 <?
 }
 
@@ -95,6 +94,8 @@ function admin_html_footer($navlinks) {
 
 // Set colours and details of rendering here
 function admin_render_form($form) {
+    //$form->display();
+    //return;
     $renderer =& $form->defaultRenderer();
 
     $form->setRequiredNote('<font color="#FF0000">*</font> shows the required fields.');
@@ -102,8 +103,10 @@ function admin_render_form($form) {
 
     $renderer->setFormTemplate('<table width="100%" border="0" cellpadding="3" cellspacing="2" bgcolor="#CCCC99"><form{attributes}>{content}</form></table>');
     $renderer->setHeaderTemplate('<tr><td style="white-space:nowrap;background:#996;color:#ffc;" align="left" colspan="2"><b>{header}</b></td></tr>');
-    $renderer->setGroupTemplate('<table><tr>{content}</tr></table>', 'name');
-    $renderer->setGroupElementTemplate('<td>{element}<br /><span style="font-size:10px;"><!-- BEGIN required --><span style="color: #f00">*</span><!-- END required --><span style="color:#996;">{label}</span></span></td>', 'name');
+
+// Use for labels on specific groups:
+//    $renderer->setGroupTemplate('<table><tr>{content}</tr></table>', ***);
+//    $renderer->setGroupElementTemplate('<td>{element}<br /><span style="font-size:10px;"><!-- BEGIN required --><span style="color: #f00">*</span><!-- END required --><span style="color:#996;">{label}</span></span></td>', ***);
 
     $form->accept($renderer);
     echo $renderer->toHtml();
