@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-reps.php,v 1.13 2005-02-15 11:12:06 francis Exp $
+ * $Id: admin-reps.php,v 1.14 2005-02-15 11:40:36 francis Exp $
  * 
  */
 
@@ -252,7 +252,9 @@ class ADMIN_PAGE_REPS {
 
             // User submitted corrections
             global $matchcgi;
+            $form = new HTML_QuickForm('adminRepsCorrectionsHeader', 'post', $self_link);
             $form->addElement('header', '', 'User Submitted Corrections');
+            admin_render_form($form);
             $corrections = dadem_get_user_corrections();
             dadem_check_error($corrections);
             // Get all the data for areas and their parents in as few call as possible
