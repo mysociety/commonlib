@@ -8,7 +8,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: votingarea.php,v 1.32 2005-02-10 16:44:20 chris Exp $
+ * $Id: votingarea.php,v 1.33 2005-02-10 17:19:11 chris Exp $
  * 
  */
 
@@ -57,7 +57,7 @@ $va_display_order = array(
         /* District councils */
         'DIW', 'LBW',
         /* unitary-type councils */
-        'MTW', 'UTW', 'UTE', 'LGE', 'COI',
+        'MTW', 'UTW', 'UTE', 'LGE', 'COP',
         /* county council */
         'CED',
         /* various devolved assemblies */
