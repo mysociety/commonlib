@@ -8,7 +8,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: votingarea.php,v 1.23 2005-01-31 18:00:19 chris Exp $
+ * $Id: votingarea.php,v 1.24 2005-01-31 18:02:04 chris Exp $
  * 
  */
 
@@ -154,7 +154,7 @@ The National Assembly for Wales has a wide range of powers over areas including
 <strong>finance</strong>, <strong>local government</strong>,
 <strong>health</strong>, <strong>housing</strong> and <strong>the Welsh
 Language</strong>.
-"
+",
     'NIA' => "
 The Northern Ireland Assembly is currently suspended, and at the moment the
 <a href=\"http://www.nics.gov.uk/gov.htm\">Northern Ireland government
