@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Util.pm,v 1.17 2005-03-30 11:37:16 francis Exp $
+# $Id: Util.pm,v 1.18 2005-03-30 16:10:03 sandpit Exp $
 #
 
 package mySociety::Util::Error;
@@ -29,7 +29,7 @@ use Sys::Syslog;
 BEGIN {
     use Exporter ();
     our @ISA = qw(Exporter);
-    our @EXPORT_OK = qw(&print_log &random_bytes);
+    our @EXPORT_OK = qw(&print_log &random_bytes &ordinal);
 }
 our @EXPORT_OK;
 
@@ -487,6 +487,26 @@ sub is_valid_postcode ($) {
                 || $pc =~ m#^[$fst]\d[$thd]\d[$in][$in]$#
                 || $pc =~ m#^[$fst][$sec]\d[$fth]\d[$in][$in]$#);
     return 0;
+}
+
+=item ordinal NUM
+
+Return the ordinal for NUM (e.g. "1st", "2nd", etc.). XXX localisation.
+
+=cut
+sub ordinal ($) {
+    my $num = shift;
+    if ($num == 11 || $num == 12) {
+        return "${num}th";
+    } else {
+        my $n = $num % 10;
+        my @ending = qw(th nd rd);
+        if ($n < @ending) {
+            return $num . $ending[$n];
+        } else {
+            return "${num}th";
+        }
+    }
 }
 
 1;
