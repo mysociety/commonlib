@@ -8,7 +8,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: votingarea.php,v 1.18 2005-01-11 22:16:15 chris Exp $
+ * $Id: votingarea.php,v 1.19 2005-01-11 22:17:51 chris Exp $
  * 
  */
 
@@ -114,9 +114,10 @@ $va_responsibility_description = array(
             <strong>rubbish collection</strong>, and <strong>local roads</strong>.",
     'GLA' => "
 The Greater London Assembly <strong>examines</strong> the Mayor of London's
-activities, questioning him about his decisions. It also <strong>investigate
-issues of importance to Londoners</strong>, publishes its findings and
-recommendations, and <strong>makes proposals</strong> to the Mayor.
+activities, <strong>investigates</strong> issues of importance to Londoners,
+and <strong>makes proposals</strong> to the Mayor.  Areas covered include the
+Mayor's budget, <strong>culture, <strong>sport and tourism</strong>,
+<strong>health</strong>, <strong>planning and <strong>transport</strong>.
 ",
     'MTD' =>
             "The Metropolitan District Council is
