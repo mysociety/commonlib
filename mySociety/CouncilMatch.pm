@@ -7,7 +7,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: CouncilMatch.pm,v 1.15 2005-02-02 11:50:58 francis Exp $
+# $Id: CouncilMatch.pm,v 1.16 2005-02-02 19:21:59 francis Exp $
 #
 
 package mySociety::CouncilMatch;
@@ -137,8 +137,7 @@ sub canonicalise_council_name ($) {
 
         s#[&/-]# #g;
         s#\band\b# #g;
-        s#'##g;                # King's Lynn => Kings Lynn
-        s#,##g;                # Rhondda, Cynon, Taff => Rhondda Cynon Taff
+        s#[[:punct:]]##g;
 
         $_ = merge_spaces($_);
         $_ = trim($_);
@@ -234,6 +233,7 @@ sub canonicalise_person_name ($) {
 # Returns Ward name with extra suffixes (e.g. Ward) removed, and in lowercase.
 sub canonicalise_ward_name ($) {
     ($_) = @_;
+    s# ED\b.*$##;
     s# Ward\b.*$##;
     return mySociety::CouncilMatch::canonicalise_council_name($_);
 }
@@ -629,7 +629,7 @@ sub check_councillors_against_website($$) {
             q#select * from area_name, area where area_name.area_id = area.id and
             parent_area_id = ?#, 'name', {}, $area_id);
     my $wardnamescanon;
-    do { $wardnamescanon->{canonicalise_ward_name($_)} = $wardnames->{$_} } for keys %$wardnames;
+    do { $wardnamescanon->{canonicalise_ward_name($_)} = $wardnames->{$_}; print "canonward: " . canonicalise_ward_name($_) . "\n" if $verbose; } for keys %$wardnames;
     # Various lookup tables
     my $wardsbyid;
     do { $wardsbyid->{$wardnames->{$_}->{id}} = $wardnames->{$_}->{name} } for keys %$wardnames;
@@ -678,8 +678,8 @@ sub check_councillors_against_website($$) {
         my $lastwardid = undef;
         my $lastcllrkey = undef;
         foreach my $lump (@lumps) {
-            my $canon_lump = canonicalise_person_name($lump);
-            print "lump: $canon_lump\n" if $verbose > 1;
+            my $canon_person_lump = canonicalise_person_name($lump);
+            print "person lump: $canon_person_lump\n" if $verbose > 1;
 
             my $matches = 0;
             foreach my $rep (@raw) {
@@ -691,19 +691,19 @@ sub check_councillors_against_website($$) {
                 # If lump begins with an initial, initialise first word of name
                 # In that case, don't bother with nicknames
                 my $match = 0;
-                if ($canon_lump =~ m/^[[:alpha:]] /) {
+                if ($canon_person_lump =~ m/^[[:alpha:]] /) {
                     $canon_name =~ s/^([[:alpha:]])([[:alpha:]]+) /$1 /;
-                    $match = ($canon_lump =~ m/\b$canon_name\b/);
+                    $match = ($canon_person_lump =~ m/\b$canon_name\b/);
                 } else {
                     # Apply nicknames
-                    $match = match_modulo_nickname($canon_lump, $canon_name); 
+                    $match = match_modulo_nickname($canon_person_lump, $canon_name); 
                 }
                 if ($match) {
                     if (($pattern eq "CWCWCW") and defined($lastcllrkey)) {
                         $error .= $area_id . ": councillor " . $cllrsbykey->{$lastcllrkey}->{rep_first} . " " .
                             $cllrsbykey->{$lastcllrkey}->{rep_last} . " has no ward\n";
                     }
-                    print "councillor matched '$canon_lump' == '$canon_name'\n" if $verbose;
+                    print "councillor matched '$canon_person_lump' == '$canon_name'\n" if $verbose;
                     $lastcllrkey = $rep->{key};
                     push @{$repdone->{$lastcllrkey}}, $lump;
                     $matches ++;
@@ -723,12 +723,13 @@ sub check_councillors_against_website($$) {
                 $error .= $area_id . ": $lump matched multiple councillors\n";
             }
 
-            my $canonlump = canonicalise_ward_name($lump);
+            my $canon_ward_lump = canonicalise_ward_name($lump);
+            print "ward lump: $canon_ward_lump\n" if $verbose > 1;
             my $found = 0;
-            do { $found = $wardnamescanon->{$_}->{id} if ($canonlump =~ m/\b$_\b/) } for (keys %$wardnamescanon);
+            do { $found = $wardnamescanon->{$_}->{id} if ($canon_ward_lump =~ m/\b$_\b/) } for (keys %$wardnamescanon);
 #            $found = 0 if ($lump !~ m/(^\d+\.)/);
             if ($found) {
-                print "ward matched '$canonlump'\n" if $verbose;
+                print "ward matched '$canon_ward_lump'\n" if $verbose;
                 $lastwardid = $found;
                 push @{$warddone->{$lastwardid}}, $lump;
                 if ($pattern eq "CWCWCW") {
@@ -766,8 +767,8 @@ sub check_councillors_against_website($$) {
                 my ($best_len, $best_match);
                 $best_match = "<none>";
                 foreach my $lump (@lumps) {
-                    my $canon_lump = canonicalise_person_name($lump);
-                    my $common_len = Common::placename_match_metric($canon_lump, $canon_name);
+                    my $canon_person_lump = canonicalise_person_name($lump);
+                    my $common_len = Common::placename_match_metric($canon_person_lump, $canon_name);
                     if (!defined($best_len) or $best_len < $common_len) {
                         $best_match = $lump;
                         $best_len = $common_len;
