@@ -6,7 +6,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: ratty.php,v 1.9 2004-11-16 11:11:16 francis Exp $
+ * $Id: ratty.php,v 1.10 2004-11-18 20:47:14 francis Exp $
  * 
  */
 
@@ -64,6 +64,7 @@ function ratty_admin_available_fields() {
  * Updates a ratty rule. */
 function ratty_admin_update_rule($vals, $conds) {
     global $ratty_client;
+    global $fyr_error_message;
     $res = $ratty_client->call('Ratty.admin_update_rule', array($vals, $conds));
     if ($fyr_error_message = ratty_get_error($res)) {
         template_show_error();
@@ -75,6 +76,7 @@ function ratty_admin_update_rule($vals, $conds) {
  * Updates a ratty rule. */
 function ratty_admin_delete_rule($id) {
     global $ratty_client;
+    global $fyr_error_message;
     $res = $ratty_client->call('Ratty.admin_delete_rule', array($id));
     if ($fyr_error_message = ratty_get_error($res)) {
         template_show_error();
@@ -87,6 +89,7 @@ function ratty_admin_delete_rule($id) {
  * Get info about all rules. */
 function ratty_admin_get_rules() {
     global $ratty_client;
+    global $fyr_error_message;
     $res = $ratty_client->call('Ratty.admin_get_rules', array($vals, $conds));
     if ($fyr_error_message = ratty_get_error($res)) {
         template_show_error();
@@ -98,6 +101,7 @@ function ratty_admin_get_rules() {
  * Get info about a rule. */
 function ratty_admin_get_rule($id) {
     global $ratty_client;
+    global $fyr_error_message;
     $res = $ratty_client->call('Ratty.admin_get_rule', array($id));
     if ($fyr_error_message = ratty_get_error($res)) {
         template_show_error();
@@ -110,6 +114,7 @@ function ratty_admin_get_rule($id) {
  * Get all conditions for a rule. */
 function ratty_admin_get_conditions($id) {
     global $ratty_client;
+    global $fyr_error_message;
     $res = $ratty_client->call('Ratty.admin_get_conditions', array($id));
     if ($fyr_error_message = ratty_get_error($res)) {
         template_show_error();
