@@ -8,7 +8,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: votingarea.php,v 1.16 2005-01-07 21:14:56 matthew Exp $
+ * $Id: votingarea.php,v 1.17 2005-01-11 22:09:09 chris Exp $
  * 
  */
 
@@ -106,6 +106,10 @@ $va_salaried = array(
 $va_responsibility_description = array(
     'DIS' =>
             "The District Council is responsible for
+            <strong>local services</strong>, including <strong>planning</strong>, <strong>council housing</strong>,
+            <strong>rubbish collection</strong>, and <strong>local roads</strong>.",
+    'LBO' =>
+            "The London Borough Council is responsible for
             <strong>local services</strong>, including <strong>planning</strong>, <strong>council housing</strong>,
             <strong>rubbish collection</strong>, and <strong>local roads</strong>.",
     'MTD' =>
