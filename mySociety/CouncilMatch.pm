@@ -7,7 +7,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: CouncilMatch.pm,v 1.10 2005-02-01 16:18:03 francis Exp $
+# $Id: CouncilMatch.pm,v 1.11 2005-02-01 23:01:48 francis Exp $
 #
 
 package mySociety::CouncilMatch;
@@ -15,6 +15,7 @@ package mySociety::CouncilMatch;
 use Data::Dumper;
 use LWP::Simple;
 use HTML::TokeParser;
+use Text::CSV;
 use URI;
 
 use mySociety::StringUtils qw(trim merge_spaces);
@@ -41,7 +42,7 @@ sub process_ge_data ($$) {
     # Match up wards
     my $ret = match_council_wards($area_id, $verbosity);
     $status = $ret->{error} ? 'wards-mismatch' : 'wards-match';
-    $error .= $ret->{error};
+    $error .= $ret->{error} ? $ret->{error} : "";
     $details .= $ret->{details};
 
     # See if we have URL
@@ -53,7 +54,7 @@ sub process_ge_data ($$) {
         if ($status eq 'url-found') {
             my $ret = check_councillors_against_website($area_id, $verbosity);
             $status = $ret->{error} ? 'councillors-mismatch' : 'councillors-match';
-            $error .= $ret->{error};
+            $error .= $ret->{error} ? $ret->{error} : "";
             $details = $ret->{details} . "\n" . $details;
         }
     }
@@ -142,6 +143,49 @@ sub canonicalise_council_name ($) {
     $_ = lc;
     return $_;
 }
+
+# Load in nickname data
+my $nickmap;
+my $csv_parser = new Text::CSV;
+open NICKNAMES, "<../mapit-dadem-loading/nicknames/nicknames.csv" or die "couldn't find nicknames.csv file";
+<NICKNAMES>; # heading
+while (my $line = <NICKNAMES>) {
+    chomp($line);
+    $csv_parser->parse($line);
+    my ($nick, $canon) = map { trim($_) } $csv_parser->fields();
+    push @{$nickmap->{lc($nick)}}, lc($canon);
+}
+
+# match_modulo_nickname NAMEA NAMEB
+# Sees if two names match, allowing for nickname.  Each name must be in form
+# "firstname initials othernames", all lowercase.  e.g. "timmy tailor" would
+# match "timothy tailor".  Returns 1 if match, 0 otherwise.
+sub match_modulo_nickname($$) {
+    my ($a, $b) = @_;
+    my (@a, @b);
+    my ($afirst, $arest) = ($a =~ m/^(.*) (.*)$/);
+    my ($bfirst, $brest) = ($b =~ m/^(.*) (.*)$/);
+    return 0 if (!defined($arest) || !defined($brest) || !defined($afirst) || !defined($bfirst));
+    return 0 if ($arest ne $brest);
+    return 1 if ($afirst eq $bfirst);
+    my %anames = ($afirst => 1);
+    my %bnames = ($bfirst => 1);
+    do { $anames{$_} = 1 } for @{$nickmap->{$afirst}};
+    do { $bnames{$_} = 1 } for @{$nickmap->{$bfirst}};
+    print "$afirst-$arest, $bfirst-$brest\n";
+    print Dumper(\%anames);
+    print Dumper(\%bnames);
+    foreach $_ (keys %anames) {
+        return 1 if (exists($bnames{$_}));
+    }
+    return 0;
+}
+
+#print match_modulo_nickname("jack nobody", "hans nobody");
+#print "\n";
+#print match_modulo_nickname("timmy tailor", "timothy tailor");
+#print "\n";
+#exit;
 
 # canonicalise_person_name NAME
 # Convert name from various formats "Fred Smith", "Smith, Fred",
@@ -578,8 +622,8 @@ sub check_councillors_against_website($$) {
     # Get out next layer of URLs
     my @urls;
     my $p = HTML::TokeParser->new(\$mainpage);
-    # include also clickable maps "area"
-    while (my $token = $p->get_tag("area")) { #, "a")) {
+    # include only clickable maps "area"
+    while (my $token = $p->get_tag("area")) {
         my $url = $token->[1]{href};
         next if !$url;
         next if $url =~ m/^\#/;
@@ -590,7 +634,6 @@ sub check_councillors_against_website($$) {
             push @urls, $url;
         }
     }
-#=cut
 
     # scan_with_pattern PATTERN
     # Scan lumps to find wards and councillors in given pattern
@@ -619,10 +662,16 @@ sub check_councillors_against_website($$) {
                 my $canon_name = canonicalise_person_name("$first $last");
                 print "name: $canon_name\n" if $verbose > 1;
                 # If lump begins with an initial, initialise first word of name
+                # In that case, don't bother with nicknames
+                my $match = 0;
                 if ($canon_lump =~ m/^[[:alpha:]] /) {
                     $canon_name =~ s/^([[:alpha:]])([[:alpha:]]+) /$1 /;
+                    $match = ($canon_lump eq $canon_name);
+                } else {
+                    # Apply nicknames
+                    $match = match_modulo_nickname($canon_lump, $canon_name); 
                 }
-                if ($canon_lump eq $canon_name) {
+                if ($match) {
                     print "councillor matched '$canon_lump' == '$canon_name'\n" if $verbose;
                     $lastcllrkey = $rep->{key};
                     push @{$repdone->{$lastcllrkey}}, $lump;
@@ -733,20 +782,22 @@ sub check_councillors_against_website($$) {
         $ecount2 = ($error2 =~ tr/\n/\n/);
     }
 
+    my ($details, $error);
     if (!$error1) {
         print "WCWCCC worked\n" if $verbose;
+        $details = $details1;
     }
     if (!$error2) {
         print "CWCWCW worked\n" if $verbose;
+        $details = $details2;
     }
-    my ($details, $error);
     if ($error1 && $error2) {
         if ($ecount1 < $ecount2) {
-            print "shortest is WCWCCC\n" if $verbose;
+            print "least-errorful is WCWCCC\n" if $verbose;
             $error .= $error1;
             $details = $details1;
         } else {
-            print "shortest is CWCWCW\n" if $verbose;
+            print "least-errorful is CWCWCW\n" if $verbose;
             $error .= $error2;
             $details = $details2;
         }
