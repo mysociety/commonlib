@@ -8,7 +8,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: votingarea.php,v 1.31 2005-02-10 10:27:35 francis Exp $
+ * $Id: votingarea.php,v 1.32 2005-02-10 16:44:20 chris Exp $
  * 
  */
 
@@ -30,6 +30,8 @@ $va_inside = array(
         'UTW' => 'UTA',
 
         'LGE' => 'LGD',
+
+        'COP' => 'COI',
 
         'MTW' => 'MTD',
 
@@ -55,7 +57,7 @@ $va_display_order = array(
         /* District councils */
         'DIW', 'LBW',
         /* unitary-type councils */
-        'MTW', 'UTW', 'UTE', 'LGE',
+        'MTW', 'UTW', 'UTE', 'LGE', 'COI',
         /* county council */
         'CED',
         /* various devolved assemblies */
@@ -86,6 +88,8 @@ $va_salaried = array(
         'LGE' => 0,
 
         'MTW' => 0,
+
+        'COI' => 0, /* XXX don't know but assume unpaid -- check */
 
         'SPE' => 1,
         'SPC' => 1,
@@ -130,6 +134,13 @@ Mayor's budget, <strong>culture</strong>, <strong>sport and tourism</strong>,
             responsible for all aspects of <strong>local services and policy</strong>, including
             <strong>planning</strong>, <strong>transport</strong>, <strong>education</strong>, 
             <strong>social services</strong> and <strong>libraries</strong>.",
+    'COI' => "
+The Council of the Isles is responsible for <strong>education<strong>,
+<strong>housing</strong>, <strong>planning</strong>, <strong>water and
+sewage</strong> and various other local matters including
+<strong>tourism</strong>, <strong>development</strong> and running <strong>the
+airport</strong>.
+",
     'CTY' =>
             "The County Council is responsible for <strong>local
             services</strong>, including <strong>education</strong>, <strong>social services</strong>, <strong>transport</strong> and
@@ -181,12 +192,12 @@ Assembly have been elected and you can contact them.
 Types which are local councils, such as districts, counties,
 unitary authorities and boroughs. */
 
-$va_council_parent_types = array('DIS', 'LBO', 'MTD', 'UTA', 'LGD', 'CTY');
+$va_council_parent_types = array('DIS', 'LBO', 'MTD', 'UTA', 'LGD', 'CTY', 'COI');
 
 /* $va_council_child_types
 
 Types which are wards or electoral divisions in councils. */
 
-$va_council_child_types = array('DIW', 'LBW', 'MTW', 'UTE', 'UTW', 'LGE', 'CED');
+$va_council_child_types = array('DIW', 'LBW', 'MTW', 'UTE', 'UTW', 'LGE', 'CED', 'COP');
 
 ?>
