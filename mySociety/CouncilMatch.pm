@@ -7,12 +7,17 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: CouncilMatch.pm,v 1.8 2005-02-01 13:23:07 francis Exp $
+# $Id: CouncilMatch.pm,v 1.9 2005-02-01 15:33:31 francis Exp $
 #
 
 package mySociety::CouncilMatch;
 
 use Data::Dumper;
+use LWP::Simple;
+use HTML::TokeParser;
+use URI;
+
+use mySociety::StringUtils qw(trim merge_spaces);
 
 our ($d_dbh, $m_dbh);
 # set_db_handles MAPID_DB DADEM_DB
@@ -24,6 +29,67 @@ sub set_db_handles($$) {
 
 our $parent_types = [qw(DIS LBO MTD UTA LGD CTY)];
 our $child_types = [qw(DIW LBW MTW UTE UTW LGW CED)];
+
+# process_ge_data COUNCIL_ID VERBOSITY 
+# Performs next step(s) in processing on GE data.  Returns
+# hashref containing 'details' and 'error' should you need it,
+# but that is also saved in raw_process_status.
+sub process_ge_data ($$) {
+    my ($area_id, $verbosity) = @_;
+    my ($status, $error, $details);
+
+    # Match up wards
+    my $ret = match_council_wards($area_id, $verbosity);
+    $status = $ret->{error} ? 'wards-mismatch' : 'wards-match';
+    $error .= $ret->{error};
+    $details .= $ret->{details};
+
+    # See if we have URL
+    if ($status eq "wards-match") {
+        my $found = check_for_extradata($area_id);
+        $status = $found ? "url-found" : "url-missing";
+
+        # Check against council website
+        if ($status eq 'url-found') {
+            my $ret = check_councillors_against_website($area_id, $verbosity);
+            $status = $ret->{error} ? 'councillors-mismatch' : 'councillors-match';
+            $error .= $ret->{error};
+            $details = $ret->{details} . "\n" . $details;
+        }
+    }
+
+    # Save status
+    set_process_status($area_id, $status, $error ? $error : undef, $details);
+    $d_dbh->commit();
+
+    return { 'details' => $details, 
+             'error' => $error };
+}
+
+
+# get_process_status COUNCIL_ID
+# Returns the text string saying what state of GE data processing
+# the council is in.
+sub get_process_status ($) {
+    my ($area_id) = @_;
+    my $ret = $d_dbh->selectrow_arrayref(q#select status from raw_process_status 
+        where council_id = ?#, {}, $area_id);
+    if (!defined($ret)) {
+        return "";
+    }
+    return $ret->[0];
+}
+
+# set_process_status COUNCIL_ID STATUS ERROR DETAILS
+# Alter processing status for a council.
+sub set_process_status ($$$$) {
+    my ($area_id, $status, $error, $details) = @_;
+
+    $d_dbh->do(q#delete from raw_process_status where council_id=?#, {}, $area_id);
+    $d_dbh->do(q#insert into raw_process_status (council_id, status, error, details)
+        values (?,?,?,?)#, {}, $area_id, $status, $error, $details);
+}
+
 
 # canonicalise_council_name NAME
 # Convert the NAME of a council into a "canonical" version of the name.
@@ -77,51 +143,45 @@ sub canonicalise_council_name ($) {
     return $_;
 }
 
+# canonicalise_person_name NAME
+# Convert name from various formats "Fred Smith", "Smith, Fred",
+# "Fred R Smith", "Smith, Fred RK" to uniform one "fred smith".  Removes
+# initials except first one if there is no first name, puts surname last,
+# lowercases.
+sub canonicalise_person_name ($) {
+    ($_) = @_;
 
-# get_process_status COUNCIL_ID
-# Returns the text string saying what state of GE data processing
-# the council is in.
-sub get_process_status ($) {
-    my ($area_id) = @_;
-    my $ret = $d_dbh->selectrow_arrayref(q#select status from raw_process_status 
-        where council_id = ?#, {}, $area_id);
-    if (!defined($ret)) {
-        return "";
-    }
-    return $ret->[0];
+    # Swap Lastname, Firstname
+    s/^([^,]+),([^,]+)$/$2 $1/;  
+
+    # Clear up spaces and punctuation
+    s#[[:punct:]]##g;
+    $_ = trim($_);
+    $_ = merge_spaces($_);
+
+    # Remove fancy words
+    my $titles = "Cllr |Councillor |Dr |Hon |hon |rah |rh |Mrs |Ms |Mr |Miss |Rt Hon |Reverend |The Rev |The Reverend |Sir |Dame |Rev |Prof ";
+    my $honourifics = " MP| CBE| OBE| MBE| QC| BEM| rh| RH| Esq| QPM| JP| FSA| Bt| BEd| Hons| TD| MA| QHP| DL| CMG| BB| AKC| Bsc| Econ| LLB| GBE| QSO| BA| FRSA| FCA| DD| KBE| PhD";
+    while (s#^($titles )##) {};
+    while (s#( $honourifics)$##) {};
+
+    # Split up initials unspaced 
+    s/\b([[:upper:]])([[:upper:]])\b/$1 $2/g;
+    # Remove initials apart from first name/initial
+    s/\b(\S+ )((?:[[:upper:]] )+)/$1/;
+
+    # Remove case
+    $_ = lc($_);
+
+    return $_;
 }
 
-# set_process_status COUNCIL_ID STATUS ERROR DETAILS
-# Alter processing status for a council.
-sub set_process_status ($$$$) {
-    my ($area_id, $status, $error, $details) = @_;
-
-    $d_dbh->do(q#delete from raw_process_status where council_id=?#, {}, $area_id);
-    $d_dbh->do(q#insert into raw_process_status (council_id, status, error, details)
-        values (?,?,?,?)#, {}, $area_id, $status, $error, $details);
-}
-
-# process_ge_data COUNCIL_ID VERBOSITY 
-# Performs next step(s) in processing on GE data.
-sub process_ge_data ($$) {
-    my ($area_id, $verbosity) = @_;
-    my $status;
-
-    # Match up wards
-    $status = get_process_status($area_id);
-    if ($status eq "" or $status eq "wards-mismatch") {
-        match_council_wards($area_id, $verbosity);
-    }
-
-    # See if we have URL
-    $status = get_process_status($area_id);
-    if ($status eq "wards-match" or $status eq "url-found" or $status eq "url-missing") {
-        check_for_extradata($area_id);
-    }
-
-    # Do fancier stuff
-    $status = get_process_status($area_id);
-
+# canonicalise_ward_name WARD
+# Returns Ward name with extra suffixes (e.g. Ward) removed, and in lowercase.
+sub canonicalise_ward_name ($) {
+    ($_) = @_;
+    s# Ward$##;
+    return mySociety::CouncilMatch::canonicalise_council_name($_);
 }
 
 # Internal use
@@ -137,15 +197,13 @@ sub check_for_extradata ($) {
             $found = 1;
         }
     }
-    my $status = $found ? "url-found" : "url-missing";
-    set_process_status($area_id, $status, undef, "");
-    $d_dbh->commit();
+    return $found;
 }
  
 # Internal use
 # match_council_wards COUNCIL_ID VERBOSITY 
 # Attempts to match up the wards from the raw_input_data table to the Ordnance
-# Survey names.  Stores results in raw_process_status.
+# Survey names. Returns hash ref containing 'details' and 'error'.
 sub match_council_wards ($$) {
     my ($area_id, $verbosity) = @_;
     print "Area: $area_id\n" if $verbosity > 0;
@@ -177,7 +235,7 @@ sub match_council_wards ($$) {
 
     my $dump_wards = sub {
         $ret = "";
-        $ret .= sprintf "%38s => %-38s\n", 'Matches Made: GovEval', 'OS/ONS Name (mySociety ID)';
+        $ret .= sprintf "%38s => %-38s\n", 'Ward Matches Made: GovEval', 'OS/ONS Name (mySociety ID)';
         $ret .= sprintf "-" x 38 . ' '. "-" x 38 . "\n";
 
         foreach my $g (@$wards_goveval) {
@@ -190,17 +248,26 @@ sub match_council_wards ($$) {
                 }
             }
         }
-        $ret .= sprintf "\n%38s\n", "Other Database wards:";
-        $ret .= sprintf "-" x 80 . "\n";
+
+        $first = 1;
         foreach my $d (@$wards_database) {
             if (!exists($d->{referred})) {
+                if ($first) {
+                    $ret .= sprintf "\n%38s\n", "Other Database wards:";
+                    $ret .= sprintf "-" x 80 . "\n";
+                    $first = 0;
+                }
                 $ret .= sprintf "%38s\n", $d->{id} . " " . $d->{name};
             }
         }
-        $ret .= sprintf "\n%38s\n", "Other GovEval wards:";
-        $ret .= sprintf "-" x 80 . "\n";
+        $first = 1;
         foreach my $g (@$wards_goveval) {
             if (!exists($g->{matches})) {
+                if ($first) {
+                    $ret .= sprintf "\n%38s\n", "Other GovEval wards:";
+                    $ret .= sprintf "-" x 80 . "\n";
+                    $first = 0;
+                }
                 $ret .= sprintf "%38s\n", $g->{name};
             }
         }
@@ -339,12 +406,8 @@ sub match_council_wards ($$) {
         delete $g->{matches};
     }
 
-    # Update status field
-    $status = $error ? 'wards-mismatch' : 'wards-match';
-    set_process_status($area_id, $status, $error ? $error : undef, $matchesdump);
-    $d_dbh->commit();
-
-    return { 'matchesdump' => $matchesdump, 
+    # Return data
+    return { 'details' => $matchesdump, 
              'error' => $error };
 }
 
@@ -469,6 +532,210 @@ sub edit_raw_data($$$$$$) {
 
     }
     $d_dbh->commit();
+}
+
+# check_councillors_against_website COUNCIL_ID VERBOSITY 
+# Attempts to match up the wards from the raw_input_data table to the Ordnance
+# Survey names. Returns hash ref containing 'details' and 'error'.
+sub check_councillors_against_website($$) {
+    my ($area_id, $verbose) = @_;
+    print "Council " . $area_id . "\n" if $verbose;
+
+    # Get URL from database
+    my $extradata = $d_dbh->selectrow_hashref(q#select council_id, councillors_url from 
+        raw_council_extradata where council_id = ?#, {}, $area_id);
+
+    # Get known data from database
+    my @raw = mySociety::CouncilMatch::get_raw_data($area_id);
+    my $wardnames = $m_dbh->selectall_hashref(
+            q#select * from area_name, area where area_name.area_id = area.id and
+            parent_area_id = ?#, 'name', {}, $area_id);
+    my $wardnamescanon;
+    do { $wardnamescanon->{canonicalise_ward_name($_)} = $wardnames->{$_} } for keys %$wardnames;
+    # Various lookup tables
+    my $wardsbyid;
+    do { $wardsbyid->{$wardnames->{$_}->{id}} = $wardnames->{$_}->{name} } for keys %$wardnames;
+    my $cllrsbykey;
+    do { $cllrsbykey->{$_->{key}} = $_ } for @raw;
+    my $cllrsbywardid;
+    do { push @{$cllrsbywardid->{$wardnames->{$_->{ward_name}}->{id}}}, $_ if (defined($wardnames->{$_->{ward_name}})) } for @raw;
+
+    # Get all HTML from councillor list web page, and tidy
+    print "Getting main page... $extradata->{councillors_url} " if $verbose;
+    my $mainpage = LWP::Simple::get($extradata->{councillors_url});
+    print "...got\n" if $verbose;
+    my @lumps = mySociety::StringUtils::break_into_lumps($mainpage);
+    my $content = $mainpage;
+
+    # Get out next layer of URLs
+    my @urls;
+    my $p = HTML::TokeParser->new(\$mainpage);
+    # include also clickable maps "area"
+    while (my $token = $p->get_tag("area")) { #, "a")) {
+        my $url = $token->[1]{href};
+        next if !$url;
+        next if $url =~ m/^\#/;
+        next if $url =~ m/\.pdf$/;
+        if (!URI->new($url)->scheme()) { # only relative ones
+            my $uri = URI->new_abs($url, $extradata->{councillors_url});
+            $url = $uri->as_string();
+            push @urls, $url;
+        }
+    }
+#=cut
+
+    # scan_with_pattern PATTERN
+    # Scan lumps to find wards and councillors in given pattern
+    my $scan_with_pattern = sub {
+        my ($pattern) = @_;
+        die "scan_with_pattern: invalid pattern $pattern" if ($pattern ne "WCWCCC" && $pattern ne "CWCWCW");
+        my $error = "";
+
+        my $warddone;
+        do { $warddone->{$wardnames->{$_}->{id}} = [] if $wardnames->{$_}->{id}} for keys %$wardnames;
+        my $repdone;
+        do { $repdone->{$_->{key}} = [] } for @raw;
+    
+        # Scan for stuff
+        my $lastwardid = undef;
+        my $lastcllrkey = undef;
+        foreach my $lump (@lumps) {
+            my $canon_lump = canonicalise_person_name($lump);
+            print "lump: $canon_lump\n" if $verbose > 1;
+
+            my $matches = 0;
+            foreach my $rep (@raw) {
+                my $first = $rep->{rep_first};
+                my $last = $rep->{rep_last};
+                # Match representative names various ways
+                my $canon_name = canonicalise_person_name("$first $last");
+                print "name: $canon_name\n" if $verbose > 1;
+                # If lump begins with an initial, initialise first word of name
+                if ($canon_lump =~ m/^[[:alpha:]] /) {
+                    $canon_name =~ s/^([[:alpha:]])([[:alpha:]]+) /$1 /;
+                }
+                if ($canon_lump eq $canon_name) {
+                    print "councillor matched '$canon_lump' == '$canon_name'\n" if $verbose;
+                    $lastcllrkey = $rep->{key};
+                    push @{$repdone->{$lastcllrkey}}, $lump;
+                    $matches ++;
+                    if ($pattern eq "WCWCCC") {
+                        # check ward right
+                        if (!(defined $lastwardid)) {
+                            $error .= $area_id . ": councillor $first $last in wrong ward, ge " . $rep->{ward_name} . " none on website\n";
+                        } elsif (!(defined $wardnames->{$rep->{ward_name}})) {
+                            $error .= $area_id . ": councillor $first $last has unknown ward " . $rep->{ward_name} . "\n";
+                        } elsif ($wardnames->{$rep->{ward_name}}->{id} != $lastwardid) {
+                            $error .= $area_id . ": councillor $first $last in wrong ward, ge " . $rep->{ward_name} . " website " . $wardsbyid->{$lastwardid} . "\n";
+                        }
+                    }
+                }
+            }
+            if ($matches > 1) {
+                $error .= $area_id . ": $lump matched multiple councillors\n";
+            }
+
+            my $canonlump = canonicalise_ward_name($lump);
+            if (exists($wardnamescanon->{$canonlump})) {
+                print "ward matched '$canonlump'\n" if $verbose;
+                $lastwardid = $wardnamescanon->{$canonlump}->{id};
+                push @{$warddone->{$lastwardid}}, $lump;
+                if ($pattern eq "CWCWCW") {
+                    # check councillor right
+                    if (!$lastcllrkey) {
+                        $error .= $area_id . ": ward $lump without councillor\n";
+                    } elsif (!grep { $_->{key} eq $lastcllrkey } @{$cllrsbywardid->{$lastwardid}}) {
+                        #print Dumper(@{$cllrsbywardid->{$lastwardid}});
+                        #print "lastcllrkey $lastcllrkey\n";
+                        $error .= $area_id . ": councillor " . $cllrsbykey->{$lastcllrkey}->{rep_first} . " " .
+                            $cllrsbykey->{$lastcllrkey}->{rep_last} . " appears in wrong ward, ge " . 
+                            $cllrsbykey->{$lastcllrkey}->{ward_name} . " website $lump\n";
+                    }
+                }
+            }
+        }
+
+        # Check all got
+        foreach my $ward (keys %$warddone) {
+            if (!scalar(@{$warddone->{$ward}})) {
+                $error = $area_id . ": ward not matched " . $wardsbyid->{$ward} . " $ward\n" . $error;
+            }
+        }
+        foreach my $rep (keys %$repdone) {
+            if (!scalar(@{$repdone->{$rep}})) {
+                $error = $area_id . ": councillor not matched ge " . $cllrsbykey->{$rep}->{rep_first} . " " . $cllrsbykey->{$rep}->{rep_last} . "\n" . $error;
+                #my $common_len = Common::placename_match_metric($match1, $match2);
+            }
+        }
+
+        # Dump matches we have made
+        my $details = "";
+        $details .= sprintf "%38s => %-38s\n", 'Councillor Matches Made: GovEval', 'Council Website';
+        $details .= sprintf "-" x 38 . ' '. "-" x 38 . "\n";
+        foreach my $repkey (keys %$repdone) {
+            my $gename = $cllrsbykey->{$repkey}->{rep_first} . " " . $cllrsbykey->{$repkey}->{rep_last};
+            $first = 1;
+            foreach my $match (@{$repdone->{$repkey}}) {
+                $details .= sprintf "%38s => %-38s\n", $first ? $gename : "", $match;
+                $first = 0;
+            }
+        }
+        $details .= sprintf "\n%38s => %-38s\n", 'Ward Matches Made: GovEval', 'Council Website';
+        $details .= sprintf "-" x 38 . ' '. "-" x 38 . "\n";
+        foreach my $ward (keys %$warddone) {
+            my $gename = $wardsbyid->{$ward};
+            $first = 1;
+            foreach my $match (@{$warddone->{$ward}}) {
+                $details .= sprintf "%38s => %-38s\n", $first ? $gename : "", $match;
+                $first = 0;
+            }
+        }
+
+        return ($error, $details);
+    };
+
+    my ($error1, $details1) = &$scan_with_pattern("WCWCCC");
+    my ($error2, $details2) = &$scan_with_pattern("CWCWCW");
+    my $ecount1 = ($error1 =~ tr/\n/\n/);
+    my $ecount2 = ($error2 =~ tr/\n/\n/);
+=comment
+    if ($ecount1 > 20 and $ecount2 > 20) {
+        # Nothing much good, so try recursive get
+        foreach my $url (@urls) {
+            print "Getting... $url " if $verbose;
+            my $subpage = LWP::Simple::get($url);
+            print "...got\n" if $verbose;
+            push @lumps, mySociety::StringUtils::break_into_lumps($subpage);
+        }
+        ($error1, $details1) = &$scan_with_pattern("WCWCCC");
+        ($error2, $details2 = &$scan_with_pattern("CWCWCW");
+        $ecount1 = ($error1 =~ tr/\n/\n/);
+        $ecount2 = ($error2 =~ tr/\n/\n/);
+    }
+=cut
+
+    if (!$error1) {
+        print "WCWCCC worked\n" if $verbose;
+    }
+    if (!$error2) {
+        print "CWCWCW worked\n" if $verbose;
+    }
+    my ($details, $error);
+    if ($error1 && $error2) {
+        if ($ecount1 < $ecount2) {
+            print "shortest is WCWCCC\n" if $verbose;
+            $error .= $error1;
+            $details = $details1;
+        } else {
+            print "shortest is CWCWCW\n" if $verbose;
+            $error .= $error2;
+            $details = $details2;
+        }
+    }
+
+    # Return data
+    return { 'details' => $details, 
+             'error' => $error };
 }
 
 
