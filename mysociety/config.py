@@ -1,10 +1,11 @@
+#
 # config.py:
 # Very simple config parser. Our config files are sort of cod-PHP.
 #
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: config.py,v 1.2 2005-03-03 13:12:15 francis Exp $
+# $Id: config.py,v 1.3 2005-03-07 11:46:35 chris Exp $
 #
 
 """
@@ -13,12 +14,13 @@ Parse config files (written in a sort of cod-php, using
 to define individual elements.
 
 Example use:
-    mysociety.config.set_file('../conf/general');
-    opt = mysociety.config.get('CONFIG_VARIABLE', DEFAULT_VALUE);
+    mysociety.config.set_file('../conf/general')
+    opt = mysociety.config.get('CONFIG_VARIABLE', DEFAULT_VALUE)
 """
 
-import re
 import os
+import popen2
+import re
 
 def find_php():
     """find_php() -> php_binary
@@ -48,10 +50,10 @@ def read_config(f):
     if not php_path:
         php_path = find_php()
 
-    # Delete everything from the environment other than our special
-    # variable to give PHP the config file name. We don't want PHP to pick
-    # up other information from our environment and turn into an FCGI
-    # server or something.
+    # Delete everything from the environment other than our special variable to
+    # give PHP the config file name. We don't want PHP to pick up other
+    # information from our environment and turn into an FCGI server or
+    # something.
 
     # Just copying os.environ doesn't cause the correct unsetenvs and putenvs
     # to be called, so instead we have to explicitly store it in store_environ
@@ -60,15 +62,12 @@ def read_config(f):
         store_environ[k] = os.environ[k]
         del os.environ[k]
     os.environ['MYSOCIETY_CONFIG_FILE_PATH'] = f
-    (child_stdin, child_stdout, child_stderr) = os.popen3([php_path,])
+    child = popen2.Popen3([php_path,], False) # don't capture stderr
     for k,v in store_environ.iteritems():
         os.environ[k] = v
 
-    print >>child_stdin, """
+    print >>child.tochild, """
 <?php
-print "<p>PHP!!!";
-print_r($_ENV);
-#print getcwd();
 require(getenv("MYSOCIETY_CONFIG_FILE_PATH"));
 $a = get_defined_constants();
 print "start_of_options\n";
@@ -81,23 +80,33 @@ foreach ($a as $k => $v) {
     }
 }
 ?>"""
-    child_stdin.close()
+    child.tochild.close()
 
     # skip any header material
     line = True
     while line:
-        line = child_stdout.readline()
+        line = child.fromchild.readline()
         if line == "start_of_options\n":
             break
     else:
         raise Exception, "%s: %s: failed to read options" % (php_path, f)
 
     # read remainder
-    buf = ''.join(child_stdout.readlines())
-    child_stdout.close()
+    buf = ''.join(child.fromchild.readlines())
+    child.fromchild.close()
+
+    # check that php exited successfully
+    status = child.wait()
+    if os.WIFSIGNALED(status):
+        raise Exception, "%s: %s: killed by signal %d" % (php_path, f, WTERMSIG(status))
+    elif os.WEXITSTATUS(status) != 0:
+        raise Exception, "%s: %s: exited with failure status %d" % (php_path, f, WEXITSTATUS(status))
+    
+    # parse out config values
     vals = buf.split('\0'); # option values may be empty
     vals.pop()  # The buffer ends "\0" so there's always a trailing empty value
                 # at the end of the buffer. I love perl! Perl is my friend!
+                # (I assume this should now read "Python", but I'm not sure.)
 
     if len(vals) % 2:
         raise Exception, "%s: %s: bad option output from subprocess" % (php_path, f)
