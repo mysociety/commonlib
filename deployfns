@@ -4,7 +4,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: deployfns,v 1.12 2005-03-15 19:09:48 chris Exp $
+# $Id: deployfns,v 1.13 2005-03-17 18:44:33 francis Exp $
 #
 
 # Warnings and errors
@@ -118,10 +118,10 @@ check_pgsql_schema () {
     dropdb -q -U $PSQL_SCHEMATEST_USER schematest || warn "schematest already dropped, continuing"
     createdb -q -U $PSQL_SCHEMATEST_USER schematest
     psql --file=$2 -U $PSQL_SCHEMATEST_USER -q schematest 2>&1 | grep -v "will create implicit" && echo -n 
-    pg_dump -s -U $PSQL_SCHEMATEST_USER schematest | egrep -v "^--|SET SESSION AUTHORIZATION|\\connect - |GRANT ALL|REVOKE ALL" | grep -v "SET search_path = public, pg_catalog;" | sed "s/,$//;" > $CVS_SCHEMA_FILE
+    pg_dump -s -U $PSQL_SCHEMATEST_USER schematest | egrep -v "^--|SET SESSION AUTHORIZATION|\\connect - |GRANT ALL|REVOKE ALL" | grep -v "SET search_path = public, pg_catalog;" | sed "s/,$//;" | grep -v '^[ \t]*$' > $CVS_SCHEMA_FILE
 
     # ... the live database dump
-    su $1 -c "pg_dump -s -U $4 $3" | egrep -v "^--|SET SESSION AUTHORIZATION|\\connect - |GRANT ALL|REVOKE ALL" | grep -v "SET search_path = public, pg_catalog;" | sed "s/,$//;" > $CURRENT_SCHEMA_FILE
+    su $1 -c "pg_dump -s -U $4 $3" | egrep -v "^--|SET SESSION AUTHORIZATION|\\connect - |GRANT ALL|REVOKE ALL" | grep -v "SET search_path = public, pg_catalog;" | sed "s/,$//;" | grep -v '^[ \t]*$' > $CURRENT_SCHEMA_FILE
 
     # Note:  Using sort here is completely evil.  It is because
     # older verions of pg_dump don't output the tables in a stable
@@ -135,7 +135,7 @@ check_pgsql_schema () {
     cat $CURRENT_SCHEMA_FILE | sort > $CURRENT_SCHEMA_FILE.sorted
 
     # Compare them
-    if ! diff --ignore-blank-lines --ignore-space-change $CURRENT_SCHEMA_FILE.sorted $CVS_SCHEMA_FILE.sorted 
+    if ! diff -w $CURRENT_SCHEMA_FILE.sorted $CVS_SCHEMA_FILE.sorted
     then
         warn "Schema in CVS differs from that in pgsql database, you need to update it"
         warn "database: $3; user: $4 schema: $2"
