@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: PIDFile.pm,v 1.1 2004-11-10 17:10:38 chris Exp $
+# $Id: PIDFile.pm,v 1.2 2005-01-31 12:29:19 chris Exp $
 #
 
 package mySociety::PIDFile::Error;
@@ -62,7 +62,7 @@ sub new ($$) {
         $E->throw();
     };
 
-    return bless({ name => $name, h => $h }, $class);
+    return bless({ name => $name, h => $h, pid => $$ }, $class);
 }
 
 =item DESTROY
@@ -72,7 +72,8 @@ Close and delete the PID file on exit.
 =cut
 sub DESTROY ($) {
     my ($self) = @_;
-    unlink($self->{name});
+    # Only the process which created the PID file should remove it.
+    unlink($self->{name}) if ($self->{pid} == $$)
     $self->{h}->close();
 }
 
