@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-ratty.php,v 1.7 2004-11-15 13:00:26 francis Exp $
+ * $Id: admin-ratty.php,v 1.8 2004-11-15 14:44:05 fyr Exp $
  * 
  */
 
@@ -77,7 +77,7 @@ class ADMIN_PAGE_RATTY {
 
             $form->addElement('header', '', $rule = "" ? 'New Rate-Limiting Rule' : 'Edit Rate-Limiting Rule');
             $form->addElement('text', 'sequence', "Rule evaluation position:", array('size' => 20, 'maxlength' => 20));
-            $form->addElement('text', 'note', "Description of rule:", array('size' => 40, 'maxlength' => 40));
+            $form->addElement('text', 'note', "Description of rule:", array('size' => 40, 'maxlength' => 80));
             $form->addElement('text', 'requests', "Limit to this many hits:", array('size' => 20, 'maxlength' => 20));
             $form->addElement('text', 'interval', "Every this many seconds:", array('size' => 20, 'maxlength' => 20));
             $form->addRule('sequence', 'Rule position must be numeric', 'numeric', null, 'server');
