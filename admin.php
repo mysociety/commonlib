@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin.php,v 1.27 2005-02-21 11:40:11 francis Exp $
+ * $Id: admin.php,v 1.28 2005-03-14 14:44:38 francis Exp $
  * 
  */
 
@@ -53,7 +53,8 @@ function admin_page_display($site_name, $pages) {
         admin_html_header($title);
         print "<h1>$title</h1>";
         $self_link = "?page=$id";
-        $page->display($self_link);
+        $page->self_link = $self_link;
+        $page->display($self_link); # TODO remove this as parameter, use class member
         admin_html_footer();
     } elseif (get_http_var("navframe")) {
         // right hand nav frame
