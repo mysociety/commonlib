@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: DaDem.pm,v 1.7 2004-11-22 17:41:00 francis Exp $
+# $Id: DaDem.pm,v 1.8 2005-01-31 19:14:34 chris Exp $
 #
 
 package mySociety::DaDem;
@@ -76,9 +76,9 @@ use constant CONTACT_EMAIL      => 102;
 
 =item configure [URL]
 
-Set the "XML-RPC proxy" URL which will be used to call the functions.
-If you don't specify the URL, mySociety configuration variable DADEM_URL
-will be used instead.
+Set the URL which will be used to call the functions over RABX.  If you don't
+specify the URL, mySociety configuration variable DADEM_URL will be used
+instead.
 
 =cut
 my $rabx_client = undef;
@@ -96,7 +96,7 @@ area, or, on failure, an error code.
 =cut
 sub get_representatives ($) {
     my ($id) = @_;
-    configure() if !defined $rabx_client;
+    configure() if (!defined($rabx_client));
     return $rabx_client->call('DaDem.get_representatives', $id);
 }
 
@@ -137,7 +137,7 @@ or, on failure, an error code.
 =cut
 sub get_representative_info ($) {
     my ($id) = @_;
-    configure() if !defined $rabx_client;
+    configure() if (!defined($rabx_client));
     return $rabx_client->call('DaDem.get_representative_info', $id);
 }
 

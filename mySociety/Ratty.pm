@@ -6,7 +6,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Ratty.pm,v 1.2 2005-01-13 01:45:47 chris Exp $
+# $Id: Ratty.pm,v 1.3 2005-01-31 19:14:34 chris Exp $
 #
 
 package mySociety::Ratty;
@@ -44,13 +44,16 @@ sub configure (;$) {
 
 =item test SCOPE VALUES
 
-Invoke the rate limiter with the given VALUES (e.g. postcode, representative ID
-etc.). Returns undef if no rate limit was tripped, or a reference to an array
-of [rule ID, message] if one was, or throws an error on failure.
+Invoke the rate limiter with the given VALUES (reference to hash giving, e.g.
+postcode, representative ID etc.) for the supplies SCOPE (should be a subsystem
+name of some kind, for instance "fyr-web". Returns undef if no rate limit was
+tripped, a reference to an array of [rule ID, message] if one was, or throws an
+error on failure.
 
 =cut
 sub test ($$) {
     my ($scope, $values) = @_;
+    die "SCOPE must be supplied" unless (defined($scope));
     configure() if (!defined($rabx_client));
     return $rabx_client->call('Ratty.test', $scope, $values);
 }
