@@ -7,7 +7,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: CouncilMatch.pm,v 1.6 2005-01-28 12:54:05 francis Exp $
+# $Id: CouncilMatch.pm,v 1.7 2005-01-28 13:25:45 francis Exp $
 #
 
 package mySociety::CouncilMatch;
@@ -340,7 +340,20 @@ sub edit_raw_data($$$$$$$) {
     # Delete entries which are in old but not in new
     foreach my $key (keys %old) {
         if (!exists($new{$key})) {
-            print "need to delete $key";
+            my ($newrow_id) = ($key =~ m/^newrow_id([0-9]+)$/);
+            my ($ge_id) = ($key =~ m/^ge_id([0-9]+)$/);
+            my $sth = $d_dbh->prepare(q#insert into raw_input_data_edited
+                (ge_id, newrow_id, alteration, council_id, council_name, council_type, council_ons_code,
+                ward_name, rep_first, rep_last, 
+                rep_party, rep_email, rep_fax, 
+                editor, whenedited, note)
+                values (?, ?, ?, ?, ?, ?, ?,
+                        ?, ?, ?, ?, ?, ?, 
+                        ?, ?, ?) #);
+            $sth->execute($ge_id, $newrow_id, 'delete', $area_id, $area_name, $area_type, $area_ons_code,
+                $old{$key}->{ward_name}, $old{$key}->{rep_first}, $old{$key}->{rep_last}, 
+                $old{$key}->{rep_party}, $old{$key}->{rep_email}, $old{$key}->{rep_fax},
+                $user, time(), "");
         }
     }
 
@@ -363,7 +376,7 @@ sub edit_raw_data($$$$$$$) {
         my ($newrow_id) = ($key =~ m/^newrow_id([0-9]+)$/);
         my ($ge_id) = ($key =~ m/^ge_id([0-9]+)$/);
         if (!$newrow_id && !$ge_id) {
-            my @row = $d_dbh->selectrow_array(qw#select nextval('raw_input_data_edited_newrow_seq')#);
+            my @row = $d_dbh->selectrow_array(q#select nextval('raw_input_data_edited_newrow_seq')#);
             $newrow_id = $row[0];
         }
 
@@ -373,7 +386,7 @@ sub edit_raw_data($$$$$$$) {
             ward_name, rep_first, rep_last, rep_party, 
             rep_email, rep_fax, 
             editor, whenedited, note)
-            values (?, ?, ?, ?, ?, ?,
+            values (?, ?, ?, ?, ?, ?, ?,
                     ?, ?, ?, ?,
                     ?, ?,
                     ?, ?, ?) #);
