@@ -7,7 +7,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: CouncilMatch.pm,v 1.9 2005-02-01 15:33:31 francis Exp $
+# $Id: CouncilMatch.pm,v 1.10 2005-02-01 16:18:03 francis Exp $
 #
 
 package mySociety::CouncilMatch;
@@ -534,6 +534,13 @@ sub edit_raw_data($$$$$$) {
     $d_dbh->commit();
 }
 
+# Break parts of array separated by various sorts of punctuation
+sub split_lumps_further($) {
+    my ($lumps) = @_;
+    my @lumps = map { split / - | \(| \)/, $_ } @$lumps;
+    return @lumps;
+}
+
 # check_councillors_against_website COUNCIL_ID VERBOSITY 
 # Attempts to match up the wards from the raw_input_data table to the Ordnance
 # Survey names. Returns hash ref containing 'details' and 'error'.
@@ -565,6 +572,7 @@ sub check_councillors_against_website($$) {
     my $mainpage = LWP::Simple::get($extradata->{councillors_url});
     print "...got\n" if $verbose;
     my @lumps = mySociety::StringUtils::break_into_lumps($mainpage);
+    @lumps = split_lumps_further(\@lumps);
     my $content = $mainpage;
 
     # Get out next layer of URLs
@@ -663,8 +671,19 @@ sub check_councillors_against_website($$) {
         }
         foreach my $rep (keys %$repdone) {
             if (!scalar(@{$repdone->{$rep}})) {
-                $error = $area_id . ": councillor not matched ge " . $cllrsbykey->{$rep}->{rep_first} . " " . $cllrsbykey->{$rep}->{rep_last} . "\n" . $error;
-                #my $common_len = Common::placename_match_metric($match1, $match2);
+                my $name = $cllrsbykey->{$rep}->{rep_first} . " " . $cllrsbykey->{$rep}->{rep_last};
+                # Find best matches by common substring to give as examples
+                my $canon_name = canonicalise_person_name($name);
+                my ($best_len, $best_match);
+                foreach my $lump (@lumps) {
+                    my $canon_lump = canonicalise_person_name($lump);
+                    my $common_len = Common::placename_match_metric($canon_lump, $canon_name);
+                    if (!defined($best_len) or $best_len < $common_len) {
+                        $best_match = $lump;
+                        $best_len = $common_len;
+                    }
+                }
+                $error = $area_id . ": councillor not matched ge " . $name . " best match on council website: $best_match\n" . $error;
             }
         }
 
@@ -698,21 +717,21 @@ sub check_councillors_against_website($$) {
     my ($error2, $details2) = &$scan_with_pattern("CWCWCW");
     my $ecount1 = ($error1 =~ tr/\n/\n/);
     my $ecount2 = ($error2 =~ tr/\n/\n/);
-=comment
     if ($ecount1 > 20 and $ecount2 > 20) {
         # Nothing much good, so try recursive get
         foreach my $url (@urls) {
             print "Getting... $url " if $verbose;
             my $subpage = LWP::Simple::get($url);
             print "...got\n" if $verbose;
-            push @lumps, mySociety::StringUtils::break_into_lumps($subpage);
+            my @newlumps = mySociety::StringUtils::break_into_lumps($subpage);
+            @newlumps = split_lumps_further(\@newlumps);
+            push @lumps, @newlumps;
         }
         ($error1, $details1) = &$scan_with_pattern("WCWCCC");
-        ($error2, $details2 = &$scan_with_pattern("CWCWCW");
+        ($error2, $details2) = &$scan_with_pattern("CWCWCW");
         $ecount1 = ($error1 =~ tr/\n/\n/);
         $ecount2 = ($error2 =~ tr/\n/\n/);
     }
-=cut
 
     if (!$error1) {
         print "WCWCCC worked\n" if $verbose;
