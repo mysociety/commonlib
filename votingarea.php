@@ -8,7 +8,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: votingarea.php,v 1.21 2005-01-19 14:45:32 francis Exp $
+ * $Id: votingarea.php,v 1.22 2005-01-19 17:02:00 francis Exp $
  * 
  */
 
@@ -19,8 +19,8 @@
 $va_inside = array(
         'LBW' => 'LBO',
 
-        'LAC' => 'GLA',
-        'LAE' => 'GLA',
+        'LAC' => 'LAS',
+        'LAE' => 'LAS',
 
         'CED' => 'CTY',
 
@@ -112,12 +112,12 @@ $va_responsibility_description = array(
             "The London Borough Council is responsible for
             <strong>local services</strong>, including <strong>planning</strong>, <strong>council housing</strong>,
             <strong>rubbish collection</strong>, and <strong>local roads</strong>.",
-    'GLA' => "
-The Greater London Assembly <strong>examines</strong> the Mayor of London's
+    'LAS' => "
+The London Assembly <strong>examines</strong> the Mayor of London's
 activities, <strong>investigates</strong> issues of importance to Londoners,
 and <strong>makes proposals</strong> to the Mayor.  Areas covered include the
-Mayor's budget, <strong>culture, <strong>sport and tourism</strong>,
-<strong>health</strong>, <strong>planning and <strong>transport</strong>.
+Mayor's budget, <strong>culture</strong>, <strong>sport and tourism</strong>,
+<strong>health</strong>, <strong>planning</strong> and <strong>transport</strong>.
 ",
     'MTD' =>
             "The Metropolitan District Council is
