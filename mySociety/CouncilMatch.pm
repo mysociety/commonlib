@@ -7,7 +7,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: CouncilMatch.pm,v 1.2 2005-01-25 17:15:04 francis Exp $
+# $Id: CouncilMatch.pm,v 1.3 2005-01-26 19:48:52 francis Exp $
 #
 
 package mySociety::CouncilMatch;
@@ -224,6 +224,19 @@ sub match_council_wards ($$$$) {
     # Store textual version of what we did
     $matchesdump = &$dump_wards();
 
+    # Store name aliases in DB
+    if (!$error) {
+        foreach my $g (@$wards_goveval) {
+            die if (!exists($g->{matches}));
+            die if (scalar(@{$g->{matches}}) != 1);
+            my $dd = @{$g->{matches}}[0];
+            $m_dbh->do(q#delete from area_name where area_id = ? and name_type = 'G'#, {}, $dd->{id});
+            $m_dbh->do(q#insert into area_name (area_id, name_type, name)
+                values (?,?,?)#, {}, $dd->{id}, 'G', $g->{name});
+        }
+        $m_dbh->commit();
+    }
+ 
     # Clean up looped references
     foreach my $d (@$wards_database) {
         delete $d->{used};
