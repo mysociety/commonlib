@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: VotingArea.pm,v 1.20 2005-01-19 14:45:31 francis Exp $
+# $Id: VotingArea.pm,v 1.21 2005-01-19 17:02:00 francis Exp $
 #
 
 package mySociety::VotingArea;
@@ -31,14 +31,6 @@ present in Boundary Line.
 
 =over 4
 
-=item LAE_AREA_ID
-
-ID for the area for which "London-wide" members of the London assembly are
-elected. Coterminous with the GLA region.
-
-=cut
-use constant LAE_AREA_ID => 900002;
-
 =item WMP_AREA_ID
 
 ID for the area over which the House of Commons has jurisdiction (i.e., the
@@ -53,6 +45,14 @@ Same, for European Parliament.
 
 =cut
 use constant EUP_AREA_ID => 900001;
+
+=item LAE_AREA_ID
+
+ID for the area for which "London-wide" members of the London assembly are
+elected. Coterminous with the GLA region.
+
+=cut
+use constant LAE_AREA_ID => 900002;
 
 =item SPA_AREA_ID
 
@@ -75,6 +75,13 @@ Northern Ireland Assembly
 =cut
 use constant NIA_AREA_ID => 900005;
 
+=item LAS_AREA_ID
+
+London Asssembly.  Coterminous with GLA.
+
+=cut
+use constant LAS_AREA_ID => 900006;
+
 
 =back
 
@@ -89,7 +96,8 @@ Known 3-letter area types.
 =cut
 @mySociety::VotingArea::known_types = (
         'LBO', 'LBW',  # London Borough, Ward
-        'GLA', 'LAC', 'LAE', # Greater London Assemly, Constituency, Electoral Region
+        'GLA',         # Greater London Authority 
+        'LAS', 'LAC', 'LAE', # London Assembly, Constituency, Electoral Region
         'LGD', 'LGW',  # Local Government District, Electoral Area
         'CTY', 'CED',  # County, Electoral Division
         'DIS', 'DIW',  # District, Ward
@@ -120,7 +128,9 @@ for instance "Ward" or "Electoral Division".
         LBO =>  "London Borough",
         LBW =>  "Ward",
 
-        GLA =>  "London Assembly",
+        GLA =>  "Greater London Authority",
+
+        LAS =>  "London Assembly",
         LAC =>  "Constituency",
         LAE =>  "Electoral Region",
 
@@ -174,7 +184,7 @@ you in the European Parliament".
 %mySociety::VotingArea::attend_prep = (
         LBO =>  "on the",
 
-        GLA =>  "on the",
+        LAS =>  "on the",
 
         CTY =>  "on",
 
@@ -208,6 +218,7 @@ that area.  For example, "Councillor" or "MEP".
         LBW => 'Councillor',
 
         GLA => 'Mayor', # "of London"? 
+
         LAC => 'London Assembly Member',
         LAE => 'London Assembly Member',
 
@@ -245,6 +256,7 @@ area.  For example, "Councillor" or "Member of the European Parliament".
         LBW => 'Councillor',
 
         GLA => 'Mayor', # "of London"? 
+
         LAC => 'London Assembly Member',
         LAE => 'London Assembly Member',
 
@@ -282,6 +294,7 @@ Plural short version of rep_name.
         LBW => 'Councillors',
 
         GLA => 'Mayors', # "of London"?
+
         LAC => 'London Assembly Members',
         LAE => 'London Assembly Members',
 
@@ -318,6 +331,7 @@ Plural long version of rep_name.
         LBW => 'Councillors',
 
         GLA => 'Mayors', # "of London"?
+
         LAC => 'London Assembly Members',
         LAE => 'London Assembly Members',
 
@@ -357,6 +371,7 @@ that area.  For example, "AM" for Assembly Members.
         LBW => '',
 
         GLA => '',
+
         LAC => 'AM',
         LAE => 'AM',
 
@@ -394,6 +409,7 @@ that area.  For example, "Cllr" for Councillors.
         LBW => 'Cllr',
 
         GLA => 'Mayor', # "of London"? 
+
         LAC => '',
         LAE => '',
 
