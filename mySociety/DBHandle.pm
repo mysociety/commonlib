@@ -9,7 +9,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: DBHandle.pm,v 1.7 2005-02-03 12:26:06 chris Exp $
+# $Id: DBHandle.pm,v 1.8 2005-02-03 12:29:57 chris Exp $
 #
 
 package mySociety::DBHandle;
@@ -115,13 +115,10 @@ sub dbh () {
     our $dbh;
     our $dbh_process;
     # If the connection to the database has gone away, try to detect the
-    # condition here. XXX this means we could restart a transaction half-way
-    # through. 
-    if (defined($dbh) && !eval { $dbh->ping() } ) { # call through eval because that's what Apache::DBI does
-        $dbh->disconnect();
-        undef $dbh;
-    }
-    if (!defined($dbh) || $dbh_process != $$) {
+    # condition here. Also detect a fork which has occured since dbh() was last
+    # called. XXX this means we could restart a transaction half-way through. 
+    if (!defined($dbh) || $dbh_process != $$
+        || !eval { $dbh->ping() }) { # call through eval because that's what Apache::DBI does
         $dbh->{InactiveDestroy} = 1 if (defined($dbh));
         $dbh = new_dbh();
         $dbh_process = $$;
