@@ -7,7 +7,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: CouncilMatch.pm,v 1.17 2005-02-04 14:21:13 francis Exp $
+# $Id: CouncilMatch.pm,v 1.18 2005-02-04 18:56:10 francis Exp $
 #
 
 package mySociety::CouncilMatch;
@@ -48,9 +48,14 @@ sub process_ge_data ($$) {
     $error .= $ret->{error} ? $ret->{error} : "";
     $details .= $ret->{details};
 
+    # Get any extra data
+    my $extra_data = get_extradata($area_id);
+
+    # Disable attempt at matching against council website for now
+=comment
     # See if we have URL
     if ($status eq "wards-match") {
-        my $found = check_for_extradata($area_id);
+        my $found = ($extra_data and $extra_data->{councillors_url} ne "");
         $status = $found ? "url-found" : "url-missing";
 
         # Check against council website
@@ -61,6 +66,15 @@ sub process_ge_data ($$) {
             $details = $ret->{details} . "\n" . $details;
         }
     }
+=cut
+
+    # Make live
+    if ($status eq "wards-match" and $extra_data and $extra_data->{make_live}) {
+        my $ret = refresh_live_data($area_id, $verbosity);
+        $status = $ret->{error} ? 'failed-live' : 'made-live';
+        $error .= $ret->{error} ? $ret->{error} : "";
+        $details = $ret->{details} . "\n" . $details;
+    } 
 
     # Save status
     set_process_status($area_id, $status, $error ? $error : undef, $details);
@@ -70,6 +84,97 @@ sub process_ge_data ($$) {
              'error' => $error };
 }
 
+# refresh_live_data COUNCIL_ID VERBOSITY 
+# Attempts to match up the wards from the raw_input_data table to the Ordnance
+# Survey names. Returns hash ref containing 'details' and 'error'.
+sub refresh_live_data($$) {
+    my ($area_id, $verbose) = @_;
+    print "refresh_live_data council " . $area_id . "\n" if $verbose;
+    my $details = "";
+    my $error = "";
+
+    # Get updated data from raw table
+    my @raw = mySociety::CouncilMatch::get_raw_data($area_id);
+    my $update_keys;
+    my $ward_ids;
+    # ... name match to fill in ward id, and contact type
+    foreach $row (@raw) {
+        # ... get ward id
+        my $name_matches = $m_dbh->selectall_arrayref(q#select area_id, type 
+            from area_name, area where area_name.area_id = area.id and
+            name_type = 'G' and name = ?  and parent_area_id = ?#, {}, 
+            $row->{ward_name}, $area_id);
+        if (scalar(@$name_matches) != 1) {
+            # This should never happen, as we have matched ward names before running this
+            throw Error::Simple("refresh_live_data: Didn't get right number of name matches, got "
+                . scalar(@$name_matches) . " for '" . $row->{ward_name} . "'");
+        }
+        $row->{ward_id} = $name_matches->[0]->[0];
+        $row->{ward_type} = $name_matches->[0]->[1];
+        $ward_ids->{$row->{ward_id}} = 1;
+
+        # ... calculate method
+        my $method = 'via';
+        if ($row->{fax} and $row->{email}) {
+            $method = 'either';
+        } elsif ($row->{fax}) {
+            $method = 'fax';
+        } elsif ($row->{email}) {
+            $method = 'email';
+        }
+        $row->{method} = $method;
+
+        # ... store keys in hash
+        $update_keys->{$row->{key}} = $row;
+    }
+
+    # Get any existing data from representatives table
+    my $current_keys = $d_dbh->selectall_hashref(q#select * from representative
+        where area_id in (# . join(",", map { '?' } keys %$ward_ids) . q#)#, 'import_key',
+        {}, keys %$ward_ids);
+
+    # Go through all updated data, and either insert or replace
+    foreach $update_key (keys %$update_keys) {
+        my $row = $update_keys->{$update_key};
+        if (exists($current_keys->{$update_key})) {
+            # update
+            my $rows_affected = $d_dbh->do(q#update representative set
+                name = ?, party = ?, method = ?, email = ?, fax = ?
+                where import_key = ?#, {}, 
+                $row->{rep_first} . " " . $row->{rep_last},
+                $row->{rep_party}, $row->{method}, 
+                $row->{rep_email}, $row->{rep_fax},
+                $update_key);
+            throw Error::Simple("refresh_live_data: update affected $rows_affected rows, not one") if $rows_affected != 1;
+            $details .= "Making live: Updated $update_key ".$row->{rep_first}." ".$row->{rep_last}."\n";
+        } else {
+            # insert into
+            $d_dbh->do(q#insert into representative 
+                (area_id, area_type, name, party, method, email, fax, import_key) 
+                values (?, ?, ?, ?, ?, ?, ?, ?)#, {}, 
+                $row->{ward_id}, $row->{ward_type},
+                $row->{rep_first} . " " . $row->{rep_last},
+                $row->{rep_party}, $row->{method}, 
+                $row->{rep_email}, $row->{rep_fax},
+                $update_key);
+            $details .= "Making live: Inserted $update_key ".$row->{rep_first}." ".$row->{rep_last}."\n";
+        }
+    }
+
+    # Delete any representative data which is no longer present
+    foreach $current_key (keys %$current_keys) {
+        my $current_row = $current_keys->{$current_key};
+        # Data is in representative table, but not in new data, so delete
+        if (!exists($update_keys->{$current_key})) {
+            my $rows_affected = $d_dbh->do(q#delete from representative where import_key = ?#, {},
+                $current_key);
+            throw Error::Simple("refresh_live_data: delete affected $rows_affected rows, not one") if $rows_affected != 1;
+            $details .= "Making live: Deleted $current_key ".$current_row->{name}."\n";
+        }
+    }
+
+    return { 'details' => $details, 'error' => $error };
+}
 
 # get_process_status COUNCIL_ID
 # Returns the text string saying what state of GE data processing
@@ -244,14 +349,6 @@ sub match_modulo_nickname($$) {
     return 0;
 }
 
-#print match_modulo_nickname("sally prentice l", "sally prentice");
-#print "\n";
-#print match_modulo_nickname("jack nobody", "hans nobody");
-#print "\n";
-#print match_modulo_nickname("timmy tailor", "timothy tailor");
-#print "\n";
-#exit;
-
 # canonicalise_person_name NAME
 # Convert name from various formats "Fred Smith", "Smith, Fred",
 # "Fred R Smith", "Smith, Fred RK" to uniform one "fred smith".  Removes
@@ -298,19 +395,13 @@ sub canonicalise_ward_name ($) {
 }
 
 # Internal use
-# check_for_extradata COUNCIL_ID 
+# get_extradata COUNCIL_ID 
 # Checks we have the councillor names webpage URL, and any other needed data.
-sub check_for_extradata ($) {
+sub get_extradata ($) {
     my ($area_id) = @_;
-    my $ret = $d_dbh->selectrow_arrayref(q#select council_id, councillors_url from 
+    my $ret = $d_dbh->selectrow_hashref(q#select council_id, councillors_url, make_live from 
         raw_council_extradata where council_id = ?#, {}, $area_id);
-    my $found = 0;
-    if (defined($ret)) {
-        if ($ret->[1] ne "") {
-            $found = 1;
-        }
-    }
-    return $found;
+    return $ret;
 }
  
 # Internal use
@@ -647,13 +738,6 @@ sub edit_raw_data($$$$$$) {
     $d_dbh->commit();
 }
 
-# Break parts of array separated by various sorts of punctuation
-sub split_lumps_further($) {
-    my ($lumps) = @_;
-    my @lumps = map { split / - | \(| \)|:|;/, $_ } @$lumps;
-    return @lumps;
-}
-
 # get_url_via_cache URL
 # Gets contents of given URL, throws exception if there is an error.
 # If file is already in the cache, gets it again.
@@ -696,6 +780,13 @@ sub check_councillors_against_website($$) {
     do { $cllrsbykey->{$_->{key}} = $_ } for @raw;
     my $cllrsbywardid;
     do { push @{$cllrsbywardid->{$wardnames->{$_->{ward_name}}->{id}}}, $_ if (defined($wardnames->{$_->{ward_name}})) } for @raw;
+
+    # Break parts of array separated by various sorts of punctuation
+    sub split_lumps_further($) {
+        my ($lumps) = @_;
+        my @lumps = map { split / - | \(| \)|:|;/, $_ } @$lumps;
+        return @lumps;
+    }
 
     # Get all HTML from councillor list web page, and tidy
     print "Getting main page... $extradata->{councillors_url} " if $verbose;
