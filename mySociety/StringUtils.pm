@@ -6,7 +6,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: StringUtils.pm,v 1.1 2005-01-29 00:32:37 francis Exp $
+# $Id: StringUtils.pm,v 1.2 2005-01-29 11:36:51 chris Exp $
 #
 
 package mySociety::StringUtils;
@@ -20,6 +20,8 @@ BEGIN {
 }
 our @EXPORT_OK;
 
+use String::Ediff;
+
 =head1 NAME
 
 mySociety::StringUtils
@@ -32,16 +34,12 @@ Various useful string related functions for applications.
 
 =over 4
 
-=item random_bytes NUMBER
-
-Return the given NUMBER of random bytes from /dev/random.
-
 =item trim STRING
 
 Remove whitespace from either end.
 
 =cut
-sub trim($) {
+sub trim ($) {
     ($_) = @_;
     s/^\s+//;     s/\s+$//;
     return $_;
@@ -49,14 +47,63 @@ sub trim($) {
 
 =item merge_spaces STRING
 
-Replace contiguous whitespace with a single space
+Replace contiguous whitespace (including linebreaks) with a single space.
 
 =cut
-sub merge_spaces($) {
+sub merge_spaces ($) {
     ($_) = @_;
-    s/\s+/ /gs;
+    s/\p{IsSpace}+/ /gs;
     return $_;
-} 
+}
+
+=item string_diff FROM TO
+
+Compare the string FROM to TO. Returns a reference to a list containing
+information about the differences; each element is either a pair of substrings,
+the first of which appears only in FROM and the second only in TO, or a single
+string which is common to both. Whitespace in FROM and TO is ignored.
+
+=cut
+sub string_diff ($$) {
+    my ($from, $to) = @_;
+
+    $from = merge_spaces($from);
+    $to = merge_spaces($to);
+
+    # String::Ediff::ediff returns -- get this -- a space-separated string
+    # containing eight-item records.
+    my @ix = split(" ", String::Ediff::ediff($from, $to));
+
+    my @ret = ( );
+    
+    # Where we've got to in each string.
+    my $s1at = 0;
+    my $s2at = 0;
+    my @diff;
+    for (my $i = 0; $i < @ix; $i += 8) {
+        # Consider differing part.
+        @diff = ('', '');
+        $diff[0] = substr($from, $s1at, $ix[$i + 0] - $s1at)
+            if ($ix[$i + 0] > $s1at);
+        $s1at = $ix[$i + 1];
+
+        $diff[1] = substr($to, $s2at, $ix[$i + 4] - $s2at)
+            if ($ix[$i + 4] > $s2at);
+        $s2at = $is[$i + 5];
+        
+        push(@ret, [@diff]) if ($diff[0] || $diff[1]);
+
+        # Consider common part.
+        push(@ret, substr($from, $ix[$i + 0], $ix[$i + 1] - $ix[$i + 0]))
+            if ($ix[$i + 1] > $ix[$i + 0]);
+    }
+    @diff = ('', '');
+    $diff[0] = substr($from, $s1at) if ($s1at < length($from));
+    $diff[1] = substr($to, $s2at) if ($s2at < length($to));
+    push(@ret, [@diff]) if ($diff[0] || $diff[1]);
+
+    return \@ret;
+}
 
 =item break_into_lumps CONTENT
 
@@ -65,7 +112,7 @@ Each lump was separated by a "paragraph" level tag.  Not just P, but also
 e.g. TD or LI.
 
 =cut
-sub break_into_lumps($) {
+sub break_into_lumps ($) {
     my ($content) = @_;
 
     $content =~ s/&amp;/&/g;  # make ampersands normal
