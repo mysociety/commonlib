@@ -6,7 +6,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-ratty.php,v 1.32 2005-01-17 17:56:47 francis Exp $
+ * $Id: admin-ratty.php,v 1.33 2005-01-17 20:38:06 chris Exp $
  * 
  */
 
@@ -34,8 +34,6 @@ class ADMIN_PAGE_RATTY {
     }
 
     function display($self_link) {
-        //print "<pre>"; print_r($_POST); print "</pre>";
-
         $action = get_http_var('action');
         if ($action == "")
             $action = "listrules";
@@ -64,7 +62,10 @@ class ADMIN_PAGE_RATTY {
                     if (get_http_var("delete$ix") != "")
                         continue;
                     $condition = array();
-                    $condition['condition'] = get_http_var("condition$ix");
+                    /* Parse normal/inverted condition */
+                    $c = get_http_var("condition$ix");
+                    $condition['invert'] = (substr($c, 0, 1) == '+') ? 0 : 1;
+                    $condition['condition'] = substr($c, 1, 1);
                     $condition['field'] = get_http_var("field$ix");
                     $condition['value'] = get_http_var("value$ix");
                     array_push($conditiondata, $condition);
@@ -72,23 +73,27 @@ class ADMIN_PAGE_RATTY {
             }
 
             if (get_http_var('newfilter') != "") {
-                array_push($conditiondata, array("condition" => 'E'));
+                array_push($conditiondata, array('condition' => 'E', 'invert' => 0));
             }
             if (get_http_var('newsingle') != "") {
-                array_push($conditiondata, array("condition" => 'S'));
+                array_push($conditiondata, array("condition" => 'S', 'invert' => 0));
             }
             if (get_http_var('newdistinct') != "") {
-                array_push($conditiondata, array("condition" => 'D'));
+                array_push($conditiondata, array("condition" => 'D', 'invert' => 0));
             }
 
             $form = new HTML_QuickForm('adminRattyRuleForm', 'post', $self_link);
             # Resplice conditions with numbers for form
             $cform = array();
-            $ix = 0;
-            foreach ($conditiondata as $dummy => $cond) {
-                $ix++;
-                foreach ($cond as $key => $value) {
-                    $cform[$key . $ix] = $value;
+
+            /* Copy condition data into form, fixing up normal/inverted rules
+             * as we go. */
+            for ($ix = 1; $ix <= count($conditiondata); ++$ix) {
+                foreach ($conditiondata[$ix - 1] as $key => $value) {
+                    if ($key == 'condition')
+                        $cform["condition$ix"] = ($conditiondata[$ix - 1]['invert'] ? '-' : '+') . $value;
+                    else if ($key != 'invert')
+                        $cform[$key . $ix] = $value;
                 }
             }
             $form->setDefaults(array_merge($ruledata, $cform));
@@ -143,22 +148,29 @@ class ADMIN_PAGE_RATTY {
                 $condgroup = array();
                 $condgroup[0] = &HTML_QuickForm::createElement('select', "field$ix", null, $fields);
                 
-                if ($condition['condition'] == 'S') {
+                if ($condition['condition'] == '+S') {
                     $condgroup[1] = &HTML_QuickForm::createElement('hidden', "condition$ix", 'S');
                     $desc = 'Limit hits separately for each:';
                 }
-                else if ($condition['condition'] == 'D') {
+                else if ($condition['condition'] == '+D') {
                     $condgroup[1] = &HTML_QuickForm::createElement('hidden', "condition$ix", 'D');
                     $desc = 'Limit number of distinct values of:';
                 }
                 else {
                     $condgroup[1] = &HTML_QuickForm::createElement('select', "condition$ix", null, 
                             array(
-                                'E' => 'exactly equals',
-                                'R' => 'matches regexp',
-                                'I' => 'matches IP mask',
-                                '>' => 'is greater than',
-                                '<' => 'is smaller than'
+                                '+E' => 'exactly equals',
+                                '-E' => 'does not equal',
+                                '+R' => 'matches regexp',
+                                '-R' => 'does not match regexp',
+                                '+T' => 'roughly matches text',
+                                '-T' => 'does not roughly match text',
+                                '+I' => 'matches IP mask',
+                                '-I' => 'does not match IP mask',
+                                '+>' => 'is greater than',
+                                '+<' => 'is smaller than',
+                                '+P' => 'is present',
+                                '-P' => 'is not present',
                             )
                         );
                     $desc = 'Applies only when:';
