@@ -6,7 +6,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: template.php,v 1.1 2004-11-15 18:35:24 francis Exp $
+ * $Id: template.php,v 1.2 2004-11-16 15:08:43 francis Exp $
  * 
  */
 
@@ -23,7 +23,7 @@ function template_draw($template_name, $values = null) {
         print "Please set template style_dir.";
         exit;
     }
-
+    
     include $template_style_dir . "/" . $template_name . ".html";
 }
 
