@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.4 2004-10-25 15:21:31 francis Exp $
+ * $Id: utility.php,v 1.5 2004-10-28 10:53:20 francis Exp $
  * 
  */
 
@@ -24,14 +24,14 @@ function debug ($header, $text="", $complex_variable=null) {
     // $complex_variable is dumped in full, so you can put arrays/hashes here
 	
 	$debug_level = get_http_var("debug");
-//    $debug_level = 4;
+//    $debug_level = 2;
 	
 	if ($debug_level != '') {
 	
 		// Set which level shows which types of debug info.
 		$levels = array (
 			1 => array ('FRONTEND', 'WARNING', 'MAPIT', 'DADEM', 'QUEUE'),
-			2 => array ('MAPITRESULT', 'DADEMRESULT'), 
+			2 => array ('MAPITRESULT', 'DADEMRESULT', 'RATTY'), 
 			3 => array ('XMLRPC'),
 			4 => array ('SERIALIZE'),
 			// Higher than this: 'DATA', etc.

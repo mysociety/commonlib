@@ -6,7 +6,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: ratty.php,v 1.1 2004-10-28 10:16:38 chris Exp $
+ * $Id: ratty.php,v 1.2 2004-10-28 10:53:20 francis Exp $
  * 
  */
 
@@ -17,6 +17,7 @@
  * items which an attacker could scrape from the page. Returns TRUE if the page
  * can be shown, FALSE if it should not, or an error code on failure. */
 function ratty_test($vals) {
+    debug("RATTY", "Rate limiting", $vals);
     return TRUE;
 }
 
