@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: error.php,v 1.3 2005-01-11 11:46:42 chris Exp $
+ * $Id: error.php,v 1.4 2005-01-11 13:48:39 chris Exp $
  * 
  */
 
@@ -44,7 +44,13 @@
 /* err ERROR
  * Report the given ERROR and abort. */
 function err($err) {
-    trigger_error($err, E_USER_ERROR);
+    /* We can't just call trigger_error, because that will always report this
+     * function as the location where the error occured. So use debug_backtrace
+     * to construct the relevant information. */
+    $a = debug_backtrace(); /* now $a[1] is the caller */
+    err_global_handler(E_USER_ERROR, $err, $a[1]['file'], $a[1]['line'],
+                        /* XXX We can't obtain the calling context AFAIK. */
+                        null);
     exit(1); /* NOTREACHED */
 }
 
