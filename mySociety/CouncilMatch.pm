@@ -7,7 +7,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: CouncilMatch.pm,v 1.24 2005-02-09 16:41:28 chris Exp $
+# $Id: CouncilMatch.pm,v 1.25 2005-02-09 16:48:31 francis Exp $
 #
 
 package mySociety::CouncilMatch;
@@ -432,9 +432,10 @@ sub match_council_wards ($$) {
     my $wards_goveval = [];
     do { push @{$wards_goveval}, { name => $_} } for @wards_array;
 
-    # Set of wards already in database (from Ordnance Survey / ONS / legislation)
+    # Set of wards already in database (from Ordnance Survey / ONS / mySociety / legislation)
     my $rows = $m_dbh->selectall_arrayref(q#select distinct on (area_id) area_id, name from area_name, area where
-        area_name.area_id = area.id and parent_area_id = ? and (name_type = 'O' or name_type = 'S' or name_type = 'L') and
+        area_name.area_id = area.id and parent_area_id = ? and 
+        (name_type = 'O' or name_type = 'S' or name_type = 'M' or name_type = 'L') and
         (# . join(' or ', map { "type = '$_'" } @$mySociety::VotingArea::council_child_types) . q#) 
         #, {}, $area_id);
     my $wards_database = [];
@@ -448,7 +449,7 @@ sub match_council_wards ($$) {
 
     my $dump_wards = sub {
         $ret = "";
-        $ret .= sprintf "%38s => %-38s\n", 'Ward Matches Made: GovEval', 'OS/ONS Name (mySociety ID)';
+        $ret .= sprintf "%38s => %-38s\n", 'Ward Matches Made: GovEval', 'OS/ONS/mySociety Name (mySociety ID)';
         $ret .= sprintf "-" x 38 . ' '. "-" x 38 . "\n";
 
         foreach my $g (@$wards_goveval) {
