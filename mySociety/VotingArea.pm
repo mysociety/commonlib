@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: VotingArea.pm,v 1.12 2004-11-25 00:17:45 chris Exp $
+# $Id: VotingArea.pm,v 1.13 2004-12-03 20:12:47 chris Exp $
 #
 
 package mySociety::VotingArea;
@@ -84,9 +84,9 @@ Unitary Authority ward
 
 Local Government District
 
-=item LGW
+=item LGE
 
-Local Government District ward
+Local Government District electoral area
 
 =item MTD 
 
@@ -163,7 +163,7 @@ use constant UTE => 402; # ... electoral division
 use constant UTW => 403; # ... ward
 
 use constant LGD => 451; # Local Government District
-use constant LGW => 452; # ... ward
+use constant LGE => 453; # ... electoral area
 
 use constant CTY => 501; # County
 use constant CED => 502; # ... electoral division
@@ -269,7 +269,7 @@ for instance "Ward" or "Electoral Division".
         DIW,  "Ward",
 
         LGD,  "Local Government District",
-        LGW,  "Ward",
+        LGW,  "Electoral Area",
 
         UTA,  "Unitary Authority",
         UTE,  "Electoral Division",
