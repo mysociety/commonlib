@@ -6,8 +6,10 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: RABX.pm,v 1.1 2004-10-29 10:25:40 chris Exp $
-#
+# $Id: RABX.pm,v 1.2 2004-10-30 10:06:02 francis Exp $
+
+# References:
+#   Netstrings are documented here: http://cr.yp.to/proto/netstrings.txt
 
 package RABX::Error;
 
@@ -362,7 +364,7 @@ use HTTP::Request;
 use HTTP::Response;
 use Regexp::Common qw(URI);
 
-my $rcsid = ''; $rcsid .= '$Id: RABX.pm,v 1.1 2004-10-29 10:25:40 chris Exp $';
+my $rcsid = ''; $rcsid .= '$Id: RABX.pm,v 1.2 2004-10-30 10:06:02 francis Exp $';
 
 =back
 
