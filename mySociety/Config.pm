@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Config.pm,v 1.7 2004-11-18 22:28:46 chris Exp $
+# $Id: Config.pm,v 1.8 2004-11-18 22:41:42 chris Exp $
 #
 
 package mySociety::Config;
@@ -68,7 +68,9 @@ sub read_config ($;$) {
     my $text = join('', $f->getlines());
     $f->close();
 
-    $text =~ s#//.*$##gm;
+    # Only at start of line, so that we don't find comments in the middle of
+    # strings (consider "http://...").
+    $text =~ s#^\s*//.*$##gm;
     $text =~ s#/\*.+?\*/##gs;
 
     my $config = { };
