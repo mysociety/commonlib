@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-reps.php,v 1.10 2005-02-09 08:37:05 francis Exp $
+ * $Id: admin-reps.php,v 1.11 2005-02-10 11:51:48 francis Exp $
  * 
  */
 
@@ -121,6 +121,7 @@ class ADMIN_PAGE_REPS {
             if (in_array($vainfo['type'], $va_council_child_types)) {
                 $editable_here = false;
             }
+            $readonly = $editable_here ? null : "readonly";
 
             $form->addElement('header', '', 'Edit Representative');
             if ($editable_here) {
@@ -132,8 +133,8 @@ class ADMIN_PAGE_REPS {
                 htmlspecialchars($vainfo['name']) . " " . htmlspecialchars($vainfo['type_name']) . 
                 ($parentinfo ? " in " . 
                 htmlspecialchars($parentinfo['name']) . " " . htmlspecialchars($parentinfo['type_name']) : "" ));
-            $form->addElement('text', 'name', "Full name:", array('size' => 60, 'readonly' => $editable_here));
-            $form->addElement('text', 'party', "Political party:", array('size' => 60, 'readonly' => $editable_here));
+            $form->addElement('text', 'name', "Full name:", array('size' => 60, $readonly => 1));
+            $form->addElement('text', 'party', "Political party:", array('size' => 60, $readonly => 1));
             $form->addElement('static', 'note2', null, "Make sure you
             update contact method when you change email or fax
             numbers.");
@@ -145,11 +146,11 @@ class ADMIN_PAGE_REPS {
                         'via' => 'Contact via electoral body (e.g. Democratic Services)',
                         'unknown' => "We don't know contact details"
                     ),
-                    array('readonly' => $editable_here));
-            $form->addElement('text', 'email', "Email address:", array('size' => 60, 'readonly' => $editable_here));
-            $form->addElement('text', 'fax', "Fax number:", array('size' => 60, 'readonly' => $editable_here));
+                    array($readonly => 1));
+            $form->addElement('text', 'email', "Email address:", array('size' => 60, $readonly => 1));
+            $form->addElement('text', 'fax', "Fax number:", array('size' => 60, $readonly => 1));
             $form->addElement('textarea', 'note', "Note to add to log:
-            (where new data was from etc.)", array('rows' => 3, 'cols' => 60, 'readonly' => $editable_here));
+            (where new data was from etc.)", array('rows' => 3, 'cols' => 60, $readonly => 1));
             $form->addElement('hidden', 'pc', $pc);
             $form->addElement('hidden', 'rep_id', $rep_id);
 
