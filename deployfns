@@ -4,7 +4,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: deployfns,v 1.1 2004-12-17 10:22:42 francis Exp $
+# $Id: deployfns,v 1.2 2004-12-20 21:15:07 francis Exp $
 #
 
 # Warnings and errors
@@ -146,6 +146,19 @@ read_conf () {
     cat $1 | grep define | egrep -v "^\/\/" | sed "s/define('\(.*\)', '\(.*\)'.*/\1=\"\2\"/" | egrep -v "define|mySociety::Config" >$CONF_SOURCE
     . $CONF_SOURCE
 }
+
+# Stops a daemon
+# $1 - name of daemon
+daemon_stop () {
+    /usr/local/etc/rc.d/$1.sh stop || warn "daemon stop failed, continuing anyway"
+}
+
+# Starts a daemon
+# $1 - name of daemon
+daemon_start () {
+    /usr/local/etc/rc.d/$1.sh start
+}
+
 
 # Stuff to automatically run
 check_who_where
