@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: error.php,v 1.2 2005-01-10 15:45:42 chris Exp $
+ * $Id: error.php,v 1.3 2005-01-11 11:46:42 chris Exp $
  * 
  */
 
@@ -97,6 +97,8 @@ function err_global_handler($num, $str, $file, $line, $context) {
         $err_handler_log($num, $str, $file, $line, $context);
     if (isset($err_handler_display))
         $err_handler_display($num, $str, $file, $line, $context);
+    else
+        $err_handler_log($num, "no error display handler set", $file, $line, $context);
     exit(1);
 }
 
@@ -105,6 +107,7 @@ function err_global_handler($num, $str, $file, $line, $context) {
  * arguments as for the set_error_handler. FUNCTION may be null to turn off
  * error logging. */
 function err_set_handler_log($func) {
+    global $err_handler_log;
     if (isset($func) && !function_exists($func))
         err("err_set_log_handler: called with name of nonexistent function '$func'");
     $err_handler_log = $func;
@@ -115,6 +118,7 @@ function err_set_handler_log($func) {
  * take arguments as for the set_error_handler. FUNCTION may be null to turn
  * off error logging. */
 function err_set_handler_display($func) {
+    global $err_handler_display;
     if (isset($func) && !function_exists($func))
         err("err_set_display_handler: called with name of nonexistent function '$func'");
     $err_handler_display = $func;
