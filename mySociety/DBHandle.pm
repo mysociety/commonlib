@@ -9,7 +9,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: DBHandle.pm,v 1.3 2005-01-31 19:50:23 chris Exp $
+# $Id: DBHandle.pm,v 1.4 2005-01-31 19:55:25 chris Exp $
 #
 
 package mySociety::DBHandle;
@@ -113,6 +113,13 @@ Return a shared database handle.
 =cut
 sub dbh () {
     our $dbh;
+    # If the connection to the database has gone away, try to detect the
+    # condition here. XXX this means we could restart a transaction half-way
+    # through. 
+    if (defined($dbh) && !eval { $dbh->ping() } ) { # call through eval because that's what Apache::DBI does
+        $dbh->disconnect();
+        undef $dbh;
+    }
     $dbh ||= new_dbh();
 }
 
