@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: VotingArea.pm,v 1.16 2004-12-15 17:58:10 chris Exp $
+# $Id: VotingArea.pm,v 1.17 2004-12-15 18:21:19 chris Exp $
 #
 
 package mySociety::VotingArea;
@@ -232,7 +232,7 @@ Known 3-letter area types.
 
 =cut
 @mySociety::VotingArea::known_types = qw(
-        LBO LBW GLA LAC LAE CTY CED DIS DIW UTA UTE UTW MTD MTW SPA SPE SPC WAS WAE WAC WMP WMC EUP EUR
+        LBO LBW GLA LAC LAE LGD LGW CTY CED DIS DIW UTA UTE UTW MTD MTW SPA SPE SPC WAS WAE WAC WMP WMC EUP EUR
     );
 
 =item %known_types
