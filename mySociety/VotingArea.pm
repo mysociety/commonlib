@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: VotingArea.pm,v 1.15 2004-12-07 00:08:18 francis Exp $
+# $Id: VotingArea.pm,v 1.16 2004-12-15 17:58:10 chris Exp $
 #
 
 package mySociety::VotingArea;
@@ -226,6 +226,22 @@ use constant EUP_AREA_ID => 900001;
 
 =over 4
 
+=item @known_types
+
+Known 3-letter area types.
+
+=cut
+@mySociety::VotingArea::known_types = qw(
+        LBO LBW GLA LAC LAE CTY CED DIS DIW UTA UTE UTW MTD MTW SPA SPE SPC WAS WAE WAC WMP WMC EUP EUR
+    );
+
+=item %known_types
+
+Hash having an entry for each element of @known_types.
+
+=cut
+%mySociety::VotingArea::known_types = map { $_ => 1 } @mySociety::VotingArea::known_types;
+
 =item %type_to_id
 
 Map a 3-letter type string (like "WMC") to its corresponding numeric type.
@@ -233,9 +249,7 @@ Map a 3-letter type string (like "WMC") to its corresponding numeric type.
 =cut
 {
     no strict 'refs';
-    %mySociety::VotingArea::type_to_id = map { $_ => &$_ } qw(
-            LBO LBW GLA LAC LAE CTY CED DIS DIW UTA UTE UTW MTD MTW SPA SPE SPC WAS WAE WAC WMP WMC EUP EUR
-        );
+    %mySociety::VotingArea::type_to_id = map { $_ => &$_ } @mySociety::VotingArea::known_types;
 }
 
 =item %id_to_type
