@@ -7,7 +7,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: CouncilMatch.pm,v 1.21 2005-02-07 14:44:03 francis Exp $
+# $Id: CouncilMatch.pm,v 1.22 2005-02-08 00:32:09 francis Exp $
 #
 
 package mySociety::CouncilMatch;
@@ -156,7 +156,12 @@ sub refresh_live_data($$) {
                 $row->{rep_party}, $row->{method}, 
                 $row->{rep_email}, $row->{rep_fax},
                 $update_key);
-            $details .= "Making live: Inserted $update_key ".$row->{rep_first}." ".$row->{rep_last}."\n";
+            $details .= "Making live: Inserted $update_key ".$row->{rep_first}." ".$row->{rep_last}
+                . " (" . $row->{rep_party} . ")"
+                . " method: " . $row->{method}
+                . " fax: " . $row->{rep_fax} . " email: " . $row->{rep_email} 
+                . "\n";
+
         }
     }
 
