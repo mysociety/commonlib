@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Config.pm,v 1.3 2004-11-10 09:50:39 francis Exp $
+# $Id: Config.pm,v 1.4 2004-11-10 10:41:53 francis Exp $
 #
 
 package mySociety::Config;
@@ -14,6 +14,7 @@ package mySociety::Config;
 use strict;
 use IO::File;
 use Error qw(:try);
+use Data::Dumper;
 
 sub fixup ($) {
     if ($_[0] =~ m#^'(.+)'$#) {
@@ -63,7 +64,7 @@ sub read_config ($;$) {
                     ,
                     \s*
                     
-                    ('.+?'|".+?"|\d+)
+                    ('.*?'|".*?"|\d+)
 
                     \s*
                     \)
@@ -71,6 +72,7 @@ sub read_config ($;$) {
         my ($key, $val) = ($1, $2);
         fixup($key);
         fixup($val);
+        $key =~ s/OPTION_//;
         $config->{$key} = $val;
     }
 
@@ -87,7 +89,7 @@ Sets the default configuration file, used by mySociety::Config::get.
 my $main_config_filename;
 
 sub set_file ($) {
-    ($::main_config_filename) = @_;
+    ($main_config_filename) = @_;
 }
 
 =item get KEY
@@ -103,13 +105,13 @@ my %cached_configs;
 sub get ($) {
     my ($key) = @_;
 
-    my $filename = $::main_config_filename;
+    my $filename = $main_config_filename;
     die "Please call mySociety::Config::set_file to specify config file" if !defined $filename;
 
-    if (!defined($::cached_configs->{$filename})) {
-        $::cached_configs->{$filename} = read_config($filename);
+    if (!defined($cached_configs{$filename})) {
+        $cached_configs{$filename} = read_config($filename);
     }
-    my $value = $::cached_configs->{$filename}->{$key};
+    my $value = $cached_configs{$filename}->{$key};
     die "Value for '$key' not in mySociety configuration" if !defined $value;
 
     return $value;
