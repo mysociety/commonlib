@@ -6,7 +6,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-ratty.php,v 1.25 2005-01-13 02:18:50 chris Exp $
+ * $Id: admin-ratty.php,v 1.26 2005-01-13 11:29:26 francis Exp $
  * 
  */
 
@@ -95,10 +95,17 @@ class ADMIN_PAGE_RATTY {
 
             $form->addElement('header', '', $rule = "" ? 'New Rate-Limiting Rule' : 'Edit Rate-Limiting Rule');
             $form->addElement('text', 'note', "Title of rule:", array('size' => 60, 'maxlength' => 80));
-            $form->addElement('text', 'requests', "Limit to this many hits:", array('size' => 10, 'maxlength' => 20));
-            $form->addElement('text', 'interval', "Every this many seconds:", array('size' => 10, 'maxlength' => 20));
+
+            $limitgroup = array();
+            $limitgroup[] = &HTML_QuickForm::createElement('text', 'requests', null, array('size' => 5, 'maxlength' => 10));
+            $limitgroup[] = &HTML_QuickForm::createElement('static', null, null, "<b> hits every </b>");
+            $limitgroup[] = &HTML_QuickForm::createElement('text', 'interval', null, array('size' => 5, 'maxlength' => 10));
+            $limitgroup[] = &HTML_QuickForm::createElement('static', null, null, "<b> seconds</b>. Leave blank to block completely.");
+            $form->addGroup($limitgroup, "limitgroup", "Limit rate to:", null, false);
+
             $form->addElement('textarea', 'message', "Action when rule fires:", array('rows' => 3, 'cols' => 60));
-            $form->addElement('static', '', '', "<div>" . $this->scope_messageblurb . "</div>");
+            $form->addElement('static', '', '', "<div><b>What goes 
+            in the action box?</b> " . $this->scope_messageblurb . "</div>");
             $form->addElement('text', 'sequence', "Rule evaluation position:", array('size' => 10, 'maxlength' => 20));
             $form->addRule('sequence', 'Rule position must be numeric', 'numeric', null, 'server');
             $form->addRule('requests', 'Hit count must be numeric', 'numeric', null, 'server');
@@ -186,8 +193,36 @@ class ADMIN_PAGE_RATTY {
         if ($action == "listrules") {
             $rules = ratty_admin_get_rules($this->scope);
             print <<<EOF
-<p><b>$this->scope_title Rules:</b> $this->scope_description</b>
-</p>
+<h2>$this->scope_title Rules</h2> 
+<p>$this->scope_description</h1></p>
+<table border="1" width="100%">
+    <tr>
+        <th>Eval Order</th>
+        <th>Description</th>
+        <th>Hit limit</th>
+        <th>Matches</th>
+    </tr>
+EOF;
+            $c = 1;
+            foreach ($rules as $rule) {
+                if ($rule['note'] == "") 
+                    $rule['note'] = "&lt;unnamed&gt;";
+                print '<tr'.($c==1?' class="v"':'').'>';
+                print "<td>" . $rule['sequence'] . "</td>";
+                print "<td><a href=\"$self_link&action=editrule&rule_id=" .     /* XXX use new_url... */
+                    $rule['id'] . "\">" . $rule['note'] . "</a></td>";
+                print "<td>" . $rule['requests'] . " hits / " . $rule['interval'] . " " . make_plural($rule['interval'], 'sec'). "</td>";
+                print "<td>" . $rule['hits'] . "</td>";
+                print "</tr>";
+
+                $c = 1 - $c;
+            }
+?>
+</table>
+<?
+            print "<p><a href=\"$self_link&action=editrule\">New rule</a>";
+?>
+<h2>Help &mdash; how do these rules work?</h2>
 <p>
 Each rule has a hit rate limit, which limits the number of times a
 request or operation is permitted to, at most, the maximum number of
@@ -206,29 +241,7 @@ Rules are applied in order. Each request is tested against each rule in turn
 until one matches, in which case the request is denied; or until there are no
 more rules, in which case the request is permitted.
 </p>
-<table border="1" width="100%">
-    <tr>
-        <th>Position</th>
-        <th>Description</th>
-        <th>Hit limit</th>
-        <th>Matches</th>
-    </tr>
-EOF;
-            foreach ($rules as $rule) {
-                if ($rule['note'] == "") 
-                    $rule['note'] = "&lt;unnamed&gt;";
-                print "<tr>";
-                print "<td>" . $rule['sequence'] . "</td>";
-                print "<td><a href=\"$self_link&action=editrule&rule_id=" .     /* XXX use new_url... */
-                    $rule['id'] . "\">" . $rule['note'] . "</a></td>";
-                print "<td>" . $rule['requests'] . " hits / " . $rule['interval'] . " " . make_plural($rule['interval'], 'sec'). "</td>";
-                print "<td>" . $rule['hits'] . "</td>";
-                print "</tr>";
-            }
-?>
-</table>
 <?
-            print "<p><a href=\"$self_link&action=editrule\">New rule</a>";
         }
 
     }
