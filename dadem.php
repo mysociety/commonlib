@@ -7,7 +7,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: dadem.php,v 1.8 2004-11-22 12:22:39 francis Exp $
+ * $Id: dadem.php,v 1.9 2004-12-20 18:03:48 francis Exp $
  * 
  */
 
@@ -87,6 +87,16 @@ function dadem_get_representatives_info($array) {
 function dadem_admin_get_stats() {
     global $dadem_client;
     $result = $dadem_client->call('DaDem.admin_get_stats', array());
+    return $result;
+}
+
+/* admin_edit_representative ID NEWDATA EDITOR NOTE
+ * Alter data for a representative.  ID is the id to change,
+ * NEWDATA hash of new columns.  EDITOR name of who altered
+ * it.  NOTE is a comment as to why they did so.  */
+function dadem_admin_edit_representative($id, $newdata, $editor, $note) {
+    global $dadem_client;
+    $result = $dadem_client->call('DaDem.admin_edit_representative', array($id, $newdata, $editor, $note));
     return $result;
 }
 

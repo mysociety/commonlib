@@ -1,11 +1,11 @@
 <?php
 /*
- * PHP info admin page.
+ * Config info admin page.
  * 
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-configinfo.php,v 1.1 2004-11-18 23:42:57 francis Exp $
+ * $Id: admin-configinfo.php,v 1.2 2004-12-20 18:03:47 francis Exp $
  * 
  */
 
