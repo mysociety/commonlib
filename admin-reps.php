@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-reps.php,v 1.16 2005-02-15 16:48:20 francis Exp $
+ * $Id: admin-reps.php,v 1.17 2005-02-16 02:12:13 francis Exp $
  * 
  */
 
@@ -333,8 +333,9 @@ class ADMIN_PAGE_REPS {
                     $wardinfo = $info1[$correction['voting_area_id']];
                     $vaid = $wardinfo['parent_area_id'];
                     $vainfo = $info2[$vaid];
-                    $html .= '<a href="'.$matchcgi.'?page=counciledit;area_id='
-                        . $vaid . '&r=' . '">' .
+                    // TODO: Make this councilinfo, and give a valid r= return URL
+                    $html .= '<a href="'.$matchcgi.'?page=councilinfo;area_id='
+                        . $vaid . '&r=' . '">' . 
                         htmlspecialchars($vainfo['name']) . "</a>, ";
                     $html .= htmlspecialchars($wardinfo['name']);
                     $html .= "<br>";
