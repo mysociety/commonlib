@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.18 2004-12-13 19:01:26 francis Exp $
+ * $Id: utility.php,v 1.19 2004-12-17 17:17:34 chris Exp $
  * 
  */
 
@@ -803,10 +803,61 @@ function javascript_focus_set($form, $elt) {
     return "document.$form.$elt.focus();";
 }
 
-/* see if a string really contains a regular expression */
+/* check_is_valid_regexp STRING
+ * Return true if STRING is (approximately) a valid Perl5 regular
+ * expression. */
 function check_is_valid_regexp($regex) {
     $result = preg_match("/" . str_replace("/", "\/", $regex) .  "/", "");
     return ($result !== FALSE);
+}
+
+/* new_url PAGE RETAIN [PARAM VALUE ...]
+ * Return a new URL for PAGE with added parameters. If RETAIN is true, then all
+ * of the parameters with which the page was originally invoked will be
+ * retained in the original URL; additionally, any PARAM VALUE pairs will be
+ * added. If a PARAM is specified it overrides any retained parameter value; if
+ * a VALUE is null, any retained PARAM is removed. If a VALUE is an array,
+ * multiple URL parameters will be added. If PAGE is null the URL under which
+ * this page was invoked is used. */
+function new_url($page, $retain) {
+    if (!isset($page))
+        $page = invoked_url();
+    $url = "$page";
+
+    $params = array();
+    if ($retain)
+        /* GET takes priority over POST. This isn't the usual behaviour but is
+         * consistent with other bits of the code (see fyr/phplib/forms.php) */
+        $params = array_merge($_POST, $_GET);
+
+    if (func_num_args() > 2) {
+        if ((func_num_args() % 2) != 0)
+            die("call to new_url with odd number of arguments");
+        for ($i = 2; $i < func_num_args(); $i += 2) {
+            $k = func_get_arg($i);
+            $v = func_get_arg($i + 1);
+            if (array_key_exists($k, $params))
+                unset($params[$k]);
+            $params[func_get_arg($i)] = func_get_arg($i + 1);
+        }
+    }
+    
+    if (count($params) > 0) {
+        $url .= "?";
+        $n = 0;
+        foreach ($params as $key => $val) {
+            if (is_array($val)) {
+                $url .= urlencode($key) . '=' . urlencode($val[0]);
+                for ($i = 1; $i < count($val); ++$i)
+                    $url .= '&' . urlencode($key) . '=' . urlencode($val[$i]);
+            } else
+                $url .= urlencode($key) . '=' . urlencode($val);
+            if (++$n < count($params))
+                $url .= '&';
+        }
+    }
+
+    return $url;
 }
 
 ?>
