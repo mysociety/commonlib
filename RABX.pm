@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: RABX.pm,v 1.7 2005-02-21 11:37:30 francis Exp $
+# $Id: RABX.pm,v 1.8 2005-02-21 13:18:31 chris Exp $
 
 # References:
 #   Netstrings are documented here: http://cr.yp.to/proto/netstrings.txt
@@ -176,11 +176,6 @@ Format X (which may be a reference or a scalar) into HANDLE.
 =cut
 sub wire_wr ($$);
 sub wire_wr ($$) {
-    if ($have_fast_serialisation) {
-        $_[1]->print(RABX::Fast::do_serialise($_[0]));
-        return;
-    }
-
     my $ref = ref($_[0]) ? $_[0] : \$_[0];
     my $h = $_[1];
 
@@ -293,20 +288,23 @@ and a reference to a list of arguments.
 
 =cut
 sub call_string_parse ($) {
-    my ($buf) = @_;
-    my $h = new IO::String($buf);
-    my $c = $h->getc();
-    throw RABX::Error(qq#EOF reading call string indicator character#, RABX::Error::PROTOCOL)
-        if (!defined($c));
-    throw RABX::Error(qq#first byte of call string should be "R", not "$c"#, RABX::Error::PROTOCOL)
-        unless ($c eq 'R');
-    my $ver = netstring_rd($h);
-    throw RABX::Error(qq#Bad version "$ver"#, RABX::Error::PROTOCOL) unless ($ver eq PROTOCOL_VERSION);
-    my $func = netstring_rd($h);
-    my $args = wire_rd($h);
-    throw RABX::Error(qq#function arguments should be list, not # . ref($args), RABX::Error::PROTOCOL)
-        unless (ref($args) eq 'ARRAY');
-    return ($func, $args);
+    if ($have_fast_serialisation) {
+        return RABX::Fast::do_call_string_parse($_[0]);
+    } else {
+        my $h = new IO::String($buf);
+        my $c = $h->getc();
+        throw RABX::Error(qq#EOF reading call string indicator character#, RABX::Error::PROTOCOL)
+            if (!defined($c));
+        throw RABX::Error(qq#first byte of call string should be "R", not "$c"#, RABX::Error::PROTOCOL)
+            unless ($c eq 'R');
+        my $ver = netstring_rd($h);
+        throw RABX::Error(qq#Bad version "$ver"#, RABX::Error::PROTOCOL) unless ($ver eq PROTOCOL_VERSION);
+        my $func = netstring_rd($h);
+        my $args = wire_rd($h);
+        throw RABX::Error(qq#function arguments should be list, not # . ref($args), RABX::Error::PROTOCOL)
+            unless (ref($args) eq 'ARRAY');
+        return ($func, $args);
+    }
 }
 
 =item return_string VALUE
@@ -319,21 +317,29 @@ derivative.
 
 =cut
 sub return_string ($) {
-    my ($v) = @_;
-    my $buf = '';
-    my $h = new IO::String($buf);
-    if (ref($v) and UNIVERSAL::isa($v, 'RABX::Error')) {
-        $h->print('E');
-        netstring_wr(PROTOCOL_VERSION, $h);
-        netstring_wr($v->value() | RABX::Error::SERVER, $h);    # Indicate that error was detected on server side.
-        netstring_wr($v->text(), $h);
-        wire_wr($v->extradata(), $h) if ($v->can('extradata'));
+    if ($have_fast_serialisation) {
+        if (ref($_[0]) and UNIVERSAL::isa($v, 'RABX::Error')) {
+            return RABX::Fast::do_return_string_error($_[0]->value() | RABX::Error::SERVER, $_[0]->text(), $_[0]->can('extradata') ? $_[0]->extradata() : undef);
+        } else {
+            return RABX::Fast::do_return_string_success($_[0]);
+        }
     } else {
-        $h->print('S');
-        netstring_wr(PROTOCOL_VERSION, $h);
-        wire_wr($v, $h);
+        my ($v) = @_;
+        my $buf = '';
+        my $h = new IO::String($buf);
+        if (ref($v) and UNIVERSAL::isa($v, 'RABX::Error')) {
+            $h->print('E');
+            netstring_wr(PROTOCOL_VERSION, $h);
+            netstring_wr($v->value() | RABX::Error::SERVER, $h);    # Indicate that error was detected on server side.
+            netstring_wr($v->text(), $h);
+            wire_wr($v->extradata(), $h) if ($v->can('extradata'));
+        } else {
+            $h->print('S');
+            netstring_wr(PROTOCOL_VERSION, $h);
+            wire_wr($v, $h);
+        }
+        return $buf;
     }
-    return $buf;
 }
 
 =item return_string_parse STRING
@@ -373,7 +379,7 @@ use HTTP::Request;
 use HTTP::Response;
 use Regexp::Common qw(URI);
 
-my $rcsid = ''; $rcsid .= '$Id: RABX.pm,v 1.7 2005-02-21 11:37:30 francis Exp $';
+my $rcsid = ''; $rcsid .= '$Id: RABX.pm,v 1.8 2005-02-21 13:18:31 chris Exp $';
 
 =back
 
