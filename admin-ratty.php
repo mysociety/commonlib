@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-ratty.php,v 1.9 2004-11-15 15:54:14 francis Exp $
+ * $Id: admin-ratty.php,v 1.10 2004-11-15 16:46:58 francis Exp $
  * 
  */
 
@@ -119,6 +119,8 @@ class ADMIN_PAGE_RATTY {
                 }
                 array_push($condgroup, HTML_QuickForm::createElement('submit', "delete$ix", 'Del'));
                 $form->addGroup($condgroup, "c$ix", $desc, null, false);
+                $form->addRule("c$ix", 'Please use a valid regular expression', 'callback', 'check_condition_regexp');
+
             }
 
             $buttongroup[0] = &HTML_QuickForm::createElement('submit', 'newfilter', 'Apply only when...');
@@ -187,5 +189,20 @@ limit</th><th>Matches</th></tr>
 
     }
 }
+
+    function check_condition_regexp($arr) {
+        $cond = "";
+        $value = "";
+        foreach ($arr as $k => $v) {
+            if (!(strpos($k, "condition") === FALSE)) $cond = $v;
+            if (!(strpos($k, "value") === FALSE)) $value = $v;
+        }
+        if ($cond == "R") 
+            return check_is_valid_regexp($value);
+//        if ($cond == "I") 
+//            return check_is_valid_ipmask($value);
+        return TRUE;
+    }
+
 
 ?>

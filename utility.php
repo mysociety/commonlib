@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.11 2004-11-10 12:44:31 francis Exp $
+ * $Id: utility.php,v 1.12 2004-11-15 16:46:58 francis Exp $
  * 
  */
 
@@ -795,6 +795,12 @@ function invoked_url() {
  * input element of the given FORM (id) and ELEMENT (name). */
 function javascript_focus_set($form, $elt) {
     return "document.$form.$elt.focus();";
+}
+
+/* see if a string really contains a regular expression */
+function check_is_valid_regexp($regex) {
+    $result = preg_match("/" . $regex .  "/", "");
+    return $result != FALSE;
 }
 
 ?>
