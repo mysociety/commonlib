@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: VotingArea.pm,v 1.3 2004-10-17 13:24:56 chris Exp $
+# $Id: VotingArea.pm,v 1.4 2004-10-18 16:48:14 francis Exp $
 #
 
 package mySociety::VotingArea;
@@ -349,7 +349,7 @@ For voting areas, gives the prefix to the title of the person who repesents
 that area.  For example, "Cllr" for Councillors.
 
 =cut
-%mySociety::VotingArea::rep_suffix = (
+%mySociety::VotingArea::rep_prefix = (
         LBW, 'Cllr',
 
         GLA, 'Mayor', # "of London"? 
