@@ -6,7 +6,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-ratty.php,v 1.30 2005-01-13 15:44:24 francis Exp $
+ * $Id: admin-ratty.php,v 1.31 2005-01-13 16:59:13 francis Exp $
  * 
  */
 
@@ -25,7 +25,7 @@ class ADMIN_PAGE_RATTY {
     function ADMIN_PAGE_RATTY($scope, $what, $description, $messageblurb) {
         $this->id = "ratty-" . $scope;
         $this->name = "Ratty";
-        $this->navname = "Rate Limit &mdash; $what";
+        $this->navname = "$what &mdash; Ratty";
 
         $this->scope = $scope;
         $this->scope_title = $what;
@@ -94,20 +94,22 @@ class ADMIN_PAGE_RATTY {
             $form->setDefaults(array_merge($ruledata, $cform));
 
             $form->addElement('header', '', $rule = "" ? 'New Rate-Limiting Rule' : 'Edit Rate-Limiting Rule');
-            $form->addElement('text', 'note', "Title of rule:", array('size' => 60, 'maxlength' => 80));
+
+            $titlegroup = array();
+            $titlegroup[] = &HTML_QuickForm::createElement('text', 'note', null, array('size' => 40, 'maxlength' => 80));
+            $titlegroup[] = &HTML_QuickForm::createElement('static', null, null, "<b>Eval position:</b>");
+            $titlegroup[] = &HTML_QuickForm::createElement('text', 'sequence', "Rule evaluation position:", array('size' => 5, 'maxlength' => 10));
+            $form->addRule('sequence', 'Rule position must be numeric', 'numeric', null, 'server');
+            $form->addGroup($titlegroup, "titlegroup", "Title of rule:", null, false);
 
             $limitgroup = array();
             $limitgroup[] = &HTML_QuickForm::createElement('text', 'requests', null, array('size' => 5, 'maxlength' => 10));
             $limitgroup[] = &HTML_QuickForm::createElement('static', null, null, "<b> hits every </b>");
             $limitgroup[] = &HTML_QuickForm::createElement('text', 'interval', null, array('size' => 5, 'maxlength' => 10));
-            $limitgroup[] = &HTML_QuickForm::createElement('static', null, null, "<b> seconds</b>. Leave blank to block completely.");
+            $limitgroup[] = &HTML_QuickForm::createElement('static', null, null, "<b> seconds</b>. Leave blank/zero to block completely.");
             $form->addGroup($limitgroup, "limitgroup", "Limit rate to:", null, false);
 
-            $form->addElement('textarea', 'message', "Action when rule fires:", array('rows' => 3, 'cols' => 60));
-            $form->addElement('static', '', '', "<div><b>What goes 
-            in the action box?</b> " . $this->scope_messageblurb . "</div>");
-            $form->addElement('text', 'sequence', "Rule evaluation position:", array('size' => 10, 'maxlength' => 20));
-            $form->addRule('sequence', 'Rule position must be numeric', 'numeric', null, 'server');
+            $form->addElement('textarea', 'message', "Action when rule fires:<br>(for help see below)", array('rows' => 3, 'cols' => 60));
             $form->addRule('requests', 'Hit count must be numeric', 'numeric', null, 'server');
             $form->addRule('interval', 'Time period must be numeric', 'numeric', null, 'server');
             $form->addRule('note', 'Description is required', 'required', null, 'server');
@@ -124,11 +126,11 @@ class ADMIN_PAGE_RATTY {
                 list($field_name, $field_description, $field_examples) = $row;
                 $fields[$field_name] = $field_name;
                 if (count($field_examples) > 0) {
-                    // Get last seen field as example
-                    $example = $field_examples[count($field_examples)-1];
+                    // Get field as an example
+                    $example = $field_examples[0];
                     // Search for one that isn't empty
                     if (!$example and count($field_examples) > 1) {
-                        $example = $field_examples[count($field_examples)-2];
+                        $example = $field_examples[1];
                     }
                     $fields[$field_name] .= " (e.g. " .  trim_characters($example, 0, 20) . ")";
                 }
@@ -200,13 +202,15 @@ class ADMIN_PAGE_RATTY {
             if ($action == "editrule") {
                 admin_render_form($form);
 
+                print "<h2>Help &mdash What goes in the action box?</h2>";
+                print "<p>" . $this->scope_messageblurb . "</p>";
                 print "<h2>Help &mdash What do all the fields mean?</h2>";
                 print "<p>";
                 foreach ($fieldarray as $row) {
                     list($field_name, $field_description, $field_examples) = $row;
                     print "<b>$field_name:</b> $field_description. ";
-                    print "e.g. " . implode(",", array_map(
-                    create_function('$a', 'return "\"".trim_characters($a, 0, 50)."\"";'), $field_examples));
+                    print "e.g. " . implode(", ", array_map(
+                    create_function('$a', 'return "\'".trim_characters($a, 0, 50)."\'";'), $field_examples));
                     print "<br>";
                 }
                 print "</p>";
@@ -233,7 +237,11 @@ EOF;
                 print "<td>" . $rule['sequence'] . "</td>";
                 print "<td><a href=\"$self_link&action=editrule&rule_id=" .     /* XXX use new_url... */
                     $rule['id'] . "\">" . $rule['note'] . "</a></td>";
-                print "<td>" . $rule['requests'] . " hits / " . $rule['interval'] . " " . make_plural($rule['interval'], 'sec'). "</td>";
+                if ($rule['requests'] == 0 && $rule['interval'] == 0) {
+                    print "<td>blocked</td>";
+                } else {
+                    print "<td>" . $rule['requests'] . " hits / " . $rule['interval'] . " " . make_plural($rule['interval'], 'sec'). "</td>";
+                }
                 print "<td>" . $rule['hits'] . "</td>";
                 print "</tr>";
 
