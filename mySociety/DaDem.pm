@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: DaDem.pm,v 1.2 2004-10-14 14:14:24 chris Exp $
+# $Id: DaDem.pm,v 1.3 2004-10-19 16:46:32 chris Exp $
 #
 
 package mySociety::DaDem;
@@ -43,6 +43,7 @@ Representative ID refers to a non-existent representative.
 Area ID refers to an area for which no representatives are returned.
 
 =back
+
 =cut
 
 use constant UNKNOWN_AREA       => 1;
@@ -62,6 +63,7 @@ Means of contacting representative is fax.
 Means of contacting representative is email.
 
 =back
+
 =cut
 
 use constant CONTACT_FAX        => 101;
