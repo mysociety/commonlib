@@ -1,12 +1,13 @@
 <?php
 /*
+ * mapit.php:
  * Interact with MapIt.  Roughly speaking, postcode lookup of voting
  * areas.
  * 
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: mapit.php,v 1.2 2004-10-18 09:24:56 francis Exp $
+ * $Id: mapit.php,v 1.3 2004-10-18 10:29:22 chris Exp $
  * 
  */
 
