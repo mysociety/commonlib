@@ -6,7 +6,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: StringUtils.pm,v 1.2 2005-01-29 11:36:51 chris Exp $
+# $Id: StringUtils.pm,v 1.3 2005-01-29 11:49:52 chris Exp $
 #
 
 package mySociety::StringUtils;
@@ -16,7 +16,7 @@ use strict;
 BEGIN {
     use Exporter ();
     our @ISA = qw(Exporter);
-    our @EXPORT_OK = qw(&trim &merge_spaces);
+    our @EXPORT_OK = qw(&trim &merge_spaces &string_diff);
 }
 our @EXPORT_OK;
 
@@ -89,7 +89,7 @@ sub string_diff ($$) {
 
         $diff[1] = substr($to, $s2at, $ix[$i + 4] - $s2at)
             if ($ix[$i + 4] > $s2at);
-        $s2at = $is[$i + 5];
+        $s2at = $ix[$i + 5];
         
         push(@ret, [@diff]) if ($diff[0] || $diff[1]);
 
