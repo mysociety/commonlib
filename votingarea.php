@@ -8,7 +8,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: votingarea.php,v 1.28 2005-02-09 12:05:26 chris Exp $
+ * $Id: votingarea.php,v 1.29 2005-02-09 17:07:43 francis Exp $
  * 
  */
 
@@ -29,7 +29,7 @@ $va_inside = array(
         'UTE' => 'UTA',
         'UTW' => 'UTA',
 
-        'LGW' => 'LGD',
+        'LGE' => 'LGD',
 
         'MTW' => 'MTD',
 
@@ -55,7 +55,7 @@ $va_display_order = array(
         /* District councils */
         'DIW', 'LBW',
         /* unitary-type councils */
-        'MTW', 'UTW', 'UTE', 'LGW',
+        'MTW', 'UTW', 'UTE', 'LGE',
         /* county council */
         'CED',
         /* various devolved assemblies */
@@ -83,7 +83,7 @@ $va_salaried = array(
         'UTE' => 0,
         'UTW' => 0,
 
-        'LGW' => 0,
+        'LGE' => 0,
 
         'MTW' => 0,
 
@@ -181,6 +181,6 @@ $va_council_parent_types = array('DIS', 'LBO', 'MTD', 'UTA', 'LGD', 'CTY');
 
 Types which are wards or electoral divisions in councils. */
 
-$va_council_child_types = array('DIW', 'LBW', 'MTW', 'UTE', 'UTW', 'LGW', 'CED');
+$va_council_child_types = array('DIW', 'LBW', 'MTW', 'UTE', 'UTW', 'LGE', 'CED');
 
 ?>
