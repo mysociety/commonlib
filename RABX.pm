@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: RABX.pm,v 1.9 2005-02-21 15:15:32 chris Exp $
+# $Id: RABX.pm,v 1.10 2005-02-23 13:13:13 chris Exp $
 
 # References:
 #   Netstrings are documented here: http://cr.yp.to/proto/netstrings.txt
@@ -379,7 +379,7 @@ use HTTP::Request;
 use HTTP::Response;
 use Regexp::Common qw(URI);
 
-my $rcsid = ''; $rcsid .= '$Id: RABX.pm,v 1.9 2005-02-21 15:15:32 chris Exp $';
+my $rcsid = ''; $rcsid .= '$Id: RABX.pm,v 1.10 2005-02-23 13:13:13 chris Exp $';
 
 =back
 
@@ -532,8 +532,10 @@ sub dispatch (%) { # XXX should take stream + environment hash
 
     try {
         my $meth = $ENV{REQUEST_METHOD};
+        throw RABX::Error(qq#No REQUEST_METHOD in environment; this script must be run in a CGI/FastCGI context#, RABX::Error::INTERFACE)
+            if (!defined($meth));
         throw RABX::Error(qq#Bad HTTP method "$meth"; should be "GET" or "POST"#, RABX::Error::TRANSPORT)
-            if (!defined($meth) or $meth !~ m#^(GET|POST)$#);
+            if ($meth !~ m#^(GET|POST)$#);
         my $callstr;
         if ($meth eq 'GET') {
             $callstr = $ENV{QUERY_STRING};
