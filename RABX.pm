@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: RABX.pm,v 1.2 2004-10-30 10:06:02 francis Exp $
+# $Id: RABX.pm,v 1.3 2004-11-10 12:02:38 francis Exp $
 
 # References:
 #   Netstrings are documented here: http://cr.yp.to/proto/netstrings.txt
@@ -364,7 +364,7 @@ use HTTP::Request;
 use HTTP::Response;
 use Regexp::Common qw(URI);
 
-my $rcsid = ''; $rcsid .= '$Id: RABX.pm,v 1.2 2004-10-30 10:06:02 francis Exp $';
+my $rcsid = ''; $rcsid .= '$Id: RABX.pm,v 1.3 2004-11-10 12:02:38 francis Exp $';
 
 =back
 
@@ -538,6 +538,7 @@ sub dispatch (%) { # XXX should take stream + environment hash
             }
         }
 
+        warn($callstr);
         my ($func, $args) = RABX::call_string_parse($callstr);
         throw RABX::Error(qq#no function "$func"#, RABX::Error::INTERFACE)
             if (!exists($funcs{$func}));
