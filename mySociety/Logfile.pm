@@ -6,7 +6,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Logfile.pm,v 1.1 2005-01-28 19:05:09 chris Exp $
+# $Id: Logfile.pm,v 1.2 2005-01-28 19:45:13 chris Exp $
 #
 
 package mySociety::Logfile::Error;
@@ -147,7 +147,7 @@ range.
 sub getline ($$) {
     my ($self, $offset) = @_;
     $self->_update() if (Time::HiRes::time() > $self->{when} + 1.);
-    die "OFFSET must be a nonnegative integer" unless ($offset =~ m#^\+?\d+$#);
+    die "OFFSET must be a nonnegative integer" unless (defined($offset) && $offset =~ m#^\+?\d+$#);
     return undef if ($offset > $self->{st}->size());
     my $i = $self->_normalise($offset);
     my $j = index($self->{mapping}, $self->{lineending}, $offset);
