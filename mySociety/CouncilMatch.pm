@@ -7,12 +7,8 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: CouncilMatch.pm,v 1.14 2005-02-02 11:04:41 francis Exp $
+# $Id: CouncilMatch.pm,v 1.15 2005-02-02 11:50:58 francis Exp $
 #
-
-package mySociety::CouncilMatch::Error;
-use RABX;
-@mySociety::CouncilMatch::Error::ISA = qw(RABX::Error::User);
 
 package mySociety::CouncilMatch;
 
@@ -595,7 +591,7 @@ sub edit_raw_data($$$$$$) {
 # Break parts of array separated by various sorts of punctuation
 sub split_lumps_further($) {
     my ($lumps) = @_;
-    my @lumps = map { split / - | \(| \)|:|;|\band\b/, $_ } @$lumps;
+    my @lumps = map { split / - | \(| \)|:|;/, $_ } @$lumps;
     return @lumps;
 }
 
@@ -608,9 +604,9 @@ sub get_url_via_cache($) {
     $file =~ s#/#_#g;
     $file = mySociety::Config::get('COUNCILMATCH_PAGECACHE') . $file;
     if (! -e $file) {
-        my $ret = LWP::Simple::mirror($url, $file);
+        my $ret = LWP::Simple::getstore($url, $file);
         if (LWP::Simple::is_error($ret)) {
-            throw mySociety::CouncilMatch::Error("Failed to get URL $url");
+            throw Error::Simple("Failed to get URL $url HTTP status $ret to $file");
         }
     }
     my $content = File::Slurp::read_file($file);
@@ -768,6 +764,7 @@ sub check_councillors_against_website($$) {
                 # Find best matches by common substring to give as examples
                 my $canon_name = canonicalise_person_name($name);
                 my ($best_len, $best_match);
+                $best_match = "<none>";
                 foreach my $lump (@lumps) {
                     my $canon_lump = canonicalise_person_name($lump);
                     my $common_len = Common::placename_match_metric($canon_lump, $canon_name);
