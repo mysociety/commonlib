@@ -7,7 +7,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: dadem.php,v 1.6 2004-11-08 18:09:31 francis Exp $
+ * $Id: dadem.php,v 1.7 2004-11-19 12:25:44 francis Exp $
  * 
  */
 
@@ -69,6 +69,15 @@ function dadem_get_representatives_info($array) {
     debug("DADEM", "Looking up info on representatives");
     $result = $dadem_client->call('DaDem.get_representatives_info', array($array));
     debug("DADEMRESULT", "Result is:", $result);
+    return $result;
+}
+
+/* dadem_get_stats
+ * Return an associative array giving statistics about DaDem's 
+ * database */
+function dadem_admin_get_stats() {
+    global $dadem_client;
+    $result = $dadem_client->call('DaDem.admin_get_stats', array());
     return $result;
 }
 

@@ -7,7 +7,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: mapit.php,v 1.6 2004-11-08 18:09:31 francis Exp $
+ * $Id: mapit.php,v 1.7 2004-11-19 12:25:44 francis Exp $
  * 
  */
 
@@ -64,4 +64,20 @@ function mapit_get_voting_areas_info($array) {
     return $result;
 }
 
+/* mapit_get_voting_area_children ID
+ */
+function mapit_get_voting_area_children($id) {
+    global $mapit_client;
+    $result = $mapit_client->call('MaPit.get_voting_area_children', array($id));
+    return $result;
+}
+
+
+/* mapit_admin_get_stats
+ */
+function mapit_admin_get_stats() {
+    global $mapit_client;
+    $result = $mapit_client->call('MaPit.admin_get_stats', array($array));
+    return $result;
+}
 ?>
