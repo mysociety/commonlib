@@ -10,7 +10,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: rabx.php,v 1.4 2004-11-16 11:11:16 francis Exp $
+ * $Id: rabx.php,v 1.5 2004-12-14 20:29:28 chris Exp $
  * 
  */
 
@@ -294,6 +294,8 @@ class RABX_Client {
     var $ch, $url, $use_post = FALSE;
     var $lastt;
 
+    /* constructor URL
+     * Constructor; return a client that calls functions at the given URL. */
     function RABX_Client($url) {
         $this->url = $url;
         $this->ch = curl_init();
@@ -302,9 +304,11 @@ class RABX_Client {
         $use_post = FALSE;
     }
 
-    /* call FUNCTION ARGUMENTS
-     * Call the named FUNCTION with the given ARGUMENTS (an array). */
-    function call($function, $args) {
+    /* call FUNCTION ARGUMENTS [FORCEPOST]
+     * Call the named FUNCTION with the given ARGUMENTS (an array); if
+     * FORCEPOST is true, use HTTP POST even if the request would be small
+     * enough to fit in a GET. */
+    function call($function, $args, $force_post = 0) {
         debug(RABX, "RABX calling $function via $this->url, arguments:", $args);
 
         $callstr = rabx_call_string($function, &$args);
@@ -313,7 +317,7 @@ class RABX_Client {
             return $callstr;
 
         $c = urlencode($callstr);
-        $post = $use_post;
+        $post = $use_post || $force_post;
         if (!$post and strlen($u = $this->url. "?$c") > 1024)
             $post = TRUE;
 
