@@ -6,7 +6,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-ratty.php,v 1.33 2005-01-17 20:38:06 chris Exp $
+ * $Id: admin-ratty.php,v 1.34 2005-01-25 15:28:23 chris Exp $
  * 
  */
 
@@ -101,7 +101,7 @@ class ADMIN_PAGE_RATTY {
             $form->addElement('header', '', $rule = "" ? 'New Rate-Limiting Rule' : 'Edit Rate-Limiting Rule');
 
             $titlegroup = array();
-            $titlegroup[] = &HTML_QuickForm::createElement('text', 'note', null, array('size' => 40, 'maxlength' => 80));
+            $titlegroup[] = &HTML_QuickForm::createElement('text', 'note', null, array('size' => 40));
             $titlegroup[] = &HTML_QuickForm::createElement('static', null, null, "<b>Eval position:</b>");
             $titlegroup[] = &HTML_QuickForm::createElement('text', 'sequence', "Rule evaluation position:", array('size' => 5, 'maxlength' => 10));
             $form->addRule('sequence', 'Rule position must be numeric', 'numeric', null, 'server');
