@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Util.pm,v 1.13 2005-02-15 09:59:29 chris Exp $
+# $Id: Util.pm,v 1.14 2005-02-16 00:45:44 chris Exp $
 #
 
 package mySociety::Util::Error;
@@ -57,7 +57,7 @@ sub random_bytes ($) {
 
     our $f;
     if (!$f) {
-        $f = new IO::File("/dev/random", O_RDONLY) or die "/dev/random: $!";
+        $f = new IO::File("/dev/random", O_RDONLY) or die "open /dev/random: $!";
     }
 
     my $l = '';
@@ -65,13 +65,11 @@ sub random_bytes ($) {
     while (length($l) < $count) {
         my $n = $f->sysread($l, $count - length($l), length($l));
         if (!defined($n)) {
-            die "/dev/random: $!";
+            die "read /dev/random: $!";
         } elsif (!$n) {
-            die "/dev/random: EOF (shouldn't happen)";
+            die "read /dev/random: EOF (shouldn't happen)";
         }
     }
-
-    $f->close();
 
     die "wanted $count bytes, got " . length($l) . " bytes" unless (length($l) == $count);
 
