@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-reps.php,v 1.9 2005-02-07 23:59:59 francis Exp $
+ * $Id: admin-reps.php,v 1.10 2005-02-09 08:37:05 francis Exp $
  * 
  */
 
@@ -70,7 +70,7 @@ class ADMIN_PAGE_REPS {
             $newdata['fax'] = get_http_var('fax');
             $result = dadem_admin_edit_representative($rep_id, $newdata, http_auth_user(), get_http_var('note'));
             dadem_check_error($result);
-            print "<p><i>Successfully updated representative $rep_id</i></i>";
+            print "<p><i>Successfully updated representative ". htmlspecialchars($rep_id) . "</i></i>";
             $rep_id = null;
         }
 
@@ -114,17 +114,26 @@ class ADMIN_PAGE_REPS {
                 'method' => $repinfo['method'],
                 'email' => $repinfo['email'],
                 'fax' => $repinfo['fax']));
+    
+            // Councillor types are not edited here, but in match.cgi interface
+            global $va_council_child_types;
+            $editable_here = true;
+            if (in_array($vainfo['type'], $va_council_child_types)) {
+                $editable_here = false;
+            }
 
             $form->addElement('header', '', 'Edit Representative');
-            $form->addElement('static', 'note1', null, "Edit only
-                the values which you need to.  Blank to return to default.");
+            if ($editable_here) {
+                $form->addElement('static', 'note1', null, "
+                Edit only the values which you need to.  Blank to return to default.");
+            }
             $form->addElement('static', 'office', 'Office:',
                 htmlspecialchars($vainfo['rep_name']) . " for " . 
                 htmlspecialchars($vainfo['name']) . " " . htmlspecialchars($vainfo['type_name']) . 
                 ($parentinfo ? " in " . 
                 htmlspecialchars($parentinfo['name']) . " " . htmlspecialchars($parentinfo['type_name']) : "" ));
-            $form->addElement('text', 'name', "Full name:", array('size' => 60));
-            $form->addElement('text', 'party', "Political party:", array('size' => 60));
+            $form->addElement('text', 'name', "Full name:", array('size' => 60, 'readonly' => $editable_here));
+            $form->addElement('text', 'party', "Political party:", array('size' => 60, 'readonly' => $editable_here));
             $form->addElement('static', 'note2', null, "Make sure you
             update contact method when you change email or fax
             numbers.");
@@ -135,17 +144,26 @@ class ADMIN_PAGE_REPS {
                         'shame' => "Shame! Doesn't want contacting",
                         'via' => 'Contact via electoral body (e.g. Democratic Services)',
                         'unknown' => "We don't know contact details"
-                    ));
-            $form->addElement('text', 'email', "Email address:", array('size' => 60));
-            $form->addElement('text', 'fax', "Fax number:", array('size' => 60));
+                    ),
+                    array('readonly' => $editable_here));
+            $form->addElement('text', 'email', "Email address:", array('size' => 60, 'readonly' => $editable_here));
+            $form->addElement('text', 'fax', "Fax number:", array('size' => 60, 'readonly' => $editable_here));
             $form->addElement('textarea', 'note', "Note to add to log:
-            (where new data was from etc.)", array('rows' => 3, 'cols' => 60));
+            (where new data was from etc.)", array('rows' => 3, 'cols' => 60, 'readonly' => $editable_here));
             $form->addElement('hidden', 'pc', $pc);
             $form->addElement('hidden', 'rep_id', $rep_id);
 
-            $finalgroup[] = &HTML_QuickForm::createElement('submit', 'done', 'Done');
-            $finalgroup[] = &HTML_QuickForm::createElement('submit', 'cancel', 'Cancel');
-            $form->addGroup($finalgroup, "finalgroup", "",' ', false);
+            if ($editable_here) {
+                $finalgroup[] = &HTML_QuickForm::createElement('submit', 'done', 'Done');
+                $finalgroup[] = &HTML_QuickForm::createElement('submit', 'cancel', 'Cancel');
+                $form->addGroup($finalgroup, "finalgroup", "",' ', false);
+            } else {
+                $form->addElement('static', 'note3', null, 
+                    '<a href="https://secure.mysociety.org/admin/services/match.cgi?page=councilinfo;area_id='
+                    . $vainfo['parent_area_id'] . '">To edit Councillors please use the match.cgi interface</a>'.
+                    '<br><a href="'.$self_link.'&ds_va_id='
+                    . $vainfo['parent_area_id'] . '">... or edit Democratic Services for this council</a>');
+            }
     
             $form->addElement('header', '', 'Historical Changes (each
                 relative to imported data)');

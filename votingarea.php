@@ -8,7 +8,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: votingarea.php,v 1.25 2005-02-08 15:50:21 francis Exp $
+ * $Id: votingarea.php,v 1.26 2005-02-09 08:37:05 francis Exp $
  * 
  */
 
@@ -168,5 +168,18 @@ sitting, it has full authority over \"transferred matters\", which include
 Assembly have been elected and you can contact them.
 "
     );
+
+/* $va_council_parent_types
+
+Types which are local councils, such as districts, counties,
+unitary authorities and boroughs. */
+
+$va_council_parent_types = array('DIS', 'LBO', 'MTD', 'UTA', 'LGD', 'CTY');
+
+/* $va_council_child_types
+
+Types which are wards or electoral divisions in councils. */
+
+$va_council_child_types = array('DIW', 'LBW', 'MTW', 'UTE', 'UTW', 'LGW', 'CED');
 
 ?>
