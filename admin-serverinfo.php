@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-serverinfo.php,v 1.1 2004-11-11 12:54:27 francis Exp $
+ * $Id: admin-serverinfo.php,v 1.2 2004-11-15 16:51:30 fyr Exp $
  * 
  */
 
@@ -28,7 +28,7 @@ class ADMIN_PAGE_SERVERINFO {
         $form = new HTML_QuickForm('adminRattyForm', 'get', $self_link);
 
         $form->addElement('header', '', 'System Name');
-        $form->addElement('html', $this->run("uname -a"));
+        $form->addElement('html', $this->run("uname -a | fmt"));
         $form->addElement('header', '', 'Time, Uptime, Logins and Load (over last 1, 5, 15 mins)');
         $form->addElement('html', $this->run("uptime"));
         $form->addElement('header', '', 'Disk Space');
@@ -36,7 +36,7 @@ class ADMIN_PAGE_SERVERINFO {
         $form->addElement('header', '', 'Recent Logins');
         $form->addElement('html', $this->run("who"));
         $form->addElement('header', '', 'Network Interfaces');
-        $form->addElement('html', $this->run("ifconfig"));
+        $form->addElement('html', $this->run("/sbin/ifconfig"));
 
         admin_render_form($form);
  }
