@@ -8,7 +8,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: votingarea.php,v 1.19 2005-01-11 22:17:51 chris Exp $
+ * $Id: votingarea.php,v 1.20 2005-01-12 20:53:17 chris Exp $
  * 
  */
 
@@ -121,6 +121,10 @@ Mayor's budget, <strong>culture, <strong>sport and tourism</strong>,
 ",
     'MTD' =>
             "The Metropolitan District Council is
+            responsible for all aspects of local services and policy, including
+            planning, transport, education, social services and libraries.",
+    'UTA' => 
+            "The Unitary Authority is
             responsible for all aspects of local services and policy, including
             planning, transport, education, social services and libraries.",
     'CTY' =>
