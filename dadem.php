@@ -7,7 +7,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: dadem.php,v 1.14 2005-02-10 16:32:58 francis Exp $
+ * $Id: dadem.php,v 1.15 2005-02-15 11:12:06 francis Exp $
  * 
  */
 
@@ -73,6 +73,15 @@ function dadem_get_bad_contacts() {
     return $result;
 }
 
+/* dadem_get_user_corrections
+ * Returns list of user submitted corrections to data.  Each entry is
+ * an associative array of data about the correction. */
+function dadem_get_user_corrections() {
+    global $dadem_client;
+    $result = $dadem_client->call('DaDem.get_user_corrections', array());
+    return $result;
+}
+
 /* dadem_get_representative_info ID
  * On success, returns an array giving information about the representative
  * with the given ID. This array contains elements type, the type of the area
@@ -109,15 +118,15 @@ function dadem_get_representative_history($rep_id) {
     return $result;
 }
 
-/* dadem_store_user_correction ID CHANGE NAME PARTY NOTES EMAIL
+/* dadem_store_user_correction VA_ID REP_ID CHANGE NAME PARTY NOTES EMAIL
 
  * Records a correction to representative data made by a user on the website.
  * CHANGE is either "add", "delete" or "modify".  NAME and PARTY are new
  * values.  NOTES and EMAIL are fields the user can put extra info in. */
-function dadem_store_user_correction($id, $change, $name, $party, $notes, $email) {
+function dadem_store_user_correction($va_id, $rep_id, $change, $name, $party, $notes, $email) {
     global $dadem_client;
     $result = $dadem_client->call('DaDem.store_user_correction', 
-        array($id, $change, $name, $party, $notes, $email));
+        array($va_id, $rep_id, $change, $name, $party, $notes, $email));
     return $result;
 }
 
@@ -137,6 +146,14 @@ function dadem_admin_get_stats() {
 function dadem_admin_edit_representative($id, $newdata, $editor, $note) {
     global $dadem_client;
     $result = $dadem_client->call('DaDem.admin_edit_representative', array($id, $newdata, $editor, $note));
+    return $result;
+}
+
+/* dadem_admin_done_user_correction CORRECTION_ID
+ * Marks user correction as having been dealt with.  */
+function dadem_admin_done_user_correction($correction_id) {
+    global $dadem_client;
+    $result = $dadem_client->call('DaDem.admin_done_user_correction', array($correction_id));
     return $result;
 }
 

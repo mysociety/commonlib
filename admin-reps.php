@@ -5,12 +5,14 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-reps.php,v 1.12 2005-02-10 16:32:57 francis Exp $
+ * $Id: admin-reps.php,v 1.13 2005-02-15 11:12:06 francis Exp $
  * 
  */
 
 require_once "dadem.php";
 require_once "mapit.php";
+
+$matchcgi = "https://secure.mysociety.org/admin/services/match.cgi";
 
 class ADMIN_PAGE_REPS {
     function ADMIN_PAGE_REPS () {
@@ -73,6 +75,11 @@ class ADMIN_PAGE_REPS {
             print "<p><i>Successfully updated representative ". htmlspecialchars($rep_id) . "</i></i>";
             $rep_id = null;
         }
+        if (get_http_var('ucclose') != "") {
+            $result = dadem_admin_done_user_correction(get_http_var('ucid'));
+            dadem_check_error($result);
+            print "<p><i>Successfully closed correction ". htmlspecialchars(get_http_var('ucid')) . "</i></i>";
+        }
 
         // Postcode and search box
         $form = new HTML_QuickForm('adminRepsSearchForm', 'get', $self_link);
@@ -86,9 +93,10 @@ class ADMIN_PAGE_REPS {
         admin_render_form($form);
 
         // Conditional parts: 
-        $form = new HTML_QuickForm('adminRepsEditForm', 'get', $self_link);
-        $form->addElement('hidden', 'page', $this->id);
         if ($rep_id) {
+            $form = new HTML_QuickForm('adminRepsEditForm', 'get', $self_link);
+            $form->addElement('hidden', 'page', $this->id);
+
             // Edit representative
             $repinfo = dadem_get_representative_info($rep_id);
             dadem_check_error($repinfo);
@@ -159,8 +167,9 @@ class ADMIN_PAGE_REPS {
                 $finalgroup[] = &HTML_QuickForm::createElement('submit', 'cancel', 'Cancel');
                 $form->addGroup($finalgroup, "finalgroup", "",' ', false);
             } else {
+                global $matchcgi;
                 $form->addElement('static', 'note3', null, 
-                    '<a href="https://secure.mysociety.org/admin/services/match.cgi?page=councilinfo;area_id='
+                    '<a href="'.$matchcgi.'?page=councilinfo;area_id='
                     . $vainfo['parent_area_id'] . '">To edit Councillors please use the match.cgi interface</a>'.
                     '<br><a href="'.$self_link.'&ds_va_id='
                     . $vainfo['parent_area_id'] . '">... or edit Democratic Services for this council</a>');
@@ -188,13 +197,20 @@ class ADMIN_PAGE_REPS {
             }
             $html .= "</table>";
             $form->addElement('static', 'bytype', null, $html);
+            admin_render_form($form);
         } else if ($search) {
+            $form = new HTML_QuickForm('adminRepsSearchResults', 'get', $self_link);
+
             // Search reps
             $reps = dadem_search_representatives($search);
             dadem_check_error($reps);
             $html = $this->render_reps($self_link, $reps);
             $form->addElement('static', 'bytype', null, $html);
+
+            admin_render_form($form);
         } else if ($pc) {
+            $form = new HTML_QuickForm('adminRepsSearchResults', 'get', $self_link);
+            
             // Postcode search
             $voting_areas = mapit_get_voting_areas($pc);
             mapit_check_error($voting_areas);
@@ -229,8 +245,79 @@ class ADMIN_PAGE_REPS {
                 }
             }
             $form->addElement('static', 'bytype', null, $html);
+
+            admin_render_form($form);
         } else {
             // General Statistics
+
+            // User submitted corrections
+            global $matchcgi;
+            $form->addElement('header', '', 'User Submitted Corrections');
+            $corrections = dadem_get_user_corrections();
+            dadem_check_error($corrections);
+            // Get all the data for areas and their parents in as few call as possible
+            $vaids = array();
+            foreach ($corrections as $correction) {
+                array_push($vaids, $correction['voting_area_id']);
+            }
+            $info1 = mapit_get_voting_areas_info($vaids);
+            mapit_check_error($info1);
+            $vaids = array();
+            foreach ($info1 as $key=>$value) {
+                array_push($vaids, $value['parent_area_id']);
+            }
+            $info2 = mapit_get_voting_areas_info($vaids);
+            
+            foreach ($corrections as $correction) {
+                $form = new HTML_QuickForm('adminRepsCorrections', 'post', $self_link);
+                $html = "";
+                $rep = $correction['representative_id'];
+
+                $html .= "<p>";
+                $html .= strftime('%Y-%m-%d %H:%M:%S', $correction['whenentered']) . " ";
+                if ($correction['user_email'])
+                    $html .= " by " . htmlspecialchars($correction['user_email']);
+                $html .= "<br>";
+                if ($correction['voting_area_id']) {
+                    $wardinfo = $info1[$correction['voting_area_id']];
+                    $vaid = $wardinfo['parent_area_id'];
+                    $vainfo = $info2[$vaid];
+                    $html .= '<a href="'.$matchcgi.'?page=counciledit;area_id='
+                        . $vaid . '&r=' . '">' .
+                        htmlspecialchars($vainfo['name']) . "</a>, ";
+                    $html .= htmlspecialchars($wardinfo['name']);
+                    $html .= "<br>";
+                }
+                $html .= $correction['alteration'] . " ";
+
+                if ($rep) {
+                    $repinfo = dadem_get_representative_info($rep);
+                    dadem_check_error($repinfo);
+
+                    $html .= "<a href=\"$self_link&pc=" .  urlencode(get_http_var('pc')). "&rep_id=" . $rep .  "\">" . htmlspecialchars($repinfo['name']) . " (". htmlspecialchars($repinfo['party']) . ")</a> \n";
+                    if ($correction['alteration'] != "delete") {
+                        $html .= " to ";
+                    }
+                }
+                if ($correction['alteration'] != "delete") {
+                    $html .= htmlspecialchars($correction['name']) .  " (" . htmlspecialchars($correction['party']) . ")";
+                }
+                if ($correction['user_notes'])
+                    $html .= "<br>Notes: " . htmlspecialchars($correction['user_notes']);
+
+                $usercorr = array();
+                $usercorr[] =& HTML_QuickForm::createElement('static', 'usercorrections', null, $html);
+                // You can't do this with element type "hidden" as it only allows one value in a
+                // page for variable named ucid.  So once again I go to raw HTML.  Remind me not
+                // to use HTML_QuickForm again...
+                $usercorr[] =& HTML_QuickForm::createElement('html', 
+                    '<input name="ucid" type="hidden" value="'. $correction['user_correction_id'] . '" />');
+                $usercorr[] =& HTML_QuickForm::createElement('submit', 'ucclose', 'hide (done)');
+                $form->addGroup($usercorr, 'stuff', null, '&nbsp', false);
+                admin_render_form($form);
+            }
+
+            $form = new HTML_QuickForm('adminRepsStats', 'post', $self_link);
 
             // Bad contacts
             $form->addElement('header', '', 'Bad Contacts');
@@ -271,9 +358,9 @@ class ADMIN_PAGE_REPS {
             }
             $html .= "</table>";
             $form->addElement('static', 'bytype', null, $html);
-        }
 
-        admin_render_form($form);
+            admin_render_form($form);
+        }
    }
 }
 
