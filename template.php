@@ -1,12 +1,12 @@
 <?php
 /*
  * template.php:
- * Basic templating.
+ * Basic web templating.
  * 
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: template.php,v 1.5 2005-01-11 16:09:10 chris Exp $
+ * $Id: template.php,v 1.6 2005-03-23 12:49:36 francis Exp $
  * 
  */
 
