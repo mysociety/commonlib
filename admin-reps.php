@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-reps.php,v 1.2 2004-12-20 20:34:16 francis Exp $
+ * $Id: admin-reps.php,v 1.3 2004-12-20 20:52:15 francis Exp $
  * 
  */
 
@@ -65,8 +65,7 @@ class ADMIN_PAGE_REPS {
 
             $form->addElement('header', '', 'Edit Representative');
             $form->addElement('static', 'note1', null, "Edit only
-            the values which you need to, it makes it easier to feed data
-            back to GovEval.");
+            the values which you need to.  Blank to return to default.");
             $form->addElement('text', 'name', "Full name:", array('size' => 60));
             $form->addElement('text', 'party', "Political party:", array('size' => 60));
             $form->addElement('static', 'note2', null, "Make sure you
