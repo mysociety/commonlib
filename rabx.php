@@ -10,7 +10,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: rabx.php,v 1.13 2005-01-31 11:00:19 chris Exp $
+ * $Id: rabx.php,v 1.14 2005-02-21 11:53:03 chris Exp $
  * 
  */
 
@@ -81,7 +81,7 @@ function rabx_is_error($e) {
  * Append STRING to BUFFER, formatted as a netstring. Returns true on success
  * or an error on failure. */
 function rabx_netstring_wr(&$string, &$buffer) {
-    $buffer .= sprintf("%d:%s,", strlen($string), $string);
+    $buffer .= sprintf("%d:%s,", strlen(&$string), &$string);
     return TRUE;
 }
 
@@ -143,11 +143,11 @@ function rabx_wire_wr(&$x, &$buffer) {
         } else {
             /* "Associative array" */
             $buffer .= 'A';
-            if (rabx_is_error($e = rabx_netstring_wr(count($x), $buffer)))
+            if (rabx_is_error($e = rabx_netstring_wr(count($x), &$buffer)))
                 return $e;
             foreach ($x as $k => $v) {
-                if (rabx_is_error($e = rabx_wire_wr($k, $buffer))
-                    || rabx_is_error($e = rabx_wire_wr($v, $buffer)))
+                if (rabx_is_error($e = rabx_wire_wr($k, &$buffer))
+                    || rabx_is_error($e = rabx_wire_wr($v, &$buffer)))
                     return $e;
             }
             return TRUE;
@@ -162,7 +162,7 @@ function rabx_wire_wr(&$x, &$buffer) {
             $buffer .= 'R';
         else if (is_string($x))
             $buffer .= 'T';     /* XXX should check for UTF-8 */
-        return rabx_netstring_wr($x, $buffer);
+        return rabx_netstring_wr($x, &$buffer);
     }
 }
 
@@ -233,9 +233,9 @@ function rabx_wire_rd(&$buffer, &$pos) {
 function rabx_call_string($function, &$args) {
     $str = 'R';
     $ver = '0';
-    rabx_netstring_wr($ver, $str); /* 0 == version */
-    rabx_netstring_wr($function, $str); /* XXX errors */
-    rabx_wire_wr($args, $str);
+    rabx_netstring_wr($ver, &$str); /* 0 == version */
+    rabx_netstring_wr($function, &$str); /* XXX errors */
+    rabx_wire_wr($args, &$str);
     return $str;
 }
 
