@@ -9,7 +9,7 @@
 
 package RABX::Fast;
 
-my $rcsid = ''; $rcsid .= '$Id: Fast.pm,v 1.1 2005-02-16 23:41:15 chris Exp $';
+my $rcsid = ''; $rcsid .= '$Id: Fast.pm,v 1.2 2005-02-17 00:28:25 chris Exp $';
 
 use strict;
 
@@ -71,7 +71,7 @@ unsigned char *serialise(SV *x, unsigned char *buf, size_t *off, size_t *len) {
         }
     } else {
         /* Some kind of reference. */
-        size_t i, N;
+        I32 i, N;
         SV *y;
         HE *ent;
         y = SvRV(x);
@@ -79,11 +79,12 @@ unsigned char *serialise(SV *x, unsigned char *buf, size_t *off, size_t *len) {
             case SVt_PVAV:
                 /* List. */
                 buf[(*off)++] = 'L';
-                n = snprintf(b, sizeof b, "%u", (unsigned)(N = av_len((AV*)y)));
+                N = av_len((AV*)y) + 1;
+                n = snprintf(b, sizeof b, "%d", (int)N);
                 buf = netstring_append(b, n, buf, off, len);
                 for (i = 0; i < N; ++i) {
                     SV **z;
-                    z = av_fetch(SvAV(y), (I32)i, 0);
+                    z = av_fetch((AV*)y, (I32)i, 0);
                     buf = serialise(z ? *z : &PL_sv_undef, buf, off, len);
                 }
                 break;
@@ -91,7 +92,7 @@ unsigned char *serialise(SV *x, unsigned char *buf, size_t *off, size_t *len) {
             case SVt_PVHV:
                 /* Hash. */
                 buf[(*off)++] = 'A';
-                n = snprintf(b, sizeof b, "%u", (unsigned)(N = hv_iterinit((HV*)y)));
+                n = snprintf(b, sizeof b, "%d", (int)(N = hv_iterinit((HV*)y)))
                 buf = netstring_append(b, n, buf, off, len);
                 while ((ent = hv_iternext((HV*)y))) {
                     SV *k, *v;
