@@ -9,7 +9,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: DBHandle.pm,v 1.6 2005-01-31 20:11:15 chris Exp $
+# $Id: DBHandle.pm,v 1.7 2005-02-03 12:26:06 chris Exp $
 #
 
 package mySociety::DBHandle;
@@ -113,6 +113,7 @@ Return a shared database handle.
 =cut
 sub dbh () {
     our $dbh;
+    our $dbh_process;
     # If the connection to the database has gone away, try to detect the
     # condition here. XXX this means we could restart a transaction half-way
     # through. 
@@ -120,7 +121,12 @@ sub dbh () {
         $dbh->disconnect();
         undef $dbh;
     }
-    $dbh ||= new_dbh();
+    if (!defined($dbh) || $dbh_process != $$) {
+        $dbh->{InactiveDestroy} = 1 if (defined($dbh));
+        $dbh = new_dbh();
+        $dbh_process = $$;
+    }
+    return $dbh;
 }
 
 END {
