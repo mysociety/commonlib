@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.1 2004-10-18 08:48:07 francis Exp $
+ * $Id: utility.php,v 1.2 2004-10-20 10:44:40 francis Exp $
  * 
  */
 
@@ -446,7 +446,10 @@ function filter_user_input ($text, $filter_type) {
 
 }
 
-
+function convert_to_unix_newlines($text) {
+    $text = preg_replace("/(\r\n|\n|\r)/\n", "\n", $text);
+    return $text;
+}
 
 function prepare_comment_for_display ($text) {
 	// Makes any URLs into HTML links.
@@ -514,32 +517,6 @@ function htmlentities_notags ($text) {
 
 	return $text;
 
-}
-
-
-
-function fix_gid_from_db ($gid, $keepmajor = false) {
-	// The gids in the database are longer than we use in the site.
-	// Feed this a gid from the db and it will be returned truncated.
-	
-	// $gid will be like 'uk.org.publicwhip/debate/2003-02-28.475.3'.
-	
-	// You will almost always want $keepmajor to be false.
-	// This returns '2003-02-28.475.3' which is used for URLs.
-	
-	// However, trackbacks want a bit more info, so we can tell what
-	// kind of thing they link to. So they need $keepmajor to be true.
-	// This returns 'debate_2003-02-28.475.3'.
-	
-	if ($keepmajor) {
-		$newgid = substr($gid, strpos($gid, '/')+1 );
-		$newgid = str_replace('/', '_', $newgid);
-	} else {
-		$newgid = substr($gid, strrpos($gid, '/')+1 );
-	}
-
-	return $newgid;
-	
 }
 
 function gid_to_anchor ($gid) {
