@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-reps.php,v 1.15 2005-02-15 15:26:04 francis Exp $
+ * $Id: admin-reps.php,v 1.16 2005-02-15 16:48:20 francis Exp $
  * 
  */
 
@@ -61,6 +61,9 @@ class ADMIN_PAGE_REPS {
             dadem_check_error($ds_vainfo);
             $rep_id = $ds_vainfo[0];
         }
+        // Make new rep in this voting area
+        $new_in_va_id = get_http_var('new_in_va_id');
+        // Postcode
         $pc = get_http_var('pc');
         if (get_http_var('gopc')) {
             $rep_id = null;
@@ -73,8 +76,17 @@ class ADMIN_PAGE_REPS {
             $newdata['method'] = get_http_var('method');
             $newdata['email'] = get_http_var('email');
             $newdata['fax'] = get_http_var('fax');
+            if (!$rep_id) {
+                // Making a new representative, put in type and id
+                $newdata['area_id'] = $new_in_va_id;
+                $vainfo = mapit_get_voting_area_info($new_in_va_id);
+                mapit_check_error($vainfo);
+                $newdata['area_type'] = $vainfo['type'];
+            }
             $result = dadem_admin_edit_representative($rep_id, $newdata, http_auth_user(), get_http_var('note'));
             dadem_check_error($result);
+            $rep_id = $result;
+            $new_in_va_id = null;
             print "<p><i>Successfully updated representative ". htmlspecialchars($rep_id) . "</i></i>";
             $rep_id = null;
         }
@@ -102,35 +114,40 @@ class ADMIN_PAGE_REPS {
         admin_render_form($form);
 
         // Conditional parts: 
-        if ($rep_id) {
+        if ($rep_id or $new_in_va_id) {
             $form = new HTML_QuickForm('adminRepsEditForm', 'get', $self_link);
             $form->addElement('hidden', 'page', $this->id);
 
             // Edit representative
-            $repinfo = dadem_get_representative_info($rep_id);
-            dadem_check_error($repinfo);
-            $vainfo = mapit_get_voting_area_info($repinfo['voting_area']);
+            if ($rep_id) {
+                $repinfo = dadem_get_representative_info($rep_id);
+                dadem_check_error($repinfo);
+            }
+            $va_id = $rep_id ? $repinfo['voting_area'] : $new_in_va_id;
+            $vainfo = mapit_get_voting_area_info($va_id);
             mapit_check_error($vainfo);
             if ($vainfo['parent_area_id']) {
                 $parentinfo = mapit_get_voting_area_info($vainfo['parent_area_id']);
                 mapit_check_error($parentinfo);
             } else 
                 $parentinfo = null;
-            $rephistory = dadem_get_representative_history($rep_id);
+            $rephistory = $rep_id ? dadem_get_representative_history($rep_id) : array();
             dadem_check_error($rephistory);
             // Reverse postcode lookup
             if (!$pc) {
-                $pc = mapit_get_example_postcode($repinfo['voting_area']);
+                $pc = mapit_get_example_postcode($va_id);
                 mapit_check_error($pc);
                 $form->addElement('static', 'note1', null, "Example postcode for testing: " . htmlentities($pc));
             }
 
-            $form->setDefaults(
-                array('name' => $repinfo['name'],
-                'party' => $repinfo['party'],
-                'method' => $repinfo['method'],
-                'email' => $repinfo['email'],
-                'fax' => $repinfo['fax']));
+            if ($rep_id) {
+                $form->setDefaults(
+                    array('name' => $repinfo['name'],
+                    'party' => $repinfo['party'],
+                    'method' => $repinfo['method'],
+                    'email' => $repinfo['email'],
+                    'fax' => $repinfo['fax']));
+            }
     
             // Councillor types are not edited here, but in match.cgi interface
             global $va_council_child_types;
@@ -140,8 +157,11 @@ class ADMIN_PAGE_REPS {
             }
             $readonly = $editable_here ? null : "readonly";
 
-            $form->addElement('header', '', 'Edit Representative');
-            if ($editable_here) {
+            if ($rep_id) 
+                $form->addElement('header', '', 'Edit Representative');
+            else
+                $form->addElement('header', '', 'New Representative');
+            if ($rep_id and $editable_here) {
                 $form->addElement('static', 'note1', null, "
                 Edit only the values which you need to.  Blank to return to default.
                 If a representative has changed delete them and make a new one.
@@ -171,16 +191,27 @@ class ADMIN_PAGE_REPS {
             $form->addElement('text', 'fax', "Fax:", array('size' => 60, $readonly => 1));
             $form->addElement('textarea', 'note', "Notes for log:", array('rows' => 3, 'cols' => 60, $readonly => 1));
             $form->addElement('hidden', 'pc', $pc);
-            $form->addElement('hidden', 'rep_id', $rep_id);
+            if ($rep_id) 
+                $form->addElement('hidden', 'rep_id', $rep_id);
+            else
+                $form->addElement('hidden', 'new_in_va_id', $new_in_va_id);
 
             if ($editable_here) {
                 $finalgroup[] = &HTML_QuickForm::createElement('submit', 'done', 'Done');
                 $finalgroup[] = &HTML_QuickForm::createElement('submit', 'cancel', 'Cancel');
-                if ($repinfo['deleted']) {
-                    $finalgroup[] = &HTML_QuickForm::createElement('static', 'staticspacer', null, '&nbsp; Deleted rep, no longer in office, just click done to undelete');
-                } else {
-                    $finalgroup[] = &HTML_QuickForm::createElement('static', 'staticspacer', null, '&nbsp; No longer in office? --->');
-                    $finalgroup[] = &HTML_QuickForm::createElement('submit', 'delete', 'Delete');
+                if ($rep_id) {
+                    $finalgroup[] = &HTML_QuickForm::createElement('static', 'newlink', null,
+                        "<a href=\"$self_link&pc=" .  urlencode(get_http_var('pc')). "&new_in_va_id=" . 
+                        $va_id .  "\">" . 
+                        "Make new " . 
+                        htmlspecialchars($vainfo['name']) . " rep". 
+                        "</a> \n");
+                    if ($repinfo['deleted']) {
+                        $finalgroup[] = &HTML_QuickForm::createElement('static', 'staticspacer', null, '&nbsp; Deleted rep, no longer in office, just click done to undelete');
+                    } else {
+                        $finalgroup[] = &HTML_QuickForm::createElement('static', 'staticspacer', null, '&nbsp; No longer in office? --->');
+                        $finalgroup[] = &HTML_QuickForm::createElement('submit', 'delete', 'Delete');
+                    }
                 }
                 $form->addGroup($finalgroup, "finalgroup", "",' ', false);
             } else {
