@@ -6,7 +6,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-ratty.php,v 1.26 2005-01-13 11:29:26 francis Exp $
+ * $Id: admin-ratty.php,v 1.27 2005-01-13 11:41:21 francis Exp $
  * 
  */
 
@@ -25,7 +25,7 @@ class ADMIN_PAGE_RATTY {
     function ADMIN_PAGE_RATTY($scope, $what, $description, $messageblurb) {
         $this->id = "ratty-" . $scope;
         $this->name = "Ratty";
-        $this->navname = "Rate Limit - $what";
+        $this->navname = "Rate Limit &mdash; $what";
 
         $this->scope = $scope;
         $this->scope_title = $what;
