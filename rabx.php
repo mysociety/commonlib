@@ -10,7 +10,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: rabx.php,v 1.7 2005-01-11 10:48:44 chris Exp $
+ * $Id: rabx.php,v 1.8 2005-01-11 11:00:40 chris Exp $
  * 
  */
 
@@ -193,7 +193,7 @@ function rabx_wire_rd(&$buffer, &$pos) {
     
     /* All other types now encode a string, which is either the value or a
      * length. */
-    if (rabx_is_error($x = rabx_netstring_rd($buffer, $pos, $error)))
+    if (rabx_is_error($x = rabx_netstring_rd($buffer, $pos)))
         return $x;
 
     if ($type == 'I') {
