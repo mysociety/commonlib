@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-reps.php,v 1.7 2005-02-03 13:26:28 chris Exp $
+ * $Id: admin-reps.php,v 1.8 2005-02-07 13:46:02 francis Exp $
  * 
  */
 
@@ -16,7 +16,7 @@ class ADMIN_PAGE_REPS {
     function ADMIN_PAGE_REPS () {
         $this->id = "reps";
         $this->name = "Reps";
-        $this->navname = "Representative Data";
+        $this->navname= "Representative Data";
     }
 
     function render_reps($self_link, $reps) {
@@ -24,7 +24,8 @@ class ADMIN_PAGE_REPS {
         $info = dadem_get_representatives_info($reps);
         dadem_check_error($info);
 
-        foreach ($info as $rep => $repinfo) {
+        foreach ($reps as $rep) {
+            $repinfo = $info[$rep];
             if ($repinfo['edited']) {
                 $html .= "<i>edited</i> ";
             }
@@ -40,18 +41,18 @@ class ADMIN_PAGE_REPS {
     }
 
     function display($self_link) {
-        $form = new HTML_QuickForm('adminMaPitForm', 'post', $self_link);
-
         // Input data
-        if (get_http_var('gos'))
+        $rep_id = get_http_var('rep_id');
+        if (get_http_var('gos')) {
             $search = get_http_var('search');
+            $rep_id = null;
+        }
         else
             $search = null;
-        if (get_http_var('gopc') or (!isset($search)))
-            $pc = get_http_var('pc');
-        else 
-            $pc = null;
-        $rep_id = get_http_var('rep_id');
+        $pc = get_http_var('pc');
+        if (get_http_var('gopc')) {
+            $rep_id = null;
+        }
         if (get_http_var('cancel') != "") 
             $rep_id = null;
         if (get_http_var('done') != "") {
@@ -67,6 +68,7 @@ class ADMIN_PAGE_REPS {
         }
 
         // Postcode and search box
+        $form = new HTML_QuickForm('adminRepsSearchForm', 'get', $self_link);
         $form->addElement('header', '', 'Search');
         $buttons[] =& HTML_QuickForm::createElement('text', 'pc', null, array('size' => 10, 'maxlength' => 255));
         $buttons[] =& HTML_QuickForm::createElement('submit', 'gopc', 'go postcode');
@@ -74,12 +76,22 @@ class ADMIN_PAGE_REPS {
         $buttons[] =& HTML_QuickForm::createElement('submit', 'gos', 'search');
         $form->addElement('hidden', 'page', $this->id);
         $form->addGroup($buttons, 'stuff', null, '&nbsp', false);
+        admin_render_form($form);
 
         // Conditional parts: 
+        $form = new HTML_QuickForm('adminRepsEditForm', 'get', $self_link);
+        $form->addElement('hidden', 'page', $this->id);
         if ($rep_id) {
             // Edit representative
             $repinfo = dadem_get_representative_info($rep_id);
             dadem_check_error($repinfo);
+            $vainfo = mapit_get_voting_area_info($repinfo['voting_area']);
+            mapit_check_error($vainfo);
+            if ($vainfo['parent_area_id']) {
+                $parentinfo = mapit_get_voting_area_info($vainfo['parent_area_id']);
+                mapit_check_error($parentinfo);
+            } else 
+                $parentinfo = null;
             $rephistory = dadem_get_representative_history($rep_id);
             dadem_check_error($rephistory);
             // Reverse postcode lookup
@@ -98,7 +110,12 @@ class ADMIN_PAGE_REPS {
 
             $form->addElement('header', '', 'Edit Representative');
             $form->addElement('static', 'note1', null, "Edit only
-            the values which you need to.  Blank to return to default.");
+                the values which you need to.  Blank to return to default.");
+            $form->addElement('static', 'office', 'Office:',
+                htmlspecialchars($vainfo['rep_name']) . " for " . 
+                htmlspecialchars($vainfo['name']) . " " . htmlspecialchars($vainfo['type_name']) . 
+                ($parentinfo ? " in " . 
+                htmlspecialchars($parentinfo['name']) . " " . htmlspecialchars($parentinfo['type_name']) : "" ));
             $form->addElement('text', 'name', "Full name:", array('size' => 60));
             $form->addElement('text', 'party', "Political party:", array('size' => 60));
             $form->addElement('static', 'note2', null, "Make sure you
@@ -145,6 +162,12 @@ class ADMIN_PAGE_REPS {
             }
             $html .= "</table>";
             $form->addElement('static', 'bytype', null, $html);
+        } else if ($search) {
+            // Search reps
+            $reps = dadem_search_representatives($search);
+            dadem_check_error($reps);
+            $html = $this->render_reps($self_link, $reps);
+            $form->addElement('static', 'bytype', null, $html);
         } else if ($pc) {
             // Postcode search
             $voting_areas = mapit_get_voting_areas($pc);
@@ -152,22 +175,33 @@ class ADMIN_PAGE_REPS {
             $areas = array_values($voting_areas);
             $areas_info = mapit_get_voting_areas_info($areas);
             mapit_check_error($areas_info);
-            foreach ($areas_info as $area=>$area_info) {
-                $va_id = $area;
-
-                // One voting area
-                $reps = dadem_get_representatives($va_id);
-                dadem_check_error($reps);
-                $reps = array_values($reps);
-                $html = "<p><b>" . $area_info['name'] . " (" .  $area_info['type_name'] . ") </b></p>"; 
-                $html .= $this->render_reps($self_link, $reps);
+            $html = "";
+            // Display in order council, ward, council, ward...
+            global $va_display_order, $va_inside;
+            $our_order = array();
+            foreach ($va_display_order as $row) {
+                if (!is_array($row))
+                    $row = array($row);
+                $our_order[] = $va_inside[$row[0]];
+                foreach ($row as $va_type) {
+                    $our_order[] = $va_type;
+                }
             }
-            $form->addElement('static', 'bytype', null, $html);
-        } else if ($search) {
-            // Search reps
-            $reps = dadem_search_representatives($search);
-            dadem_check_error($reps);
-            $html = $this->render_reps($self_link, $reps);
+            // Render everything in the order
+            foreach ($our_order as $va_type) {
+                foreach ($areas_info as $area=>$area_info) {
+                    if ($va_type <> $area_info['type']) 
+                        continue;
+                    $va_id = $area;
+
+                    // One voting area
+                    $reps = dadem_get_representatives($va_id);
+                    dadem_check_error($reps);
+                    $reps = array_values($reps);
+                    $html .= "<p><b>" . $area_info['name'] . " (" .  $area_info['type_name'] . ") </b></p>"; 
+                    $html .= $this->render_reps($self_link, $reps);
+                }
+            }
             $form->addElement('static', 'bytype', null, $html);
         } else {
             // General Statistics
@@ -206,7 +240,6 @@ class ADMIN_PAGE_REPS {
         }
 
         admin_render_form($form);
-        $form = new HTML_QuickForm('adminRepsForm', 'get', $self_link);
    }
 }
 
