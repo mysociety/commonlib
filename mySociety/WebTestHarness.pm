@@ -11,7 +11,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.1 2005-03-01 17:27:28 francis Exp $
+# $Id: WebTestHarness.pm,v 1.2 2005-03-02 16:52:33 francis Exp $
 #
 
 package mySociety::WebTestHarness;
@@ -106,6 +106,21 @@ sub browser_check_contents ($$) {
         print $self->{useragent}->content;
         print "\n\n";
         die "URL " . $self->{useragent}->uri() . " does not contain '" . $check . "'";
+    }
+}
+
+=item browser_check_no_contents STRING
+
+Checks the current page which is being browsed does not contain the given
+string.
+
+=cut
+sub browser_check_no_contents ($$) {
+    my ($self, $check) = @_;
+    if ($self->{useragent}->content =~ m/$check/) {
+        print $self->{useragent}->content;
+        print "\n\n";
+        die "URL " . $self->{useragent}->uri() . " contains '" . $check . "'";
     }
 }
 
