@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Util.pm,v 1.4 2004-10-20 16:56:13 chris Exp $
+# $Id: Util.pm,v 1.5 2004-11-10 17:10:38 chris Exp $
 #
 
 package mySociety::Util;
@@ -16,6 +16,14 @@ use Error qw(:try);
 use IO::File;
 use Fcntl;
 use POSIX;
+use Sys::Syslog;
+
+BEGIN {
+    use Exporter ();
+    our @ISA = qw(Exporter);
+    our @EXPORT_OK = qw(&print_log);
+}
+our @EXPORT_OK;
 
 =head1 NAME
 
@@ -86,43 +94,139 @@ Send an email. TEXT is the full, already-formatted, with-headers, on-the-wire
 form of the email (except that line-endings should be "\n" not "\r\n"). SENDER
 is the B<envelope> sender of the mail (B<not> the From: address, which you
 should specify yourself). RECIPIENTs are the B<envelope> recipients of the
-mail. Returns undef on success or an error string on failure.
+mail. Returns one of the constants EMAIL_SUCCESS, EMAIL_SOFT_FAILURE, or
+EMAIL_HARD_FAILURE depending on whether the email was successfully sent (or
+queued), a temporary ("soft") error occurred, or a permanent ("hard") error
+occurred.
 
 =cut
+use constant EMAIL_SUCCESS => 0;
+use constant EMAIL_SOFT_ERROR => 1;
+use constant EMAIL_HARD_ERROR => 2;
 sub send_email ($$@) {
     my ($text, $sender, @recips) = @_;
     my $pid;
-    eval {
-#        local $SIG{PIPE} = 'IGNORE';
-        my $pid;
-        defined($pid = open(SENDMAIL, '|-')) or die "fork: $!\n";
-        if (0 == $pid) {
-            # Close all filehandles other than standard ones. This will prevent
-            # perl from messing up database connections etc. on exit.
-            for (my $fd = 3; $fd < 1024; ++$fd) {
-                POSIX::close($fd);
-            }
-            # Child.
-            # XXX should close all other fds
-            exec('/usr/sbin/sendmail',
-                    '-i',
-                    '-f', $sender,
-                    @recips);
-            exit(255);
+    my $ret;
+#    local $SIG{PIPE} = 'IGNORE';
+    defined($pid = open(SENDMAIL, '|-')) or die "fork: $!\n";
+    if (0 == $pid) {
+        # Close all filehandles other than standard ones. This will prevent
+        # perl from messing up database connections etc. on exit.
+        for (my $fd = 3; $fd < POSIX::sysconf(POSIX::_SC_OPEN_MAX); ++$fd) {
+            POSIX::close($fd);
         }
+        # Child.
+        # XXX should close all other fds
+        exec('/usr/sbin/sendmail',
+                '-i',
+                '-f', $sender,
+                @recips);
+        exit(255);
+    }
 
-        print SENDMAIL $text or die "write: $!\n";
-        close SENDMAIL;
+    print SENDMAIL $text or die "write: $!\n";
+    close SENDMAIL;
 
-        if ($? & 127) {
-            die sprintf("sendmail: killed by signal %d\n", $? & 127);
-        } elsif ($?) {
-            die sprintf("sendmail: failure exit status %d\n", $? >> 8);
+    if ($? & 127) {
+        # Killed by signal; assume that message was not queued.
+        $ret = EMAIL_HARD_ERROR;
+    } elsif ($?) {
+        # We need to distinguish between success (anything which means that
+        # the message will later be delivered or bounced), soft failures
+        # (for which redelivery should be attempted later) and hard
+        # failures (which mean that delivery will not succeed even if
+        # retried).
+        #
+        # From sendmail(8):
+        #
+        # Sendmail returns an exit status describing what it did.  The
+        # codes are defined in <sysexits.h>:
+        #
+        #   EX_OK           Successful completion on all addresses.
+        #   EX_NOUSER       User name not recognized.
+        #   EX_UNAVAILABLE  Catchall meaning necessary resources were not
+        #                   available.
+        #   EX_SYNTAX       Syntax error in address.
+        #   EX_SOFTWARE     Internal software error, including bad
+        #                   arguments.
+        #   EX_OSERR        Temporary operating system error, such as
+        #                   "cannot fork."
+        #   EX_NOHOST       Host name not recognized.
+        #   EX_TEMPFAIL     Message could not be sent immediately, but was
+        #                   queued.
+        my $ex = ($? >> 8);
+        
+        my %return_codes = (
+                0       => EMAIL_SUCCESS,       # EX_OK
+                75      => EMAIL_SUCCESS,       # EX_TEMPFAIL
+
+                69      => EMAIL_SOFT_ERROR,    # EX_UNAVAILABLE
+                71      => EMAIL_SOFT_ERROR     # EX_OSERR
+
+                # all others: assume hard failure.
+            );
+        
+        if (exists($return_codes{$ex})) {
+            $ret = $return_codes{$ex};
+        } else {
+            $ret = EMAIL_HARD_ERROR;
         }
-    };
+    }
     close(SENDMAIL);
-    $@ =~ s/\n//;
-    return $@;
+    return $ret;
+}
+
+=item daemon 
+
+Become a daemon.
+
+=cut
+sub daemon () {
+    my $p;
+    die "fork: $!" if (!defined($p = fork()));
+    return unless ($p == 0);
+    chdir("/");
+    open(STDIN, "/dev/null") or die "/dev/null: $!";
+    open(STDOUT, ">/dev/null") or die "/dev/null: $!";
+    # Close all other fds.
+    for (my $fd = 3; $fd < POSIX::sysconf(POSIX::_SC_OPEN_MAX); ++$fd) {
+        POSIX::close($fd);
+    }
+    setsid() or die "setsid: $!";
+    die "fork: $!" if (!defined($p = fork()));
+    exit(0) if ($p != 0);
+    open(STDERR, ">&STDOUT") or die "dup: $!";
+}
+
+=item open_log TAG
+
+Start system logging, under TAG. If you don't call this explicitly, the first
+call to print_log will, constructing an appropriate tag from $0.
+
+=cut
+my $logopen;
+sub open_log ($) {
+    Sys::Syslog::setlogsock('unix');    # Sys::Syslog is nasty
+    openlog($_[0], 'pid,ndelay', 'daemon');    
+    $logopen = $_[0];
+}
+
+=item print_log PRIORITY TEXT
+
+Log TEXT to the system log (under PRIORITY) and to standard error. Designed for
+use from daemons etc; web scripts should just log to standard error.
+
+=cut
+sub logmsg ($$) {
+    if (!defined($logopen)) {
+        my $tag = $0;
+        $tag =~ s#^.*/##;
+        logopen($tag);
+    }
+    my ($pri, @a) = @_;
+    STDERR->print("consolidatemgrd: ", @a, "\n");
+    my $x = join('', @a);
+    syslog($pri, '%s', $x);    
 }
 
 =item is_valid_postcode STRING
