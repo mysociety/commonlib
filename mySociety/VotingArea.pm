@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: VotingArea.pm,v 1.6 2004-10-20 13:43:07 francis Exp $
+# $Id: VotingArea.pm,v 1.7 2004-10-20 16:56:24 chris Exp $
 #
 
 package mySociety::VotingArea;
@@ -448,12 +448,12 @@ MP".
 
 =cut
 sub style_rep ($$) {
-    my ($type, $name);
+    my ($type, $name) = @_;
     die "style_rep: bad TYPE $type" unless exists($mySociety::VotingArea::type_name{$type});
     return sprintf("%s%s%s",
             $mySociety::VotingArea::rep_prefix{$type} ne '' ? "$mySociety::VotingArea::rep_prefix{$type} " : '',
             $name,
-            $mySociety::VotingArea::rep_suffix{$type} ne '' ? "$mySociety::VotingArea::rep_suffix{$type} " : '');
+            $mySociety::VotingArea::rep_suffix{$type} ne '' ? " $mySociety::VotingArea::rep_suffix{$type}" : '');
 }
 
 1;
