@@ -7,7 +7,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: dadem.php,v 1.12 2005-01-11 10:23:30 chris Exp $
+ * $Id: dadem.php,v 1.13 2005-02-08 15:06:55 francis Exp $
  * 
  */
 
@@ -100,6 +100,18 @@ function dadem_get_representative_history($rep_id) {
     return $result;
 }
 
+/* dadem_store_user_correction ID CHANGE NAME PARTY NOTES EMAIL
+
+ * Records a correction to representative data made by a user on the website.
+ * CHANGE is either "add", "delete" or "modify".  NAME and PARTY are new
+ * values.  NOTES and EMAIL are fields the user can put extra info in. */
+function dadem_store_user_correction($id, $change, $name, $party, $notes, $email) {
+    global $dadem_client;
+    $result = $dadem_client->call('DaDem.store_user_correction', 
+        array($id, $change, $name, $party, $notes, $email));
+    return $result;
+}
+
 /* dadem_get_stats
  * Return an associative array giving statistics about DaDem's 
  * database */
@@ -109,7 +121,7 @@ function dadem_admin_get_stats() {
     return $result;
 }
 
-/* admin_edit_representative ID NEWDATA EDITOR NOTE
+/* dadem_admin_edit_representative ID NEWDATA EDITOR NOTE
  * Alter data for a representative.  ID is the id to change,
  * NEWDATA hash of new columns.  EDITOR name of who altered
  * it.  NOTE is a comment as to why they did so.  */
@@ -118,5 +130,6 @@ function dadem_admin_edit_representative($id, $newdata, $editor, $note) {
     $result = $dadem_client->call('DaDem.admin_edit_representative', array($id, $newdata, $editor, $note));
     return $result;
 }
+
 
 ?>
