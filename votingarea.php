@@ -8,7 +8,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: votingarea.php,v 1.13 2005-01-07 19:03:00 chris Exp $
+ * $Id: votingarea.php,v 1.14 2005-01-07 20:01:13 chris Exp $
  * 
  */
 
@@ -126,6 +126,20 @@ $va_responsibility_description = array(
     'EUP' =>
             "They <strong>scrutinise European laws</strong> and the <strong>budget of the European Union</strong>, and provide
             <strong>oversight of the other decision-making bodies</strong>.",
+    'SPC' => "
+The Scottish Parliament is responsible for a wide range of <strong>devolved
+matters</strong> in which it sets policy independently of the London
+Parliament. Devolved matters include <strong>education</strong>,
+<strong>health</strong>, <strong>agriculture</strong>, <strong>justice</strong>
+and <strong>prisons</strong>. It also has some tax-raising powers.
+",
+    'WAC' => "
+The National Assembly for Wales has a wide range of powers over areas including
+<strong>economic development</strong>, <strong>transport</strong>,
+<strong>finance</strong>, <strong>local government</strong>,
+<strong>health</strong>, <strong>housing</strong> and <strong>the Welsh
+Language</strong>.
+"
     );
 
 ?>
