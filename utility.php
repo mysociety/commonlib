@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.9 2004-11-08 18:09:31 francis Exp $
+ * $Id: utility.php,v 1.10 2004-11-09 08:10:04 francis Exp $
  * 
  */
 
@@ -30,7 +30,7 @@ function debug ($header, $text="", $complex_variable=null) {
     // $complex_variable is dumped in full, so you can put arrays/hashes here
 	
 	$debug_level = get_http_var("debug");
-#    $debug_level = 3;
+    $debug_level = 2;
 	
 	if ($debug_level != '') {
 	
