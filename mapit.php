@@ -7,7 +7,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: mapit.php,v 1.8 2004-11-22 12:22:39 francis Exp $
+ * $Id: mapit.php,v 1.9 2004-12-20 22:46:07 francis Exp $
  * 
  */
 
@@ -47,6 +47,14 @@ function mapit_get_voting_areas($postcode) {
     debug("MAPIT", "Looking up areas for postcode $postcode");
     $result = $mapit_client->call('MaPit.get_voting_areas', array($postcode));
     debug("MAPITRESULT", "Result is:", $result);
+    return $result;
+}
+
+/* mapit_get_example_postcode ID
+ * Returns a postcode which maps to the given area ID. */
+function mapit_get_example_postcode($va_id) {
+    global $mapit_client;
+    $result = $mapit_client->call('MaPit.get_example_postcode', array($va_id));
     return $result;
 }
 

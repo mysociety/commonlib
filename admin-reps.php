@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-reps.php,v 1.3 2004-12-20 20:52:15 francis Exp $
+ * $Id: admin-reps.php,v 1.4 2004-12-20 22:46:07 francis Exp $
  * 
  */
 
@@ -19,11 +19,34 @@ class ADMIN_PAGE_REPS {
         $this->navname = "Representative Data";
     }
 
+    function render_reps($self_link, $reps) {
+        $html = "";
+        $info = dadem_get_representatives_info($reps);
+        dadem_check_error($info);
+
+        foreach ($info as $rep => $repinfo) {
+            if ($repinfo['edited']) {
+                $html .= "<i>edited</i> ";
+            }
+            $html .= "<a href=\"$self_link&pc=" . urlencode($pc). "&rep_id=" . $rep .  "\">" . $repinfo['name'] . " (". $repinfo['party'] . ")</a> \n";
+            $html .= "prefer " . $repinfo['method'];
+            if ($repinfo['email']) 
+                $html .= ", " .  $repinfo['email'];
+            if ($repinfo['fax']) 
+                $html .= ", " .  $repinfo['fax'];
+            $html .= "<br>";
+        }
+        return $html;
+    }
+
     function display($self_link) {
         $form = new HTML_QuickForm('adminMaPitForm', 'post', $self_link);
 
         // Input data
-        $pc = get_http_var('pc');
+        if (get_http_var('gos'))
+            $search = get_http_var('search');
+        if (get_http_var('gopc') or (!defined($search)))
+            $pc = get_http_var('pc');
         $rep_id = get_http_var('rep_id');
         if (get_http_var('cancel') != "") 
             $rep_id = null;
@@ -41,10 +64,12 @@ class ADMIN_PAGE_REPS {
             $rep_id = null;
         }
 
-        // Postcode box
+        // Postcode and search box
         $form->addElement('header', '', 'Search');
         $buttons[] =& HTML_QuickForm::createElement('text', 'pc', null, array('size' => 10, 'maxlength' => 255));
-        $buttons[] =& HTML_QuickForm::createElement('submit', 'go', 'go postcode');
+        $buttons[] =& HTML_QuickForm::createElement('submit', 'gopc', 'go postcode');
+        $buttons[] =& HTML_QuickForm::createElement('text', 'search', null, array('size' => 20, 'maxlength' => 255));
+        $buttons[] =& HTML_QuickForm::createElement('submit', 'gos', 'search');
         $form->addElement('hidden', 'page', $this->id);
         $form->addGroup($buttons, 'stuff', null, '&nbsp', false);
 
@@ -55,6 +80,12 @@ class ADMIN_PAGE_REPS {
             dadem_check_error($repinfo);
             $rephistory = dadem_get_representative_history($rep_id);
             dadem_check_error($rephistory);
+            // Reverse postcode lookup
+            if (!$pc) {
+                $pc = mapit_get_example_postcode($repinfo['voting_area']);
+                mapit_check_error($pc);
+                $form->addElement('static', 'note1', null, "Example postcode for testing: " . htmlentities($pc));
+            }
 
             $form->setDefaults(
                 array('name' => $repinfo['name'],
@@ -124,25 +155,16 @@ class ADMIN_PAGE_REPS {
                 dadem_check_error($reps);
                 $reps = array_values($reps);
                 $html .= "<p><b>" . $area_info['name'] . " (" .  $area_info['type_name'] . ") </b></p>"; 
-                $info = dadem_get_representatives_info($reps);
-                dadem_check_error($info);
-
-                foreach ($info as $rep => $repinfo) {
-                    if ($repinfo['edited']) {
-                        $html .= "<i>edited</i> ";
-                    }
-                    $html .= "<a href=\"$self_link&pc=" . urlencode($pc). "&rep_id=" . $rep .  "\">" . $repinfo['name'] . " (". $repinfo['party'] . ")</a> \n";
-                    $html .= "prefer " . $repinfo['method'];
-                    if ($repinfo['email']) 
-                        $html .= ", " .  $repinfo['email'];
-                    if ($repinfo['fax']) 
-                        $html .= ", " .  $repinfo['fax'];
-                    $html .= "<br>";
-                }
+                $html .= $this->render_reps($self_link, $reps);
             }
             $form->addElement('static', 'bytype', null, $html);
-        }
-        else {
+        } else if ($search) {
+            // Search reps
+            $reps = dadem_search_representatives($search);
+            dadem_check_error($reps);
+            $html = $this->render_reps($self_link, $reps);
+            $form->addElement('static', 'bytype', null, $html);
+        } else {
             // General Statistics
 
             // MaPit

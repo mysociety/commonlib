@@ -7,7 +7,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: dadem.php,v 1.10 2004-12-20 20:34:16 francis Exp $
+ * $Id: dadem.php,v 1.11 2004-12-20 22:46:07 francis Exp $
  * 
  */
 
@@ -53,6 +53,17 @@ function dadem_get_representatives($va_id) {
     debug("DADEMRESULT", "Result is:", $result);
     return $result;
 }
+
+/* dadem_search_representatives STRING
+ * Return an array of IDs for the representatives whose names, party
+ * or contact details containt the given search string.  Case
+ * insensitive. */
+function dadem_search_representatives($query) {
+    global $dadem_client;
+    $result = $dadem_client->call('DaDem.search_representatives', array($query));
+    return $result;
+}
+
 
 /* dadem_get_representative_info ID
  * On success, returns an array giving information about the representative
