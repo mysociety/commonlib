@@ -7,7 +7,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: CouncilMatch.pm,v 1.3 2005-01-26 19:48:52 francis Exp $
+# $Id: CouncilMatch.pm,v 1.4 2005-01-27 09:39:05 francis Exp $
 #
 
 package mySociety::CouncilMatch;
@@ -259,7 +259,7 @@ sub match_council_wards ($$$$) {
 # get_raw_data COUNCIL_ID DADEM_DB
 # Return raw input data, with any admin modifications, for a given council.
 # In the form of an array of references to hashes.  Each hash contains the
-# ward_name, rep_name, rep_party, rep_email, rep_fax.
+# ward_name, rep_first, rep_last, rep_party, rep_email, rep_fax.
 sub get_raw_data($$) {
     my ($area_id, $d_dbh) = @_;
 
@@ -303,7 +303,7 @@ sub get_raw_data($$) {
 # edit_raw_data COUNCIL_ID COUNCIL_NAME COUNCIL_TYPE DADEM_DB DATA ADMIN_USER
 # Alter raw input data as a transaction log (keeping history).
 # DATA is in the form of a reference to an array of references to hashes.  Each
-# hash contains the ward_name, rep_name, rep_party, rep_email, rep_fax, key
+# hash contains the ward_name, rep_first, rep_last, rep_party, rep_email, rep_fax, key
 # (from get_raw_data above).  Include all the councils, as deletions are
 # applied.  ADMIN_USER is name of person who made this edit.
 # COUNCIL_NAME and COUNCIL_TYPE are stored in the edit for reference later if
@@ -330,7 +330,7 @@ sub edit_raw_data($$$$$$) {
 
         if ($key && exists($old{$key})) {
             my $changed = 0;
-            foreach my $fieldname qw(ward_name rep_name rep_party rep_email rep_fax) {
+            foreach my $fieldname qw(ward_name rep_first rep_last rep_party rep_email rep_fax) {
                 if ($old{$key}->{$fieldname} ne $rep->{$fieldname}) {
                     print "changed";
                     $changed = 1;
@@ -350,13 +350,15 @@ sub edit_raw_data($$$$$$) {
         # Insert alteration
         my $sth = $d_dbh->prepare(q#insert into raw_input_data_edited
             (ge_id, newrow_id, alteration, council_id, council_name, council_type,
-            ward_name, rep_name, rep_party, rep_email, rep_fax, 
+            ward_name, rep_first, rep_last, rep_party, 
+            rep_email, rep_fax, 
             editor, whenedited, note)
             values (?, ?, ?, ?, ?, ?,
-                    ?, ?, ?, ?, ?,
+                    ?, ?, ?, ?,
+                    ?, ?,
                     ?, ?, ?) #);
         $sth->execute($ge_id, $newrow_id, 'modify', $area_id, $area_name, $area_type,
-            $rep->{'ward_name'}, $rep->{'rep_name'}, $rep->{'rep_party'},
+            $rep->{'ward_name'}, $rep->{'rep_first'}, $rep->{'rep_last'}, $rep->{'rep_party'},
                 $rep->{'rep_email'}, $rep->{'rep_fax'},
             $user, time(), "");
 
