@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: error.php,v 1.5 2005-01-26 16:45:26 chris Exp $
+ * $Id: error.php,v 1.6 2005-01-28 22:35:08 francis Exp $
  * 
  */
 
@@ -49,7 +49,7 @@ function err($err) {
      * to construct the relevant information. */
     $a = debug_backtrace(); /* now $a[1], if present, is the caller */
     $i = 0;
-    if (array_key_exists($a[1]))
+    if (array_key_exists(1, $a))
         $i = 1;
     err_global_handler(E_USER_ERROR, $err, $a[$i]['file'], $a[$i]['line'],
                         /* XXX We can't obtain the calling context AFAIK. */
