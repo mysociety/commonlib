@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Util.pm,v 1.3 2004-10-19 17:25:00 chris Exp $
+# $Id: Util.pm,v 1.4 2004-10-20 16:56:13 chris Exp $
 #
 
 package mySociety::Util;
@@ -15,6 +15,7 @@ use strict;
 use Error qw(:try);
 use IO::File;
 use Fcntl;
+use POSIX;
 
 =head1 NAME
 
@@ -91,34 +92,37 @@ mail. Returns undef on success or an error string on failure.
 sub send_email ($$@) {
     my ($text, $sender, @recips) = @_;
     my $pid;
-    try {
+    eval {
+#        local $SIG{PIPE} = 'IGNORE';
         my $pid;
         defined($pid = open(SENDMAIL, '|-')) or die "fork: $!\n";
         if (0 == $pid) {
+            # Close all filehandles other than standard ones. This will prevent
+            # perl from messing up database connections etc. on exit.
+            for (my $fd = 3; $fd < 1024; ++$fd) {
+                POSIX::close($fd);
+            }
             # Child.
             # XXX should close all other fds
-            exec('/usr/libexec/sendmail',
+            exec('/usr/sbin/sendmail',
                     '-i',
                     '-f', $sender,
                     @recips);
-            die;
+            exit(255);
         }
 
         print SENDMAIL $text or die "write: $!\n";
-
-        close SENDMAIL or die "close: $!\n";
+        close SENDMAIL;
 
         if ($? & 127) {
             die sprintf("sendmail: killed by signal %d\n", $? & 127);
         } elsif ($?) {
             die sprintf("sendmail: failure exit status %d\n", $? >> 8);
         }
-    } catch Error::Simple with {
-        my $e = shift;
-        close(SENDMAIL);
-        return $e->text();
     };
-    return undef;
+    close(SENDMAIL);
+    $@ =~ s/\n//;
+    return $@;
 }
 
 =item is_valid_postcode STRING
