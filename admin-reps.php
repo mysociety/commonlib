@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-reps.php,v 1.14 2005-02-15 11:40:36 francis Exp $
+ * $Id: admin-reps.php,v 1.15 2005-02-15 15:26:04 francis Exp $
  * 
  */
 
@@ -28,9 +28,12 @@ class ADMIN_PAGE_REPS {
 
         foreach ($reps as $rep) {
             $repinfo = $info[$rep];
-            if ($repinfo['edited']) {
+            if ($repinfo['deleted']) {
+                $html .= "<i>deleted</i> ";
+            } else if ($repinfo['edited']) {
                 $html .= "<i>edited</i> ";
             }
+            $html .= $repinfo['type'] . " ";
             $html .= "<a href=\"$self_link&pc=" .  urlencode(get_http_var('pc')). "&rep_id=" . $rep .  "\">" . $repinfo['name'] . " (". $repinfo['party'] . ")</a> \n";
             $html .= "prefer " . $repinfo['method'];
             if ($repinfo['email']) 
@@ -73,6 +76,12 @@ class ADMIN_PAGE_REPS {
             $result = dadem_admin_edit_representative($rep_id, $newdata, http_auth_user(), get_http_var('note'));
             dadem_check_error($result);
             print "<p><i>Successfully updated representative ". htmlspecialchars($rep_id) . "</i></i>";
+            $rep_id = null;
+        }
+        if (get_http_var('delete') != "") {
+            $result = dadem_admin_edit_representative($rep_id, null, http_auth_user(), get_http_var('note'));
+            dadem_check_error($result);
+            print "<p><i>Successfully deleted representative ". htmlspecialchars($rep_id) . "</i></i>";
             $rep_id = null;
         }
         if (get_http_var('ucclose') != "") {
@@ -134,7 +143,10 @@ class ADMIN_PAGE_REPS {
             $form->addElement('header', '', 'Edit Representative');
             if ($editable_here) {
                 $form->addElement('static', 'note1', null, "
-                Edit only the values which you need to.  Blank to return to default.");
+                Edit only the values which you need to.  Blank to return to default.
+                If a representative has changed delete them and make a new one.
+                Do not just edit their values, as this would ruin our reponsiveness
+                stats.");
             }
             $form->addElement('static', 'office', 'Office:',
                 htmlspecialchars($vainfo['rep_name']) . " for " . 
@@ -142,11 +154,11 @@ class ADMIN_PAGE_REPS {
                 ($parentinfo ? " in " . 
                 htmlspecialchars($parentinfo['name']) . " " . htmlspecialchars($parentinfo['type_name']) : "" ));
             $form->addElement('text', 'name', "Full name:", array('size' => 60, $readonly => 1));
-            $form->addElement('text', 'party', "Political party:", array('size' => 60, $readonly => 1));
+            $form->addElement('text', 'party', "Party:", array('size' => 60, $readonly => 1));
             $form->addElement('static', 'note2', null, "Make sure you
             update contact method when you change email or fax
             numbers.");
-            $form->addElement('select', 'method', "Contact method to use:", 
+            $form->addElement('select', 'method', "Contact method:", 
                     array(
                         'either' => 'Fax or Email', 'fax' => 'Fax only', 
                         'email' => 'Email only',
@@ -155,16 +167,21 @@ class ADMIN_PAGE_REPS {
                         'unknown' => "We don't know contact details"
                     ),
                     array($readonly => 1));
-            $form->addElement('text', 'email', "Email address:", array('size' => 60, $readonly => 1));
-            $form->addElement('text', 'fax', "Fax number:", array('size' => 60, $readonly => 1));
-            $form->addElement('textarea', 'note', "Note to add to log:
-            (where new data was from etc.)", array('rows' => 3, 'cols' => 60, $readonly => 1));
+            $form->addElement('text', 'email', "Email:", array('size' => 60, $readonly => 1));
+            $form->addElement('text', 'fax', "Fax:", array('size' => 60, $readonly => 1));
+            $form->addElement('textarea', 'note', "Notes for log:", array('rows' => 3, 'cols' => 60, $readonly => 1));
             $form->addElement('hidden', 'pc', $pc);
             $form->addElement('hidden', 'rep_id', $rep_id);
 
             if ($editable_here) {
                 $finalgroup[] = &HTML_QuickForm::createElement('submit', 'done', 'Done');
                 $finalgroup[] = &HTML_QuickForm::createElement('submit', 'cancel', 'Cancel');
+                if ($repinfo['deleted']) {
+                    $finalgroup[] = &HTML_QuickForm::createElement('static', 'staticspacer', null, '&nbsp; Deleted rep, no longer in office, just click done to undelete');
+                } else {
+                    $finalgroup[] = &HTML_QuickForm::createElement('static', 'staticspacer', null, '&nbsp; No longer in office? --->');
+                    $finalgroup[] = &HTML_QuickForm::createElement('submit', 'delete', 'Delete');
+                }
                 $form->addGroup($finalgroup, "finalgroup", "",' ', false);
             } else {
                 global $matchcgi;
@@ -180,7 +197,7 @@ class ADMIN_PAGE_REPS {
             $html = "<table border=1>";
             $html .= "<th>Order</th><th>Date</th><th>Editor</th><th>Note</th>
                 <th>Name</th> <th>Party</th> <th>Method</th> <th>Email</th>
-                <th>Fax</th>";
+                <th>Fax</th><th>Deleted</th>";
 
             foreach ($rephistory as $row) {
                 $html .= "<tr>";
@@ -193,6 +210,7 @@ class ADMIN_PAGE_REPS {
                 $html .= "<td>" . $row['method'] . "</td>\n";
                 $html .= "<td>" . $row['email'] . "</td>\n";
                 $html .= "<td>" . $row['fax'] . "</td>\n";
+                $html .= "<td>" . $row['deleted'] . "</td>\n";
                 $html .= "</tr>";
             }
             $html .= "</table>";
