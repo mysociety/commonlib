@@ -6,7 +6,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: ratty.php,v 1.12 2005-01-11 10:19:54 chris Exp $
+ * $Id: ratty.php,v 1.13 2005-01-11 10:49:10 chris Exp $
  * 
  */
 
@@ -20,6 +20,7 @@ $ratty_client = new RABX_Client(OPTION_RATTY_URL);
 $ratty_client->use_post = TRUE;
 
 function ratty_do_call($name, $args) {
+    global $ratty_client;
     $res = $ratty_client->call("Ratty.$name", $args);
     if (rabx_is_error($res))
         err($res->text);
