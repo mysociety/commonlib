@@ -4,7 +4,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: deployfns,v 1.10 2005-03-12 00:56:31 francis Exp $
+# $Id: deployfns,v 1.11 2005-03-14 13:28:58 francis Exp $
 #
 
 # Warnings and errors
@@ -134,10 +134,11 @@ check_pgsql_schema () {
     cat $CURRENT_SCHEMA_FILE | sort > $CURRENT_SCHEMA_FILE.sorted
 
     # Compare them
-    if ! diff --ignore-blank-lines $CVS_SCHEMA_FILE.sorted $CURRENT_SCHEMA_FILE.sorted
+    if ! diff --ignore-blank-lines --ignore-space-change $CURRENT_SCHEMA_FILE.sorted $CVS_SCHEMA_FILE.sorted 
     then
         warn "Schema in CVS differs from that in pgsql database, you need to update it"
         warn "database: $3; user: $4 schema: $2"
+        warn "CVS sorted: $CVS_SCHEMA_FILE.sorted; current sorted: $CURRENT_SCHEMA_FILE.sorted"
         warn "CVS schema: $CVS_SCHEMA_FILE; current schema: $CURRENT_SCHEMA_FILE"
         exit 1
     fi
