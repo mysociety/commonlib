@@ -6,7 +6,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: ratty.php,v 1.13 2005-01-11 10:49:10 chris Exp $
+ * $Id: ratty.php,v 1.14 2005-01-11 14:05:11 chris Exp $
  * 
  */
 
@@ -32,9 +32,10 @@ function ratty_do_call($name, $args) {
  * Should this call to the page described in VALUES be permitted, on the basis
  * of a rate-limit? VALUES should include keys for any significant variables on
  * which rate-limiting should be applied, for instance postcodes or IDs of data
- * items which an attacker could scrape from the page. Returns NULL if the page
- * can be shown, STRING with user message if it should be, or an error code on
- * failure. Message can be an empty string if none was specified in the rule. */
+ * items which an attacker could scrape from the page. Returns NULL if no rate
+ * limit was tripped, or an array of (rule ID, explanatory message) if one was,
+ * or an error code on failure. The message can be an empty string if none was
+ * specified in the rule. */
 function ratty_test($vals) {
     debug("RATTY", "Rate limiting", $vals);
     $res = ratty_do_call('test', array($vals));
