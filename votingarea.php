@@ -1,5 +1,6 @@
 <?php
 /*
+ * votingarea.php:
  * Stuff about voting and administrative areas.  "Voting Area" is the
  * terminology we use to mean any geographical region for which an
  * elected representative is returned.
@@ -7,7 +8,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: votingarea.php,v 1.1 2004-10-18 08:48:07 francis Exp $
+ * $Id: votingarea.php,v 1.2 2004-10-18 10:17:06 chris Exp $
  * 
  */
 
@@ -43,8 +44,8 @@ define('VA_WAC', 803);  /* ... constituency */
 define('VA_WMP', 901);  /* Westminster Parliament */
 define('VA_WMC', 902);  /* ... constituency */
 
-define('VA_EUP', 1001);  /* European Parliament */
-define('VA_EUR', 1002);  /* ... region */
+define('VA_EUP', 1001); /* European Parliament */
+define('VA_EUR', 1002); /* ... region */
 
 /* va_inside
  * For any VA_ constant which refers to a voting area which is inside an
@@ -62,7 +63,7 @@ $va_inside = array(
         VA_UTE => VA_UTA,
         VA_UTW => VA_UTA,
 
-        VA_MTW => VA_MTA,
+        VA_MTW => VA_MTD,
 
         VA_SPE => VA_SPA,
         VA_SPC => VA_SPA,
