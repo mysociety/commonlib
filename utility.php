@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.16 2004-11-22 12:22:39 francis Exp $
+ * $Id: utility.php,v 1.17 2004-11-26 11:07:36 francis Exp $
  * 
  */
 
@@ -547,17 +547,6 @@ function htmlentities_notags ($text) {
 	return $text;
 
 }
-
-function gid_to_anchor ($gid) {
-	// For trimming gids to be used as #anchors in pages.
-	// Extracted here so we keep it consistent.
-	// The gid should already be truncated using fix_gid_from_db(), so it
-	// will be like 2003-11-20.966.0
-	// This function returns 966.0
-	
-	return substr( $gid, (strpos($gid, '.') + 1) );
-}
-
 
 function send_template_email ($data, $merge) {
 	// We should have some email templates in INCLUDESPATH/easyparliament/templates/emails/.

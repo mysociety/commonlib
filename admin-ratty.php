@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-ratty.php,v 1.15 2004-11-22 17:41:00 francis Exp $
+ * $Id: admin-ratty.php,v 1.16 2004-11-26 11:07:36 francis Exp $
  * 
  */
 
@@ -96,7 +96,7 @@ class ADMIN_PAGE_RATTY {
             $fieldarray = ratty_admin_available_fields();
             $fields = array();
             foreach ($fieldarray as $row) {
-                $fields[$row[0]] = $row[0] . " (e.g. " . $row[1] . ")";
+                $fields[$row[0]] = $row[0] . " (e.g. " .  trim_characters($row[1], 0, 15) . ")";
             }
 
             // Grouped elements
