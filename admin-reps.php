@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-reps.php,v 1.17 2005-02-16 02:12:13 francis Exp $
+ * $Id: admin-reps.php,v 1.18 2005-02-17 01:15:21 francis Exp $
  * 
  */
 
@@ -30,10 +30,13 @@ class ADMIN_PAGE_REPS {
             $repinfo = $info[$rep];
             if ($repinfo['deleted']) {
                 $html .= "<i>deleted</i> ";
-            } else if ($repinfo['edited']) {
+            } else if (array_key_exists('edited', $repinfo) and $repinfo['edited']) {
                 $html .= "<i>edited</i> ";
             }
-            $html .= $repinfo['type'] . " ";
+            if (array_key_exists('type', $repinfo))
+                $html .= $repinfo['type'] . " ";
+            else
+                $html .= $repinfo['area_type'] . " ";
             $html .= "<a href=\"$self_link&pc=" .  urlencode(get_http_var('pc')). "&rep_id=" . $rep .  "\">" . $repinfo['name'] . " (". $repinfo['party'] . ")</a> \n";
             $html .= "prefer " . $repinfo['method'];
             if ($repinfo['email']) 
@@ -302,10 +305,10 @@ class ADMIN_PAGE_REPS {
             // User submitted corrections
             global $matchcgi;
             $form = new HTML_QuickForm('adminRepsCorrectionsHeader', 'post', $self_link);
-            $form->addElement('header', '', 'User Submitted Corrections');
-            admin_render_form($form);
             $corrections = dadem_get_user_corrections();
             dadem_check_error($corrections);
+            $form->addElement('header', '', 'User Submitted Corrections ' . count($corrections));
+            admin_render_form($form);
             // Get all the data for areas and their parents in as few call as possible
             $vaids = array();
             foreach ($corrections as $correction) {
@@ -372,9 +375,9 @@ class ADMIN_PAGE_REPS {
             $form = new HTML_QuickForm('adminRepsStats', 'post', $self_link);
 
             // Bad contacts
-            $form->addElement('header', '', 'Bad Contacts');
             $badcontacts = dadem_get_bad_contacts();
             dadem_check_error($badcontacts);
+            $form->addElement('header', '', 'Bad Contacts ' . count($badcontacts));
             $html = $this->render_reps($self_link, $badcontacts);
             $form->addElement('static', 'badcontacts', null, $html);
 
