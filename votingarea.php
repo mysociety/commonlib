@@ -8,39 +8,39 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: votingarea.php,v 1.3 2004-11-02 16:24:14 chris Exp $
+ * $Id: votingarea.php,v 1.4 2004-11-18 08:58:38 francis Exp $
  * 
  */
 
 /* Manifest constants for different types of areas. Larger numbers indicate
  * larger areas and "more important" bodies. */
-define('VA_LBO', 101);  /* London Borough */
-define('VA_LBW', 102);  /* ... ward */
+define('VA_DIS', 101);  /* District */
+define('VA_DIW', 102);  /* ... ward */
 
-define('VA_GLA', 201);  /* Greater London Assembly */
-define('VA_LAC', 202);  /* London constituency */
-define('VA_LAE', 203);  /* ... electoral region */
+define('VA_LBO', 201);  /* London Borough */
+define('VA_LBW', 202);  /* ... ward */
 
-define('VA_CTY', 301);  /* County */
-define('VA_CED', 302);  /* ... electoral division */
+define('VA_MTD', 301);  /* Metropolitan district */
+define('VA_MTW', 302);  /* ... ward */
 
-define('VA_DIS', 401);  /* District */
-define('VA_DIW', 402);  /* ... ward */
+define('VA_UTA', 401);  /* Unitary authority */
+define('VA_UTE', 402);  /* ... electoral division */
+define('VA_UTW', 403);  /* ... ward */
 
-define('VA_UTA', 501);  /* Unitary authority */
-define('VA_UTE', 502);  /* ... electoral division */
-define('VA_UTW', 503);  /* ... ward */
+define('VA_CTY', 501);  /* County */
+define('VA_CED', 502);  /* ... electoral division */
 
-define('VA_MTD', 601);  /* Metropolitan district */
-define('VA_MTW', 602);  /* ... ward */
+define('VA_GLA', 601);  /* Greater London Assembly */
+define('VA_LAC', 602);  /* London constituency */
+define('VA_LAE', 603);  /* ... electoral region */
 
-define('VA_SPA', 701);  /* Scottish Parliament */
-define('VA_SPE', 702);  /* ... electoral region */
-define('VA_SPC', 703);  /* ... constituency */
+define('VA_WAS', 701);  /* Welsh Assembly */
+define('VA_WAE', 702);  /* ... electoral region */
+define('VA_WAC', 703);  /* ... constituency */
 
-define('VA_WAS', 801);  /* Welsh Assembly */
-define('VA_WAE', 802);  /* ... electoral region */
-define('VA_WAC', 803);  /* ... constituency */
+define('VA_SPA', 801);  /* Scottish Parliament */
+define('VA_SPE', 802);  /* ... electoral region */
+define('VA_SPC', 803);  /* ... constituency */
 
 define('VA_WMP', 901);  /* Westminster Parliament */
 define('VA_WMC', 902);  /* ... constituency */
