@@ -8,7 +8,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: votingarea.php,v 1.12 2005-01-07 17:39:53 chris Exp $
+ * $Id: votingarea.php,v 1.13 2005-01-07 19:03:00 chris Exp $
  * 
  */
 
@@ -37,7 +37,7 @@ $va_inside = array(
         'SPC' => 'SPA',
 
         'WAE' => 'WAP',
-        'WAC' => 'WAC',
+        'WAC' => 'WAP',
 
         'NIE' => 'NIA',
 
