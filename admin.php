@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin.php,v 1.24 2005-01-29 00:32:38 francis Exp $
+ * $Id: admin.php,v 1.25 2005-01-29 11:36:27 matthew Exp $
  * 
  */
 
@@ -15,7 +15,7 @@ require_once "HTML/QuickForm.php";
 require_once "HTML/QuickForm/Rule.php";
 require_once "HTML/QuickForm/Renderer/Default.php";
 
-header("Content-Type:", "text/html; charset=utf-8");
+header("Content-Type: text/html; charset=utf-8");
 
 // Error display
 require_once "../../phplib/error.php";
