@@ -11,7 +11,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.2 2005-03-02 16:52:33 francis Exp $
+# $Id: WebTestHarness.pm,v 1.3 2005-03-08 15:42:33 francis Exp $
 #
 
 package mySociety::WebTestHarness;
@@ -120,7 +120,7 @@ sub browser_check_no_contents ($$) {
     if ($self->{useragent}->content =~ m/$check/) {
         print $self->{useragent}->content;
         print "\n\n";
-        die "URL " . $self->{useragent}->uri() . " contains '" . $check . "'";
+        die "URL " . $self->{useragent}->uri() . " unexpectedly contains '" . $check . "'";
     }
 }
 
@@ -203,7 +203,7 @@ sub email_get_containing($$) {
         $mails = dbh()->selectall_arrayref("select id, content from testharness_mail
             where content like ?", {}, $check);
         $got = scalar @$mails;
-        die "Email containing '$check' not found even after $c sec wait" if ($got == 0 && $c > 6);
+        die "Email containing '$check' not found even after $c sec wait" if ($got == 0 && $c > 10);
         die "Too many emails found containing '$check'" if ($got > 1);
         $c++;
         sleep 1;
