@@ -8,12 +8,12 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: votingarea.php,v 1.10 2004-12-30 19:46:20 francis Exp $
+ * $Id: votingarea.php,v 1.11 2005-01-07 17:34:02 chris Exp $
  * 
  */
 
 /* va_inside
- * For any ' co'nstant which refers to a voting area which is inside an
+ * For any  constant which refers to a voting area which is inside an
  * administrative area, there is an entry in this array saying which type of
  * area it's inside. */
 $va_inside = array(
@@ -47,7 +47,8 @@ $va_inside = array(
     );
 
 /* va_display_order
- * Suggested "increasing power" display order for representatives. */
+ * Suggested "increasing power" display order for representatives. XXX should
+ * this be in FYR? */
 $va_display_order = array(
         /* District councils */
         'DIW', 'LBW',
@@ -56,9 +57,9 @@ $va_display_order = array(
         /* county council */
         'CED',
         /* various devolved assemblies */
-        'LAC', 'LAE',
-        'WAC', 'WAE',
-        'SPC', 'SPE',
+        'LAC',
+        'WAC',
+        'SPC',
         'NIE',
         /* HoC and European Parliament */
         'WMC', 'EUR'
@@ -123,7 +124,26 @@ $va_responsibility_description = array(
     'EUP' =>
             "They <strong>scrutinise European laws</strong> and the <strong>budget of the European Union</strong>, and provide
             <strong>oversight of the other decision-making bodies</strong>.",
-)
+    );
 
+/* va_representative_category
+ * For the Scottish Parliament, Welsh Assembly and Greater London Assembly,
+ * there is a two-level electoral structure in which representatives are
+ * elected by a first-past-the-post system on constituencies, and by a PR
+ * system on larger "electoral regions". There is a key in this array for each
+ * category of representative which should be displayed, with the corresponding
+ * value being the list of area types on which those representatives are
+ * elected. XXX should this be in FYR? */
+$va_representative_category = array(
+        'SPC' => array('SPC', 'SPE'),
+        'WAC' => array('WAC', 'WAE'),
+        'LAC' => array('LAC', 'LAE')
+    );
+
+foreach ($va_display_order as $what) {
+    if ($what != 'SPE' && $what != 'WAE' && $what != 'LAE'
+        && !array_key_exists($what, $va_representative_category))
+        $va_representative_category[$what] = array($what);
+}
  
 ?>
