@@ -8,7 +8,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: votingarea.php,v 1.5 2004-11-18 10:16:42 francis Exp $
+ * $Id: votingarea.php,v 1.6 2004-11-18 13:14:45 francis Exp $
  * 
  */
 
@@ -82,4 +82,33 @@ $va_inside = array(
 $va_display_order = array(VA_DIW, VA_LBW, VA_MTW, VA_UTW, VA_UTE, VA_CED,
     VA_LAC, VA_LAE, VA_WAC, VA_WAE, VA_SPC, VA_SPE, VA_WMC, VA_EUR);
 
+// Lookup table of long description XXX should copy these out of Whittaker's
+// Almanac or whatever.
+$va_responsibility_description = array(
+    VA_DIS =>
+            "The District Council is responsible for
+            local services and policy, including planning, council housing,
+            building regulation, rubbish collection, and local roads. Some
+            responsibilities, such as recreation facilities, are shared with
+            the County Council.",
+    VA_MTD =>
+            "The Metropolitan District Council is
+            responsible for all aspects of local services and policy, including
+            planning, transport, education, social services and libraries.",
+    VA_CTY =>
+            "The County Council is responsible for local
+            services, including education, social services, transport and
+            libraries.",
+    VA_WMP =>
+            "The House of Commons is responsible for
+            making laws in the UK and for overall scrutiny of all aspects of
+            government.",
+    VA_EUP =>
+            "They scrutinise European laws (called
+            \"directives\") and the budget of the European Union, and provides
+            oversight of the other decision-making bodies of the Union,
+            including the Council of Ministers and the Commission."
+)
+
+ 
 ?>
