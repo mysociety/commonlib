@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: importparams.php,v 1.2 2005-03-04 10:55:59 chris Exp $
+ * $Id: importparams.php,v 1.3 2005-03-04 11:31:34 chris Exp $
  * 
  */
 
@@ -35,7 +35,7 @@ function importparams() {
     $errors = array();
     $valid = array();
     for ($i = 0; $i < func_num_args(); ++$i) {
-        $pp = func_get_arg($i++);
+        $pp = func_get_arg($i);
         if (!is_array($pp) || count($pp) < 2 || count($pp) > 4)
             err("each SPEC must be an array of 2, 3 or 4 elements");
         $name = $pp[0];
@@ -61,8 +61,7 @@ function importparams() {
                 $have_default = true;
             }
         } else if (is_string($check)) {
-            $x = preg_match($check, '');
-            if (is_bool($x) && $x == false)
+            if (preg_match($check, '') === false)
                 err("If CHECK is a string, it must be a valid PCRE regular expression, not '$check'");
             else if (count($pp) < 3 || !is_string($pp[2]))
                 err("If CHECK is a regular expression, it must be followed by an ERROR string");
@@ -94,17 +93,19 @@ function importparams() {
             eval("\$q_$name = \$val;");
             eval("\$q_h_$name = htmlspecialchars(\$val);");
         }
-        
+ 
         eval("global \$q_unchecked_$name;");
         eval("global \$q_unchecked_h_$name;");
-        if (!is_null($val)) {
-            eval("\$q_unchecked_$name = \$val;");
-            eval("\$q_unchecked_h_$name = htmlspecialchars(\$val);");
-        }
+        if (is_null($val))
+            $val = '';
+        eval("\$q_unchecked_$name = \$val;");
+        eval("\$q_unchecked_h_$name = htmlspecialchars(\$val);");
     }
 
     if (count($errors) > 0)
         return $errors;
+    else
+        return null;
 }
 
 ?>
