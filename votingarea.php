@@ -8,7 +8,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: votingarea.php,v 1.29 2005-02-09 17:07:43 francis Exp $
+ * $Id: votingarea.php,v 1.30 2005-02-09 18:56:29 chris Exp $
  * 
  */
 
@@ -141,9 +141,11 @@ Mayor's budget, <strong>culture</strong>, <strong>sport and tourism</strong>,
             "The House of Commons is responsible for
             <strong>making laws in the UK and for overall scrutiny of all aspects of
             government</strong>.",
-    'EUP' =>
-            "They <strong>scrutinise European laws</strong> and the <strong>budget of the European Union</strong>, and provide
-            <strong>oversight of the other decision-making bodies</strong>.",
+    'EUP' => "
+They <strong>scrutinise European laws</strong> and the <strong>budget of the
+European Union</strong>, and provide <strong>oversight of its other
+decision-making bodies</strong>.
+",
     'SPA' => "
 The Scottish Parliament is responsible for a wide range of <strong>devolved
 matters</strong> in which it sets policy independently of the London
