@@ -7,9 +7,24 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.14 2004-11-18 23:18:18 francis Exp $
+ * $Id: utility.php,v 1.15 2004-11-22 11:24:09 francis Exp $
  * 
  */
+
+/* Disable all magic quoting for good */
+
+if (get_magic_quotes_gpc()) unfck_gpc();
+
+function unfck($v) {
+    return is_array($v) ? array_map('unfck', $v) : stripslashes($v);
+}
+
+function unfck_gpc() {
+    foreach (array('POST', 'GET', 'REQUEST', 'COOKIE') as $gpc)
+    $GLOBALS["_$gpc"] = array_map('unfck', $GLOBALS["_$gpc"]);
+}
+
+set_magic_quotes_runtime(0);
 
 /* debug HEADER TEXT [VARIABLE]
  * Print, to the page, a debugging variable, if a debug=... parameter is
@@ -678,7 +693,10 @@ function get_http_var ($name, $default=''){
 }
 
 function clean_var ($a){
-	return (ini_get("magic_quotes_gpc") == 1) ? recursive_strip($a) : $a;
+    // this replaced by unfck_gpc above
+
+	//return (ini_get("magic_quotes_gpc") == 1) ? recursive_strip($a) : $a;
+    return $a;
 }
 
 function recursive_strip ($a){
