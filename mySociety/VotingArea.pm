@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: VotingArea.pm,v 1.18 2004-12-30 19:46:20 francis Exp $
+# $Id: VotingArea.pm,v 1.19 2005-01-07 20:20:12 chris Exp $
 #
 
 package mySociety::VotingArea;
@@ -53,6 +53,27 @@ Same, for European Parliament.
 
 =cut
 use constant EUP_AREA_ID => 900001;
+
+=item SPA_AREA_ID
+
+Scottish Parliament
+
+=cut
+use constant SPA_AREA_ID => 900003;
+
+=item WAS_AREA_ID
+
+Welsh Assembly
+
+=cut
+use constant WAS_AREA_ID => 900004;
+
+=item NIA_AREA_ID
+
+Northern Ireland Assembly
+
+=cut
+use constant NIA_AREA_ID => 900005;
 
 
 =back
