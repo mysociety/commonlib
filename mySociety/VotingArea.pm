@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: VotingArea.pm,v 1.23 2005-02-09 17:05:53 chris Exp $
+# $Id: VotingArea.pm,v 1.24 2005-02-10 10:27:34 francis Exp $
 #
 
 package mySociety::VotingArea;
@@ -140,7 +140,7 @@ for instance "Ward" or "Electoral Division".
         DIS =>  "District",
         DIW =>  "Ward",
 
-        LGD =>  "Local Government District",
+        LGD =>  "Local Council",
         LGE =>  "Electoral Area",
 
         UTA =>  "Unitary Authority",
