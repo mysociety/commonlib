@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.2 2004-10-20 10:44:40 francis Exp $
+ * $Id: utility.php,v 1.3 2004-10-20 15:37:40 francis Exp $
  * 
  */
 
@@ -29,7 +29,7 @@ function debug ($header, $text="", $complex_variable=null) {
 	
 		// Set which level shows which types of debug info.
 		$levels = array (
-			1 => array ('FRONTEND', 'WARNING', 'MAPIT', 'DADEM'),
+			1 => array ('FRONTEND', 'WARNING', 'MAPIT', 'DADEM', 'QUEUE'),
 			2 => array ('MAPITRESULT', 'DADEMRESULT'), 
 			3 => array ('XMLRPC')
 			// Higher than this: 'DATA', etc.
