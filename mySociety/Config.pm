@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Config.pm,v 1.1 2004-10-06 16:37:40 chris Exp $
+# $Id: Config.pm,v 1.2 2004-10-06 16:38:19 chris Exp $
 #
 
 package mySociety::Config;
@@ -27,7 +27,8 @@ sub fixup ($) {
 
 Read configuration from FILE, which may be either a name or a filehandle.
 Returns a reference to a hash of parameter to value. Config files are in a
-sort of cod-PHP. If specified, values from DEFAULTS are merged.
+sort of cod-PHP; basically only define('...', '...') is handled, though we
+do process comments. If specified, values from DEFAULTS are merged.
 
 =cut
 sub read_config ($;$) {
