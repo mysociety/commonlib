@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.26 2005-01-12 14:49:23 francis Exp $
+ * $Id: utility.php,v 1.27 2005-01-19 02:10:46 francis Exp $
  * 
  */
 
@@ -229,6 +229,18 @@ function trim_characters ($text, $start, $length) {
     }
 
     return $text;
+}
+
+/* trim_url URL
+ * Returns the URL formatted as a link to itself.  The displayed
+ * text is shortened to just the first part of the URL. */
+function trim_url($url) {
+    $short_url = $url;
+    $url_bits = parse_url($url);
+    if (array_key_exists('path', $url_bits) && array_key_exists('scheme', $url_bits) && array_key_exists('host', $url_bits))
+        if ($url != "" && ($url_bits['path'] != '/' || array_key_exists('query', $url_bits)) )
+            $short_url = $url_bits['scheme'] . "://" .  $url_bits['host'] . "/...";
+    return "<a href=\"" .  htmlspecialchars($url) .  "\">" .  htmlspecialchars($short_url) . "</a>";
 }
 
 /* convert_to_unix_newlines TEXT

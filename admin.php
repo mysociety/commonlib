@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin.php,v 1.20 2005-01-18 21:05:11 francis Exp $
+ * $Id: admin.php,v 1.21 2005-01-19 02:10:46 francis Exp $
  * 
  */
 
@@ -80,7 +80,7 @@ table {border-collapse: collapse; }
 .center {text-align: center; }
 .center table { margin-left: auto;  margin-right: auto;  text-align: left; }
 .center th { text-align: center !important;  }
-td,  th { font-size: 75%; vertical-align: * baseline; }
+td,  th { font-size: 75%; }
 h1 {font-size: 150%; }
 h2 {font-size: 125%; }
 .p {text-align: left; }
