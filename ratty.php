@@ -6,7 +6,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: ratty.php,v 1.4 2004-11-08 18:09:31 francis Exp $
+ * $Id: ratty.php,v 1.5 2004-11-08 18:27:17 francis Exp $
  * 
  */
 
@@ -37,7 +37,7 @@ function ratty_test($vals) {
     global $ratty_client;
     debug("RATTY", "Rate limiting", $vals);
     $res = $ratty_client->call('Ratty.test', array($vals));
-    if ($fyr_error_message = msg_get_error($res)) {
+    if ($fyr_error_message = ratty_get_error($res)) {
         include "../templates/generalerror.html";
         exit;
     }
