@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-ratty.php,v 1.8 2004-11-15 14:44:05 fyr Exp $
+ * $Id: admin-ratty.php,v 1.9 2004-11-15 15:54:14 francis Exp $
  * 
  */
 
@@ -164,7 +164,9 @@ make the rule count limits separately for each distinct, for example, IP
 address.  Or alternatively limit the number of distinct representatives
 which can be viewed per unit time.
 </p>
-<table border=1 width=100%><tr><th>Position</th><th>Description</th><th>Hit limit</th></tr>
+<table border=1
+width=100%><tr><th>Position</th><th>Description</th><th>Hit
+limit</th><th>Matches</th></tr>
 <?
             foreach ($rules as $rule) {
                 if ($rule['note'] == "") 
@@ -174,6 +176,7 @@ which can be viewed per unit time.
                 print "<td><a href=\"$self_link&action=editrule&rule_id=" .
                     $rule['id'] . "\">" . $rule['note'] . "</a></td>";
                 print "<td>" . $rule['requests'] . " hits / " . $rule['interval'] . " " . make_plural("sec", $rule['interval']). "</td>";
+                print "<td>" . $rule['hits'] . "</td>";
                 print "</tr>";
             }
 ?>
