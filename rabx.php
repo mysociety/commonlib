@@ -10,7 +10,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: rabx.php,v 1.6 2004-12-16 12:36:15 francis Exp $
+ * $Id: rabx.php,v 1.7 2005-01-11 10:48:44 chris Exp $
  * 
  */
 
@@ -36,8 +36,7 @@ class RABX_Error {
     var $code, $text, $extra;
     function RABX_Error($code, $text, $extra = null) {
         $this->code = $code;
-        // for PHP, we want any HTML escaped to avoid cross site scripting attacks
-        $this->text = htmlentities($text); 
+        $this->text = $text;
         $this->extra = $extra;
     }
 };
@@ -310,15 +309,15 @@ class RABX_Client {
      * FORCEPOST is true, use HTTP POST even if the request would be small
      * enough to fit in a GET. */
     function call($function, $args, $force_post = 0) {
-        debug(RABX, "RABX calling $function via $this->url, arguments:", $args);
+        debug("RABX", "RABX calling $function via $this->url, arguments:", $args);
 
         $callstr = rabx_call_string($function, &$args);
-        debug(RABXWIRE, "RABX raw send:", $callstr);
+        debug("RABXWIRE", "RABX raw send:", $callstr);
         if (rabx_is_error($callstr))
             return $callstr;
 
         $c = urlencode($callstr);
-        $post = $use_post || $force_post;
+        $post = $this->use_post || $force_post;
         if (!$post and strlen($u = $this->url. "?$c") > 1024)
             $post = TRUE;
 
@@ -333,13 +332,13 @@ class RABX_Client {
 
         $r = curl_exec($this->ch);
         $C = curl_getinfo($this->ch, CURLINFO_HTTP_CODE);
-        debug(RABXWIRE, "RABX raw result:", $r);
+        debug("RABXWIRE", "RABX raw result:", $r);
 
         if ($C != 200)
             return rabx_error(RABX_ERROR_TRANSPORT, "HTTP error $C calling $this->url");
         else {
             $result = rabx_return_string_parse($r);
-            debug(RABX, "RABX result:", $result);
+            debug("RABX", "RABX result:", $result);
             return $result;
         }
     }
