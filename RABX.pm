@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: RABX.pm,v 1.8 2005-02-21 13:18:31 chris Exp $
+# $Id: RABX.pm,v 1.9 2005-02-21 15:15:32 chris Exp $
 
 # References:
 #   Netstrings are documented here: http://cr.yp.to/proto/netstrings.txt
@@ -291,7 +291,7 @@ sub call_string_parse ($) {
     if ($have_fast_serialisation) {
         return RABX::Fast::do_call_string_parse($_[0]);
     } else {
-        my $h = new IO::String($buf);
+        my $h = new IO::String($_[0]);
         my $c = $h->getc();
         throw RABX::Error(qq#EOF reading call string indicator character#, RABX::Error::PROTOCOL)
             if (!defined($c));
@@ -318,7 +318,7 @@ derivative.
 =cut
 sub return_string ($) {
     if ($have_fast_serialisation) {
-        if (ref($_[0]) and UNIVERSAL::isa($v, 'RABX::Error')) {
+        if (ref($_[0]) and UNIVERSAL::isa($_[0], 'RABX::Error')) {
             return RABX::Fast::do_return_string_error($_[0]->value() | RABX::Error::SERVER, $_[0]->text(), $_[0]->can('extradata') ? $_[0]->extradata() : undef);
         } else {
             return RABX::Fast::do_return_string_success($_[0]);
@@ -379,7 +379,7 @@ use HTTP::Request;
 use HTTP::Response;
 use Regexp::Common qw(URI);
 
-my $rcsid = ''; $rcsid .= '$Id: RABX.pm,v 1.8 2005-02-21 13:18:31 chris Exp $';
+my $rcsid = ''; $rcsid .= '$Id: RABX.pm,v 1.9 2005-02-21 15:15:32 chris Exp $';
 
 =back
 
