@@ -7,7 +7,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: dadem.php,v 1.4 2004-10-28 11:00:03 chris Exp $
+ * $Id: dadem.php,v 1.5 2004-11-02 16:23:06 chris Exp $
  * 
  */
 
@@ -63,7 +63,6 @@ $dadem_client = new RABX_Client("http://" . OPTION_DADEM_HOST . ":" . OPTION_DAD
 function dadem_get_representatives($va_id) {
     global $dadem_client;
     debug("DADEM", "Looking up representatives for voting area id $va_id");
-//    $result = sxr_call(OPTION_DADEM_HOST, OPTION_DADEM_PORT, OPTION_DADEM_PATH, 'DaDem.get_representatives', array($va_id));
     $result = $dadem_client->call('DaDem.get_representatives', array($va_id));
     debug("DADEMRESULT", "Result is:", $result);
     return $result;

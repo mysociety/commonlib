@@ -7,7 +7,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: mapit.php,v 1.4 2004-10-28 11:00:03 chris Exp $
+ * $Id: mapit.php,v 1.5 2004-11-02 16:23:06 chris Exp $
  * 
  */
 
@@ -58,7 +58,6 @@ $mapit_client = new RABX_Client("http://" . OPTION_MAPIT_HOST . ":" . OPTION_MAP
 function mapit_get_voting_areas($postcode) {
     global $mapit_client;
     debug("MAPIT", "Looking up areas for postcode $postcode");
-//    $result = sxr_call(OPTION_MAPIT_HOST, OPTION_MAPIT_PORT, OPTION_MAPIT_PATH, 'MaPit.get_voting_areas', array($postcode));
     $result = $mapit_client->call('MaPit.get_voting_areas', array($postcode));
     debug("MAPITRESULT", "Result is:", $result);
     return $result;
@@ -72,7 +71,6 @@ function mapit_get_voting_areas($postcode) {
 function mapit_get_voting_area_info($va_id) {
     global $mapit_client;
     debug("MAPIT", "Looking up info on area $va_id");
-//    $result = sxr_call(OPTION_MAPIT_HOST, OPTION_MAPIT_PORT, OPTION_MAPIT_PATH, 'MaPit.get_voting_area_info', array($va_id));
     $result = $mapit_client->call('MaPit.get_voting_area_info', array($va_id));
     debug("MAPITRESULT", "Result is:", $result);
     return $result;
@@ -83,7 +81,6 @@ function mapit_get_voting_area_info($va_id) {
 function mapit_get_voting_areas_info($array) {
     global $mapit_client;
     debug("MAPIT", "Looking up info on areas");
-//    $result = sxr_call(OPTION_MAPIT_HOST, OPTION_MAPIT_PORT, OPTION_MAPIT_PATH, 'MaPit.get_voting_area_info', array($va_id));
     $result = $mapit_client->call('MaPit.get_voting_areas_info', array($array));
     debug("MAPITRESULT", "Result is:", $result);
     return $result;
