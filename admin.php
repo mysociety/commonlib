@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin.php,v 1.22 2005-01-28 16:47:52 matthew Exp $
+ * $Id: admin.php,v 1.23 2005-01-28 17:11:59 matthew Exp $
  * 
  */
 
@@ -94,7 +94,7 @@ hr {width: 600px;  background-color: #cccccc;  border: 0px;  height: 1px;  color
 // Footer at bottom
 function admin_html_footer($navlinks) {
 ?>
-<p><a href="http://www.mysociety.org/"><img class="mslogo" src="/mysociety_sm.gif" border="0" alt="mySociety"></a></p>
+<p><a href="http://www.mysociety.org/"><img class="mslogo" src="https://secure.mysociety.org/mysociety_sm.gif" border="0" alt="mySociety"></a></p>
 </td>
 <td valign=top>
 <?=$navlinks?>
