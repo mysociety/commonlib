@@ -6,7 +6,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: StringUtils.pm,v 1.3 2005-01-29 11:49:52 chris Exp $
+# $Id: StringUtils.pm,v 1.4 2005-02-01 13:23:07 francis Exp $
 #
 
 package mySociety::StringUtils;
@@ -131,7 +131,7 @@ sub break_into_lumps ($) {
 
     # Break it up into parts between tags.  Note the only tags left are
     # those in the regular expression above at this point.
-    my @lumps = split /<[^>]+>/, $content;
+    my @lumps = split /<[^>]+>|\(|\)/, $content;
     @lumps = map { trim($_) } @lumps;
     return @lumps;
 }

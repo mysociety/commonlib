@@ -7,12 +7,20 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: CouncilMatch.pm,v 1.7 2005-01-28 13:25:45 francis Exp $
+# $Id: CouncilMatch.pm,v 1.8 2005-02-01 13:23:07 francis Exp $
 #
 
 package mySociety::CouncilMatch;
 
 use Data::Dumper;
+
+our ($d_dbh, $m_dbh);
+# set_db_handles MAPID_DB DADEM_DB
+# Call first with DB handles to use for other functions.
+sub set_db_handles($$) {
+    $m_dbh = shift;
+    $d_dbh = shift;
+}
 
 our $parent_types = [qw(DIS LBO MTD UTA LGD CTY)];
 our $child_types = [qw(DIW LBW MTW UTE UTW LGW CED)];
@@ -69,16 +77,82 @@ sub canonicalise_council_name ($) {
     return $_;
 }
 
-# match_council_wards COUNCIL_ID VERBOSITY MAPIT_DB DADEM_DB
+
+# get_process_status COUNCIL_ID
+# Returns the text string saying what state of GE data processing
+# the council is in.
+sub get_process_status ($) {
+    my ($area_id) = @_;
+    my $ret = $d_dbh->selectrow_arrayref(q#select status from raw_process_status 
+        where council_id = ?#, {}, $area_id);
+    if (!defined($ret)) {
+        return "";
+    }
+    return $ret->[0];
+}
+
+# set_process_status COUNCIL_ID STATUS ERROR DETAILS
+# Alter processing status for a council.
+sub set_process_status ($$$$) {
+    my ($area_id, $status, $error, $details) = @_;
+
+    $d_dbh->do(q#delete from raw_process_status where council_id=?#, {}, $area_id);
+    $d_dbh->do(q#insert into raw_process_status (council_id, status, error, details)
+        values (?,?,?,?)#, {}, $area_id, $status, $error, $details);
+}
+
+# process_ge_data COUNCIL_ID VERBOSITY 
+# Performs next step(s) in processing on GE data.
+sub process_ge_data ($$) {
+    my ($area_id, $verbosity) = @_;
+    my $status;
+
+    # Match up wards
+    $status = get_process_status($area_id);
+    if ($status eq "" or $status eq "wards-mismatch") {
+        match_council_wards($area_id, $verbosity);
+    }
+
+    # See if we have URL
+    $status = get_process_status($area_id);
+    if ($status eq "wards-match" or $status eq "url-found" or $status eq "url-missing") {
+        check_for_extradata($area_id);
+    }
+
+    # Do fancier stuff
+    $status = get_process_status($area_id);
+
+}
+
+# Internal use
+# check_for_extradata COUNCIL_ID 
+# Checks we have the councillor names webpage URL, and any other needed data.
+sub check_for_extradata ($) {
+    my ($area_id) = @_;
+    my $ret = $d_dbh->selectrow_arrayref(q#select council_id, councillors_url from 
+        raw_council_extradata where council_id = ?#, {}, $area_id);
+    my $found = 0;
+    if (defined($ret)) {
+        if ($ret->[1] ne "") {
+            $found = 1;
+        }
+    }
+    my $status = $found ? "url-found" : "url-missing";
+    set_process_status($area_id, $status, undef, "");
+    $d_dbh->commit();
+}
+ 
+# Internal use
+# match_council_wards COUNCIL_ID VERBOSITY 
 # Attempts to match up the wards from the raw_input_data table to the Ordnance
 # Survey names.  Stores results in raw_process_status.
-sub match_council_wards ($$$$) {
-    my ($area_id, $verbosity, $m_dbh, $d_dbh) = @_;
+sub match_council_wards ($$) {
+    my ($area_id, $verbosity) = @_;
     print "Area: $area_id\n" if $verbosity > 0;
     my $error = "";
 
     # Set of wards GovEval have
-    my @raw_data = get_raw_data($area_id, $d_dbh);
+    my @raw_data = get_raw_data($area_id);
     # ... find unique set
     my %wards_hash;
     do { $wards_hash{$_->{'ward_name'}} = 1 } for @raw_data;
@@ -267,21 +341,19 @@ sub match_council_wards ($$$$) {
 
     # Update status field
     $status = $error ? 'wards-mismatch' : 'wards-match';
-    $d_dbh->do(q#delete from raw_process_status where council_id=?#, {}, $area_id);
-    $d_dbh->do(q#insert into raw_process_status (council_id, status, error, details)
-        values (?,?,?,?)#, {}, $area_id, $status, $error ? $error : undef, $matchesdump);
+    set_process_status($area_id, $status, $error ? $error : undef, $matchesdump);
     $d_dbh->commit();
 
     return { 'matchesdump' => $matchesdump, 
              'error' => $error };
 }
 
-# get_raw_data COUNCIL_ID DADEM_DB
+# get_raw_data COUNCIL_ID 
 # Return raw input data, with any admin modifications, for a given council.
 # In the form of an array of references to hashes.  Each hash contains the
 # ward_name, rep_first, rep_last, rep_party, rep_email, rep_fax.
-sub get_raw_data($$) {
-    my ($area_id, $d_dbh) = @_;
+sub get_raw_data($) {
+    my ($area_id) = @_;
 
     # Hash from representative key (either ge_id or newrow_id, with appropriate
     # prefix to distinguish them) to data about the representative.
@@ -320,7 +392,7 @@ sub get_raw_data($$) {
     return values(%$council);
 }
 
-# edit_raw_data COUNCIL_ID COUNCIL_NAME COUNCIL_TYPE ONS_CODE DADEM_DB DATA ADMIN_USER
+# edit_raw_data COUNCIL_ID COUNCIL_NAME COUNCIL_TYPE ONS_CODE DATA ADMIN_USER
 # Alter raw input data as a transaction log (keeping history).
 # DATA is in the form of a reference to an array of references to hashes.  Each
 # hash contains the ward_name, rep_first, rep_last, rep_party, rep_email, rep_fax, key
@@ -328,11 +400,11 @@ sub get_raw_data($$) {
 # applied.  ADMIN_USER is name of person who made this edit.
 # COUNCIL_NAME and COUNCIL_TYPE are stored in the edit for reference later if
 # for some reason ids get broken, really only COUNCIL_ID matters.
-sub edit_raw_data($$$$$$$) {
-    my ($area_id, $area_name, $area_type, $area_ons_code, $d_dbh, $newref, $user) = @_;
+sub edit_raw_data($$$$$$) {
+    my ($area_id, $area_name, $area_type, $area_ons_code, $newref, $user) = @_;
     my @new = @$newref;
 
-    my @old = get_raw_data($area_id, $d_dbh);
+    my @old = get_raw_data($area_id);
 
     my %old; do { $old{$_->{key}} = $_ } for @old;
     my %new; do { $new{$_->{key}} = $_ } for @new;
