@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: VotingArea.pm,v 1.17 2004-12-15 18:21:19 chris Exp $
+# $Id: VotingArea.pm,v 1.18 2004-12-30 19:46:20 francis Exp $
 #
 
 package mySociety::VotingArea;
@@ -22,172 +22,7 @@ mySociety::VotingArea
 Definitions of different types of voting and administrative areas, used in
 DaDem, MaPit, etc.
 
-=head1 CONSTANTS
-
-=head2 Area type codes
-
-(The three-letter codes used here are the mostly those used in the Ordnance
-Survey's Boundary Line product to identify different types of areas.)
-
-=over 4
-
-=item LBO 
-
-London Borough
-
-=item LBW 
-
-London Borough ward
-
-=item GLA 
-
-London Assembly
-
-=item LAC 
-
-London constituency
-
-=item LAE 
-
-London electoral region -- this is a fictional area type used as a placeholder
-for London-wide assembly members.
-
-=item CTY 
-
-County
-
-=item CED 
-
-County electoral division
-
-=item DIS 
-
-District
-
-=item DIW 
-
-District ward
-
-=item UTA 
-
-Unitary Authority
-
-=item UTE 
-
-Unitary Authority electoral division
-
-=item UTW 
-
-Unitary Authority ward
-
-=item LGD
-
-Local Government District
-
-=item LGW
-
-Local Government District electoral area
-
-=item MTD 
-
-Metropolitan District
-
-=item MTW 
-
-Metropolitan District ward
-
-=item NIA
-
-Northern Ireland Assembly (placeholder)
-
-=item NIE
-
-Northern Ireland Assembly Electoral Area (actually coterminous with the
-House of Commons constituencies in Northern Ireland)
-
-=item SPA 
-
-Scottish Parliament (placeholder)
-
-=item SPE 
-
-Scottish Parliament electoral region
-
-=item SPC 
-
-Scottish Parliament constituency
-
-=item WAS 
-
-Welsh Assembly (placeholder)
-
-=item WAE 
-
-Welsh Assembly electoral region
-
-=item WAC 
-
-Welsh Assembly constituency
-
-=item WMP 
-
-House of Commons
-
-=item WMC
-
-Westminster constituency
-
-=item EUP
-
-European Parliament
-
-=item EUR 
-
-European Parliament region
-
-=back
-
 =cut
-
-use constant DIS => 101; # District
-use constant DIW => 102; # ... ward
-
-use constant LBO => 201; # London Borough
-use constant LBW => 202; # ... ward
-
-use constant MTD => 301; # Metropolitan district
-use constant MTW => 302; # ... ward
-
-use constant UTA => 401; # Unitary authority
-use constant UTE => 402; # ... electoral division
-use constant UTW => 403; # ... ward
-
-use constant LGD => 451; # Local Government District
-use constant LGW => 453; # ... electoral area
-
-use constant CTY => 501; # County
-use constant CED => 502; # ... electoral division
-
-use constant GLA => 601; # Greater London Assembly
-use constant LAC => 602; # London constituency
-use constant LAE => 603; # ... electoral region
-
-use constant WAS => 701; # Welsh Assembly
-use constant WAE => 702; # ... electoral region
-use constant WAC => 703; # ... constituency
-
-use constant SPA => 801; # Scottish Parliament
-use constant SPE => 802; # ... electoral region
-use constant SPC => 803; # ... constituency
-
-use constant NIA => 851; # Northern Ireland Assembly
-use constant NIE => 852; # ... electoral region
-
-use constant WMP => 901; # Westminster Parliament
-use constant WMC => 902; # ... constituency
-
-use constant EUP => 1001; # European Parliament
-use constant EUR => 1002; # ... region
 
 =head2 Special area IDs
 
@@ -231,8 +66,19 @@ use constant EUP_AREA_ID => 900001;
 Known 3-letter area types.
 
 =cut
-@mySociety::VotingArea::known_types = qw(
-        LBO LBW GLA LAC LAE LGD LGW CTY CED DIS DIW UTA UTE UTW MTD MTW SPA SPE SPC WAS WAE WAC WMP WMC EUP EUR
+@mySociety::VotingArea::known_types = (
+        'LBO', 'LBW',  # London Borough, Ward
+        'GLA', 'LAC', 'LAE', # Greater London Assemly, Constituency, Electoral Region
+        'LGD', 'LGW',  # Local Government District, Electoral Area
+        'CTY', 'CED',  # County, Electoral Division
+        'DIS', 'DIW',  # District, Ward
+        'UTA', 'UTE', 'UTW', # Unitary Authority, Electoral Division, Ward
+        'MTD', 'MTW',  # Metropolitan District, Ward
+        'SPA', 'SPE', 'SPC', # Scottish Parliament, Electoral Region, Constituency
+        'WAS', 'WAE', 'WAC', # Welsh Assembly, Electoral Region, Constituency
+        'NIA', 'NIE', # Northern Ireland Assembly, Electoral Region
+        'WMP', 'WMC', # Westminster Parliament, Constituency
+        'EUP', 'EUR', # European Parliament, Region
     );
 
 =item %known_types
@@ -242,23 +88,6 @@ Hash having an entry for each element of @known_types.
 =cut
 %mySociety::VotingArea::known_types = map { $_ => 1 } @mySociety::VotingArea::known_types;
 
-=item %type_to_id
-
-Map a 3-letter type string (like "WMC") to its corresponding numeric type.
-
-=cut
-{
-    no strict 'refs';
-    %mySociety::VotingArea::type_to_id = map { $_ => &$_ } @mySociety::VotingArea::known_types;
-}
-
-=item %id_to_type
-
-Map a numeric type to its corresponding three-letter type.
-
-=cut
-%mySociety::VotingArea::id_to_type = reverse(%mySociety::VotingArea::type_to_id);
-
 =item %type_name
 
 Map names of types of areas. For administrative areas, this is their full name,
@@ -267,51 +96,49 @@ for instance "Ward" or "Electoral Division".
 
 =cut
 %mySociety::VotingArea::type_name = (
-    # NB commas not => here, since otherwise the keys are interpreted as
-    # strings, not their numeric values.
-        LBO,  "London Borough",
-        LBW,  "Ward",
+        LBO =>  "London Borough",
+        LBW =>  "Ward",
 
-        GLA,  "London Assembly",
-        LAC,  "Constituency",
-        LAE,  "Electoral Region",
+        GLA =>  "London Assembly",
+        LAC =>  "Constituency",
+        LAE =>  "Electoral Region",
 
-        CTY,  "County",
-        CED,  "Electoral Division",
+        CTY =>  "County",
+        CED =>  "Electoral Division",
 
-        DIS,  "District",
-        DIW,  "Ward",
+        DIS =>  "District",
+        DIW =>  "Ward",
 
-        LGD,  "Local Government District",
-        LGW,  "Electoral Area",
+        LGD =>  "Local Government District",
+        LGW =>  "Electoral Area",
 
-        UTA,  "Unitary Authority",
-        UTE,  "Electoral Division",
-        UTW,  "Ward",
+        UTA =>  "Unitary Authority",
+        UTE =>  "Electoral Division",
+        UTW =>  "Ward",
 
-        MTD,  "Metropolitan District",
-        MTW,  "Ward",
+        MTD =>  "Metropolitan District",
+        MTW =>  "Ward",
 
-        SPA,  "Scottish Parliament",
-        SPE,  "Electoral Region",
-        SPC,  "Constituency",
+        SPA =>  "Scottish Parliament",
+        SPE =>  "Electoral Region",
+        SPC =>  "Constituency",
 
-        WAS,  "Welsh Assembly",
-        WAE,  "Electoral Region",
-        WAC,  "Constituency",
+        WAS =>  "Welsh Assembly",
+        WAE =>  "Electoral Region",
+        WAC =>  "Constituency",
 
-        NIA,  "Northern Ireland Assembly",
-        NIE,  "Constituency", # These are the same as the Westminster
-                              # constituencies, but return several members
+        NIA =>  "Northern Ireland Assembly",
+        NIE =>  "Constituency", # These are the same as the Westminster
+                              # constituencies => but return several members
                               # using a proportional system. It looks like
                               # most people just refer to them as
                               # "constituencies".
         
-        WMP,  "House of Commons",
-        WMC,  "Constituency",
+        WMP =>  "House of Commons",
+        WMC =>  "Constituency",
 
-        EUP,  "European Parliament",
-        EUR,  "Region"
+        EUP =>  "European Parliament",
+        EUR =>  "Region"
     );
 
 =item %attend_prep
@@ -324,31 +151,29 @@ you in the European Parliament".
 =cut
 
 %mySociety::VotingArea::attend_prep = (
-    # NB commas not => here, since otherwise the keys are interpreted as
-    # strings, not their numeric values.
-        LBO,  "on the",
+        LBO =>  "on the",
 
-        GLA,  "on the",
+        GLA =>  "on the",
 
-        CTY,  "on",
+        CTY =>  "on",
 
-        DIS,  "on",
+        DIS =>  "on",
 
-        UTA,  "on",
+        UTA =>  "on",
 
-        MTD,  "on",
+        MTD =>  "on",
 
-        LGD,  "on",
+        LGD =>  "on",
 
-        SPA,  "in the",
+        SPA =>  "in the",
 
-        WAS,  "on the",
+        WAS =>  "on the",
 
-        NIA,  "on the",
+        NIA =>  "on the",
 
-        WMP,  "in the",
+        WMP =>  "in the",
 
-        EUP,  "in the",
+        EUP =>  "in the",
     );
 
 
@@ -359,36 +184,34 @@ that area.  For example, "Councillor" or "MEP".
 
 =cut
 %mySociety::VotingArea::rep_name = (
-    # NB commas not => here, since otherwise the keys are interpreted as
-    # strings, not their numeric values.
-        LBW, 'Councillor',
+        LBW => 'Councillor',
 
-        GLA, 'Mayor', # "of London"? 
-        LAC, 'Assembly Member',
-        LAE, 'Assembly Member',
+        GLA => 'Mayor', # "of London"? 
+        LAC => 'Assembly Member',
+        LAE => 'Assembly Member',
 
-        CED, 'County Councillor',
+        CED => 'County Councillor',
 
-        DIW, 'District Councillor',
+        DIW => 'District Councillor',
 
-        LGW, 'Councillor',
+        LGW => 'Councillor',
 
-        UTE, 'Councillor',
-        UTW, 'Councillor',
+        UTE => 'Councillor',
+        UTW => 'Councillor',
 
-        MTW, 'Councillor',
+        MTW => 'Councillor',
 
-        SPE, 'MSP',
-        SPC, 'MSP',
+        SPE => 'MSP',
+        SPC => 'MSP',
 
-        WAE, 'AM',
-        WAC, 'AM',
+        WAE => 'AM',
+        WAC => 'AM',
 
-        NIE, 'MLA',
+        NIE => 'MLA',
 
-        WMC, 'MP',
+        WMC => 'MP',
 
-        EUR, 'MEP'
+        EUR => 'MEP'
     );
 
 =item %rep_name_long
@@ -398,36 +221,34 @@ area.  For example, "Councillor" or "Member of the European Parliament".
 
 =cut
 %mySociety::VotingArea::rep_name_long = (
-    # NB commas not => here, since otherwise the keys are interpreted as
-    # strings, not their numeric values.
-        LBW, 'Councillor',
+        LBW => 'Councillor',
 
-        GLA, 'Mayor', # "of London"? 
-        LAC, 'Assembly Member',
-        LAE, 'Assembly Member',
+        GLA => 'Mayor', # "of London"? 
+        LAC => 'Assembly Member',
+        LAE => 'Assembly Member',
 
-        CED, 'County Councillor',
+        CED => 'County Councillor',
 
-        DIW, 'District Councillor',
+        DIW => 'District Councillor',
 
-        LGW, 'Councillor',
+        LGW => 'Councillor',
 
-        UTE, 'Councillor',
-        UTW, 'Councillor',
+        UTE => 'Councillor',
+        UTW => 'Councillor',
 
-        MTW, 'Councillor',
+        MTW => 'Councillor',
 
-        SPE, 'Member of the Scottish Parliament',
-        SPC, 'Member of the Scottish Parliament',
+        SPE => 'Member of the Scottish Parliament',
+        SPC => 'Member of the Scottish Parliament',
 
-        NIE, 'Member of the Legislative Assembly',
+        NIE => 'Member of the Legislative Assembly',
 
-        WAE, 'Welsh Assembly Member',
-        WAC, 'Welsh Assembly Member',
+        WAE => 'Welsh Assembly Member',
+        WAC => 'Welsh Assembly Member',
 
-        WMC, 'Member of Parliament',
+        WMC => 'Member of Parliament',
 
-        EUR, 'Member of the European Parliament'
+        EUR => 'Member of the European Parliament'
     );
 
 
@@ -437,36 +258,34 @@ Plural short version of rep_name.
 
 =cut
 %mySociety::VotingArea::rep_name_plural = (
-    # NB commas not => here, since otherwise the keys are interpreted as
-    # strings, not their numeric values.
-        LBW, 'Councillors',
+        LBW => 'Councillors',
 
-        GLA, 'Mayors', # "of London"?
-        LAC, 'Assembly Members',
-        LAE, 'Assembly Members',
+        GLA => 'Mayors', # "of London"?
+        LAC => 'Assembly Members',
+        LAE => 'Assembly Members',
 
-        CED, 'County Councillors',
+        CED => 'County Councillors',
 
-        DIW, 'District Councillors',
+        DIW => 'District Councillors',
 
-        UTE, 'Councillors',
-        UTW, 'Councillors',
+        UTE => 'Councillors',
+        UTW => 'Councillors',
 
-        LGW, 'Councillors',
+        LGW => 'Councillors',
 
-        MTW, 'Councillors',
+        MTW => 'Councillors',
 
-        SPE, 'MSPs',
-        SPC, 'MSPs',
+        SPE => 'MSPs',
+        SPC => 'MSPs',
 
-        WAE, 'AMs',
-        WAC, 'AMs',
+        WAE => 'AMs',
+        WAC => 'AMs',
 
-        NIE, 'MLAs',
+        NIE => 'MLAs',
 
-        WMC, 'MPs',
+        WMC => 'MPs',
 
-        EUR, 'MEPs'
+        EUR => 'MEPs'
     );
 
 =item %rep_name_long_plural
@@ -475,36 +294,34 @@ Plural long version of rep_name.
 
 =cut
 %mySociety::VotingArea::rep_name_long_plural = (
-    # NB commas not => here, since otherwise the keys are interpreted as
-    # strings, not their numeric values.
-        LBW, 'Councillors',
+        LBW => 'Councillors',
 
-        GLA, 'Mayors', # "of London"?
-        LAC, 'Assembly Members',
-        LAE, 'Assembly Members',
+        GLA => 'Mayors', # "of London"?
+        LAC => 'Assembly Members',
+        LAE => 'Assembly Members',
 
-        CED, 'County Councillors',
+        CED => 'County Councillors',
 
-        DIW, 'District Councillors',
+        DIW => 'District Councillors',
 
-        UTE, 'Councillors',
-        UTW, 'Councillors',
+        UTE => 'Councillors',
+        UTW => 'Councillors',
 
-        LGW, 'Councillors',
+        LGW => 'Councillors',
 
-        MTW, 'Councillors',
+        MTW => 'Councillors',
 
-        SPE, 'Members of the Scottish Parliament',
-        SPC, 'Members of the Scottish Parliament',
+        SPE => 'Members of the Scottish Parliament',
+        SPC => 'Members of the Scottish Parliament',
 
-        WAE, 'Welsh Assembly Members',
-        WAC, 'Welsh Assembly Members',
+        WAE => 'Welsh Assembly Members',
+        WAC => 'Welsh Assembly Members',
 
-        NIE, 'Members of the Legislative Assembly',
+        NIE => 'Members of the Legislative Assembly',
 
-        WMC, 'Members of Parliament',
+        WMC => 'Members of Parliament',
 
-        EUR, 'Members of the European Parliament'
+        EUR => 'Members of the European Parliament'
     );
 
 
@@ -516,36 +333,34 @@ that area.  For example, "AM" for Assembly Members.
 
 =cut
 %mySociety::VotingArea::rep_suffix = (
-    # NB commas not => here, since otherwise the keys are interpreted as
-    # strings, not their numeric values.
-        LBW, '',
+        LBW => '',
 
-        GLA, '',
-        LAC, 'AM',
-        LAE, 'AM',
+        GLA => '',
+        LAC => 'AM',
+        LAE => 'AM',
 
-        CED, '',
+        CED => '',
 
-        DIW, '',
+        DIW => '',
 
-        UTE, '',
-        UTW, '',
+        UTE => '',
+        UTW => '',
 
-        LGW, '',
+        LGW => '',
 
-        MTW, '',
+        MTW => '',
 
-        SPE, 'MSP',
-        SPC, 'MSP',
+        SPE => 'MSP',
+        SPC => 'MSP',
 
-        WAE, 'AM',
-        WAC, 'AM',
+        WAE => 'AM',
+        WAC => 'AM',
 
-        NIE, 'MLA',
+        NIE => 'MLA',
 
-        WMC, 'MP',
+        WMC => 'MP',
 
-        EUR, 'MEP'
+        EUR => 'MEP'
     );
 
 =item %rep_prefix
@@ -555,36 +370,34 @@ that area.  For example, "Cllr" for Councillors.
 
 =cut
 %mySociety::VotingArea::rep_prefix = (
-    # NB commas not => here, since otherwise the keys are interpreted as
-    # strings, not their numeric values.
-        LBW, 'Cllr',
+        LBW => 'Cllr',
 
-        GLA, 'Mayor', # "of London"? 
-        LAC, '',
-        LAE, '',
+        GLA => 'Mayor', # "of London"? 
+        LAC => '',
+        LAE => '',
 
-        CED, 'Cllr',
+        CED => 'Cllr',
 
-        DIW, 'Cllr',
+        DIW => 'Cllr',
 
-        UTE, 'Cllr',
-        UTW, 'Cllr',
+        UTE => 'Cllr',
+        UTW => 'Cllr',
 
-        LGW, 'Cllr',
+        LGW => 'Cllr',
 
-        MTW, 'Cllr',
+        MTW => 'Cllr',
 
-        SPE, '',
-        SPC, '',
+        SPE => '',
+        SPC => '',
 
-        WAE, '',
-        WAC, '',
+        WAE => '',
+        WAC => '',
 
-        NIE, '',
+        NIE => '',
 
-        WMC, '',
+        WMC => '',
 
-        EUR, ''
+        EUR => ''
     );
 
 =back
