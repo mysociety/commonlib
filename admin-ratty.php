@@ -6,14 +6,23 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-ratty.php,v 1.24 2005-01-12 18:03:13 francis Exp $
+ * $Id: admin-ratty.php,v 1.25 2005-01-13 02:18:50 chris Exp $
  * 
  */
 
 require_once "ratty.php";
 
 class ADMIN_PAGE_RATTY {
-    function ADMIN_PAGE_RATTY($scope, $what, $description) {
+    /* ADMIN_PAGE_RATTY SCOPE WHAT DESCRIPTION MESSAGEBLURB
+     * Create a new Ratty administration interface object. SCOPE is the Ratty
+     * scope which will be edited; WHAT is a concise description of what this
+     * scope applies to (e.g. "WriteToThem website"; DESCRIPTION is a longer
+     * description (which may include HTML), and MESSAGEBLURB (which may also
+     * include HTML) describes how the caller will interpret values of the
+     * message field in rate-limiting rules (e.g., "HTML fragment to be
+     * displayed to user when rule fires."). The contents of MESSAGEBLURB will
+     * be displayed inside a <div>. */
+    function ADMIN_PAGE_RATTY($scope, $what, $description, $messageblurb) {
         $this->id = "ratty-" . $scope;
         $this->name = "Ratty";
         $this->navname = "Rate Limit - $what";
@@ -21,6 +30,7 @@ class ADMIN_PAGE_RATTY {
         $this->scope = $scope;
         $this->scope_title = $what;
         $this->scope_description = $description;
+        $this->scope_messageblurb = $messageblurb;
     }
 
     function display($self_link) {
@@ -87,8 +97,8 @@ class ADMIN_PAGE_RATTY {
             $form->addElement('text', 'note', "Title of rule:", array('size' => 60, 'maxlength' => 80));
             $form->addElement('text', 'requests', "Limit to this many hits:", array('size' => 10, 'maxlength' => 20));
             $form->addElement('text', 'interval', "Every this many seconds:", array('size' => 10, 'maxlength' => 20));
-            $form->addElement('textarea', 'message', "HTML to display
-            when rule prevents a page view (leave blank for default):", array('rows' => 3, 'cols' => 60));
+            $form->addElement('textarea', 'message', "Action when rule fires:", array('rows' => 3, 'cols' => 60));
+            $form->addElement('static', '', '', "<div>" . $this->scope_messageblurb . "</div>");
             $form->addElement('text', 'sequence', "Rule evaluation position:", array('size' => 10, 'maxlength' => 20));
             $form->addRule('sequence', 'Rule position must be numeric', 'numeric', null, 'server');
             $form->addRule('requests', 'Hit count must be numeric', 'numeric', null, 'server');
