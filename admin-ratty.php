@@ -6,7 +6,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-ratty.php,v 1.22 2005-01-12 17:36:40 chris Exp $
+ * $Id: admin-ratty.php,v 1.23 2005-01-12 17:43:18 chris Exp $
  * 
  */
 
@@ -14,7 +14,7 @@ require_once "ratty.php";
 
 class ADMIN_PAGE_RATTY {
     function ADMIN_PAGE_RATTY($scope, $what) {
-        $this->id = "ratty";
+        $this->id = "ratty_$scope";
         $this->name = "Ratty";
         $this->navname = "Rate Limiter - $what";
         $this->scope = $scope;
