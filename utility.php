@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.3 2004-10-20 15:37:40 francis Exp $
+ * $Id: utility.php,v 1.4 2004-10-25 15:21:31 francis Exp $
  * 
  */
 
@@ -24,6 +24,7 @@ function debug ($header, $text="", $complex_variable=null) {
     // $complex_variable is dumped in full, so you can put arrays/hashes here
 	
 	$debug_level = get_http_var("debug");
+//    $debug_level = 4;
 	
 	if ($debug_level != '') {
 	
@@ -31,7 +32,8 @@ function debug ($header, $text="", $complex_variable=null) {
 		$levels = array (
 			1 => array ('FRONTEND', 'WARNING', 'MAPIT', 'DADEM', 'QUEUE'),
 			2 => array ('MAPITRESULT', 'DADEMRESULT'), 
-			3 => array ('XMLRPC')
+			3 => array ('XMLRPC'),
+			4 => array ('SERIALIZE'),
 			// Higher than this: 'DATA', etc.
 		);
 	
@@ -717,17 +719,6 @@ function hidden_form_vars ($omit = array()) {
 }
 
 
-
-// Deprecated. Use hidden_form_vars, above, instead.
-function hidden_vars ($omit = array()) {
-	global $DATA;
-	
-	foreach ($args as $key => $val) {
-		if (!in_array($key, $omit)) {
-			print "<input type=\"hidden\" name=\"$key\" value=\"" . htmlspecialchars($val) . "\" />\n";
-		}	
-	}
-}
 
 function make_ranking($rank)
 {
