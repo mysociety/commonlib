@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: RABX.pm,v 1.4 2004-11-10 17:30:37 francis Exp $
+# $Id: RABX.pm,v 1.5 2005-02-16 22:13:51 chris Exp $
 
 # References:
 #   Netstrings are documented here: http://cr.yp.to/proto/netstrings.txt
@@ -115,7 +115,7 @@ Return STRING, formatted as a netstring.
 
 =cut
 sub netstring_wr ($$) {
-    $_[1]->printf('%d:%s,', length($_[0]), $_[0]);
+    $_[1]->print(length($_[0]), ':', $_[0], ',');
 }
 
 =item netstring_rd HANDLE
@@ -168,12 +168,8 @@ Format X (which may be a reference or a scalar) into HANDLE.
 =cut
 sub wire_wr ($$);
 sub wire_wr ($$) {
-    my ($ref, $h) = @_;
-
-    if (!ref($ref)) {
-        my $x = $ref;
-        $ref = \$x;
-    }
+    my $ref = ref($_[0]) ? $_[0] : \$_[0];
+    my $h = $_[1];
 
     if (ref($ref) eq 'SCALAR') {
         # Four cases:
@@ -364,7 +360,7 @@ use HTTP::Request;
 use HTTP::Response;
 use Regexp::Common qw(URI);
 
-my $rcsid = ''; $rcsid .= '$Id: RABX.pm,v 1.4 2004-11-10 17:30:37 francis Exp $';
+my $rcsid = ''; $rcsid .= '$Id: RABX.pm,v 1.5 2005-02-16 22:13:51 chris Exp $';
 
 =back
 
