@@ -8,7 +8,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: votingarea.php,v 1.30 2005-02-09 18:56:29 chris Exp $
+ * $Id: votingarea.php,v 1.31 2005-02-10 10:27:35 francis Exp $
  * 
  */
 
@@ -135,8 +135,12 @@ Mayor's budget, <strong>culture</strong>, <strong>sport and tourism</strong>,
             services</strong>, including <strong>education</strong>, <strong>social services</strong>, <strong>transport</strong> and
             <strong>libraries</strong>.",
     'LGD' =>
-            "The Local Government District is responsible for all local
-            services and policy.", /* FIXME */
+            "The Local Council is responsible for
+            <strong>local services</strong>, including 
+            <strong>waste and recycling</strong>, 
+            <strong>leisure and community</strong>, 
+            <strong>building control</strong> and
+            <strong>local economic and cultural development</strong>.",
     'WMP' =>
             "The House of Commons is responsible for
             <strong>making laws in the UK and for overall scrutiny of all aspects of
