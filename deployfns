@@ -4,7 +4,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: deployfns,v 1.8 2005-02-03 11:54:40 francis Exp $
+# $Id: deployfns,v 1.9 2005-02-10 16:37:50 francis Exp $
 #
 
 # Warnings and errors
@@ -54,12 +54,12 @@ cvs_export () {
     done
 }
 
-# Copies from the deploy space to the live space using rsync,
-# deleting spurious files in live space.
+# Copies from the deploy space to the live space using rsync.
+# Leaves any existing files with other names alone.
 # $1 - path to deploy space
 # $2 - path to vhost, where live server is, GETS OVERWRITTEN BY DEPLOY SPACE
 rsync_across () {
-    rsync --exclude=down.html --delete -a $1/mysociety/ $2/mysociety
+    rsync --exclude=down.html -a $1/mysociety/ $2/mysociety
 }
 
 # Marks a vhost as being down for maintenance.
