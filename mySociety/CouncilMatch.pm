@@ -7,7 +7,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: CouncilMatch.pm,v 1.11 2005-02-01 23:01:48 francis Exp $
+# $Id: CouncilMatch.pm,v 1.12 2005-02-02 00:10:01 francis Exp $
 #
 
 package mySociety::CouncilMatch;
@@ -172,9 +172,9 @@ sub match_modulo_nickname($$) {
     my %bnames = ($bfirst => 1);
     do { $anames{$_} = 1 } for @{$nickmap->{$afirst}};
     do { $bnames{$_} = 1 } for @{$nickmap->{$bfirst}};
-    print "$afirst-$arest, $bfirst-$brest\n";
-    print Dumper(\%anames);
-    print Dumper(\%bnames);
+    #print "$afirst-$arest, $bfirst-$brest\n";
+    #print Dumper(\%anames);
+    #print Dumper(\%bnames);
     foreach $_ (keys %anames) {
         return 1 if (exists($bnames{$_}));
     }
