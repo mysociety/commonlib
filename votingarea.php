@@ -8,7 +8,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: votingarea.php,v 1.17 2005-01-11 22:09:09 chris Exp $
+ * $Id: votingarea.php,v 1.18 2005-01-11 22:16:15 chris Exp $
  * 
  */
 
@@ -112,6 +112,12 @@ $va_responsibility_description = array(
             "The London Borough Council is responsible for
             <strong>local services</strong>, including <strong>planning</strong>, <strong>council housing</strong>,
             <strong>rubbish collection</strong>, and <strong>local roads</strong>.",
+    'GLA' => "
+The Greater London Assembly <strong>examines</strong> the Mayor of London's
+activities, questioning him about his decisions. It also <strong>investigate
+issues of importance to Londoners</strong>, publishes its findings and
+recommendations, and <strong>makes proposals</strong> to the Mayor.
+",
     'MTD' =>
             "The Metropolitan District Council is
             responsible for all aspects of local services and policy, including
