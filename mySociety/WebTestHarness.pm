@@ -11,7 +11,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.7 2005-03-30 18:12:05 francis Exp $
+# $Id: WebTestHarness.pm,v 1.8 2005-04-01 07:24:25 francis Exp $
 #
 
 package mySociety::WebTestHarness;
@@ -19,6 +19,7 @@ package mySociety::WebTestHarness;
 use File::Find;
 use File::Slurp;
 use WWW::Mechanize;
+use Data::Dumper;
 
 use mySociety::Logfile;
 use mySociety::DBHandle qw(dbh);
@@ -28,17 +29,20 @@ use mySociety::DBHandle qw(dbh);
 
 =item new DB_OPTION_PREFIX SCHEMA
 
-Create a new test harness object.  DB_OPTION_PREFIX is the prefix
-of the mySociety configuration parameters for the database being
-used. e.g. PB_ for PB_DB_NAME.  SCHEMA is the database schema file.
+Create a new test harness object.  PARAMS is a hash ref containing:
+
+db_option_prefix - The prefix of the mySociety configuration parameters for the
+database being used. e.g. PB_ for PB_DB_NAME.  SCHEMA is the database schema
+file.  Compulsory.
 
 =cut
 sub new ($$) {
-    my ($class, $db_option_prefix) = @_;
+    my ($class, $params) = @_;
     my $self = {};
 
     $self->{useragent} = new WWW::Mechanize(autocheck => 1);
 
+    my $db_option_prefix = $params->{db_option_prefix};
     $self->{dbhost} = mySociety::Config::get($db_option_prefix.'DB_HOST', undef);
     $self->{dbport} = mySociety::Config::get($db_option_prefix.'DB_PORT', undef);
     $self->{dbname}  = mySociety::Config::get($db_option_prefix.'DB_NAME');
@@ -173,28 +177,38 @@ sub log_watcher_check($) {
 ############################################################################
 # Email
 
-=item email_setup EVELD_BIN
+=item email_setup PARAMS
 
-Prepares for incoming email.  EVELD_BIN is the binary for eveld, which the
-email test code runs to send outgoing messages.
+Prepares for incoming email.  PARAMS is a hash reference, containing:
+
+eveld_bin - The binary for eveld, which the email test code will run to send
+outgoing messages.  Optional.
+
+log_mailbox - Mail file to additionally put all received messages in.  Deletes
+any existing file.  Optional.
 
 =cut
 sub email_setup($$) {
-    my ($self, $eveld_bin) = @_;
+    my ($self, $params) = @_;
     dbh()->do("create table testharness_mail (
       id serial not null primary key,
       content text not null default '')");
     dbh()->commit();
-    $self->{eveld_bin} = $eveld_bin;
+
+    $self->{eveld_bin} = $params->{eveld_bin};
+    $self->{log_mailbox} = $params->{log_mailbox};
+    unlink $self->{log_mailbox} if $self->{log_mailbox};
 }
 
 =item email_run_eveld
 
-Run eveld once to cause it to send all outgoing queued messages.
+Run eveld once to cause it to send all outgoing queued messages.  If eveld_bin
+was not set in email_setup, does nothing.
 
 =cut
 sub email_run_eveld($) {
     my ($self) = @_;
+    return if !$self->{eveld_bin};
     system($self->{eveld_bin}, "--once") and die "Failed to call eveld";
 }
 
@@ -209,6 +223,7 @@ sub email_get_containing($$) {
     my ($self, $check) = @_;
     $self->email_run_eveld();
 
+    # Wait for email
     my $mails;
     my $got = 0;
     my $c = 0;
@@ -221,7 +236,15 @@ sub email_get_containing($$) {
         $c++;
         sleep 1;
     }
+    # Get content
     my ($id, $content) = @{$mails->[0]};
+    # Save to logging mailbox
+    if ($self->{log_mailbox}) {
+        open LOG_MAILBOX, ">>", $self->{log_mailbox} or die "Failed to open $self->{log_mailbox} for writing.";
+        print LOG_MAILBOX $content if ($self->{log_mailbox});
+        close LOG_MAILBOX
+    }
+    # Delete from incoming queue
     dbh()->do("delete from testharness_mail where id = ?", {}, $id);
     dbh()->commit();
     return $content;
