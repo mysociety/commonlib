@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: MaPit.pm,v 1.5 2004-11-22 17:41:00 francis Exp $
+# $Id: MaPit.pm,v 1.6 2005-01-19 11:32:08 chris Exp $
 #
 
 package mySociety::MaPit;
@@ -56,9 +56,9 @@ use constant AREA_NOT_FOUND => 2003;
 
 =item configure [URL]
 
-Set the "XML-RPC proxy" URL which will be used to call the functions.
-If you don't specify the URL, mySociety configuration variable MAPIT_URL
-will be used instead.
+Set the RABX URL which will be used to call the functions. If you don't
+specify the URL, mySociety configuration variable MAPIT_URL will be used
+instead.
 
 =cut
 my $rabx_client = undef;
@@ -91,8 +91,8 @@ the given ID, including:
 
 =item type
 
-Numeric code for the type of area (one of the constants in
-mySociety::VotingArea); for instance, CTY or SPC.
+Code for the type of area (one of the constants in mySociety::VotingArea); for
+instance, 'CTY' or 'SPC'.
 
 =item name
 
@@ -104,6 +104,21 @@ sub get_voting_area_info ($) {
     my ($id) = @_;
     configure() if !defined $rabx_client;
     return $rabx_client->call('MaPit.get_voting_area_info', $id);
+}
+
+=item get_location POSTCODE
+
+On success, return a reference to an array giving information about the
+location of the given POSTCODE. The elements of this array are: 'G', to
+indicate that the coordinates are referenced to the OSGB grid, or 'I' to
+indicate that they are referenced to the Irish grid; the easting of the
+coordinate, and the northing of the coordinate.
+
+=cut
+sub get_location ($) {
+    my ($postcode) = @_;
+    configure() if !defined $rabx_client;
+    return $rabx_client->call('MaPit.get_location', $postcode);
 }
 
 1;
