@@ -6,15 +6,12 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: DaDem.pm,v 1.1 2004-10-06 19:53:07 chris Exp $
+# $Id: DaDem.pm,v 1.2 2004-10-14 14:14:24 chris Exp $
 #
 
 package mySociety::DaDem;
 
 use strict;
-
-#use mySociety::VotingArea;
-#use Data::Dumper;
 
 use XMLRPC::Lite;
 
