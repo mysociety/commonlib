@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: importparams.php,v 1.1 2005-03-03 15:20:33 chris Exp $
+ * $Id: importparams.php,v 1.2 2005-03-04 10:55:59 chris Exp $
  * 
  */
 
@@ -23,12 +23,13 @@ require_once("utility.php");
  * which will be interpreted as a PCRE regular expression as in preg_match, in
  * which case ERROR should be the text of the error to use if the value does
  * not match the regular expression. If specified, DEFAULT is a value to use if
- * none is supplied in the query. If there are no errors, valid values for
- * variables are written into variables named $q_PARAMETER, where PARAMETER is
- * the name of the parameter; an HTML entities-encoded version of the data is
- * also written into $q_h_PARAMETER. Import returns null on success or an array
- * mapping named PARAMETERs to error strings if any of the parameters didn't
- * match. */
+ * none is supplied in the query. Valid values for variables are written into
+ * variables named $q_PARAMETER, where PARAMETER is the name of the parameter;
+ * an HTML entities-encoded copy is also written into $q_h_PARAMETER. Parameter
+ * values will also be written into $q_unchecked_PARAMETER and
+ * $q_h_unchecked_PARAMETER, whether or not they are valid.  Import returns
+ * null on success or an array mapping named PARAMETERs to error strings if any
+ * of the parameters didn't match. */
 function importparams() {
     $i = 0;
     $errors = array();
@@ -60,7 +61,8 @@ function importparams() {
                 $have_default = true;
             }
         } else if (is_string($check)) {
-            if (preg_match($check, '') == false)
+            $x = preg_match($check, '');
+            if (is_bool($x) && $x == false)
                 err("If CHECK is a string, it must be a valid PCRE regular expression, not '$check'");
             else if (count($pp) < 3 || !is_string($pp[2]))
                 err("If CHECK is a regular expression, it must be followed by an ERROR string");
@@ -84,21 +86,25 @@ function importparams() {
                 $error = $pp[2];
         }
 
+        eval("global \$q_$name;");
+        eval("global \$q_h_$name;");
         if (!is_null($error))
             $errors[$name] = $error;
-        else
-            $valid[$name] = $val;
+        else {
+            eval("\$q_$name = \$val;");
+            eval("\$q_h_$name = htmlspecialchars(\$val);");
+        }
+        
+        eval("global \$q_unchecked_$name;");
+        eval("global \$q_unchecked_h_$name;");
+        if (!is_null($val)) {
+            eval("\$q_unchecked_$name = \$val;");
+            eval("\$q_unchecked_h_$name = htmlspecialchars(\$val);");
+        }
     }
 
     if (count($errors) > 0)
         return $errors;
-
-    foreach ($valid as $name => $val) {
-        eval("our \$${q}_$name;");
-        eval("our \$${q}_h_$name;");
-        eval("\$${q}_$name = \$val;");
-        eval("\$${q}_h_$name = htmlspecialchars(\$val);");
-    }
 }
 
 ?>
