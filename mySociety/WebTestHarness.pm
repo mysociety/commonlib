@@ -11,7 +11,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.6 2005-03-23 17:24:12 francis Exp $
+# $Id: WebTestHarness.pm,v 1.7 2005-03-30 18:12:05 francis Exp $
 #
 
 package mySociety::WebTestHarness;
@@ -173,18 +173,29 @@ sub log_watcher_check($) {
 ############################################################################
 # Email
 
-=item email_setup
+=item email_setup EVELD_BIN
 
-Prepares for incoming email.
+Prepares for incoming email.  EVELD_BIN is the binary for eveld, which the
+email test code runs to send outgoing messages.
 
 =cut
-
-sub email_setup($) {
-    my ($self) = @_;
+sub email_setup($$) {
+    my ($self, $eveld_bin) = @_;
     dbh()->do("create table testharness_mail (
       id serial not null primary key,
       content text not null default '')");
     dbh()->commit();
+    $self->{eveld_bin} = $eveld_bin;
+}
+
+=item email_run_eveld
+
+Run eveld once to cause it to send all outgoing queued messages.
+
+=cut
+sub email_run_eveld($) {
+    my ($self) = @_;
+    system($self->{eveld_bin}, "--once") and die "Failed to call eveld";
 }
 
 =item email_get_containing STRING
@@ -196,6 +207,8 @@ seconds, or there is more than one match.
 =cut
 sub email_get_containing($$) {
     my ($self, $check) = @_;
+    $self->email_run_eveld();
+
     my $mails;
     my $got = 0;
     my $c = 0;
@@ -222,7 +235,7 @@ Throws an error if there are any emails left.
 
 sub email_check_none_left($) {
     my ($self) = @_;
-
+    $self->email_run_eveld();
     sleep 5;
     my $emails_left = dbh()->selectrow_array("select count(*) from testharness_mail");
     die "$emails_left unexpected emails left at the end" if $emails_left > 0;
