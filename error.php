@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: error.php,v 1.4 2005-01-11 13:48:39 chris Exp $
+ * $Id: error.php,v 1.5 2005-01-26 16:45:26 chris Exp $
  * 
  */
 
@@ -47,8 +47,11 @@ function err($err) {
     /* We can't just call trigger_error, because that will always report this
      * function as the location where the error occured. So use debug_backtrace
      * to construct the relevant information. */
-    $a = debug_backtrace(); /* now $a[1] is the caller */
-    err_global_handler(E_USER_ERROR, $err, $a[1]['file'], $a[1]['line'],
+    $a = debug_backtrace(); /* now $a[1], if present, is the caller */
+    $i = 0;
+    if (array_key_exists($a[1]))
+        $i = 1;
+    err_global_handler(E_USER_ERROR, $err, $a[$i]['file'], $a[$i]['line'],
                         /* XXX We can't obtain the calling context AFAIK. */
                         null);
     exit(1); /* NOTREACHED */
