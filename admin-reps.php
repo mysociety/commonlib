@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-reps.php,v 1.4 2004-12-20 22:46:07 francis Exp $
+ * $Id: admin-reps.php,v 1.5 2004-12-30 14:54:01 francis Exp $
  * 
  */
 
@@ -56,9 +56,7 @@ class ADMIN_PAGE_REPS {
             $newdata['method'] = get_http_var('method');
             $newdata['email'] = get_http_var('email');
             $newdata['fax'] = get_http_var('fax');
-            $editor = $_SERVER["REMOTE_USER"];
-            if (!$editor) $editor = "*unknown*";
-            $result = dadem_admin_edit_representative($rep_id, $newdata, $editor, get_http_var('note'));
+            $result = dadem_admin_edit_representative($rep_id, $newdata, http_auth_user(), get_http_var('note'));
             dadem_check_error($result);
             print "<p><i>Successfully updated representative $rep_id</i></i>";
             $rep_id = null;

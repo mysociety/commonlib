@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.19 2004-12-17 17:17:34 chris Exp $
+ * $Id: utility.php,v 1.20 2004-12-30 14:54:01 francis Exp $
  * 
  */
 
@@ -858,6 +858,16 @@ function new_url($page, $retain) {
     }
 
     return $url;
+}
+
+
+/* http_auth_user
+ * Return the user name authenticated by hTTP, or *unknown* if none.  */
+function http_auth_user()
+{
+    $editor = $_SERVER["REMOTE_USER"];
+    if (!$editor) $editor = "*unknown*";
+    return $editor;
 }
 
 ?>
