@@ -6,9 +6,11 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: ratty.php,v 1.6 2004-11-11 18:15:14 francis Exp $
+ * $Id: ratty.php,v 1.7 2004-11-12 10:02:33 francis Exp $
  * 
  */
+
+// TODO: Write script to automatically generate this file from perldoc.
 
 require_once('rabx.php');
 
@@ -57,5 +59,55 @@ function ratty_admin_available_fields() {
     }
     return $res;
 }
+
+/* ratty_admin_update_rule
+ * Updates a ratty rule. */
+function ratty_admin_update_rule($vals, $conds) {
+    global $ratty_client;
+    $res = $ratty_client->call('Ratty.admin_update_rule', array($vals, $conds));
+    if ($fyr_error_message = ratty_get_error($res)) {
+        include "../templates/generalerror.html";
+        exit;
+    }
+    return $res;
+}
+
+/* ratty_admin_get_rules
+ * Get info about all rules. */
+function ratty_admin_get_rules() {
+    global $ratty_client;
+    $res = $ratty_client->call('Ratty.admin_get_rules', array($vals, $conds));
+    if ($fyr_error_message = ratty_get_error($res)) {
+        include "../templates/generalerror.html";
+        exit;
+    }
+    return $res;
+}
+
+/* ratty_admin_get_rule
+ * Get info about a rule. */
+function ratty_admin_get_rule($id) {
+    global $ratty_client;
+    $res = $ratty_client->call('Ratty.admin_get_rule', array($id));
+    if ($fyr_error_message = ratty_get_error($res)) {
+        include "../templates/generalerror.html";
+        exit;
+    }
+    return $res;
+}
+
+
+/* ratty_admin_get_conditions
+ * Get all conditions for a rule. */
+function ratty_admin_get_conditions($id) {
+    global $ratty_client;
+    $res = $ratty_client->call('Ratty.admin_get_conditions', array($id));
+    if ($fyr_error_message = ratty_get_error($res)) {
+        include "../templates/generalerror.html";
+        exit;
+    }
+    return $res;
+}
+
 
 ?>

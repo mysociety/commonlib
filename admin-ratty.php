@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-ratty.php,v 1.5 2004-11-12 06:11:21 francis Exp $
+ * $Id: admin-ratty.php,v 1.6 2004-11-12 10:02:33 francis Exp $
  * 
  */
 
@@ -17,30 +17,37 @@ class ADMIN_PAGE_RATTY {
     }
 
     function display($self_link) {
-        //print "<pre>"; print_r($_POST); print "</pre>";
+        #print "<pre>"; print_r($_POST); print "</pre>";
 
         $action = get_http_var('action');
         if ($action == "")
-            $action = "editrule";
+            $action = "listrules";
 
         if ($action == "editrule") {
-            // Load data from form
-            $ruledata = array();
-            $ruledata['rule_id'] = get_http_var('rule_id'); 
-            $ruledata['requests'] = get_http_var('requests'); 
-            $ruledata['interval'] = get_http_var('interval'); 
-            $ruledata['sequence'] = get_http_var('sequence'); 
-            $ruledata['note'] = get_http_var('note'); 
-            $conditiondata = array();
-            for ($ix = 1; get_http_var("condition$ix") != ""; $ix++) {
-                if (get_http_var("delete$ix") != "")
-                    continue;
-                $condition = array();
-                $condition['condition'] = get_http_var("condition$ix");
-                $condition['field'] = get_http_var("field$ix");
-                $condition['vlaue'] = get_http_var("value$ix");
-                array_push($conditiondata, $condition);
+            if (!array_key_exists('sequence', $_POST)) {
+                $ruledata = ratty_admin_get_rule(get_http_var('rule_id'));
+                $ruledata['rule_id'] = get_http_var('rule_id');
+                $conditiondata = ratty_admin_get_conditions(get_http_var('rule_id'));
+            } else {
+                // Load data from form
+                $ruledata = array();
+                $ruledata['rule_id'] = intval(get_http_var('rule_id'));
+                $ruledata['requests'] = intval(get_http_var('requests')); 
+                $ruledata['interval'] = intval(get_http_var('interval'));
+                $ruledata['sequence'] = intval(get_http_var('sequence'));
+                $ruledata['note'] = get_http_var('note'); 
+                $conditiondata = array();
+                for ($ix = 1; get_http_var("condition$ix") != ""; $ix++) {
+                    if (get_http_var("delete$ix") != "")
+                        continue;
+                    $condition = array();
+                    $condition['condition'] = get_http_var("condition$ix");
+                    $condition['field'] = get_http_var("field$ix");
+                    $condition['value'] = get_http_var("value$ix");
+                    array_push($conditiondata, $condition);
+                }
             }
+
             if (get_http_var('newfilter') != "") {
                 array_push($conditiondata, array("condition" => 'E'));
             }
@@ -50,15 +57,28 @@ class ADMIN_PAGE_RATTY {
             if (get_http_var('newdistinct') != "") {
                 array_push($conditiondata, array("condition" => 'D'));
             }
-    
+
             $form = new HTML_QuickForm('adminRattyRuleForm', 'post', $self_link);
-            $form->setDefaults($ruledata);
+            # Resplice conditions with numbers for form
+            $cform = array();
+            $ix = 0;
+            foreach ($conditiondata as $dummy => $cond) {
+                $ix++;
+                foreach ($cond as $key => $value) {
+                    $cform[$key . $ix] = $value;
+                }
+            }
+            $form->setDefaults(array_merge($ruledata, $cform));
 
             $form->addElement('header', '', $rule = "" ? 'New Rate-Limiting Rule' : 'Edit Rate-Limiting Rule');
             $form->addElement('text', 'sequence', "Rule evaluation position:", array('size' => 20, 'maxlength' => 20));
             $form->addElement('text', 'note', "Description of rule:", array('size' => 40, 'maxlength' => 40));
             $form->addElement('text', 'requests', "Limit to this many hits:", array('size' => 20, 'maxlength' => 20));
             $form->addElement('text', 'interval', "Every this many seconds:", array('size' => 20, 'maxlength' => 20));
+            $form->addRule('sequence', 'Rule position must be numeric', 'numeric', null, 'server');
+            $form->addRule('requests', 'Hit count must be numeric', 'numeric', null, 'server');
+            $form->addRule('interval', 'Time period must be numeric', 'numeric', null, 'server');
+
             $form->addElement('header', '', 'Conditions for Rule');
     
             // Get list of fields from ratty
@@ -98,13 +118,49 @@ class ADMIN_PAGE_RATTY {
             $buttongroup[2] = &HTML_QuickForm::createElement('submit', 'newdistinct', 'Limit number of distinct values of...');
             $form->addGroup($buttongroup, "buttongroup", "Add new rule condition:",' <br> ', false);
 
-            $form->addElement('hidden', 'rule_id', $this->id);
+            $form->addElement('hidden', 'rule_id', $ruledata['rule_id']);
             $form->addElement('hidden', 'page', $this->id);
+            $form->addElement('hidden', 'action', $action);
             $form->addElement('header', '', 'Submit Changes');
             $form->addElement('submit', 'done', 'Done');
+
+            if ($form->validate()) {
+                if (get_http_var('done') != "") {
+                    $new_rule_id = ratty_admin_update_rule($ruledata, $conditiondata);
+                    $action = "listrules";
+                }
+            }
+            if ($action == "editrule") {
+                admin_render_form($form);
+            }
+        }
+        if ($action == "listrules") {
+            $rules = ratty_admin_get_rules();
+?>
+<p>Rules enforce limits on access to web pages.  Each rule has a hit rate
+limit, which you can set to 0 per second to completely block access.
+Conditions within the rule let you specify when it applies.  For
+example, you can apply the rule only for certain URLs.  You can also
+make the rule count limits separately for each distinct, for example, IP
+address.  Or alternatively limit the number of distinct representatives
+which can be viewed per unit time.
+</p>
+<table border=1 width=100%><tr><th>Position</th><th>Description</th><th>Hit limit</th></tr>
+<?
+            foreach ($rules as $rule) {
+                print "<tr>";
+                print "<td>" . $rule['sequence'] . "</td>";
+                print "<td><a href=\"$self_link&action=editrule&rule_id=" .
+                    $rule['id'] . "\">" . $rule['note'] . "</a></td>";
+                print "<td>" . $rule['requests'] . " hits / " . $rule['interval'] . " " . make_plural("sec", $rule['interval']). "</td>";
+                print "</tr>";
+            }
+?>
+</table>
+<?
+            print "<p><a href=\"$self_link&action=editrule\">New rule</a>";
         }
 
-        admin_render_form($form);
     }
 }
 

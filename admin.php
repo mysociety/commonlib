@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin.php,v 1.5 2004-11-12 06:11:22 francis Exp $
+ * $Id: admin.php,v 1.6 2004-11-12 10:02:33 francis Exp $
  * 
  */
 
@@ -37,7 +37,7 @@ function admin_page_display($site_name, $pages) {
     } 
    
     // display
-    $title = $site_name . " Admin Pages &mdash; " . $page->navname;
+    $title = $page->navname . " &mdash; $site_name Admin Pages";
     admin_html_header($title);
     $self_link = "admin?page=$id";
     $page->display($self_link);
