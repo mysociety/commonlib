@@ -7,7 +7,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: CouncilMatch.pm,v 1.1 2005-01-21 19:28:01 francis Exp $
+# $Id: CouncilMatch.pm,v 1.2 2005-01-25 17:15:04 francis Exp $
 #
 
 package mySociety::CouncilMatch;
@@ -78,10 +78,14 @@ sub match_council_wards ($$$$) {
     my $error = "";
 
     # Set of wards GovEval have
-    my $wards_array = $d_dbh->selectcol_arrayref(q#select distinct(ward_name) from raw_input_data
-        where council_id = ?#, {}, $area_id);
+    @raw_data = get_raw_data($area_id, $d_dbh);
+    # ... find unique set
+    my %wards_hash;
+    do { $wards_hash{$_->{'ward_name'}} = 1 } for @raw_data;
+    my @wards_array = keys(%wards_hash);
+    # ... store in special format
     my $wards_goveval = [];
-    do { push @{$wards_goveval}, { name => $_} } for @$wards_array;
+    do { push @{$wards_goveval}, { name => $_} } for @wards_array;
 
     # Set of wards already in database (from Ordnance Survey / ONS)
     my $rows = $m_dbh->selectall_arrayref(q#select distinct on (area_id) area_id, name from area_name, area where
@@ -239,6 +243,113 @@ sub match_council_wards ($$$$) {
              'error' => $error };
 }
 
+# get_raw_data COUNCIL_ID DADEM_DB
+# Return raw input data, with any admin modifications, for a given council.
+# In the form of an array of references to hashes.  Each hash contains the
+# ward_name, rep_name, rep_party, rep_email, rep_fax.
+sub get_raw_data($$) {
+    my ($area_id, $d_dbh) = @_;
+
+    # Hash from representative key (either ge_id or newrow_id, with appropriate
+    # prefix to distinguish them) to data about the representative.
+    my $council;
+    
+    # Real data case
+    my $sth = $d_dbh->prepare(
+            q#select * from raw_input_data where
+            council_id = ?#, {});
+    $sth->execute($area_id);
+    while (my $rep = $sth->fetchrow_hashref) {
+        my $key = 'ge_id' . $rep->{ge_id};
+        $council->{$key} = $rep;
+        $council->{$key}->{key} = $key;
+    }
+
+    # Override with other data
+    $sth = $d_dbh->prepare(
+            q#select * from raw_input_data_edited where
+            council_id = ? order by order_id#, {});
+    $sth->execute($area_id);
+    # Apply each transaction in order
+    while (my $edit = $sth->fetchrow_hashref) {
+        my $key = $edit->{ge_id} ? 'ge_id'.$edit->{ge_id} : 'newrow_id'.$edit->{newrow_id};
+        if ($edit->{alteration} eq 'delete') {
+            die "get_raw_data: delete row that doesn't exist" if (!exists($council->{$key}));
+            delete $council->{$key};
+        } elsif ($edit->{alteration} eq 'modify') {
+            $council->{$key} = $edit;
+            $council->{$key}->{key} = $key;
+        } else {
+            die "Uknown alteration type";
+        }
+    }
+
+    return values(%$council);
+}
+
+# edit_raw_data COUNCIL_ID COUNCIL_NAME COUNCIL_TYPE DADEM_DB DATA ADMIN_USER
+# Alter raw input data as a transaction log (keeping history).
+# DATA is in the form of a reference to an array of references to hashes.  Each
+# hash contains the ward_name, rep_name, rep_party, rep_email, rep_fax, key
+# (from get_raw_data above).  Include all the councils, as deletions are
+# applied.  ADMIN_USER is name of person who made this edit.
+# COUNCIL_NAME and COUNCIL_TYPE are stored in the edit for reference later if
+# for some reason ids get broken, really only COUNCIL_ID matters.
+sub edit_raw_data($$$$$$) {
+    my ($area_id, $area_name, $area_type, $d_dbh, $newref, $user) = @_;
+    my @new = @$newref;
+
+    my @old = get_raw_data($area_id, $d_dbh);
+
+    my %old; do { $old{$_->{key}} = $_ } for @old;
+    my %new; do { $new{$_->{key}} = $_ } for @new;
+
+    # Delete entries which are in old but not in new
+    foreach my $key (keys %old) {
+        if (!exists($new{$key})) {
+            print "need to delete $key";
+        }
+    }
+
+    # Go through everything in new, and modify if different from old
+    foreach my $rep (@new) {
+        my $key = $rep->{key};
+
+        if ($key && exists($old{$key})) {
+            my $changed = 0;
+            foreach my $fieldname qw(ward_name rep_name rep_party rep_email rep_fax) {
+                if ($old{$key}->{$fieldname} ne $rep->{$fieldname}) {
+                    print "changed";
+                    $changed = 1;
+                }
+            }
+            next if (!$changed);
+        }
+        
+        # Find row identifiers
+        my ($newrow_id) = ($key =~ m/^newrow_id([0-9]+)$/);
+        my ($ge_id) = ($key =~ m/^ge_id([0-9]+)$/);
+        if (!$newrow_id && !$ge_id) {
+            my @row = $d_dbh->selectrow_array(qw#select nextval('raw_input_data_edited_newrow_seq')#);
+            $newrow_id = $row[0];
+        }
+
+        # Insert alteration
+        my $sth = $d_dbh->prepare(q#insert into raw_input_data_edited
+            (ge_id, newrow_id, alteration, council_id, council_name, council_type,
+            ward_name, rep_name, rep_party, rep_email, rep_fax, 
+            editor, whenedited, note)
+            values (?, ?, ?, ?, ?, ?,
+                    ?, ?, ?, ?, ?,
+                    ?, ?, ?) #);
+        $sth->execute($ge_id, $newrow_id, 'modify', $area_id, $area_name, $area_type,
+            $rep->{'ward_name'}, $rep->{'rep_name'}, $rep->{'rep_party'},
+                $rep->{'rep_email'}, $rep->{'rep_fax'},
+            $user, time(), "");
+
+    }
+    $d_dbh->commit();
+}
 
 
 1;

@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Config.pm,v 1.12 2004-12-16 14:15:37 chris Exp $
+# $Id: Config.pm,v 1.13 2005-01-25 17:15:04 francis Exp $
 #
 
 package mySociety::Config;
@@ -111,8 +111,7 @@ sub read_config ($;$) {
         $inr->close();
         $outw->close();
 
-        exec($php_path);
-        die "$php_path: exec: $!";
+        exec($php_path) or die "$php_path: exec: $!";
     }
 
     $inr->close();
