@@ -8,7 +8,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: votingarea.php,v 1.33 2005-02-10 17:19:11 chris Exp $
+ * $Id: votingarea.php,v 1.34 2005-02-10 18:15:29 francis Exp $
  * 
  */
 
@@ -89,7 +89,7 @@ $va_salaried = array(
 
         'MTW' => 0,
 
-        'COI' => 0, /* XXX don't know but assume unpaid -- check */
+        'COP' => 0, /* XXX don't know but assume unpaid -- check */
 
         'SPE' => 1,
         'SPC' => 1,
