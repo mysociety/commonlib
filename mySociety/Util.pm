@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Util.pm,v 1.2 2004-10-19 16:46:31 chris Exp $
+# $Id: Util.pm,v 1.3 2004-10-19 17:25:00 chris Exp $
 #
 
 package mySociety::Util;
@@ -15,6 +15,18 @@ use strict;
 use Error qw(:try);
 use IO::File;
 use Fcntl;
+
+=head1 NAME
+
+mySociety::Util
+
+=head1 DESCRIPTION
+
+Various useful functions for applications, without any organising principle.
+
+=head1 FUNCTIONS
+
+=over 4
 
 =item random_bytes NUMBER
 
@@ -43,9 +55,9 @@ sub random_bytes ($) {
 =item named_tempfile [SUFFIX]
 
 Return in list context an IO::Handle open on a temporary file, and the name of
-that file. If specified, SUFFIX a suffix which will be appended to the filename
-(include any leading dot if you want to create, e.g., files called "foo.html"
-or whatever).
+that file. If specified, SUFFIX gives a suffix which will be appended to the
+filename (include any leading dot if you want to create, e.g., files called
+"foo.html" or whatever). Dies on error.
 
 =cut
 sub named_tempfile (;$) {
@@ -107,6 +119,33 @@ sub send_email ($$@) {
         return $e->text();
     };
     return undef;
+}
+
+=item is_valid_postcode STRING
+
+Is STRING (once it has been converted to upper-case and spaces removed) a valid
+UK postcode (as defined by BS7666, apparently).
+
+=cut
+sub is_valid_postcode ($) {
+    my $pc = uc($_[0]);
+    $pc =~ s#\s##g;
+    # See http://www.govtalk.gov.uk/gdsc/html/noframes/PostCode-2-1-Release.htm
+    my $in  = 'ABDEFGHJLNPQRSTUWXYZ';
+    my $fst = 'ABCDEFGHIJKLMNOPRSTUWYZ';
+    my $sec = 'ABCDEFGHJKLMNOPQRSTUVWXY';
+    my $thd = 'ABCDEFGHJKSTUW';
+    my $fth = 'ABEHMNPRVWXY';
+
+    return 1 if ($pc =~ m#^[$fst]\d\d[$in][$in]$#
+                || $pc =~ m#^[$fst]\d\d\d[$in][$in]$#
+                || $pc =~ m#^[$fst]\d\d[$in][$in]$#
+                || $pc =~ m#^[$fst]\d\d\d[$in][$in]$#
+                || $pc =~ m#^[$fst][$sec]\d\d[$in][$in]$#
+                || $pc =~ m#^[$fst][$sec]\d\d\d[$in][$in]$#
+                || $pc =~ m#^[$fst]\d[$thd]\d[$in][$in]$#
+                || $pc =~ m#^[$fst][$sec]\d[$fth]\d[$in][$in]$#);
+    return 0;
 }
 
 1;
