@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Parties.pm,v 1.2 2004-12-10 00:57:23 francis Exp $
+# $Id: Parties.pm,v 1.3 2005-01-07 11:09:23 chris Exp $
 #
 
 package mySociety::Parties;
@@ -53,6 +53,11 @@ Map names of parties to their canonical name.
 
     "SNP" => "SNP",
 
+    "SSP" => "SSP",
+
+    # Scottish Senior Citizens United Party
+    "SSCUP" => "SSCUP",
+
     "SPK" => "Speaker",
     "DCWM" => "Deputy Speaker",
     "CWM" => "Deputy Speaker",
@@ -65,5 +70,10 @@ Map names of parties to their canonical name.
     "UU" => "UUP",
     "UUP" => "UUP",
 );
+
+# Ensure that canonical party values are themselves canonical....
+foreach (values(%mySociety::Parties::canonical)) {
+    $mySociety::Parties::canonical{$_} ||= $_;
+}
 
 1;
