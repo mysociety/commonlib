@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.21 2005-01-04 16:35:19 francis Exp $
+ * $Id: utility.php,v 1.22 2005-01-07 21:14:56 matthew Exp $
  * 
  */
 
@@ -843,18 +843,14 @@ function new_url($page, $retain) {
     }
     
     if (count($params) > 0) {
-        $url .= "?";
-        $n = 0;
         foreach ($params as $key => $val) {
             if (is_array($val)) {
-                $url .= urlencode($key) . '=' . urlencode($val[0]);
-                for ($i = 1; $i < count($val); ++$i)
-                    $url .= '&' . urlencode($key) . '=' . urlencode($val[$i]);
-            } else
-                $url .= urlencode($key) . '=' . urlencode($val);
-            if (++$n < count($params))
-                $url .= '&';
+		for ($i = 0; $i < count($val); ++$i)
+                    $keyvalpairs[] = urlencode($key) . '=' . urlencode($val[$i]);
+            } elseif ($val)
+                $keyvalpairs[] = urlencode($key) . '=' . urlencode($val);
         }
+	$url .= '?' . join('&', $keyvalpairs);
     }
 
     return $url;
