@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: MaPit.pm,v 1.1 2004-10-08 14:20:46 chris Exp $
+# $Id: MaPit.pm,v 1.2 2004-10-20 16:55:39 chris Exp $
 #
 
 package mySociety::MaPit;
@@ -74,7 +74,7 @@ error code.
 =cut
 sub get_voting_areas ($) {
     my ($postcode) = @_;
-    return $proxy->call('MaPit.get_voting_areas', $postcode);
+    return $proxy->call('MaPit.get_voting_areas', $postcode)->result();
 }
 
 =item get_voting_area_info ID
@@ -97,7 +97,7 @@ The name of the area, as defined by the Ordnance Survey; for instance,
 =cut
 sub get_voting_area_info ($) {
     my ($id) = @_;
-    return $proxy->call('MaPit.get_voting_area_info', $id);
+    return $proxy->call('MaPit.get_voting_area_info', $id)->result();
 }
 
 1;

@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: DaDem.pm,v 1.3 2004-10-19 16:46:32 chris Exp $
+# $Id: DaDem.pm,v 1.4 2004-10-20 16:55:39 chris Exp $
 #
 
 package mySociety::DaDem;
@@ -92,7 +92,7 @@ area, or, on failure, an error code.
 =cut
 sub get_representatives ($) {
     my ($id) = @_;
-    return $proxy->call('DaDem.get_representatives', $id);
+    return $proxy->call('DaDem.get_representatives', $id)->result();
 }
 
 =item get_representative_info ID
@@ -132,7 +132,7 @@ or, on failure, an error code.
 =cut
 sub get_representative_info ($) {
     my ($id) = @_;
-    return $proxy->call('DaDem.get_representative_info', $id);
+    return $proxy->call('DaDem.get_representative_info', $id)->result();
 }
 
 1;
