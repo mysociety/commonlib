@@ -7,7 +7,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: dadem.php,v 1.5 2004-11-02 16:23:06 chris Exp $
+ * $Id: dadem.php,v 1.6 2004-11-08 18:09:31 francis Exp $
  * 
  */
 
@@ -16,46 +16,23 @@ include_once('utility.php');
 include_once('votingarea.php');
 
 /* Error codes */
-define('DADEM_UNKNOWN_AREA', 1);        /* unknown area */
-define('DADEM_REP_NOT_FOUND', 2);       /* unknown representative id */
-define('DADEM_AREA_WITHOUT_REPS', 3);   /* not an area for which representatives are returned */
-
-$dadem_error_strings = array(
-    DADEM_UNKNOWN_AREA      =>  'Unknown voting area',
-    DADEM_REP_NOT_FOUND     =>  'Representative not found',
-    DADEM_AREA_WITHOUT_REPS =>  'Not an area type for which representatives are returned'
-);
+define('DADEM_UNKNOWN_AREA', 3001);        /* unknown area */
+define('DADEM_REP_NOT_FOUND', 3002);       /* unknown representative id */
+define('DADEM_AREA_WITHOUT_REPS', 3003);   /* not an area for which representatives are returned */
 
 define('DADEM_CONTACT_FAX', 101);
 define('DADEM_CONTACT_EMAIL', 102);
 
-/* dadem_is_error R
- * Does R (the return value from another DaDem function) indicate an error? */
-function dadem_is_error($e) {
-//    return is_integer($e);
-    return rabx_is_error($e);
-}
-
-/* dadem_strerror CODE
- * Return a human-readable string describing CODE. */
-function dadem_strerror($e) {
-    global $dadem_error_strings;
+/* dadem_get_error R
+ * Return FALSE if R indicates success, or an error string otherwise. */
+function dadem_get_error($e) {
     if (!rabx_is_error($e))
-        return "Success";
+        return FALSE;
     else
         return $e->text;
 }
 
-/* dadem_get_error R
- * Return FALSE if R indicates success, or an error string otherwise. */
-function dadem_get_error($e) {
-    if (is_array($e))
-        return FALSE;
-    else
-        return dadem_strerror($e);
-}
-
-$dadem_client = new RABX_Client("http://" . OPTION_DADEM_HOST . ":" . OPTION_DADEM_PORT . OPTION_DADEM_PATH);
+$dadem_client = new RABX_Client(OPTION_DADEM_URL);
 
 /* dadem_get_representatives VOTING_AREA_ID
  * Return an array of IDs for the representatives for the given voting
@@ -80,6 +57,7 @@ function dadem_get_representative_info($rep_id) {
     global $dadem_client;
     debug("DADEM", "Looking up info on representative id $rep_id");
     $result = $dadem_client->call('DaDem.get_representative_info', array($rep_id));
+    debug("DADEMRESULT", "Result is:", $result);
     return $result;
 }
 
@@ -90,6 +68,7 @@ function dadem_get_representatives_info($array) {
     global $dadem_client;
     debug("DADEM", "Looking up info on representatives");
     $result = $dadem_client->call('DaDem.get_representatives_info', array($array));
+    debug("DADEMRESULT", "Result is:", $result);
     return $result;
 }
 

@@ -10,7 +10,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: rabx.php,v 1.2 2004-10-27 20:15:47 chris Exp $
+ * $Id: rabx.php,v 1.3 2004-11-08 18:09:31 francis Exp $
  * 
  */
 
@@ -303,6 +303,8 @@ class RABX_Client {
     /* call FUNCTION ARGUMENTS
      * Call the named FUNCTION with the given ARGUMENTS (an array). */
     function call($function, $args) {
+        debug(RABX, "RABX calling $function via $this->url, arguments:", $args);
+
         $callstr = rabx_call_string($function, &$args);
         if (rabx_is_error($callstr))
             return $callstr;
@@ -325,9 +327,12 @@ class RABX_Client {
         $C = curl_getinfo($this->ch, CURLINFO_HTTP_CODE);
 
         if ($C != 200)
-            return rabx_error(RABX_ERROR_TRANSPORT, "$C");
-        else
-            return rabx_return_string_parse($r);
+            return rabx_error(RABX_ERROR_TRANSPORT, "HTTP error $C calling $this->url");
+        else {
+            $result = rabx_return_string_parse($r);
+            debug(RABX, "RABX result:", $result);
+            return $result;
+        }
     }
 }
 

@@ -7,7 +7,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: mapit.php,v 1.5 2004-11-02 16:23:06 chris Exp $
+ * $Id: mapit.php,v 1.6 2004-11-08 18:09:31 francis Exp $
  * 
  */
 
@@ -15,42 +15,20 @@ include_once('rabx.php');
 include_once('votingarea.php');
 
 /* Error codes */
-define('MAPIT_BAD_POSTCODE', 1);        /* not in the format of a postcode */
-define('MAPIT_POSTCODE_NOT_FOUND', 2);  /* postcode not found */
-define('MAPIT_AREA_NOT_FOUND', 3);      /* not a valid voting area id */
-
-$mapit_error_strings = array(
-    MAPIT_BAD_POSTCODE          => 'Not in the correct format for a postcode',
-    MAPIT_POSTCODE_NOT_FOUND    => 'Postcode not found',
-    MAPIT_AREA_NOT_FOUND        => 'Area not found'
-);
-
-/* mapit_is_error R
- * Does R (the return value from another MaPit function) indicate an error? */
-function mapit_is_error($e) {
-    return rabx_is_error($e);
-}
-
-/* mapit_strerror CODE
- * Return a human-readable string describing CODE. */
-function mapit_strerror($e) {
-    global $mapit_error_strings;
-    if (!rabx_is_error($e))
-        return "Success";
-    else
-        return $e->text;
-}
+define('MAPIT_BAD_POSTCODE', 2001);        /* not in the format of a postcode */
+define('MAPIT_POSTCODE_NOT_FOUND', 2002);  /* postcode not found */
+define('MAPIT_AREA_NOT_FOUND', 2003);      /* not a valid voting area id */
 
 /* mapit_get_error R
  * Return FALSE if R indicates success, or an error string otherwise. */
 function mapit_get_error($e) {
-    if (is_array($e))
+    if (!rabx_is_error($e))
         return FALSE;
     else
-        return mapit_strerror($e);
+        return $e->text;
 }
 
-$mapit_client = new RABX_Client("http://" . OPTION_MAPIT_HOST . ":" . OPTION_MAPIT_PORT . OPTION_MAPIT_PATH);
+$mapit_client = new RABX_Client(OPTION_MAPIT_URL);
 
 /* mapit_get_voting_areas POSTCODE
  * On success, return an array mapping voting/administrative area type to

@@ -6,13 +6,25 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: ratty.php,v 1.3 2004-10-29 10:24:02 chris Exp $
+ * $Id: ratty.php,v 1.4 2004-11-08 18:09:31 francis Exp $
  * 
  */
 
 require_once('rabx.php');
 
+/* ratty_get_error R
+ * Return FALSE if R indicates success, or an error string otherwise. */
+function ratty_get_error($e) {
+    if (!rabx_is_error($e))
+        return FALSE;
+    else
+        return $e->text;
+}
+
 $ratty_client = new RABX_Client(OPTION_RATTY_URL);
+
+// Force POST requests, as rate limiting is intrinsically
+// non-idempotent; it would be no use if cached
 $ratty_client->use_post = TRUE;
 
 /* ratty_test VALUES
@@ -25,6 +37,11 @@ function ratty_test($vals) {
     global $ratty_client;
     debug("RATTY", "Rate limiting", $vals);
     $res = $ratty_client->call('Ratty.test', array($vals));
+    if ($fyr_error_message = msg_get_error($res)) {
+        include "../templates/generalerror.html";
+        exit;
+    }
+    debug("RATTYRESULT", "Result is:", $res);
     return $res != 0;
 }
 
