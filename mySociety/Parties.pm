@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Parties.pm,v 1.1 2004-12-08 08:50:50 francis Exp $
+# $Id: Parties.pm,v 1.2 2004-12-10 00:57:23 francis Exp $
 #
 
 package mySociety::Parties;
@@ -57,8 +57,8 @@ Map names of parties to their canonical name.
     "DCWM" => "Deputy Speaker",
     "CWM" => "Deputy Speaker",
 
-    "SF" => "Sinn Fein",
-    "Sinn Fein" => "Sinn Fein",
+    "SF" => "Sinn Féin",
+    "Sinn Fein" => "Sinn Féin",
 
     "UK Independence" => "UK Independence",
 
