@@ -10,7 +10,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: rabx.php,v 1.11 2005-01-26 16:28:44 chris Exp $
+ * $Id: rabx.php,v 1.12 2005-01-26 16:34:06 chris Exp $
  * 
  */
 
@@ -243,28 +243,28 @@ function rabx_call_string($function, &$args) {
  * Parse a function return out of STRING, returning corresponding PHP data
  * structures, or a RABX_Error on error. */
 function rabx_return_string_parse (&$string) {
-    $t = substr($string, 0, 1);
-    if (strlen($string) < 1)
+    $t = substr(&$string, 0, 1);
+    if (strlen(&$string) < 1)
         return rabx_error(RABX_ERROR_PROTOCOL, "return string is too short");
     else if (!($t == 'S' || $t == 'E'))
         return rabx_error(RABX_ERROR_PROTOCOL, "first byte of return string should be \"S\" or \"E\", not \"$t\"");
     $off = 1;
-    if (rabx_is_error($v = rabx_netstring_rd($string, $off)))
+    if (rabx_is_error($v = rabx_netstring_rd(&$string, $off)))
         return $v;
     else if ($v != 0)
         return rabx_error(RABX_ERROR_PROTOCOL, "unknown protocol version \"$ver\"");
 
     if ($t == "S")
-        return rabx_wire_rd($string, $off);
+        return rabx_wire_rd(&$string, $off);
     else {
-        if (rabx_is_error($code = rabx_netstring_rd($string, $off)))
+        if (rabx_is_error($code = rabx_netstring_rd(&$string, $off)))
             return $code;
-        else if (rabx_is_error($text = rabx_netstring_rd($string, $off)))
+        else if (rabx_is_error($text = rabx_netstring_rd(&$string, $off)))
             return $text;
         $code = intval($code);
         $extra = null;
-        if ($off < strlen($string)) {
-            if (rabx_is_error($extra = rabx_wire_rd($string, $off)))
+        if ($off < strlen(&$string)) {
+            if (rabx_is_error($extra = rabx_wire_rd(&$string, $off)))
                 return $extra;
         }
         return rabx_error($code, $text, $extra);
