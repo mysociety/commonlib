@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: MaPit.pm,v 1.4 2004-11-10 11:13:11 francis Exp $
+# $Id: MaPit.pm,v 1.5 2004-11-22 17:41:00 francis Exp $
 #
 
 package mySociety::MaPit;
@@ -31,15 +31,15 @@ Interrogation Tool.
 
 =over 4
 
-=item BAD_POSTCODE (1)
+=item BAD_POSTCODE
 
 String is not in the correct format for a postcode.
 
-=item POSTCODE_NOT_FOUND (2)
+=item POSTCODE_NOT_FOUND
 
 The postcode was not found in the database.
 
-=item AREA_NOT_FOUND (3)
+=item AREA_NOT_FOUND
 
 The area ID refers to a non-existent area.
 

@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: DaDem.pm,v 1.6 2004-11-10 11:13:11 francis Exp $
+# $Id: DaDem.pm,v 1.7 2004-11-22 17:41:00 francis Exp $
 #
 
 package mySociety::DaDem;
@@ -31,15 +31,15 @@ Representatives.
 
 =over 4
 
-=item UNKNOWN_AREA (1)
+=item UNKNOWN_AREA
 
 Area ID refers to a non-existent area.
 
-=item REP_NOT_FOUND (2)
+=item REP_NOT_FOUND
 
 Representative ID refers to a non-existent representative.
 
-=item AREA_WITHOUT_REPS (3)
+=item AREA_WITHOUT_REPS
 
 Area ID refers to an area for which no representatives are returned.
 
