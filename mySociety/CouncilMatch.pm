@@ -7,8 +7,12 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: CouncilMatch.pm,v 1.13 2005-02-02 03:22:14 francis Exp $
+# $Id: CouncilMatch.pm,v 1.14 2005-02-02 11:04:41 francis Exp $
 #
+
+package mySociety::CouncilMatch::Error;
+use RABX;
+@mySociety::CouncilMatch::Error::ISA = qw(RABX::Error::User);
 
 package mySociety::CouncilMatch;
 
@@ -17,6 +21,7 @@ use LWP::Simple;
 use HTML::TokeParser;
 use Text::CSV;
 use URI;
+use File::Slurp;
 
 use mySociety::StringUtils qw(trim merge_spaces);
 
@@ -134,10 +139,13 @@ sub canonicalise_council_name ($) {
         s#\bW\.\s#West #g;     # W. Sussex => West Sussex
         s#\bGt\.\s#Great #g;   # Gt. Yarmouth => Great Yarmouth
 
-        s#&#and#g;
-        s#-# #g;
+        s#[&/-]# #g;
+        s#\band\b# #g;
         s#'##g;                # King's Lynn => Kings Lynn
         s#,##g;                # Rhondda, Cynon, Taff => Rhondda Cynon Taff
+
+        $_ = merge_spaces($_);
+        $_ = trim($_);
     }
    
     $_ = lc;
@@ -159,14 +167,15 @@ while (my $line = <NICKNAMES>) {
 # match_modulo_nickname NAMEA NAMEB
 # Sees if two names match, allowing for nickname.  Each name must be in form
 # "firstname initials othernames", all lowercase.  e.g. "timmy tailor" would
-# match "timothy tailor".  Returns 1 if match, 0 otherwise.
+# match "timothy tailor".  Returns 1 if match, 0 otherwise.  NAMEA can
+# have extra stuff at the end (i.e. we look for NAMEB inside NAMEA).
 sub match_modulo_nickname($$) {
     my ($a, $b) = @_;
     my (@a, @b);
-    my ($afirst, $arest) = ($a =~ m/^(.*) (.*)$/);
-    my ($bfirst, $brest) = ($b =~ m/^(.*) (.*)$/);
+    my ($afirst, $arest) = ($a =~ m/^([^ ]*) (.*)$/);
+    my ($bfirst, $brest) = ($b =~ m/^([^ ]*) (.*)$/);
     return 0 if (!defined($arest) || !defined($brest) || !defined($afirst) || !defined($bfirst));
-    return 0 if ($arest ne $brest);
+    return 0 if ($arest !~ m/\b$brest\b/);
     return 1 if ($afirst eq $bfirst);
     my %anames = ($afirst => 1);
     my %bnames = ($bfirst => 1);
@@ -181,6 +190,8 @@ sub match_modulo_nickname($$) {
     return 0;
 }
 
+#print match_modulo_nickname("sally prentice l", "sally prentice");
+#print "\n";
 #print match_modulo_nickname("jack nobody", "hans nobody");
 #print "\n";
 #print match_modulo_nickname("timmy tailor", "timothy tailor");
@@ -195,20 +206,22 @@ sub match_modulo_nickname($$) {
 sub canonicalise_person_name ($) {
     ($_) = @_;
 
+    # Remove fancy words
+    my $titles = "Cllr|Councillor|Dr|Hon|hon|rah|rh|Mrs|Ms|Mr|Miss|Rt Hon|Reverend|The Rev|The Reverend|Sir|Dame|Rev|Prof";
+    my $honourifics = "MP|CBE|OBE|MBE|QC|BEM|rh|RH|Esq|QPM|JP|FSA|Bt|BEd|Hons|TD|MA|QHP|DL|CMG|BB|AKC|Bsc|Econ|LLB|GBE|QSO|BA|FRSA|FCA|DD|KBE|PhD";
+    while (s#(\b(?:$titles)\b)##) {};
+    while (s#(\b(?:$honourifics)\b)##) {};
+
+    # Sometimes usefully match names in emails, so strip all
+    s#\@.*$##; 
+
     # Swap Lastname, Firstname
     s/^([^,]+),([^,]+)$/$2 $1/;  
 
     # Clear up spaces and punctuation
-    s#\@.*$##; # sometimes usefully match names in emails, so strip all
     s#[[:punct:]]# #g;
     $_ = trim($_);
     $_ = merge_spaces($_);
-
-    # Remove fancy words
-    my $titles = "Cllr |Councillor |Dr |Hon |hon |rah |rh |Mrs |Ms |Mr |Miss |Rt Hon |Reverend |The Rev |The Reverend |Sir |Dame |Rev |Prof ";
-    my $honourifics = " MP| CBE| OBE| MBE| QC| BEM| rh| RH| Esq| QPM| JP| FSA| Bt| BEd| Hons| TD| MA| QHP| DL| CMG| BB| AKC| Bsc| Econ| LLB| GBE| QSO| BA| FRSA| FCA| DD| KBE| PhD";
-    while (s#^($titles )##) {};
-    while (s#( $honourifics)$##) {};
 
     # Split up initials unspaced 
     s/\b([[:upper:]])([[:upper:]])\b/$1 $2/g;
@@ -586,6 +599,23 @@ sub split_lumps_further($) {
     return @lumps;
 }
 
+# get_url_via_cache URL
+# Gets contents of given URL, throws exception if there is an error.
+# If file is already in the cache, gets it again.
+sub get_url_via_cache($) {
+    my ($url) = @_;
+    my $file = $url;
+    $file =~ s#/#_#g;
+    $file = mySociety::Config::get('COUNCILMATCH_PAGECACHE') . $file;
+    if (! -e $file) {
+        my $ret = LWP::Simple::mirror($url, $file);
+        if (LWP::Simple::is_error($ret)) {
+            throw mySociety::CouncilMatch::Error("Failed to get URL $url");
+        }
+    }
+    my $content = File::Slurp::read_file($file);
+}
+
 # check_councillors_against_website COUNCIL_ID VERBOSITY 
 # Attempts to match up the wards from the raw_input_data table to the Ordnance
 # Survey names. Returns hash ref containing 'details' and 'error'.
@@ -614,7 +644,7 @@ sub check_councillors_against_website($$) {
 
     # Get all HTML from councillor list web page, and tidy
     print "Getting main page... $extradata->{councillors_url} " if $verbose;
-    my $mainpage = LWP::Simple::get($extradata->{councillors_url});
+    my $mainpage = get_url_via_cache($extradata->{councillors_url});
     print "...got\n" if $verbose;
     my @lumps = mySociety::StringUtils::break_into_lumps($mainpage);
     @lumps = split_lumps_further(\@lumps);
@@ -667,12 +697,16 @@ sub check_councillors_against_website($$) {
                 my $match = 0;
                 if ($canon_lump =~ m/^[[:alpha:]] /) {
                     $canon_name =~ s/^([[:alpha:]])([[:alpha:]]+) /$1 /;
-                    $match = ($canon_lump eq $canon_name);
+                    $match = ($canon_lump =~ m/\b$canon_name\b/);
                 } else {
                     # Apply nicknames
                     $match = match_modulo_nickname($canon_lump, $canon_name); 
                 }
                 if ($match) {
+                    if (($pattern eq "CWCWCW") and defined($lastcllrkey)) {
+                        $error .= $area_id . ": councillor " . $cllrsbykey->{$lastcllrkey}->{rep_first} . " " .
+                            $cllrsbykey->{$lastcllrkey}->{rep_last} . " has no ward\n";
+                    }
                     print "councillor matched '$canon_lump' == '$canon_name'\n" if $verbose;
                     $lastcllrkey = $rep->{key};
                     push @{$repdone->{$lastcllrkey}}, $lump;
@@ -704,16 +738,22 @@ sub check_councillors_against_website($$) {
                 if ($pattern eq "CWCWCW") {
                     # check councillor right
                     if (!$lastcllrkey) {
-                        $error .= $area_id . ": ward $lump without councillor\n";
+                        # do nothing, as we have no councillor to check on
                     } elsif (!grep { $_->{key} eq $lastcllrkey } @{$cllrsbywardid->{$lastwardid}}) {
                         #print Dumper(@{$cllrsbywardid->{$lastwardid}});
                         #print "lastcllrkey $lastcllrkey\n";
                         $error .= $area_id . ": councillor " . $cllrsbykey->{$lastcllrkey}->{rep_first} . " " .
                             $cllrsbykey->{$lastcllrkey}->{rep_last} . " appears in wrong ward, ge " . 
                             $cllrsbykey->{$lastcllrkey}->{ward_name} . " website $lump\n";
+                    } else {
+                        $lastcllrkey = undef;
                     }
                 }
             }
+        }
+        if (($pattern eq "CWCWCW") and defined($lastcllrkey)) {
+            $error .= $area_id . ": councillor " . $cllrsbykey->{$lastcllrkey}->{rep_first} . " " .
+                $cllrsbykey->{$lastcllrkey}->{rep_last} . " has no ward\n";
         }
 
         # Check all got
@@ -774,7 +814,7 @@ sub check_councillors_against_website($$) {
         # Nothing much good, so try recursive get
         foreach my $url (@urls) {
             print "Getting... $url " if $verbose;
-            my $subpage = LWP::Simple::get($url);
+            my $subpage = get_url_via_cache($url);
             print "...got\n" if $verbose;
             my @newlumps = mySociety::StringUtils::break_into_lumps($subpage);
             @newlumps = split_lumps_further(\@newlumps);
