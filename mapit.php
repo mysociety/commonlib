@@ -7,12 +7,13 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: mapit.php,v 1.10 2004-12-30 19:46:20 francis Exp $
+ * $Id: mapit.php,v 1.11 2005-01-11 10:22:31 chris Exp $
  * 
  */
 
-include_once('rabx.php');
-include_once('votingarea.php');
+require_once('error.php');
+require_once('rabx.php');
+require_once('votingarea.php');
 
 /* Error codes */
 define('MAPIT_BAD_POSTCODE', 2001);        /* not in the format of a postcode */
@@ -29,11 +30,10 @@ function mapit_get_error($e) {
 }
 
 /* mapit_check_error R
- * If R indicates failure, displays error message and stops procesing.
- */
+ * If R indicates failure, displays error message and stops procesing. */
 function mapit_check_error($data) {
     if ($error_message = mapit_get_error($data)) {
-        template_show_error($error_message);
+        err($error_message);
     }
 }
 
