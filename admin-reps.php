@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-reps.php,v 1.1 2004-12-20 18:03:48 francis Exp $
+ * $Id: admin-reps.php,v 1.2 2004-12-20 20:34:16 francis Exp $
  * 
  */
 
@@ -53,6 +53,8 @@ class ADMIN_PAGE_REPS {
             // Edit representative
             $repinfo = dadem_get_representative_info($rep_id);
             dadem_check_error($repinfo);
+            $rephistory = dadem_get_representative_history($rep_id);
+            dadem_check_error($rephistory);
 
             $form->setDefaults(
                 array('name' => $repinfo['name'],
@@ -85,6 +87,29 @@ class ADMIN_PAGE_REPS {
             $finalgroup[] = &HTML_QuickForm::createElement('submit', 'done', 'Done');
             $finalgroup[] = &HTML_QuickForm::createElement('submit', 'cancel', 'Cancel');
             $form->addGroup($finalgroup, "finalgroup", "",' ', false);
+    
+            $form->addElement('header', '', 'Historical Changes (each
+            relative to imported data)');
+            $html = "<table border=1>";
+            $html .= "<th>Order</th><th>Date</th><th>Editor</th><th>Note</th>
+            <th>Name</th> <th>Party</th> <th>Method</th> <th>Email</th>
+            <th>Fax</th>";
+
+            foreach ($rephistory as $row) {
+                $html .= "<tr>";
+                $html .= "<td>" . $row['order_id'] . "</td>\n";
+                $html .= "<td>" . strftime('%Y-%m-%d %H:%M:%S', $row['whenedited']) . "</td>\n";
+                $html .= "<td>" . $row['editor'] . "</td>\n";
+                $html .= "<td>" . $row['note'] . "</td>\n";
+                $html .= "<td>" . $row['name'] . "</td>\n";
+                $html .= "<td>" . $row['party'] . "</td>\n";
+                $html .= "<td>" . $row['method'] . "</td>\n";
+                $html .= "<td>" . $row['email'] . "</td>\n";
+                $html .= "<td>" . $row['fax'] . "</td>\n";
+                $html .= "</tr>";
+            }
+            $html .= "</table>";
+            $form->addElement('static', 'bytype', null, $html);
         } else if ($pc) {
             // Postcode search
             $voting_areas = mapit_get_voting_areas($pc);
