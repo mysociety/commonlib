@@ -4,7 +4,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: config.py,v 1.1 2005-03-03 12:58:32 francis Exp $
+# $Id: config.py,v 1.2 2005-03-03 13:12:15 francis Exp $
 #
 
 """
@@ -60,7 +60,7 @@ def read_config(f):
         store_environ[k] = os.environ[k]
         del os.environ[k]
     os.environ['MYSOCIETY_CONFIG_FILE_PATH'] = f
-    (child_stdin, child_stdout, child_stderr) = os.popen3(php_path)
+    (child_stdin, child_stdout, child_stderr) = os.popen3([php_path,])
     for k,v in store_environ.iteritems():
         os.environ[k] = v
 
