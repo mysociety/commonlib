@@ -9,7 +9,7 @@
 
 package RABX::Fast;
 
-my $rcsid = ''; $rcsid .= '$Id: Fast.pm,v 1.2 2005-02-17 00:28:25 chris Exp $';
+my $rcsid = ''; $rcsid .= '$Id: Fast.pm,v 1.3 2005-02-17 00:51:16 chris Exp $';
 
 use strict;
 
@@ -92,7 +92,7 @@ unsigned char *serialise(SV *x, unsigned char *buf, size_t *off, size_t *len) {
             case SVt_PVHV:
                 /* Hash. */
                 buf[(*off)++] = 'A';
-                n = snprintf(b, sizeof b, "%d", (int)(N = hv_iterinit((HV*)y)))
+                n = snprintf(b, sizeof b, "%d", (int)(N = hv_iterinit((HV*)y)));
                 buf = netstring_append(b, n, buf, off, len);
                 while ((ent = hv_iternext((HV*)y))) {
                     SV *k, *v;
