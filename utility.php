@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.20 2004-12-30 14:54:01 francis Exp $
+ * $Id: utility.php,v 1.21 2005-01-04 16:35:19 francis Exp $
  * 
  */
 
@@ -868,6 +868,14 @@ function http_auth_user()
     $editor = $_SERVER["REMOTE_USER"];
     if (!$editor) $editor = "*unknown*";
     return $editor;
+}
+
+/* add_tooltip
+* Returns HTML with a span containing a tooltip.
+*/
+function add_tooltip($text, $tip)
+{
+    return "<span title=\"" .  $tip. "\">" .  $text . "</span>";
 }
 
 ?>
