@@ -6,7 +6,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-ratty.php,v 1.35 2005-02-11 15:08:46 chris Exp $
+ * $Id: admin-ratty.php,v 1.36 2005-02-17 00:34:17 francis Exp $
  * 
  */
 
@@ -237,7 +237,12 @@ class ADMIN_PAGE_RATTY {
         <th>Description</th>
         <th>Hit limit</th>
         <th>Action</th>
-        <th>Matches [1]</th>
+        <th>Matches in<br>time period[1]</th>
+EOF;
+            if ($this->scope == "fyr-abuse") {
+                print "<th>Messages</th>";
+            }
+            print <<<EOF
     </tr>
 EOF;
             $c = 1;
@@ -255,6 +260,10 @@ EOF;
                 }
                 print "<td>" . trim_characters($rule['message'], 0, 40) . "</td>";
                 print "<td>" . $rule['hits'] . "</td>";
+                if ($this->scope == "fyr-abuse") {
+                    print "<td><a href=\"?page=fyrqueue&view=logsearch&query=" .     /* XXX use new_url... */
+                    urlencode(" rule #" . $rule['id'] . " ") . "\">View</a></td>";
+                }
                 print "</tr>";
 
                 $c = 1 - $c;
@@ -290,6 +299,7 @@ up until the last hit).  "Time period" here is the number of seconds in the
 "Hit limit" column.  For more complicated "Limit hits separately..." and "Limit
 number of distinct..." rules, matches is a count of how many times just the 
 simple filter conditions were met, not how many times the rule actually triggered.
+Note that if the time period is zero, you don't get very useful results.
 </p>
 <?
         }
