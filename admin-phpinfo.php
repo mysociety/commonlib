@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-phpinfo.php,v 1.2 2004-11-11 12:38:03 francis Exp $
+ * $Id: admin-phpinfo.php,v 1.3 2005-01-12 18:03:13 francis Exp $
  * 
  */
 
@@ -19,7 +19,7 @@ class ADMIN_PAGE_PHPINFO {
     function display($self_link) {
         ob_start();
         phpinfo();
-        $php_info .= ob_get_contents();
+        $php_info = ob_get_contents();
         ob_end_clean();
 
         preg_match_all("=<body[^>]*>(.*)</body>=siU", $php_info, $a); 

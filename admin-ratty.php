@@ -6,18 +6,21 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-ratty.php,v 1.23 2005-01-12 17:43:18 chris Exp $
+ * $Id: admin-ratty.php,v 1.24 2005-01-12 18:03:13 francis Exp $
  * 
  */
 
 require_once "ratty.php";
 
 class ADMIN_PAGE_RATTY {
-    function ADMIN_PAGE_RATTY($scope, $what) {
-        $this->id = "ratty_$scope";
+    function ADMIN_PAGE_RATTY($scope, $what, $description) {
+        $this->id = "ratty-" . $scope;
         $this->name = "Ratty";
-        $this->navname = "Rate Limiter - $what";
+        $this->navname = "Rate Limit - $what";
+
         $this->scope = $scope;
+        $this->scope_title = $what;
+        $this->scope_description = $description;
     }
 
     function display($self_link) {
@@ -173,12 +176,13 @@ class ADMIN_PAGE_RATTY {
         if ($action == "listrules") {
             $rules = ratty_admin_get_rules($this->scope);
             print <<<EOF
+<p><b>$this->scope_title Rules:</b> $this->scope_description</b>
+</p>
 <p>
-Rules enforce limits on access to web pages or other resources, or on when a
-more general operation can take place. Each rule has a hit rate limit, which
-limits the number of times a request or operation is permitted to, at most, the
-maximum number of hits in any given specific time period.  (You can set the hit
-limit to 0 to completely block access.)
+Each rule has a hit rate limit, which limits the number of times a
+request or operation is permitted to, at most, the maximum number of
+hits in any given specific time period.  (You can set the hit limit to 0
+to completely block access.)
 </p>
 <p>
 Conditions within the rule let you specify when it applies.  For example, you
