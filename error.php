@@ -6,9 +6,15 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: error.php,v 1.6 2005-01-28 22:35:08 francis Exp $
+ * $Id: error.php,v 1.7 2005-03-14 14:32:04 francis Exp $
  * 
  */
+
+/* Make sure register globals is turned off */
+if (ini_get("register_globals")) {
+    print "Turn off register_globals in php.ini";
+    exit;
+}
 
 /*
  * PHP error handling is, you will not be surprised to hear, completely
