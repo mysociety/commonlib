@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin.php,v 1.3 2004-11-11 12:54:27 francis Exp $
+ * $Id: admin.php,v 1.4 2004-11-11 17:10:20 francis Exp $
  * 
  */
 
@@ -20,23 +20,27 @@ require_once "HTML/QuickForm/Rule.php";
 require_once "HTML/QuickForm/Renderer/Default.php";
 
 function admin_page_display($site_name, $pages) {
-    $title = $site_name . " Admin Pages";
+    // generate navigation bar
     $navlinks = "";
     foreach ($pages as $page) {
         $navlinks .= "<a href=\"admin?page=". $page->id."\">" . $page->navname. "</a><br>";
     }
 
-    admin_html_header($title);
-
+    // find page
     $id = get_http_var("page");
     if ($id == "") 
         $id = $pages[0]->id;
-    $self_link = "admin?page=$id";
     foreach ($pages as $page) {
         if ($page->id == $id) {
-            $page->display($self_link);
+            break;
         }
-    }
+    } 
+   
+    // display
+    $title = $site_name . " Admin Pages &mdash; " . $page->navname;
+    admin_html_header($title);
+    $self_link = "admin?page=$id";
+    $page->display($self_link);
     admin_html_footer($navlinks);
 }
 
@@ -57,7 +61,8 @@ table {border-collapse: collapse; }
 .center {text-align: center; }
 .center table { margin-left: auto;  margin-right: auto;  text-align: left; }
 .center th { text-align: center !important;  }
-td,  th { border: 1px solid #000000;  font-size: 75%; vertical-align: baseline; }
+/*td,  th { border: 1px solid #000000;  font-size: 75%; vertical-align: * baseline; }*/
+td,  th { border: 1px solid #000000;  font-size: 75%; }
 h1 {font-size: 150%; }
 h2 {font-size: 125%; }
 .p {text-align: left; }
@@ -95,7 +100,7 @@ function admin_render_form($form) {
     $form->setRequiredNote('<font color="#FF0000">*</font> shows the required fields.');
     $form->setJsWarnings('Those fields have errors :', 'Thanks for correcting them.');
 
-    $renderer->setFormTemplate('<table width="450" border="0" cellpadding="3" cellspacing="2" bgcolor="#CCCC99"><form{attributes}>{content}</form></table>');
+    $renderer->setFormTemplate('<table width="100%" border="0" cellpadding="3" cellspacing="2" bgcolor="#CCCC99"><form{attributes}>{content}</form></table>');
     $renderer->setHeaderTemplate('<tr><td style="white-space:nowrap;background:#996;color:#ffc;" align="left" colspan="2"><b>{header}</b></td></tr>');
     $renderer->setGroupTemplate('<table><tr>{content}</tr></table>', 'name');
     $renderer->setGroupElementTemplate('<td>{element}<br /><span style="font-size:10px;"><!-- BEGIN required --><span style="color: #f00">*</span><!-- END required --><span style="color:#996;">{label}</span></span></td>', 'name');
