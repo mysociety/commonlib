@@ -1,18 +1,24 @@
 <?php
-
 /*
+ * utility.php:
  * General utility functions.  Taken from the TheyWorkForYou.com source
  * code, and licensed under a BSD-style license.
  * 
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.7 2004-10-28 15:05:25 chris Exp $
+ * $Id: utility.php,v 1.8 2004-11-02 16:23:43 chris Exp $
  * 
  */
 
+/* debug HEADER TEXT [VARIABLE]
+ * Print, to the page, a debugging variable, if a debug=... parameter is
+ * present. The message is prefixed with the HEADER and consists of the passed
+ * TEXT and an optional (perhaps array or class) VARIABLE which, if present, is
+ * also dumped to the page. Display of items is dependent on the integer value
+ * of the debug query variable and the passed HEADER, according to the table in
+ * $levels below. */
 function debug ($header, $text="", $complex_variable=null) {
-	// Pass it a brief header word and some debug text and it'll be output.
 
 	// We set ?debug=n in the URL.
 	// n is a number from (currently) 1 to 4.
@@ -179,16 +185,22 @@ function error_handler ($errno, $errmsg, $filename, $linenum, $vars) {
 
 
 
-// Replacement for var_dump()
+/* vardump VARIABLE
+ * Dump VARIABLE to the page, wrapped in <pre> tags. */
 function vardump($blah) {
-	print "<pre>\n";
-	var_dump($blah);
-	print "</pre>\n";
+    /* Miserable. We need to encode entities in the output, which means messing
+     * about with output buffering. */
+    ob_start();
+    var_dump($blah);
+    $d = ob_get_contents();
+    ob_end_clean();
+    print "<pre>" . htmlspecialchars($d, ENT_QUOTES, 'UTF-8') . "</pre>";
 }
 
 
 
-// Far from foolproof, but better than nothing.
+/* validate_email STRING
+ * Return TRUE if the passed STRING may be a valid email address. */
 function validate_email ($string) {
 	if (!ereg('^[-!#$%&\'*+\\./0-9=?A-Z^_`a-z{|}~]+'.
 		'@'.
@@ -775,6 +787,13 @@ function invoked_url() {
     $url .= preg_replace("/\?.*/", "", $_SERVER['REQUEST_URI']);
 
     return $url;
+}
+
+/* javascript_focus_set FORM ELEMENT
+ * Return a bit of JavaScript which will set the user's input focus to the
+ * input element of the given FORM (id) and ELEMENT (name). */
+function javascript_focus_set($form, $elt) {
+    return "document.$form.$elt.focus();";
 }
 
 ?>
