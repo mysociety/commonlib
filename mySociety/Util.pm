@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Util.pm,v 1.8 2004-11-15 12:36:56 francis Exp $
+# $Id: Util.pm,v 1.9 2004-11-18 20:03:49 chris Exp $
 #
 
 package mySociety::Util::Error;
@@ -21,6 +21,8 @@ use Error qw(:try);
 use Fcntl;
 use Getopt::Std;
 use IO::File;
+use IO::Handle;
+use IO::Pipe;
 use POSIX;
 use Sys::Syslog;
 
@@ -78,7 +80,7 @@ filename (include any leading dot if you want to create, e.g., files called
 sub named_tempfile (;$) {
     my ($suffix) = @_;
     $suffix ||= '';
-    my ($where) = grep { -d $_ and -w $_ } ($ENV{TEMP}, $ENV{TMPDIR}, $ENV{TEMPDIR}, "/tmp");
+    my ($where) = grep { defined($_) and -d $_ and -w $_ } ($ENV{TEMP}, $ENV{TMPDIR}, $ENV{TEMPDIR}, "/tmp");
     die "no temporary directory available (last tried was \"$where\", error was $!)" unless (defined($where));
     
     my $prefix = $0;
@@ -92,6 +94,50 @@ sub named_tempfile (;$) {
     }
 
     die "unable to create temporary file; last attempted name was \"$name\" and open failed with error $!";
+}
+
+=item pipe_via PROGRAM ARG ... [HANDLE]
+
+Sets up a pipe via the given PROGRAM (passing it the given ARGs), and (if
+given) connecting its standard output to HANDLE. If called in list context,
+returns the handle and the PID of the child process.
+
+=cut
+sub pipe_via (@) {
+    my ($prog, @args) = @_;
+    my $outh;
+    if (UNIVERSAL::isa($args[$#args], 'IO::Handle')) {
+        $outh = pop(@args)->fileno();
+    }
+
+    my ($rd, $wr) = POSIX::pipe() or die "pipe: $!";
+
+    my $child = fork();
+    die "fork: $!" if (!defined($child));
+
+    if ($child == 0) {
+        POSIX::close($wr);
+        POSIX::close(0);
+        POSIX::dup($rd);
+        POSIX::close($rd);
+        if (defined($outh)) {
+            POSIX::close(1);
+            POSIX::dup($outh);
+            POSIX::close($outh);
+        }
+        exec($prog, @args);
+        exit(1);
+    }
+
+    POSIX::close($rd);
+
+    my $p = new IO::Handle();
+    $p->fdopen($wr, "w");
+    if (wantarray()) {
+        return ($p, $child);
+    } else {
+        return $p;
+    }
 }
 
 =item send_email TEXT SENDER RECIPIENT ...
@@ -191,7 +237,7 @@ Become a daemon.
 sub daemon () {
     my $p;
     die "fork: $!" if (!defined($p = fork()));
-    return unless ($p == 0);
+    exit(0) unless ($p == 0);
     chdir("/");
     open(STDIN, "/dev/null") or die "/dev/null: $!";
     open(STDOUT, ">/dev/null") or die "/dev/null: $!";
@@ -240,7 +286,7 @@ sub print_log ($$) {
 =item is_valid_postcode STRING
 
 Is STRING (once it has been converted to upper-case and spaces removed) a valid
-UK postcode (as defined by BS7666, apparently).
+UK postcode? (As defined by BS7666, apparently.)
 
 =cut
 sub is_valid_postcode ($) {
