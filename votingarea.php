@@ -8,7 +8,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: votingarea.php,v 1.7 2004-11-22 12:11:45 chris Exp $
+ * $Id: votingarea.php,v 1.8 2004-12-08 23:26:40 matthew Exp $
  * 
  */
 
@@ -113,30 +113,26 @@ $va_display_order = array(
 $va_responsibility_description = array(
     VA_DIS =>
             "The District Council is responsible for
-            local services and policy, including planning, council housing,
-            building regulation, rubbish collection, and local roads. Some
-            responsibilities, such as recreation facilities, are shared with
-            the County Council.",
+            <strong>local services</strong>, including <strong>planning</strong>, <strong>council housing</strong>,
+            <strong>rubbish collection</strong>, and <strong>local roads</strong>.",
     VA_MTD =>
             "The Metropolitan District Council is
             responsible for all aspects of local services and policy, including
             planning, transport, education, social services and libraries.",
     VA_CTY =>
-            "The County Council is responsible for local
-            services, including education, social services, transport and
-            libraries.",
+            "The County Council is responsible for <strong>local
+            services</strong>, including <strong>education</strong>, <strong>social services</strong>, <strong>transport</strong> and
+            <strong>libraries</strong>.",
     VA_LGD =>
             "The Local Government District is responsible for all local
             services and policy.", /* FIXME */
     VA_WMP =>
             "The House of Commons is responsible for
-            making laws in the UK and for overall scrutiny of all aspects of
-            government.",
+            <strong>making laws in the UK and for overall scrutiny of all aspects of
+            government</strong>.",
     VA_EUP =>
-            "They scrutinise European laws (called
-            \"directives\") and the budget of the European Union, and provides
-            oversight of the other decision-making bodies of the Union,
-            including the Council of Ministers and the Commission.",
+            "They <strong>scrutinise European laws</strong> and the <strong>budget of the European Union</strong>, and provide
+            <strong>oversight of the other decision-making bodies</strong>.",
 )
 
  
