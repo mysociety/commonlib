@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: VotingArea.pm,v 1.4 2004-10-18 16:48:14 francis Exp $
+# $Id: VotingArea.pm,v 1.5 2004-10-19 16:46:21 chris Exp $
 #
 
 package mySociety::VotingArea;
@@ -374,5 +374,20 @@ that area.  For example, "Cllr" for Councillors.
 
         EUR, ''
     );
+
+=item style_rep TYPE NAME
+
+Return the full style of a representative, e.g. "Cllr Fred Fish" or "Simon Soup
+MP".
+
+=cut
+sub style_rep ($$) {
+    my ($type, $name);
+    die "style_rep: bad TYPE $type" unless exists($mySociety::VotingArea::type_name{$type});
+    return sprintf("%s%s%s",
+            $mySociety::VotingArea::rep_prefix{$type} ne '' ? "$mySociety::VotingArea::rep_prefix{$type} " : '',
+            $name,
+            $mySociety::VotingArea::rep_suffix{$type} ne '' ? "$mySociety::VotingArea::rep_suffix{$type} " : '');
+}
 
 1;
