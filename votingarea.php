@@ -8,7 +8,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: votingarea.php,v 1.11 2005-01-07 17:34:02 chris Exp $
+ * $Id: votingarea.php,v 1.12 2005-01-07 17:39:53 chris Exp $
  * 
  */
 
@@ -47,8 +47,10 @@ $va_inside = array(
     );
 
 /* va_display_order
- * Suggested "increasing power" display order for representatives. XXX should
- * this be in FYR? */
+ * Suggested "increasing power" display order for representatives. In cases
+ * where one category of representatives is elected on a constituency and an
+ * electoral area, as with top-up lists in the Scottish Parliament, an array of
+ * the equivalent types is placed in this array. XXX should this be in FYR? */
 $va_display_order = array(
         /* District councils */
         'DIW', 'LBW',
@@ -57,9 +59,9 @@ $va_display_order = array(
         /* county council */
         'CED',
         /* various devolved assemblies */
-        'LAC',
-        'WAC',
-        'SPC',
+        array('LAC', 'LAE'),
+        array('WAC', 'WAE'),
+        array('SPC', 'SPE'),
         'NIE',
         /* HoC and European Parliament */
         'WMC', 'EUR'
@@ -126,24 +128,4 @@ $va_responsibility_description = array(
             <strong>oversight of the other decision-making bodies</strong>.",
     );
 
-/* va_representative_category
- * For the Scottish Parliament, Welsh Assembly and Greater London Assembly,
- * there is a two-level electoral structure in which representatives are
- * elected by a first-past-the-post system on constituencies, and by a PR
- * system on larger "electoral regions". There is a key in this array for each
- * category of representative which should be displayed, with the corresponding
- * value being the list of area types on which those representatives are
- * elected. XXX should this be in FYR? */
-$va_representative_category = array(
-        'SPC' => array('SPC', 'SPE'),
-        'WAC' => array('WAC', 'WAE'),
-        'LAC' => array('LAC', 'LAE')
-    );
-
-foreach ($va_display_order as $what) {
-    if ($what != 'SPE' && $what != 'WAE' && $what != 'LAE'
-        && !array_key_exists($what, $va_representative_category))
-        $va_representative_category[$what] = array($what);
-}
- 
 ?>
