@@ -5,19 +5,16 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-reps.php,v 1.18 2005-02-17 01:15:21 francis Exp $
+ * $Id: admin-reps.php,v 1.19 2005-02-21 11:37:32 francis Exp $
  * 
  */
 
 require_once "dadem.php";
 require_once "mapit.php";
 
-$matchcgi = "https://secure.mysociety.org/admin/services/match.cgi";
-
 class ADMIN_PAGE_REPS {
     function ADMIN_PAGE_REPS () {
         $this->id = "reps";
-        $this->name = "Reps";
         $this->navname= "Representative Data";
     }
 
@@ -218,9 +215,8 @@ class ADMIN_PAGE_REPS {
                 }
                 $form->addGroup($finalgroup, "finalgroup", "",' ', false);
             } else {
-                global $matchcgi;
                 $form->addElement('static', 'note3', null, 
-                    '<a href="'.$matchcgi.'?page=councilinfo;area_id='
+                    '<a href="'.OPTION_ADMIN_SERVICES_CGI.'match.cgi?page=councilinfo;area_id='
                     . $vainfo['parent_area_id'] . '">To edit Councillors please use the match.cgi interface</a>'.
                     '<br><a href="'.$self_link.'&ds_va_id='
                     . $vainfo['parent_area_id'] . '">... or edit Democratic Services for this council</a>');
@@ -302,8 +298,16 @@ class ADMIN_PAGE_REPS {
         } else {
             // General Statistics
 
+            // Bad contacts
+            $form = new HTML_QuickForm('adminRepsBad', 'post', $self_link);
+            $badcontacts = dadem_get_bad_contacts();
+            dadem_check_error($badcontacts);
+            $form->addElement('header', '', 'Bad Contacts ' . count($badcontacts));
+            $html = $this->render_reps($self_link, $badcontacts);
+            $form->addElement('static', 'badcontacts', null, $html);
+            admin_render_form($form);
+
             // User submitted corrections
-            global $matchcgi;
             $form = new HTML_QuickForm('adminRepsCorrectionsHeader', 'post', $self_link);
             $corrections = dadem_get_user_corrections();
             dadem_check_error($corrections);
@@ -337,7 +341,7 @@ class ADMIN_PAGE_REPS {
                     $vaid = $wardinfo['parent_area_id'];
                     $vainfo = $info2[$vaid];
                     // TODO: Make this councilinfo, and give a valid r= return URL
-                    $html .= '<a href="'.$matchcgi.'?page=councilinfo;area_id='
+                    $html .= '<a href="'.OPTION_ADMIN_SERVICES_CGI.'match.cgi?page=councilinfo;area_id='
                         . $vaid . '&r=' . '">' . 
                         htmlspecialchars($vainfo['name']) . "</a>, ";
                     $html .= htmlspecialchars($wardinfo['name']);
@@ -373,13 +377,6 @@ class ADMIN_PAGE_REPS {
             }
 
             $form = new HTML_QuickForm('adminRepsStats', 'post', $self_link);
-
-            // Bad contacts
-            $badcontacts = dadem_get_bad_contacts();
-            dadem_check_error($badcontacts);
-            $form->addElement('header', '', 'Bad Contacts ' . count($badcontacts));
-            $html = $this->render_reps($self_link, $badcontacts);
-            $form->addElement('static', 'badcontacts', null, $html);
 
             // MaPit
             $form->addElement('header', '', 'Postcode/Area Statistics (MaPit)');

@@ -5,15 +5,14 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-phpinfo.php,v 1.3 2005-01-12 18:03:13 francis Exp $
+ * $Id: admin-phpinfo.php,v 1.4 2005-02-21 11:37:32 francis Exp $
  * 
  */
 
 class ADMIN_PAGE_PHPINFO {
     function ADMIN_PAGE_PHPINFO () {
         $this->id = "phpinfo";
-        $this->name = "PHP Info";
-        $this->navname = "PHP Environment Info";
+        $this->navname = "PHP Environment";
     }
 
     function display($self_link) {

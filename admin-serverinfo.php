@@ -5,14 +5,13 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-serverinfo.php,v 1.4 2004-12-20 18:03:48 francis Exp $
+ * $Id: admin-serverinfo.php,v 1.5 2005-02-21 11:37:32 francis Exp $
  * 
  */
 
 class ADMIN_PAGE_SERVERINFO {
     function ADMIN_PAGE_SERVERINFO () {
         $this->id = "serverinfo";
-        $this->name = "Server Info";
         $this->navname = "Server Information";
     }
 

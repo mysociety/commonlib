@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin.php,v 1.25 2005-01-29 11:36:27 matthew Exp $
+ * $Id: admin.php,v 1.26 2005-02-21 11:37:32 francis Exp $
  * 
  */
 
@@ -29,28 +29,67 @@ function admin_page_display($site_name, $pages) {
     $navlinks = "";
     foreach ($pages as $page) {
         if (isset($page))
-            $navlinks .= "<a href=\"?page=". $page->id."\">" . $page->navname. "</a><br>";
+            if (isset($page->url)) {
+                $navlinks .= "<a target=\"content\" href=\"". $page->url."\">" . $page->navname. "</a><br>";
+            } else {
+                $navlinks .= "<a target=\"content\" href=\"?page=". $page->id."\">" . $page->navname. "</a><br>";
+            }
         else
             $navlinks .= "<br>";
     }
 
-    // find page
-    $id = get_http_var("page");
-    if ($id == "") 
-        $id = $pages[0]->id;
-    foreach ($pages as $page) {
-        if (isset($page) && $page->id == $id) {
-            break;
+    $maintitle = "$site_name admin";
+    if (get_http_var("page"))  {
+        // find page
+        $id = get_http_var("page");
+        foreach ($pages as $page) {
+            if (isset($page) && $page->id == $id) {
+                break;
+            }
+        } 
+        // display
+        ob_start();
+        $title = $page->navname . " &mdash; $maintitle";
+        admin_html_header($title);
+        print "<h1>$title</h1>";
+        $self_link = "?page=$id";
+        $page->display($self_link);
+        admin_html_footer();
+    } elseif (get_http_var("navframe")) {
+        // right hand nav frame
+        admin_html_header($maintitle);
+?>
+<h3><?=$site_name?></h3>
+<?=$navlinks?>
+<p><a href="http://www.mysociety.org/"><img class="mslogo" src="https://secure.mysociety.org/mysociety_sm.gif" border="0" alt="mySociety"></a></p>
+<?
+        admin_html_footer();
+    } else {
+        $url = get_http_var('url');
+        if (!$url) {
+            $url = "?page=" . $pages[0]->id;
         }
-    } 
-   
-    // display
-    $title = $page->navname . " &mdash; $site_name Admin";
-    ob_start();
-    admin_html_header($title);
-    $self_link = "?page=$id";
-    $page->display($self_link);
-    admin_html_footer($navlinks);
+?>
+<html><head>
+<title><?=$maintitle?></title>
+<script language="JavaScript"><!--
+function onloadcontent() {
+// Attempt to put a usable URL in the URL
+//    document.title = self.content.document.title;
+//   newloc = "?url=" + escape(self.content.location);
+//    if (document.location.search != newloc) 
+// This is no good, as it gets page to reload
+//        document.location.search = newloc;
+}
+//--></script>
+<frameset cols=*,180>
+<noframes><h1><?=$maintitle?></h1><?=$navlinks?></noframes>
+<frame name="content" src="<?=$url?>" onload="onloadcontent()">
+<frame name="navigation" src="?navframe=yes">
+</frameset>
+</head></html>
+<?
+    }
 }
 
 
@@ -84,24 +123,17 @@ h2 {font-size: 125%; }
 .diffto {background-color: #99ffcc; }
 .diffsnip {background-color: #ccff33; }
 i {color: #666666;  background-color: #cccccc; }
-img.mslogo {float: right;  border: 0px; }
+img.mslogo {float: left;  border: 0px; }
 hr {width: 600px;  background-color: #cccccc;  border: 0px;  height: 1px;  color: #000000; }
 //--></style>
 </head>
 <body>
-<h1><?=$title?></h1>
-<table border=1 cellpadding=10 width=100%><tr><td width=80%>
 <?
 }
 
 // Footer at bottom
-function admin_html_footer($navlinks) {
+function admin_html_footer() {
 ?>
-<p><a href="http://www.mysociety.org/"><img class="mslogo" src="https://secure.mysociety.org/mysociety_sm.gif" border="0" alt="mySociety"></a></p>
-</td>
-<td valign=top>
-<?=$navlinks?>
-</td></tr></table>
 </body>
 </html>
 <?
