@@ -10,7 +10,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: rabx.php,v 1.10 2005-01-12 16:42:48 chris Exp $
+ * $Id: rabx.php,v 1.11 2005-01-26 16:28:44 chris Exp $
  * 
  */
 
@@ -89,36 +89,28 @@ function rabx_netstring_wr(&$string, &$buffer) {
  * Read a netstring from BUFFER starting at position POS. Returns the string
  * read on success, or an error on failure. */
 function rabx_netstring_rd(&$buffer, &$pos) {
-    $avail = strlen($buffer) - $pos;
+    $avail = strlen(&$buffer) - $pos;
     if ($avail < 3)
         return rabx_error(RABX_ERROR_PROTOCOL, "not enough space for a netstring at position $pos");
-    $len = 0;
-    while (1) {
-        $n = substr($buffer, $pos, 1);
-        if ($n == ":")
-            break;
-        if (!strstr("0123456789", $n))
-            return rabx_error(RABX_ERROR_PROTOCOL, "bad character \"$n\" in netstring length at position $pos");
-        $len = $len * 10 + ord($n) - ord("0");
-        ++$pos;
-        --$avail;
-    }
-
-    /* skip : */
-    ++$pos;
-    --$avail;
+    $m = array();
+    if (!preg_match('/(\d+):/', &$buffer, &$m, 0, $pos))
+        return rabx_error(RABX_ERROR_PROTOCOL, "bad netstring leader at position $pos");
+    $len = $m[1];
+    $pos += ($n = strlen($m[0]));
+    $avail -= $n;
 
     if ($avail < $len + 1)
         return rabx_error(RABX_ERROR_PROTOCOL, "not enough space for netstring payload at position $pos");
 
-    $res = substr($buffer, $pos, $len);
+    $res = substr(&$buffer, $pos, $len);
     $pos += $len;
     
-    if (substr($buffer, $pos, 1) != ",")
+    if (substr(&$buffer, $pos, 1) != ",")
         return rabx_error(RABX_ERROR_PROTOCOL, "no trailing \",\" after netstring at position $pos");
 
     ++$pos;
     --$avail;
+
     return $res;
 }
 
@@ -178,9 +170,9 @@ function rabx_wire_wr(&$x, &$buffer) {
  * Read the on-the-wire representation of some data from BUFFER beginning at
  * position POS. On error, returns an error. */
 function rabx_wire_rd(&$buffer, &$pos) {
-    if ($pos >= strlen($buffer))
+    if ($pos >= strlen(&$buffer))
         return rabx_error(RABX_ERROR_PROTOCOL, "attempt to read beyond end of buffer at position $pos");
-    $type = substr($buffer, $pos, 1);
+    $type = substr(&$buffer, $pos, 1);
     ++$pos;
 
     /* Check for valid type. */
@@ -193,7 +185,7 @@ function rabx_wire_rd(&$buffer, &$pos) {
     
     /* All other types now encode a string, which is either the value or a
      * length. */
-    if (rabx_is_error($x = rabx_netstring_rd($buffer, $pos)))
+    if (rabx_is_error($x = rabx_netstring_rd(&$buffer, $pos)))
         return $x;
 
     if ($type == 'I') {
@@ -213,7 +205,7 @@ function rabx_wire_rd(&$buffer, &$pos) {
             return rabx_error(RABX_ERROR_PROTOCOL, "list length is not an integer at position $pos");
         $a = array();
         for ($i = 0; $i < intval($x); ++$i) {
-            array_push($a, $e = rabx_wire_rd($buffer, $pos));
+            array_push($a, $e = rabx_wire_rd(&$buffer, $pos));
             if (rabx_is_error($e))
                 return $e;
         }
@@ -223,9 +215,9 @@ function rabx_wire_rd(&$buffer, &$pos) {
             return rabx_error(RABX_ERROR_PROTOCOL, "associative array length is not an integer at position $pos");
         $a = array();
         for ($i = 0; $i < intval($x); ++$i) {
-            if (rabx_is_error($k = rabx_wire_rd($buffer, $pos)))
+            if (rabx_is_error($k = rabx_wire_rd(&$buffer, $pos)))
                 return $k;
-            if (rabx_is_error($v = rabx_wire_rd($buffer, $pos)))
+            if (rabx_is_error($v = rabx_wire_rd(&$buffer, $pos)))
                 return $v;
             $a[$k] = $v;
         }
