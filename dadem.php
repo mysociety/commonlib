@@ -7,7 +7,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: dadem.php,v 1.13 2005-02-08 15:06:55 francis Exp $
+ * $Id: dadem.php,v 1.14 2005-02-10 16:32:58 francis Exp $
  * 
  */
 
@@ -63,6 +63,15 @@ function dadem_search_representatives($query) {
     return $result;
 }
 
+/* dadem_get_bad_contacts
+  * Returns list of representatives whose contact details are bad.  That is,
+  * listed as 'unknown', listed as 'fax' or 'email' or 'either' without
+  * appropriate details being present.  */
+function dadem_get_bad_contacts() {
+    global $dadem_client;
+    $result = $dadem_client->call('DaDem.get_bad_contacts', array());
+    return $result;
+}
 
 /* dadem_get_representative_info ID
  * On success, returns an array giving information about the representative

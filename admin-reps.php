@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-reps.php,v 1.11 2005-02-10 11:51:48 francis Exp $
+ * $Id: admin-reps.php,v 1.12 2005-02-10 16:32:57 francis Exp $
  * 
  */
 
@@ -232,9 +232,17 @@ class ADMIN_PAGE_REPS {
         } else {
             // General Statistics
 
+            // Bad contacts
+            $form->addElement('header', '', 'Bad Contacts');
+            $badcontacts = dadem_get_bad_contacts();
+            dadem_check_error($badcontacts);
+            $html = $this->render_reps($self_link, $badcontacts);
+            $form->addElement('static', 'badcontacts', null, $html);
+
             // MaPit
             $form->addElement('header', '', 'Postcode/Area Statistics (MaPit)');
             $mapitstats = mapit_admin_get_stats();
+            mapit_check_error($mapitstats);
             $form->addElement('static', 'mapitstats', "Areas: ", $mapitstats['area_count']);
             $form->addElement('static', 'mapitstats', "Postcodes: ",  $mapitstats['postcode_count']);
             
