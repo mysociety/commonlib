@@ -9,7 +9,7 @@
 
 package RABX::Fast;
 
-my $rcsid = ''; $rcsid .= '$Id: Fast.pm,v 1.4 2005-02-21 13:19:00 chris Exp $';
+my $rcsid = ''; $rcsid .= '$Id: Fast.pm,v 1.5 2005-02-23 13:10:40 chris Exp $';
 
 use strict;
 
@@ -203,7 +203,7 @@ SV *unserialise(const unsigned char *buf, size_t *off, const size_t len) {
         sl = (STRLEN)l;
         ret = newSVpv(s, sl);
         if (c == 'T') {
-            if (!is_utf8_string((U8*)s, sl)
+            if (!is_utf8_string((U8*)s, sl))
                 croak("text value is not UTF-8");
             SvUTF8_on(ret);
         } else
