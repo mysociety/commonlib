@@ -9,7 +9,7 @@ etc.
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: evel.php,v 1.2 2005-03-30 18:12:06 francis Exp $
+ * $Id: evel.php,v 1.3 2005-04-01 07:24:25 francis Exp $
  *
  */
 
@@ -34,9 +34,69 @@ function evel_check_error($data) {
 $evel_client = new RABX_Client(OPTION_EVEL_URL);
 
 
+/* evel_construct_email SPEC
+
+  Construct a wire-format (RFC2822) email message according to SPEC, which
+  is an associative array containing elements as follows:
+
+  * _body_
+
+    Text of the message to send, as a UTF-8 string with "\n" line-endings.
+
+  * _template_, _parameters_
+
+    Templated body text and an associative array of template parameters
+    containing optional substititutions <?=$values['name']?>, each of which
+    is replaced by the value of the corresponding named value in
+    _parameters_. It is an error to use a substitution when the
+    corresponding parameter is not present or undefined. The first line of
+    the template will be interpreted as contents of the Subject: header of
+    the mail if it begins with the literal string 'Subject: ' followed by a
+    blank line. The templated text will be word-wrapped to produce lines of
+    appropriate length.
+
+  * To
+
+    Contents of the To: header, as a literal UTF-8 string or an array of
+    addresses or [address, name] pairs.
+
+  * From
+
+    Contents of the From: header, as an email address or an [address, name]
+    pair.
+
+  * Cc
+
+    Contents of the Cc: header, as for To.
+
+  * Subject
+
+    Contents of the Subject: header, as a UTF-8 string.
+
+  * Message-ID
+
+    Contents of the Message-ID: header, as a US-ASCII string.
+
+  * _any other element_
+
+    interpreted as the literal value of a header with the same name.
+
+  If no Message-ID is given, one is generated. If no To is given, then the
+  string "Undisclosed-Recipients: ;" is used. If no From is given, a
+  generic no-reply address is used. It is an error to fail to give a body,
+  templated body, or Subject. */
+function evel_construct_email($spec) {
+    global $evel_client;
+    $params = func_get_args();
+    $result = $evel_client->call('EvEl.construct_email', $params);
+    return $result;
+}
+
 /* evel_send MESSAGE RECIPIENT ...
 
-  MESSAGE is the full text of a message to be sent to the given RECIPIENTS. */
+  Send a MESSAGE to the given RECIPIENTS. MESSAGE is either the full text
+  of a message (in its RFC2822, on-the-wire format) or an associative array
+  as passed to construct_email. */
 function evel_send($message, $recipient) {
     global $evel_client;
     $params = func_get_args();
