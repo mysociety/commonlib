@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: RABX.pm,v 1.6 2005-02-16 23:41:15 chris Exp $
+# $Id: RABX.pm,v 1.7 2005-02-21 11:37:30 francis Exp $
 
 # References:
 #   Netstrings are documented here: http://cr.yp.to/proto/netstrings.txt
@@ -95,10 +95,12 @@ use IO::String;
 use utf8;
 
 my $have_fast_serialisation = 0;
-eval {
-    use RABX::Fast;
-    $have_fast_serialisation = 1;
-};
+BEGIN {
+    eval {
+        require RABX::Fast;
+        $have_fast_serialisation = 1;
+    };
+}
 
 use constant PROTOCOL_VERSION => 0;
 
@@ -371,7 +373,7 @@ use HTTP::Request;
 use HTTP::Response;
 use Regexp::Common qw(URI);
 
-my $rcsid = ''; $rcsid .= '$Id: RABX.pm,v 1.6 2005-02-16 23:41:15 chris Exp $';
+my $rcsid = ''; $rcsid .= '$Id: RABX.pm,v 1.7 2005-02-21 11:37:30 francis Exp $';
 
 =back
 
