@@ -8,12 +8,11 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: votingarea.php,v 1.4 2004-11-18 08:58:38 francis Exp $
+ * $Id: votingarea.php,v 1.5 2004-11-18 10:16:42 francis Exp $
  * 
  */
 
-/* Manifest constants for different types of areas. Larger numbers indicate
- * larger areas and "more important" bodies. */
+/* Manifest constants for different types of areas.  */
 define('VA_DIS', 101);  /* District */
 define('VA_DIW', 102);  /* ... ward */
 
@@ -24,22 +23,22 @@ define('VA_MTD', 301);  /* Metropolitan district */
 define('VA_MTW', 302);  /* ... ward */
 
 define('VA_UTA', 401);  /* Unitary authority */
-define('VA_UTE', 402);  /* ... electoral division */
-define('VA_UTW', 403);  /* ... ward */
+define('VA_UTE', 402);  /* ... electoral division (in wales and isle of wight)*/
+define('VA_UTW', 403);  /* ... ward (elsewhere)*/
 
 define('VA_CTY', 501);  /* County */
 define('VA_CED', 502);  /* ... electoral division */
 
 define('VA_GLA', 601);  /* Greater London Assembly */
 define('VA_LAC', 602);  /* London constituency */
-define('VA_LAE', 603);  /* ... electoral region */
+define('VA_LAE', 603);  /* ... electoral region (for top-up members)*/
 
 define('VA_WAS', 701);  /* Welsh Assembly */
-define('VA_WAE', 702);  /* ... electoral region */
+define('VA_WAE', 702);  /* ... electoral region (for top-up members)*/
 define('VA_WAC', 703);  /* ... constituency */
 
 define('VA_SPA', 801);  /* Scottish Parliament */
-define('VA_SPE', 802);  /* ... electoral region */
+define('VA_SPE', 802);  /* ... electoral region (for top-up members)*/
 define('VA_SPC', 803);  /* ... constituency */
 
 define('VA_WMP', 901);  /* Westminster Parliament */
@@ -77,5 +76,10 @@ $va_inside = array(
 
         VA_EUR => VA_EUP
     );
+
+/* va_display_order
+ * Suggested "increasing power" display order for representatives. */
+$va_display_order = array(VA_DIW, VA_LBW, VA_MTW, VA_UTW, VA_UTE, VA_CED,
+    VA_LAC, VA_LAE, VA_WAC, VA_WAE, VA_SPC, VA_SPE, VA_WMC, VA_EUR);
 
 ?>
