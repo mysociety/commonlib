@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: RABX.pm,v 1.5 2005-02-16 22:13:51 chris Exp $
+# $Id: RABX.pm,v 1.6 2005-02-16 23:41:15 chris Exp $
 
 # References:
 #   Netstrings are documented here: http://cr.yp.to/proto/netstrings.txt
@@ -94,6 +94,12 @@ use Error qw(:try);
 use IO::String;
 use utf8;
 
+my $have_fast_serialisation = 0;
+eval {
+    use RABX::Fast;
+    $have_fast_serialisation = 1;
+};
+
 use constant PROTOCOL_VERSION => 0;
 
 =head1 NAME
@@ -168,6 +174,11 @@ Format X (which may be a reference or a scalar) into HANDLE.
 =cut
 sub wire_wr ($$);
 sub wire_wr ($$) {
+    if ($have_fast_serialisation) {
+        $_[1]->print(RABX::Fast::do_serialise($_[0]));
+        return;
+    }
+
     my $ref = ref($_[0]) ? $_[0] : \$_[0];
     my $h = $_[1];
 
@@ -360,7 +371,7 @@ use HTTP::Request;
 use HTTP::Response;
 use Regexp::Common qw(URI);
 
-my $rcsid = ''; $rcsid .= '$Id: RABX.pm,v 1.5 2005-02-16 22:13:51 chris Exp $';
+my $rcsid = ''; $rcsid .= '$Id: RABX.pm,v 1.6 2005-02-16 23:41:15 chris Exp $';
 
 =back
 
