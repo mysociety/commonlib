@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Util.pm,v 1.11 2005-02-08 17:31:29 chris Exp $
+# $Id: Util.pm,v 1.12 2005-02-15 09:58:57 chris Exp $
 #
 
 package mySociety::Util::Error;
@@ -63,8 +63,15 @@ sub random_bytes ($) {
     my $l = '';
 
     while (length($l) < $count) {
-        $f->sysread($l, $count - length($l), length($l)) or die "/dev/random: $!";
+        my $n = $f->sysread($l, $count - length($l), length($l));
+        if (!defined($n)) {
+            die "/dev/random: $!";
+        } elsif (!$n) {
+            die "/dev/random: EOF (shouldn't happen)";
+        }
     }
+
+    $f->close();
 
     return $l;
 }
