@@ -8,7 +8,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: votingarea.php,v 1.8 2004-12-08 23:26:40 matthew Exp $
+ * $Id: votingarea.php,v 1.9 2004-12-16 23:11:04 chris Exp $
  * 
  */
 
@@ -105,6 +105,39 @@ $va_display_order = array(
         VA_NIE,
         /* HoC and European Parliament */
         VA_WMC, VA_EUR
+    );
+
+/* va_salaried
+ * Array indicating whether representatives at the various levels receive a
+ * salary for their work. */
+$va_salaried = array(
+        VA_LBW => 0,
+
+        VA_LAC => 1,
+        VA_LAE => 1,
+
+        VA_CED => 0,
+
+        VA_DIW => 0,
+
+        VA_UTE => 0,
+        VA_UTW => 0,
+
+        VA_LGW => 0,
+
+        VA_MTW => 0,
+
+        VA_SPE => 1,
+        VA_SPC => 1,
+
+        VA_WAE => 1,
+        VA_WAC => 1,
+
+        VA_NIE => 1,
+
+        VA_WMC => 1,
+
+        VA_EUR => 1
     );
 
 /* va_responsibility_description
