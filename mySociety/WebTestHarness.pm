@@ -11,7 +11,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.4 2005-03-11 18:33:20 francis Exp $
+# $Id: WebTestHarness.pm,v 1.5 2005-03-23 12:49:36 francis Exp $
 #
 
 package mySociety::WebTestHarness;
@@ -245,21 +245,23 @@ sub email_incoming($$) {
 ############################################################################
 # PHP functions
 
-=item php_check_syntax DIRECTORY
+=item php_check_syntax DIRECTORY [EXTENSION]
 
-Recursively checks all .php files in the directory have valid syntax.
+Recursively checks files in the directory have valid syntax.  EXTENSION
+is a regular expression, and defaults to qr/\.php$/.
 
 =cut
-sub php_check_syntax($$) {
-    my ($self, $dir) = @_;
-    find(\&do_php_check_syntax, $dir);
-    sub do_php_check_syntax {
-        if (m/\.php$/) {
+sub php_check_syntax($$;$) {
+    my ($self, $dir, $extension) = @_;
+    $extension = qr/\.php$/ unless $extension;
+    my $do_php_check_syntax = sub {
+        if (m/$extension/) {
             my $phpbin = mySociety::Config::find_php();
             my $syntax_result = qx#$phpbin -l $_#;
             die $syntax_result if ($syntax_result ne "No syntax errors detected in $_\n");
         }
-    }
+    };
+    find($do_php_check_syntax, $dir);
 }
 
 
