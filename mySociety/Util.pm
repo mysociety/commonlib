@@ -6,15 +6,21 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Util.pm,v 1.6 2004-11-15 11:09:42 francis Exp $
+# $Id: Util.pm,v 1.7 2004-11-15 11:24:29 chris Exp $
 #
+
+package mySociety::Util::Error;
+
+@mySociety::Util::Error::ISA = qw(Error::Simple);
 
 package mySociety::Util;
 
 use strict;
+
 use Error qw(:try);
-use IO::File;
 use Fcntl;
+use Getopt::Std;
+use IO::File;
 use POSIX;
 use Sys::Syslog;
 
@@ -130,7 +136,7 @@ sub send_email ($$@) {
     if ($? & 127) {
         # Killed by signal; assume that message was not queued.
         $ret = EMAIL_HARD_ERROR;
-    } elsif ($?) {
+    } else {
         # We need to distinguish between success (anything which means that
         # the message will later be delivered or bounced), soft failures
         # (for which redelivery should be attempted later) and hard
@@ -155,7 +161,7 @@ sub send_email ($$@) {
         #   EX_TEMPFAIL     Message could not be sent immediately, but was
         #                   queued.
         my $ex = ($? >> 8);
-        
+
         my %return_codes = (
                 0       => EMAIL_SUCCESS,       # EX_OK
                 75      => EMAIL_SUCCESS,       # EX_TEMPFAIL
@@ -173,6 +179,7 @@ sub send_email ($$@) {
         }
     }
     close(SENDMAIL);
+
     return $ret;
 }
 
@@ -217,16 +224,17 @@ Log TEXT to the system log (under PRIORITY) and to standard error. Designed for
 use from daemons etc; web scripts should just log to standard error.
 
 =cut
-sub logmsg ($$) {
+sub print_log ($$) {
     if (!defined($logopen)) {
         my $tag = $0;
         $tag =~ s#^.*/##;
-        logopen($tag);
+        open_log($tag);
     }
     my ($pri, @a) = @_;
-    STDERR->print("consolidatemgrd: ", @a, "\n");
-    my $x = join('', @a);
-    syslog($pri, '%s', $x);    
+    my $str = join('', @a);
+    chomp($str);
+    STDERR->print("$logopen: ", $str, "\n");
+    syslog($pri, '%s', $str);
 }
 
 =item is_valid_postcode STRING
