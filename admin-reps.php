@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-reps.php,v 1.5 2004-12-30 14:54:01 francis Exp $
+ * $Id: admin-reps.php,v 1.6 2005-01-12 17:40:58 francis Exp $
  * 
  */
 
@@ -28,7 +28,7 @@ class ADMIN_PAGE_REPS {
             if ($repinfo['edited']) {
                 $html .= "<i>edited</i> ";
             }
-            $html .= "<a href=\"$self_link&pc=" . urlencode($pc). "&rep_id=" . $rep .  "\">" . $repinfo['name'] . " (". $repinfo['party'] . ")</a> \n";
+            $html .= "<a href=\"$self_link&pc=" .  urlencode(get_http_var('pc')). "&rep_id=" . $rep .  "\">" . $repinfo['name'] . " (". $repinfo['party'] . ")</a> \n";
             $html .= "prefer " . $repinfo['method'];
             if ($repinfo['email']) 
                 $html .= ", " .  $repinfo['email'];
@@ -45,8 +45,12 @@ class ADMIN_PAGE_REPS {
         // Input data
         if (get_http_var('gos'))
             $search = get_http_var('search');
-        if (get_http_var('gopc') or (!defined($search)))
+        else
+            $search = null;
+        if (get_http_var('gopc') or (!isset($search)))
             $pc = get_http_var('pc');
+        else 
+            $pc = null;
         $rep_id = get_http_var('rep_id');
         if (get_http_var('cancel') != "") 
             $rep_id = null;
@@ -117,11 +121,11 @@ class ADMIN_PAGE_REPS {
             $form->addGroup($finalgroup, "finalgroup", "",' ', false);
     
             $form->addElement('header', '', 'Historical Changes (each
-            relative to imported data)');
+                relative to imported data)');
             $html = "<table border=1>";
             $html .= "<th>Order</th><th>Date</th><th>Editor</th><th>Note</th>
-            <th>Name</th> <th>Party</th> <th>Method</th> <th>Email</th>
-            <th>Fax</th>";
+                <th>Name</th> <th>Party</th> <th>Method</th> <th>Email</th>
+                <th>Fax</th>";
 
             foreach ($rephistory as $row) {
                 $html .= "<tr>";
@@ -152,7 +156,7 @@ class ADMIN_PAGE_REPS {
                 $reps = dadem_get_representatives($va_id);
                 dadem_check_error($reps);
                 $reps = array_values($reps);
-                $html .= "<p><b>" . $area_info['name'] . " (" .  $area_info['type_name'] . ") </b></p>"; 
+                $html = "<p><b>" . $area_info['name'] . " (" .  $area_info['type_name'] . ") </b></p>"; 
                 $html .= $this->render_reps($self_link, $reps);
             }
             $form->addElement('static', 'bytype', null, $html);
