@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: VotingArea.pm,v 1.24 2005-02-10 10:27:34 francis Exp $
+# $Id: VotingArea.pm,v 1.25 2005-02-10 16:47:14 chris Exp $
 #
 
 package mySociety::VotingArea;
@@ -103,6 +103,7 @@ Known 3-letter area types.
         'DIS', 'DIW',  # District, Ward
         'UTA', 'UTE', 'UTW', # Unitary Authority, Electoral Division, Ward
         'MTD', 'MTW',  # Metropolitan District, Ward
+        'COI', 'COP',  # Council of the Isles (Scilly) and constituent Parish
         'SPA', 'SPE', 'SPC', # Scottish Parliament, Electoral Region, Constituency
         'WAS', 'WAE', 'WAC', # Welsh Assembly, Electoral Region, Constituency
         'NIA', 'NIE', # Northern Ireland Assembly, Electoral Region
@@ -150,6 +151,9 @@ for instance "Ward" or "Electoral Division".
         MTD =>  "Metropolitan District",
         MTW =>  "Ward",
 
+        COI =>  "Council of the Isles",
+        COP =>  "Parish",
+
         SPA =>  "Scottish Parliament",
         SPE =>  "Electoral Region",
         SPC =>  "Constituency",
@@ -160,10 +164,10 @@ for instance "Ward" or "Electoral Division".
 
         NIA =>  "Northern Ireland Assembly",
         NIE =>  "Constituency", # These are the same as the Westminster
-                              # constituencies => but return several members
-                              # using a proportional system. It looks like
-                              # most people just refer to them as
-                              # "constituencies".
+                                # constituencies but return several members
+                                # using a proportional system. It looks like
+                                # most people just refer to them as
+                                # "constituencies".
         
         WMP =>  "House of Commons",
         WMC =>  "Constituency",
@@ -193,6 +197,8 @@ you in the European Parliament".
         UTA =>  "on",
 
         MTD =>  "on",
+
+        COI =>  "on",
 
         LGD =>  "on",
 
@@ -233,6 +239,8 @@ that area.  For example, "Councillor" or "MEP".
 
         MTW => 'Councillor',
 
+        COP => 'Councillor',
+
         SPE => 'MSP',
         SPC => 'MSP',
 
@@ -270,6 +278,8 @@ area.  For example, "Councillor" or "Member of the European Parliament".
         UTW => 'Councillor',
 
         MTW => 'Councillor',
+
+        COP => 'Councillor',
 
         SPE => 'Member of the Scottish Parliament',
         SPC => 'Member of the Scottish Parliament',
@@ -309,6 +319,8 @@ Plural short version of rep_name.
 
         MTW => 'Councillors',
 
+        COP => 'Councillors',
+
         SPE => 'MSPs',
         SPC => 'MSPs',
 
@@ -345,6 +357,8 @@ Plural long version of rep_name.
         LGE => 'Councillors',
 
         MTW => 'Councillors',
+
+        COP => 'Councillors',
 
         SPE => 'Members of the Scottish Parliament',
         SPC => 'Members of the Scottish Parliament',
@@ -386,6 +400,8 @@ that area.  For example, "AM" for Assembly Members.
 
         MTW => '',
 
+        COP => '',
+
         SPE => 'MSP',
         SPC => 'MSP',
 
@@ -424,6 +440,8 @@ that area.  For example, "Cllr" for Councillors.
 
         MTW => 'Cllr',
 
+        COP => 'Cllr',
+
         SPE => '',
         SPC => '',
 
@@ -443,14 +461,14 @@ Types which are local councils, such as districts, counties,
 unitary authorities and boroughs.
 
 =cut
-our $council_parent_types = [qw(DIS LBO MTD UTA LGD CTY)];
+our $council_parent_types = [qw(DIS LBO MTD UTA LGD CTY COI)];
 
 =item $council_child_types
 
 Types which are wards or electoral divisions in councils.
 
 =cut
-our $council_child_types = [qw(DIW LBW MTW UTE UTW LGE CED)];
+our $council_child_types = [qw(DIW LBW MTW UTE UTW LGE CED COP)];
 
 =back
 
