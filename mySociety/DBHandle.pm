@@ -9,7 +9,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: DBHandle.pm,v 1.9 2005-02-16 15:13:37 chris Exp $
+# $Id: DBHandle.pm,v 1.10 2005-03-03 11:21:50 chris Exp $
 #
 
 package mySociety::DBHandle::Error;
@@ -106,22 +106,25 @@ sub new_dbh () {
         if (exists($mySociety::DBHandle::conf{Host}));
     $connstr .= ";port=$mySociety::DBHandle::conf{Port}"
         if (exists($mySociety::DBHandle::conf{Port}));
-    return DBI->connect($connstr,
+    my $dbh = DBI->connect($connstr,
                         $mySociety::DBHandle::conf{User},
                         $mySociety::DBHandle::conf{Password}, {
                             RaiseError => 0,
                             AutoCommit => 0,
                             PrintError => 0,
                             PrintWarn => 0,
-                            HandleError => sub ($$$) {
-                                my ($err, $dbh, $val) = @_;
-                                # Let's not make any unwise assumptions about
-                                # reentrancy here.
-                                local $dbh->{HandleError} = sub ($$$) { };
-                                $dbh->rollback();
-                                throw mySociety::DBHandle::Error($err);
-                            }
+                            RaiseError => 1
                         });
+    $dbh->{HandleError} =
+        sub ($$$) {
+            my ($err) = @_;
+            # Let's not make any unwise assumptions about reentrancy here.
+            local $dbh->{HandleError} = sub ($$$) { };
+            $dbh->rollback();
+            throw mySociety::DBHandle::Error($err);
+        };
+    $dbh->{RaiseError} = 0;
+    return $dbh;
 }
 
 =item dbh
