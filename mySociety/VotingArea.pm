@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: VotingArea.pm,v 1.10 2004-11-18 18:18:23 chris Exp $
+# $Id: VotingArea.pm,v 1.11 2004-11-22 12:11:45 chris Exp $
 #
 
 package mySociety::VotingArea;
@@ -80,6 +80,14 @@ Unitary Authority electoral division
 
 Unitary Authority ward
 
+=item LGD
+
+Local Government District
+
+=item LGW
+
+Local Government District ward
+
 =item MTD 
 
 Metropolitan District
@@ -88,9 +96,18 @@ Metropolitan District
 
 Metropolitan District ward
 
+=item NIA
+
+Northern Ireland Assembly (placeholder)
+
+=item NIE
+
+Northern Ireland Assembly Electoral Area (actually coterminous with the
+House of Commons constituencies in Northern Ireland)
+
 =item SPA 
 
-Scottish Parliament (this code is a placeholder).
+Scottish Parliament (placeholder)
 
 =item SPE 
 
@@ -102,7 +119,7 @@ Scottish Parliament constituency
 
 =item WAS 
 
-Welsh Assembly
+Welsh Assembly (placeholder)
 
 =item WAE 
 
@@ -145,6 +162,9 @@ use constant UTA => 401; # Unitary authority
 use constant UTE => 402; # ... electoral division
 use constant UTW => 403; # ... ward
 
+use constant LGD => 451; # Local Government District
+use constant LGW => 452; # ... ward
+
 use constant CTY => 501; # County
 use constant CED => 502; # ... electoral division
 
@@ -159,6 +179,9 @@ use constant WAC => 703; # ... constituency
 use constant SPA => 801; # Scottish Parliament
 use constant SPE => 802; # ... electoral region
 use constant SPC => 803; # ... constituency
+
+use constant NIA => 851; # Northern Ireland Assembly
+use constant NIE => 852; # ... electoral region
 
 use constant WMP => 901; # Westminster Parliament
 use constant WMC => 902; # ... constituency
@@ -245,6 +268,9 @@ for instance "Ward" or "Electoral Division".
         DIS,  "District",
         DIW,  "Ward",
 
+        LGD,  "Local Government District",
+        LGW,  "Ward"
+
         UTA,  "Unitary Authority",
         UTE,  "Electoral Division",
         UTW,  "Ward",
@@ -260,6 +286,13 @@ for instance "Ward" or "Electoral Division".
         WAE,  "Electoral Region",
         WAC,  "Constituency",
 
+        NIA,  "Northern Ireland Assembly",
+        NIE,  "Constituency", # These are the same as the Westminster
+                              # constituencies, but return several members
+                              # using a proportional system. It looks like
+                              # most people just refer to them as
+                              # "constituencies".
+        
         WMP,  "House of Commons",
         WMC,  "Constituency",
 
@@ -291,9 +324,13 @@ you in the European Parliament".
 
         MTD,  "on",
 
+        LGD,  "on",
+
         SPA,  "in the",
 
         WAS,  "on the",
+
+        NIA,  "on the",
 
         WMP,  "in the",
 
@@ -320,6 +357,8 @@ that area.  For example, "Councillor" or "MEP".
 
         DIW, 'District Councillor',
 
+        LGW, 'Councillor',
+
         UTE, 'Councillor',
         UTW, 'Councillor',
 
@@ -330,6 +369,8 @@ that area.  For example, "Councillor" or "MEP".
 
         WAE, 'AM',
         WAC, 'AM',
+
+        NIE, 'MLA',
 
         WMC, 'MP',
 
@@ -355,6 +396,8 @@ area.  For example, "Councillor" or "Member of the European Parliament".
 
         DIW, 'District Councillor',
 
+        LGW, 'Councillor',
+
         UTE, 'Councillor',
         UTW, 'Councillor',
 
@@ -362,6 +405,8 @@ area.  For example, "Councillor" or "Member of the European Parliament".
 
         SPE, 'Member of the Scottish Parliament',
         SPC, 'Member of the Scottish Parliament',
+
+        NIE, 'Member of the Legislative Assembly',
 
         WAE, 'Welsh Assembly Member',
         WAC, 'Welsh Assembly Member',
@@ -393,6 +438,8 @@ Plural short version of rep_name.
         UTE, 'Councillors',
         UTW, 'Councillors',
 
+        LGW, 'Councillors',
+
         MTW, 'Councillors',
 
         SPE, 'MSPs',
@@ -400,6 +447,8 @@ Plural short version of rep_name.
 
         WAE, 'AMs',
         WAC, 'AMs',
+
+        NIE, 'MLAs',
 
         WMC, 'MPs',
 
@@ -427,6 +476,8 @@ Plural long version of rep_name.
         UTE, 'Councillors',
         UTW, 'Councillors',
 
+        LGW, 'Councillors',
+
         MTW, 'Councillors',
 
         SPE, 'Members of the Scottish Parliament',
@@ -434,6 +485,8 @@ Plural long version of rep_name.
 
         WAE, 'Welsh Assembly Members',
         WAC, 'Welsh Assembly Members',
+
+        NIE, 'Members of the Legislative Assembly',
 
         WMC, 'Members of Parliament',
 
@@ -464,6 +517,8 @@ that area.  For example, "AM" for Assembly Members.
         UTE, '',
         UTW, '',
 
+        LGW, '',
+
         MTW, '',
 
         SPE, 'MSP',
@@ -471,6 +526,8 @@ that area.  For example, "AM" for Assembly Members.
 
         WAE, 'AM',
         WAC, 'AM',
+
+        NIE, 'MLA',
 
         WMC, 'MP',
 
@@ -499,6 +556,8 @@ that area.  For example, "Cllr" for Councillors.
         UTE, 'Cllr',
         UTW, 'Cllr',
 
+        LGW, 'Cllr',
+
         MTW, 'Cllr',
 
         SPE, '',
@@ -506,6 +565,8 @@ that area.  For example, "Cllr" for Councillors.
 
         WAE, '',
         WAC, '',
+
+        NIE, '',
 
         WMC, '',
 
