@@ -7,7 +7,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: CouncilMatch.pm,v 1.26 2005-02-09 17:58:59 francis Exp $
+# $Id: CouncilMatch.pm,v 1.27 2005-02-09 18:30:19 francis Exp $
 #
 
 package mySociety::CouncilMatch;
@@ -548,6 +548,31 @@ sub match_council_wards ($$) {
     # We want to pick "Kilbowie" not "Kilbowie West", but can only do so
     # after "Kilbowie West" has been allocated to "Kilbowie West Ward".
     # Hence this second pass.
+
+    # ... except now we do it several times
+    my $more = 1;
+    while ($more) {
+        $more = 0;
+        foreach my $g (@$wards_goveval) {
+            next if (exists($g->{id}));
+            next if (!exists($g->{matches}));
+
+            # Find matches which haven't been used elsewhere
+            my @left = grep { !exists($_->{used}) } @{$g->{matches}};
+            my $count = scalar(@left);
+           
+            # Match is now unambiguous...
+            if ($count == 1) {
+                my $longest_match = $left[0];
+                push @{$longest_match->{used}}, $g;
+                $g->{id} = $longest_match->{id};
+                $g->{matches} = \@left;
+                print "Resolved is: " . $g->{name} . " is " .  $longest_match->{name} . " " .  $longest_match->{id} . "\n" if $verbosity > 0;
+                $more = 1;
+            }
+        }
+    }
+    # Store any errors for amibguous entries which are left
     foreach my $g (@$wards_goveval) {
         next if (exists($g->{id}));
         next if (!exists($g->{matches}));
@@ -562,15 +587,9 @@ sub match_council_wards ($$) {
         } elsif ($count > 1) {
             # If there is more than one
             $error .= "${area_id}: Only ambiguous matches found for GovEval ward " .  $g->{name} .  ", matches are " . join(", ", map { $_->{name} } @left) . "\n";
-        } else {
-            my $longest_match = $left[0];
-            push @{$longest_match->{used}}, $g;
-            $g->{id} = $longest_match->{id};
-            $g->{matches} = \@left;
-            print "Resolved is: " . $g->{name} . " is " .  $longest_match->{name} . " " .  $longest_match->{id} . "\n" if $verbosity > 0;
         }
     }
-    
+     
     # Check we used every single ward (rather than used same twice)
     foreach my $d (@$wards_database) {
         if (!exists($d->{used})) {
