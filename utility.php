@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.28 2005-02-03 09:55:49 francis Exp $
+ * $Id: utility.php,v 1.29 2005-02-08 14:34:59 chris Exp $
  * 
  */
 
@@ -259,7 +259,7 @@ function trim_url_to_domain($url) {
  * Return a copy of TEXT in which all DOS/RFC822-style line-endings (CRLF,
  * "\r\n") have been converted to UNIX-style line-endings (LF, "\n"). */
 function convert_to_unix_newlines($text) {
-    $text = preg_replace("/(\r\n|\n|\r)/\n", "\n", $text);
+    $text = preg_replace("/(\r\n|\n|\r)/s", "\n", $text);
     return $text;
 }
 
