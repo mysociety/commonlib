@@ -4,7 +4,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: deployfns,v 1.4 2005-01-07 18:47:35 francis Exp $
+# $Id: deployfns,v 1.5 2005-01-12 10:15:36 francis Exp $
 #
 
 # Warnings and errors
@@ -112,10 +112,10 @@ check_pgsql_schema () {
     dropdb -q -U $PSQL_SCHEMATEST_USER schematest || warn "schematest already dropped, continuing"
     createdb -q -U $PSQL_SCHEMATEST_USER schematest
     psql --file=$2 -U $PSQL_SCHEMATEST_USER -q schematest
-    pg_dump -s -U $PSQL_SCHEMATEST_USER schematest | egrep -v "^--|SET SESSION AUTHORIZATION|\\connect - " > $CVS_SCHEMA_FILE
+    pg_dump -s -U $PSQL_SCHEMATEST_USER schematest | egrep -v "^--|SET SESSION AUTHORIZATION|\\connect - " | grep -v "SET search_path = public, pg_catalog;" > $CVS_SCHEMA_FILE
 
     # ... the live database dump
-    su $1 -c "pg_dump -s -U $4 $3" | egrep -v "^--|SET SESSION AUTHORIZATION|\\connect - " > $CURRENT_SCHEMA_FILE
+    su $1 -c "pg_dump -s -U $4 $3" | egrep -v "^--|SET SESSION AUTHORIZATION|\\connect - " | grep -v "SET search_path = public, pg_catalog;"  > $CURRENT_SCHEMA_FILE
 
     # Note:  Using sort here is completely evil.  It is because
     # older verions of pg_dump don't output the tables in a stable
@@ -129,7 +129,7 @@ check_pgsql_schema () {
     cat $CURRENT_SCHEMA_FILE | sort > $CURRENT_SCHEMA_FILE.sorted
 
     # Compare them
-    if ! diff $CVS_SCHEMA_FILE.sorted $CURRENT_SCHEMA_FILE.sorted
+    if ! diff --ignore-blank-lines $CVS_SCHEMA_FILE.sorted $CURRENT_SCHEMA_FILE.sorted
     then
         warn "Schema in CVS differs from that in pgsql database, you need to update it"
         warn "database: $3; user: $4 schema: $2"
