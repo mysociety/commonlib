@@ -6,7 +6,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-ratty.php,v 1.28 2005-01-13 12:14:34 francis Exp $
+ * $Id: admin-ratty.php,v 1.29 2005-01-13 15:15:38 francis Exp $
  * 
  */
 
@@ -118,11 +118,21 @@ class ADMIN_PAGE_RATTY {
     
             // Get list of fields from ratty
             $fieldarray = ratty_admin_available_fields($this->scope);
+            sort($fieldarray);
             $fields = array();
             foreach ($fieldarray as $row) {
-                $fields[$row[0]] = $row[0] . " (e.g. " .  trim_characters($row[1], 0, 30) . ")";
+                list($field_name, $field_description, $field_examples) = $row;
+                $fields[$field_name] = $field_name;
+                if (count($field_examples) > 0) {
+                    // Get last seen field as example
+                    $example = $field_examples[count($field_examples)-1];
+                    // Search for one that isn't empty
+                    if (!$example and count($field_examples) > 1) {
+                        $example = $field_examples[count($field_examples)-2];
+                    }
+                    $fields[$field_name] .= " (e.g. " .  trim_characters($example, 0, 20) . ")";
+                }
             }
-            sort($fields);
 
             // Grouped elements
             $ix = 0;
@@ -190,6 +200,17 @@ class ADMIN_PAGE_RATTY {
             if ($action == "editrule") {
                 admin_render_form($form);
             }
+
+            print "<h2>Help &mdash What do all the fields mean?</h2>";
+            print "<p>";
+            foreach ($fieldarray as $row) {
+                list($field_name, $field_description, $field_examples) = $row;
+                print "<b>$field_name:</b> $field_description. ";
+                print "e.g. " . implode(",", array_map(
+                create_function('$a', 'return "\"".trim_characters($a, 0, 50)."\"";'), $field_examples));
+                print "<br>";
+            }
+            print "</p>";
         }
         if ($action == "listrules") {
             $rules = ratty_admin_get_rules($this->scope);
