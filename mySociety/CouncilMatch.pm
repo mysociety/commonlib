@@ -7,7 +7,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: CouncilMatch.pm,v 1.19 2005-02-07 10:49:24 francis Exp $
+# $Id: CouncilMatch.pm,v 1.20 2005-02-07 13:46:02 francis Exp $
 #
 
 package mySociety::CouncilMatch;
@@ -28,11 +28,6 @@ sub set_db_handles($$) {
     $m_dbh = shift;
     $d_dbh = shift;
 }
-
-# These are the types for local councils, which include districts, counties,
-# boroughs...  But NOT assemblies, parliaments and so on.
-our $council_parent_types = [qw(DIS LBO MTD UTA LGD CTY)];
-our $council_child_types = [qw(DIW LBW MTW UTE UTW LGW CED)];
 
 # process_ge_data COUNCIL_ID VERBOSITY 
 # Performs next step(s) in processing on GE data.  Returns
@@ -426,7 +421,7 @@ sub match_council_wards ($$) {
     # Set of wards already in database (from Ordnance Survey / ONS)
     my $rows = $m_dbh->selectall_arrayref(q#select distinct on (area_id) area_id, name from area_name, area where
         area_name.area_id = area.id and parent_area_id = ? and (name_type = 'O' or name_type = 'S') and
-        (# . join(' or ', map { "type = '$_'" } @$mySociety::CouncilMatch::council_child_types) . q#) 
+        (# . join(' or ', map { "type = '$_'" } @$mySociety::VotingArea::council_child_types) . q#) 
         #, {}, $area_id);
     my $wards_database = [];
     foreach my $row (@$rows) { 

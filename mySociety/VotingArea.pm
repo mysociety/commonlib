@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: VotingArea.pm,v 1.21 2005-01-19 17:02:00 francis Exp $
+# $Id: VotingArea.pm,v 1.22 2005-02-07 13:46:02 francis Exp $
 #
 
 package mySociety::VotingArea;
@@ -436,6 +436,22 @@ that area.  For example, "Cllr" for Councillors.
 
         EUR => ''
     );
+
+=item $council_parent_types
+
+Types which are local councils, such as districts, counties,
+unitary authorities and boroughs.
+
+=cut
+our $council_parent_types = [qw(DIS LBO MTD UTA LGD CTY)];
+
+=item $council_child_types
+
+Types which are wards or electoral divisions in councils.
+
+=cut
+our $council_child_types = [qw(DIW LBW MTW UTE UTW LGW CED)];
+
 
 =back
 
