@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-ratty.php,v 1.12 2004-11-15 18:35:24 francis Exp $
+ * $Id: admin-ratty.php,v 1.13 2004-11-16 11:11:16 francis Exp $
  * 
  */
 
@@ -41,6 +41,7 @@ class ADMIN_PAGE_RATTY {
                 $ruledata['interval'] = intval(get_http_var('interval'));
                 $ruledata['sequence'] = intval(get_http_var('sequence'));
                 $ruledata['note'] = get_http_var('note'); 
+                $ruledata['message'] = get_http_var('message'); 
                 $conditiondata = array();
                 for ($ix = 1; get_http_var("condition$ix") != ""; $ix++) {
                     if (get_http_var("delete$ix") != "")
@@ -78,6 +79,8 @@ class ADMIN_PAGE_RATTY {
             $form->addElement('header', '', $rule = "" ? 'New Rate-Limiting Rule' : 'Edit Rate-Limiting Rule');
             $form->addElement('text', 'sequence', "Rule evaluation position:", array('size' => 10, 'maxlength' => 20));
             $form->addElement('text', 'note', "Description of rule:", array('size' => 60, 'maxlength' => 80));
+            $form->addElement('textarea', 'message', "HTML to display
+            when rule prevents a page view (leave blank for default):", array('rows' => 3, 'cols' => 60));
             $form->addElement('text', 'requests', "Limit to this many hits:", array('size' => 10, 'maxlength' => 20));
             $form->addElement('text', 'interval', "Every this many seconds:", array('size' => 10, 'maxlength' => 20));
             $form->addRule('sequence', 'Rule position must be numeric', 'numeric', null, 'server');

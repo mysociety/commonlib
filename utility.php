@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.12 2004-11-15 16:46:58 francis Exp $
+ * $Id: utility.php,v 1.13 2004-11-16 11:11:16 francis Exp $
  * 
  */
 
@@ -41,7 +41,7 @@ function debug ($header, $text="", $complex_variable=null) {
 			1 => array ('FRONTEND', 'WARNING', 'MAPIT', 'DADEM', 'QUEUE', 'TIMESTAMP'),
 			2 => array ('MAPITRESULT', 'DADEMRESULT', 'RATTY'), 
 			3 => array ('XMLRPC', 'RABX', 'RATTYRESULT'),
-			4 => array ('SERIALIZE'),
+			4 => array ('RABXWIRE', 'SERIALIZE'),
 		);
 	
 		// Store which headers we are allowed to show.

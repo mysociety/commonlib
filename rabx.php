@@ -10,7 +10,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: rabx.php,v 1.3 2004-11-08 18:09:31 francis Exp $
+ * $Id: rabx.php,v 1.4 2004-11-16 11:11:16 francis Exp $
  * 
  */
 
@@ -188,7 +188,7 @@ function rabx_wire_rd(&$buffer, &$pos) {
         return rabx_error(RABX_ERROR_PROTOCOL, "bad type character \"$type\" at position $pos");
 
     /* Null value. */
-    if ($type == "N")
+    if ($type == 'N')
         return null;
     
     /* All other types now encode a string, which is either the value or a
@@ -196,17 +196,19 @@ function rabx_wire_rd(&$buffer, &$pos) {
     if (rabx_is_error($x = rabx_netstring_rd($buffer, $pos, $error)))
         return $x;
 
-    if ($type == "I") {
+    if ($type == 'I') {
         if (!is_numeric($x))
             return rabx_error(RABX_ERROR_PROTOCOL, "integer value is not numeric at position $pos");
         return intval($x);
-    } else if ($type == "R") {
+    } else if ($type == 'R') {
         if (!is_numeric($x))
             return rabx_error(RABX_ERROR_PROTOCOL, "real value is not numeric at position $pos");
         return floatval($x);
-    } else if ($type == "T" || $type == "B") {  /* XXX UTF-8 */
+    } else if ($type == 'T') {  /* XXX UTF-8 */
         return $x;
-    } else if ($type == "L") {
+    } else if ($type == 'B') { // Raw binary
+        return $x;
+    } else if ($type == 'L') {
         if (intval($x) != $x)
             return rabx_error(RABX_ERROR_PROTOCOL, "list length is not an integer at position $pos");
         $a = array();
@@ -237,8 +239,8 @@ function rabx_wire_rd(&$buffer, &$pos) {
  * Return the on-the-wire data for a call to the named FUNCTION with the
  * given ARGS. */
 function rabx_call_string($function, &$args) {
-    $str = "R";
-    $ver = "0";
+    $str = 'R';
+    $ver = '0';
     rabx_netstring_wr($ver, $str); /* 0 == version */
     rabx_netstring_wr($function, $str); /* XXX errors */
     rabx_wire_wr($args, $str);
@@ -306,6 +308,7 @@ class RABX_Client {
         debug(RABX, "RABX calling $function via $this->url, arguments:", $args);
 
         $callstr = rabx_call_string($function, &$args);
+        debug(RABXWIRE, "RABX raw send:", $callstr);
         if (rabx_is_error($callstr))
             return $callstr;
 
@@ -325,6 +328,7 @@ class RABX_Client {
 
         $r = curl_exec($this->ch);
         $C = curl_getinfo($this->ch, CURLINFO_HTTP_CODE);
+        debug(RABXWIRE, "RABX raw result:", $r);
 
         if ($C != 200)
             return rabx_error(RABX_ERROR_TRANSPORT, "HTTP error $C calling $this->url");

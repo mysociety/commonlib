@@ -6,7 +6,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: ratty.php,v 1.8 2004-11-15 13:00:26 francis Exp $
+ * $Id: ratty.php,v 1.9 2004-11-16 11:11:16 francis Exp $
  * 
  */
 
@@ -33,18 +33,19 @@ $ratty_client->use_post = TRUE;
  * Should this call to the page described in VALUES be permitted, on the basis
  * of a rate-limit? VALUES should include keys for any significant variables on
  * which rate-limiting should be applied, for instance postcodes or IDs of data
- * items which an attacker could scrape from the page. Returns TRUE if the page
- * can be shown, FALSE if it should not, or an error code on failure. */
+ * items which an attacker could scrape from the page. Returns NULL if
+ * the page can be shown, STRING with user message if it should be, or an
+ * error code on failure.  Message can be an empty string if none was 
+ * specified in the rule. */
 function ratty_test($vals) {
     global $ratty_client;
     debug("RATTY", "Rate limiting", $vals);
     $res = $ratty_client->call('Ratty.test', array($vals));
     if ($fyr_error_message = ratty_get_error($res)) {
-        include "../templates/generalerror.html";
-        exit;
+        template_show_error();
     }
     debug("RATTYRESULT", "Result is:", $res);
-    return $res != 0;
+    return $res;
 }
 
 /* ratty_admin_available_fields
@@ -54,8 +55,7 @@ function ratty_admin_available_fields() {
     global $ratty_client;
     $res = $ratty_client->call('Ratty.admin_available_fields', array());
     if ($fyr_error_message = ratty_get_error($res)) {
-        include "../templates/generalerror.html";
-        exit;
+        template_show_error();
     }
     return $res;
 }
@@ -66,8 +66,7 @@ function ratty_admin_update_rule($vals, $conds) {
     global $ratty_client;
     $res = $ratty_client->call('Ratty.admin_update_rule', array($vals, $conds));
     if ($fyr_error_message = ratty_get_error($res)) {
-        include "../templates/generalerror.html";
-        exit;
+        template_show_error();
     }
     return $res;
 }
@@ -78,8 +77,7 @@ function ratty_admin_delete_rule($id) {
     global $ratty_client;
     $res = $ratty_client->call('Ratty.admin_delete_rule', array($id));
     if ($fyr_error_message = ratty_get_error($res)) {
-        include "../templates/generalerror.html";
-        exit;
+        template_show_error();
     }
     return $res;
 }
@@ -91,8 +89,7 @@ function ratty_admin_get_rules() {
     global $ratty_client;
     $res = $ratty_client->call('Ratty.admin_get_rules', array($vals, $conds));
     if ($fyr_error_message = ratty_get_error($res)) {
-        include "../templates/generalerror.html";
-        exit;
+        template_show_error();
     }
     return $res;
 }
@@ -103,8 +100,7 @@ function ratty_admin_get_rule($id) {
     global $ratty_client;
     $res = $ratty_client->call('Ratty.admin_get_rule', array($id));
     if ($fyr_error_message = ratty_get_error($res)) {
-        include "../templates/generalerror.html";
-        exit;
+        template_show_error();
     }
     return $res;
 }
@@ -116,8 +112,7 @@ function ratty_admin_get_conditions($id) {
     global $ratty_client;
     $res = $ratty_client->call('Ratty.admin_get_conditions', array($id));
     if ($fyr_error_message = ratty_get_error($res)) {
-        include "../templates/generalerror.html";
-        exit;
+        template_show_error();
     }
     return $res;
 }
