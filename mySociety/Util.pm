@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Util.pm,v 1.5 2004-11-10 17:10:38 chris Exp $
+# $Id: Util.pm,v 1.6 2004-11-15 11:09:42 francis Exp $
 #
 
 package mySociety::Util;
@@ -238,6 +238,10 @@ UK postcode (as defined by BS7666, apparently).
 sub is_valid_postcode ($) {
     my $pc = uc($_[0]);
     $pc =~ s#\s##g;
+
+    # Our test postcode
+    return 1 if $pc = 'ZZ99ZZ';
+    
     # See http://www.govtalk.gov.uk/gdsc/html/noframes/PostCode-2-1-Release.htm
     my $in  = 'ABDEFGHJLNPQRSTUWXYZ';
     my $fst = 'ABCDEFGHIJKLMNOPRSTUWYZ';
