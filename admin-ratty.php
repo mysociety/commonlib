@@ -6,7 +6,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-ratty.php,v 1.34 2005-01-25 15:28:23 chris Exp $
+ * $Id: admin-ratty.php,v 1.35 2005-02-11 15:08:46 chris Exp $
  * 
  */
 
@@ -147,16 +147,14 @@ class ADMIN_PAGE_RATTY {
                 $ix++;
                 $condgroup = array();
                 $condgroup[0] = &HTML_QuickForm::createElement('select', "field$ix", null, $fields);
-                
-                if ($condition['condition'] == '+S') {
+
+                if ($condition['condition'] == 'S') {
                     $condgroup[1] = &HTML_QuickForm::createElement('hidden', "condition$ix", 'S');
                     $desc = 'Limit hits separately for each:';
-                }
-                else if ($condition['condition'] == '+D') {
+                } else if ($condition['condition'] == 'D') {
                     $condgroup[1] = &HTML_QuickForm::createElement('hidden', "condition$ix", 'D');
                     $desc = 'Limit number of distinct values of:';
-                }
-                else {
+                } else {
                     $condgroup[1] = &HTML_QuickForm::createElement('select', "condition$ix", null, 
                             array(
                                 '+E' => 'exactly equals',
