@@ -11,7 +11,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.8 2005-04-01 07:24:25 francis Exp $
+# $Id: WebTestHarness.pm,v 1.9 2005-04-12 10:29:10 francis Exp $
 #
 
 package mySociety::WebTestHarness;
@@ -261,7 +261,7 @@ sub email_check_none_left($) {
     $self->email_run_eveld();
     sleep 5;
     my $emails_left = dbh()->selectrow_array("select count(*) from testharness_mail");
-    die "$emails_left unexpected emails left at the end" if $emails_left > 0;
+    die "$emails_left unexpected emails left" if $emails_left > 0;
 }
 
 =item email_incoming MAIL_BODY
