@@ -11,7 +11,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.9 2005-04-12 10:29:10 francis Exp $
+# $Id: WebTestHarness.pm,v 1.10 2005-04-15 11:07:44 francis Exp $
 #
 
 package mySociety::WebTestHarness;
@@ -276,6 +276,19 @@ sub email_incoming($$) {
     dbh()->commit();
 
 }
+
+=item email_check_url URL
+
+Checks that a URL contains reasonable characters and is short enough to be
+clicked on from even dodgy email clients.
+
+=cut
+sub email_check_url($) {
+    my ($self, $url) = @_;
+    $url =~ m#^.*/[A-Za-z0-9/]*$# or die "URL contains bad characters for an email: $url";
+    die "URL is too long for an email: $url" if length($url) > 65;
+}
+
 
 ############################################################################
 # PHP functions
