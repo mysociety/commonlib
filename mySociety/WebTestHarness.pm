@@ -11,7 +11,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.10 2005-04-15 11:07:44 francis Exp $
+# $Id: WebTestHarness.pm,v 1.11 2005-04-25 12:06:39 francis Exp $
 #
 
 package mySociety::WebTestHarness;
@@ -60,6 +60,10 @@ sub new ($$) {
 
 Drops the database, and reloads it from the given schema.  Checks the database
 has _testharness in its name to avoid clobbering something important.
+
+If you get "NOTICE:  CREATE TABLE will create implicit sequence" messages
+and would like to supress them, edit /etc/postgresql/postgresql.conf, setting
+    client_min_messages = warning 
 
 =cut
 sub database_drop_reload ($$)
