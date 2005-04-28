@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: error.php,v 1.7 2005-03-14 14:32:04 francis Exp $
+ * $Id: error.php,v 1.8 2005-04-28 17:57:56 francis Exp $
  * 
  */
 
@@ -67,6 +67,10 @@ function err($err) {
  * Log the error with the given parameters, trying to arrange that it reach the
  * appropriate web server error log. */
 function err_log_webserver($num, $str, $file, $line, $context) {
+#print "<pre>";
+#print_r($context);
+#print "</pre>";
+
     /* Apache (and perhaps other webservers) logs errors preceded by a tag
      * giving the time and "severity" of the error. The time is in the format
      * "[%a %b %d %H:%M:%S %Y]", and the "severity" is one of "[error]",
