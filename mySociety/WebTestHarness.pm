@@ -11,7 +11,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.11 2005-04-25 12:06:39 francis Exp $
+# $Id: WebTestHarness.pm,v 1.12 2005-05-10 12:08:41 francis Exp $
 #
 
 package mySociety::WebTestHarness;
@@ -71,7 +71,7 @@ sub database_drop_reload ($$)
     my ($self, $schema_file) = @_;
 
     # Drop and recreate database from schema
-    die "Database will be dropped, so for safety must be called '_testharness'" if ($self->{dbname} !~ m/_testharness$/);
+    die "Database will be dropped, so for safety must have name starting '_testharness'" if ($self->{dbname} !~ m/_testharness$/);
 
     # ... make connection with no database name and drop and remake database
     my $connstr = 'dbi:Pg:';
