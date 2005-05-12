@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Parties.pm,v 1.5 2005-02-04 14:21:14 francis Exp $
+# $Id: Parties.pm,v 1.6 2005-05-12 11:54:33 francis Exp $
 #
 
 package mySociety::Parties;
@@ -48,6 +48,9 @@ Map names of parties to their canonical name.
 
     "PC" => "Plaid Cymru",
     "Plaid Cymru" => "Plaid Cymru",
+
+    "Res" => "Respect",
+    "Respect" => "Respect",
 
     "SDLP" => "SDLP",
 

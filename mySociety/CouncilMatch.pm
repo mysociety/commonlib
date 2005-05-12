@@ -7,7 +7,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: CouncilMatch.pm,v 1.27 2005-02-09 18:30:19 francis Exp $
+# $Id: CouncilMatch.pm,v 1.28 2005-05-12 11:54:33 francis Exp $
 #
 
 package mySociety::CouncilMatch;
@@ -208,6 +208,24 @@ sub set_process_status ($$$$) {
         values (?,?,?,?)#, {}, $area_id, $status, $error, $details);
 }
 
+# move_compass_to_start STRING
+# Move compass directions (North, South, East, West) to start of string
+# and to have that order.  Requires a lowercase string, and ignores
+# spaces.
+sub move_compass_to_start {
+    my ($match) = @_;
+
+    # Move compass points to start
+    my $compass = "";
+    foreach my $dir ("north", "south", "east", "west") {
+        while ($match =~ m/($dir)/) {
+            $match =~ s/^(.*)($dir)(.*)$/$1$3/;
+            $compass .= "$dir";
+        }
+    }
+    return $compass . $match;
+}
+
 # canonicalise_constituency_name NAME
 # Convert the NAME of a constituency (all voting areas except councils,
 # basically) into a "canonical" version of the name. That is, one with all the
@@ -258,9 +276,8 @@ sub canonicalise_constituency_name ($) {
     s#'##g;
     s#,##g;
     s#\.##g;
-    s#\s+# #g;
-    s#^\s+##g;
-    s#\s+$##g;
+    s#\s+##g; # Squash all spaces
+    $_ = move_compass_to_start($_);
 
     return $_;
 }
@@ -320,25 +337,30 @@ sub canonicalise_council_name ($) {
     return $_;
 }
 
-# Load in nickname data
 my $nickmap;
-my $csv_parser = new Text::CSV;
-open NICKNAMES, "<../mapit-dadem-loading/nicknames/nicknames.csv" or die "couldn't find nicknames.csv file";
-<NICKNAMES>; # heading
-while (my $line = <NICKNAMES>) {
-    chomp($line);
-    $csv_parser->parse($line);
-    my ($nick, $canon) = map { trim($_) } $csv_parser->fields();
-    push @{$nickmap->{lc($nick)}}, lc($canon);
-}
 
-# match_modulo_nickname NAMEA NAMEB
+# match_modulo_nickname NAMEA NAMEB NICKNAMEFILE
 # Sees if two names match, allowing for nickname.  Each name must be in form
 # "firstname initials othernames", all lowercase.  e.g. "timmy tailor" would
 # match "timothy tailor".  Returns 1 if match, 0 otherwise.  NAMEA can
 # have extra stuff at the end (i.e. we look for NAMEB inside NAMEA).
-sub match_modulo_nickname($$) {
-    my ($a, $b) = @_;
+# NICKNAMEFILE points to mapit-dadem-loading/nicknames/nicknames.csv
+sub match_modulo_nickname($$$) {
+    my ($a, $b, $nicknamefile) = @_;
+
+    if (!defined($nickmap)) {
+        # Load in nickname data
+        my $csv_parser = new Text::CSV;
+        open NICKNAMES, "<$nicknamefile" or die "couldn't find nicknames.csv file";
+        <NICKNAMES>; # heading
+        while (my $line = <NICKNAMES>) {
+            chomp($line);
+            $csv_parser->parse($line);
+            my ($nick, $canon) = map { trim($_) } $csv_parser->fields();
+            push @{$nickmap->{lc($nick)}}, lc($canon);
+        }
+    }
+
     my (@a, @b);
     my ($afirst, $arest) = ($a =~ m/^([^ ]*) (.*)$/);
     my ($bfirst, $brest) = ($b =~ m/^([^ ]*) (.*)$/);
@@ -879,7 +901,7 @@ sub check_councillors_against_website($$) {
                     $match = ($canon_person_lump =~ m/\b$canon_name\b/);
                 } else {
                     # Apply nicknames
-                    $match = match_modulo_nickname($canon_person_lump, $canon_name); 
+                    $match = match_modulo_nickname($canon_person_lump, $canon_name, "../mapit-dadem-loading/nicknames/nicknames.csv"); 
                 }
                 if ($match) {
                     if (($pattern eq "CWCWCW") and defined($lastcllrkey)) {
