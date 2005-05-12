@@ -7,7 +7,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: CouncilMatch.pm,v 1.28 2005-05-12 11:54:33 francis Exp $
+# $Id: CouncilMatch.pm,v 1.29 2005-05-12 15:36:37 francis Exp $
 #
 
 package mySociety::CouncilMatch;
@@ -209,7 +209,7 @@ sub set_process_status ($$$$) {
 }
 
 # move_compass_to_start STRING
-# Move compass directions (North, South, East, West) to start of string
+# Move compass directions (North, South, East, West, Central) to start of string
 # and to have that order.  Requires a lowercase string, and ignores
 # spaces.
 sub move_compass_to_start {
@@ -217,7 +217,7 @@ sub move_compass_to_start {
 
     # Move compass points to start
     my $compass = "";
-    foreach my $dir ("north", "south", "east", "west") {
+    foreach my $dir ("north", "south", "east", "west", "central") {
         while ($match =~ m/($dir)/) {
             $match =~ s/^(.*)($dir)(.*)$/$1$3/;
             $compass .= "$dir";
