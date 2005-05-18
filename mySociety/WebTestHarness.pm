@@ -11,7 +11,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.12 2005-05-10 12:08:41 francis Exp $
+# $Id: WebTestHarness.pm,v 1.13 2005-05-18 19:55:14 francis Exp $
 #
 
 package mySociety::WebTestHarness;
@@ -84,6 +84,17 @@ sub database_drop_reload ($$)
     $db_remake_db->disconnect();
 
     # ... load in schema
+    $self->database_load_schema($schema_file);
+}
+
+=item database_load_schema SCHEMA_FILE
+
+Loads schema file into main database.
+
+=cut
+sub database_load_schema ($$) {
+    my ($self, $schema_file) = @_;
+
     $schema = read_file($schema_file);
     dbh()->do($schema);
     dbh()->commit();
