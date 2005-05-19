@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-reps.php,v 1.19 2005-02-21 11:37:32 francis Exp $
+ * $Id: admin-reps.php,v 1.20 2005-05-19 17:44:00 matthew Exp $
  * 
  */
 
@@ -234,7 +234,7 @@ class ADMIN_PAGE_REPS {
                 $html .= "<td>" . $row['order_id'] . "</td>\n";
                 $html .= "<td>" . strftime('%Y-%m-%d %H:%M:%S', $row['whenedited']) . "</td>\n";
                 $html .= "<td>" . $row['editor'] . "</td>\n";
-                $html .= "<td>" . $row['note'] . "</td>\n";
+                $html .= "<td>" . htmlspecialchars($row['note']) . "</td>\n";
                 $html .= "<td>" . $row['name'] . "</td>\n";
                 $html .= "<td>" . $row['party'] . "</td>\n";
                 $html .= "<td>" . $row['method'] . "</td>\n";
