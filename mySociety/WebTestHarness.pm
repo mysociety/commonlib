@@ -11,7 +11,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.13 2005-05-18 19:55:14 francis Exp $
+# $Id: WebTestHarness.pm,v 1.14 2005-05-25 11:56:21 francis Exp $
 #
 
 package mySociety::WebTestHarness;
@@ -98,6 +98,29 @@ sub database_load_schema ($$) {
     $schema = read_file($schema_file);
     dbh()->do($schema);
     dbh()->commit();
+}
+
+=item database_cycle_sequences NUMBER
+
+Advances all user sequences in the database, such that
+their next values are spaced apart by NUMBER values.  This
+ensures that allocated ids will differ between different types,
+so detecting bugs when the wrong id is used
+
+=cut
+sub database_cycle_sequences ($) {
+    my ($self, $number) = @_;
+
+    my $seqs = dbh()->selectcol_arrayref("select relname from pg_statio_user_sequences");
+
+    my $start = 10;
+    foreach $seq (@$seqs) {
+        for (my $i = 0; $i < $start; $i++) {
+            dbh()->do("select nextval(?)", {}, $seq);
+        }
+        $start += $number;
+    }
+    die "There should be some sequence" if ($start == 10);
 }
 
 ############################################################################
