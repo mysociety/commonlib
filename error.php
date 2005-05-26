@@ -6,9 +6,14 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: error.php,v 1.8 2005-04-28 17:57:56 francis Exp $
+ * $Id: error.php,v 1.9 2005-05-26 02:19:05 francis Exp $
  * 
  */
+
+# Tip of the Day:  This code grabs a backtrace into a string, and 
+# writes it to the Apache error log.  print_r can only do this
+# in PHP 4.3.0 and above.
+#       error_log(print_r(debug_backtrace(), TRUE));
 
 /* Make sure register globals is turned off */
 if (ini_get("register_globals")) {
@@ -69,6 +74,7 @@ function err($err) {
 function err_log_webserver($num, $str, $file, $line, $context) {
 #print "<pre>";
 #print_r($context);
+#error_log(print_r($context, TRUE));
 #print "</pre>";
 
     /* Apache (and perhaps other webservers) logs errors preceded by a tag
