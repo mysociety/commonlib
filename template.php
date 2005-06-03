@@ -6,43 +6,61 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: template.php,v 1.6 2005-03-23 12:49:36 francis Exp $
+ * $Id: template.php,v 1.7 2005-06-03 11:09:54 matthew Exp $
  * 
  */
 
 require_once('error.php');
 
 $template_style_dir = null;
+$real_template_name = null;
 
-/* template_set_style STYLE
- * Set the given STYLE for templates in use. STYLE should be the name of a
- * directory where template HTML files are stored, relative to the caller's
- * current directory. This function must be called before any other template
- * functions. */
-function template_set_style($style_dir) {
+/* template_set_style STYLE [ADDITIONAL]
+ * Sets or adds (if ADDITIONAL is true) the given STYLE for templates in
+ * use. STYLE should be the name of a directory where template HTML files
+ * are stored, relative to the caller's current directory. This function
+ * must be called before any other template functions. Later additional
+ * calls to this function are given preference in template searching. */
+function template_set_style($style_dir, $additional = false) {
     global $template_style_dir;
     /* This is just a convenience check -- obviously the directory could be
      * removed or replaced with a file before the files within it are read. */
     if (!file_exists($style_dir) || !is_dir($style_dir))
         err("style directory \"$style_dir\" doesn't exist or isn't a directory");
-    $template_style_dir = $style_dir;
+    if ($additional)
+        array_unshift($template_style_dir, $style_dir);
+    else
+        $template_style_dir = array($style_dir);
 }
 
 /* template_draw TEMPLATE [VALUES]
- * Call the given TEMPLATE (name of an HTML file in the templates directory,
- * without the ".html" suffix). If set, the given VALUES will be assigned to
- * the variable $values when the template is executing. A template is expected
- * to write output to standard output. */
+ * Call the given TEMPLATE (name of an HTML or PHP file in the templates
+ * directory or directories, without the ".html" or ".php" suffix). If
+ * set, the given VALUES will be assigned to the variable $values when
+ * the template is executing. A template is expected to write output to
+ * standard output. */
 function template_draw($template_name, $values = null) {
-    global $template_style_dir;
+    global $template_style_dir, $real_template_name;
     if (!isset($template_style_dir))
         err("no template style directory set");
 
     /* Convenience check, again. */
-    if (file_exists("$template_style_dir/$template_name.html"))
-        require "$template_style_dir/$template_name.html";
-    else
+    $found = false;
+    foreach ($template_style_dir as $dir) {
+        if (file_exists("$dir/$template_name.html")) {
+            $real_template_name = $template_name;
+            require "$dir/$template_name.html";
+            $found = true;
+            break;
+        } elseif (file_exists("$dir/$template_name.php")) {
+            require "$dir/$template_name.php";
+            $found = true;
+            break;
+        }
+    }
+    if (!$found) {
         err("template file for \"$template_name\" does not exist");
+    }
 }
 
 /* template_string TEMPLATE [VALUES]
@@ -67,7 +85,7 @@ function template_string($template_name, $values = null) {
  * the message to standard output rather than exiting. */
 function template_show_error($message) {
     global $template_style_dir;
-    if (!isset($template_style_dir) || !file_exists("$template_style_dir/error-general.html"))
+    if (!isset($template_style_dir) || !file_exists(end($template_style_dir) . '/error-general.html'))
         print $message;
     else
         /* Not safe. */
