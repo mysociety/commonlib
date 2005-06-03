@@ -9,7 +9,7 @@ etc.
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: evel.php,v 1.4 2005-04-01 10:40:06 francis Exp $
+ * $Id: evel.php,v 1.5 2005-06-03 16:04:03 francis Exp $
  *
  */
 
@@ -43,11 +43,16 @@ $evel_client = new RABX_Client(OPTION_EVEL_URL);
 
     Text of the message to send, as a UTF-8 string with "\n" line-endings.
 
+  * _unwrapped_body_
+
+    Text of the message to send, as a UTF-8 string with "\n" line-endings.
+    It will be word-wrapped before sending.
+
   * _template_, _parameters_
 
-    Templated body text and an associative array of template parameters
-    containing optional substititutions <?=$values['name']?>, each of which
-    is replaced by the value of the corresponding named value in
+    Templated body text and an associative array of template parameters.
+    _template contains optional substititutions <?=$values['name']?>, each
+    of which is replaced by the value of the corresponding named value in
     _parameters_. It is an error to use a substitution when the
     corresponding parameter is not present or undefined. The first line of
     the template will be interpreted as contents of the Subject: header of
@@ -84,7 +89,7 @@ $evel_client = new RABX_Client(OPTION_EVEL_URL);
   If no Message-ID is given, one is generated. If no To is given, then the
   string "Undisclosed-Recipients: ;" is used. If no From is given, a
   generic no-reply address is used. It is an error to fail to give a body,
-  templated body, or Subject. */
+  unwrapped body or a templated body; or a Subject. */
 function evel_construct_email($spec) {
     global $evel_client;
     $params = func_get_args();
@@ -92,12 +97,13 @@ function evel_construct_email($spec) {
     return $result;
 }
 
-/* evel_send MESSAGE RECIPIENT ...
+/* evel_send MESSAGE RECIPIENTS
 
   Send a MESSAGE to the given RECIPIENTS. MESSAGE is either the full text
   of a message (in its RFC2822, on-the-wire format) or an associative array
-  as passed to construct_email. */
-function evel_send($message, $recipient) {
+  as passed to construct_email. RECIPIENTS is either one email address
+  string, or an array of them for multiple recipients. */
+function evel_send($message, $recipients) {
     global $evel_client;
     $params = func_get_args();
     $result = $evel_client->call('EvEl.send', $params);

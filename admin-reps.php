@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-reps.php,v 1.20 2005-05-19 17:44:00 matthew Exp $
+ * $Id: admin-reps.php,v 1.21 2005-06-03 16:04:03 francis Exp $
  * 
  */
 
@@ -45,15 +45,18 @@ class ADMIN_PAGE_REPS {
         return $html;
     }
 
+    function render_area($self_link, $area_id, $area_info) {
+        $html = "<a href=\"$self_link&pc=" .  urlencode(get_http_var('pc')). "&va_id=" . $area_id .  "\">";
+        $html .= $area_info['name'];
+        $html .= "</a>";
+        $html .= " (" .  $area_info['type_name'] . ")";
+        return $html;
+    }
+
     function display($self_link) {
         // Input data
         $rep_id = get_http_var('rep_id');
-        if (get_http_var('gos')) {
-            $search = get_http_var('search');
-            $rep_id = null;
-        }
-        else
-            $search = null;
+        $va_id = get_http_var('va_id');
         $ds_va_id = get_http_var('ds_va_id');
         if (!$rep_id && $ds_va_id) {
             // Democratic services
@@ -65,8 +68,16 @@ class ADMIN_PAGE_REPS {
         $new_in_va_id = get_http_var('new_in_va_id');
         // Postcode
         $pc = get_http_var('pc');
-        if (get_http_var('gopc')) {
-            $rep_id = null;
+        // Search
+        $search = null;
+        if (get_http_var('gos')) {
+            if (validate_postcode(get_http_var('search'))) {
+                $pc = get_http_var('search');
+                $rep_id = null;
+            } else {
+                $search = get_http_var('search');
+                $rep_id = null;
+            }
         }
         if (get_http_var('cancel') != "") 
             $rep_id = null;
@@ -101,14 +112,18 @@ class ADMIN_PAGE_REPS {
             dadem_check_error($result);
             print "<p><i>Successfully closed correction ". htmlspecialchars(get_http_var('ucid')) . "</i></i>";
         }
+        if (get_http_var('vaupdate') != "") {
+            $result = dadem_admin_set_area_status(get_http_var('va_id'), get_http_var('new_status'));
+            dadem_check_error($result);
+            print "<p><i>Successfully updated voting area status ". htmlspecialchars(get_http_var('va_id')) . " to " . htmlspecialchars(get_http_var('new_status')) . "</i></i>";
+        }
+
 
         // Postcode and search box
         $form = new HTML_QuickForm('adminRepsSearchForm', 'get', $self_link);
         $form->addElement('header', '', 'Search');
-        $buttons[] =& HTML_QuickForm::createElement('text', 'pc', null, array('size' => 10, 'maxlength' => 255));
-        $buttons[] =& HTML_QuickForm::createElement('submit', 'gopc', 'go postcode');
         $buttons[] =& HTML_QuickForm::createElement('text', 'search', null, array('size' => 20, 'maxlength' => 255));
-        $buttons[] =& HTML_QuickForm::createElement('submit', 'gos', 'search');
+        $buttons[] =& HTML_QuickForm::createElement('submit', 'gos', 'postcode or query');
         $form->addElement('hidden', 'page', $this->id);
         $form->addGroup($buttons, 'stuff', null, '&nbsp', false);
         admin_render_form($form);
@@ -175,9 +190,7 @@ class ADMIN_PAGE_REPS {
                 htmlspecialchars($parentinfo['name']) . " " . htmlspecialchars($parentinfo['type_name']) : "" ));
             $form->addElement('text', 'name', "Full name:", array('size' => 60, $readonly => 1));
             $form->addElement('text', 'party', "Party:", array('size' => 60, $readonly => 1));
-            $form->addElement('static', 'note2', null, "Make sure you
-            update contact method when you change email or fax
-            numbers.");
+            $form->addElement('static', 'note2', null, "Make sure you update contact method when you change email or fax numbers.");
             $form->addElement('select', 'method', "Contact method:", 
                     array(
                         'either' => 'Fax or Email', 'fax' => 'Fax only', 
@@ -246,6 +259,33 @@ class ADMIN_PAGE_REPS {
             $html .= "</table>";
             $form->addElement('static', 'bytype', null, $html);
             admin_render_form($form);
+        } else if ($va_id) {
+            // One voting area
+            $form = new HTML_QuickForm('adminVotingArea', 'get', $self_link);
+            $area_info = mapit_get_voting_area_info($va_id);
+            mapit_check_error($area_info);
+            $reps = dadem_get_representatives($va_id);
+            dadem_check_error($reps);
+            $reps = array_values($reps);
+            $html = "<p><b>" . $this->render_area($self_link, $va_id, $area_info) . "</b></p>"; 
+            $html .= $this->render_reps($self_link, $reps);
+            $form->addElement('static', 'bytype', null, $html);
+            $form->addElement('hidden', 'page', $this->id);
+            $form->addElement('hidden', 'va_id', $va_id);
+            $form->addElement('select', 'new_status', null, 
+                    array(
+                        'none' => 'No special status', 
+                        'pending_election' => 'Pending election, rep data not valid', 
+                        'recent_election' => 'Recent election, our rep data not yet updated',
+                    ),
+                    array()
+            );
+            $status = dadem_get_area_status($va_id);
+            dadem_check_error($status);
+            $form->setDefaults(array('new_status' => $status));
+ 
+            $form->addElement('submit', 'vaupdate', 'Update');
+            admin_render_form($form);
         } else if ($search) {
             $form = new HTML_QuickForm('adminRepsSearchResults', 'get', $self_link);
 
@@ -288,7 +328,7 @@ class ADMIN_PAGE_REPS {
                     $reps = dadem_get_representatives($va_id);
                     dadem_check_error($reps);
                     $reps = array_values($reps);
-                    $html .= "<p><b>" . $area_info['name'] . " (" .  $area_info['type_name'] . ") </b></p>"; 
+                    $html .= "<p><b>" . $this->render_area($self_link, $va_id, $area_info) . "</b></p>"; 
                     $html .= $this->render_reps($self_link, $reps);
                 }
             }
