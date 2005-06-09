@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: importparams.php,v 1.3 2005-03-04 11:31:34 chris Exp $
+ * $Id: importparams.php,v 1.4 2005-06-09 11:22:42 francis Exp $
  * 
  */
 
@@ -106,6 +106,14 @@ function importparams() {
         return $errors;
     else
         return null;
+}
+
+function importparams_validate_postcode($pc) {
+    if (validate_postcode($pc)) {
+        return null;
+    } else {
+        return "Please enter a valid postcode, such as OX1 3DR";
+    }
 }
 
 ?>
