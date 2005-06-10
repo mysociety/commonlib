@@ -9,7 +9,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: DBHandle.pm,v 1.10 2005-03-03 11:21:50 chris Exp $
+# $Id: DBHandle.pm,v 1.11 2005-06-10 13:28:31 chris Exp $
 #
 
 package mySociety::DBHandle::Error;
@@ -113,7 +113,15 @@ sub new_dbh () {
                             AutoCommit => 0,
                             PrintError => 0,
                             PrintWarn => 0,
-                            RaiseError => 1
+                            RaiseError => 1,
+                            # This sets the UTF-8 flag on strings returned from
+                            # Postgres, which is appropriate since we store all
+                            # data in the database as UTF-8. Why this is needed
+                            # I have no idea, given that the database has an
+                            # encoding which should be set to "UNICODE". Just
+                            # another day in character-sets trainwreck land,
+                            # I suppose.
+                            pg_enable_utf8 => 1
                         });
     $dbh->{HandleError} =
         sub ($$$) {
