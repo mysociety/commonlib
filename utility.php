@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.34 2005-06-10 10:12:19 matthew Exp $
+ * $Id: utility.php,v 1.35 2005-06-10 16:57:56 matthew Exp $
  * 
  */
 
@@ -428,8 +428,8 @@ function merge_spaces($text) {
 // Taken from WordPress, tweaked slightly to work with , and . at end of some URLs.
 function make_clickable($ret, $nofollow = false) {
     $ret = ' ' . $ret . ' ';
-    $ret = preg_replace("#([\s>])(https?)://([^\s<>{}()]+[^\s.,<>{}()])#i", "$1<a href='$2://$3'" . 
-                ($nofollow ? " rel='nofollow'" : ""). ">$2://$3</a>", $ret);
+    $ret = preg_replace("#(https?)://([^\s<>{}()]+[^\s.,<>{}()])#i", "<a href='$1://$2'" . 
+                ($nofollow ? " rel='nofollow'" : ""). ">$1://$2</a>", $ret);
     $ret = preg_replace("#(\s)www\.([a-z0-9\-]+)(\.[a-z0-9\-\~]+)+((?:/[^ <>{}()\n\r]*[^., <>{}()\n\r])?)#i", 
                 "$1<a href='http://www.$2$3$4'" . ($nofollow ? " rel='nofollow'" : "") . ">www.$2$3$4</a>", $ret);
     $ret = preg_replace("#(\s)([a-z0-9\-_.]+)@([^,< \n\r]*[^.,< \n\r])#i", "$1<a href=\"mailto:$2@$3\">$2@$3</a>", $ret);
