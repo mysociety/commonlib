@@ -10,7 +10,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: HelmertTransform.pm,v 1.1 2005-06-14 18:30:37 chris Exp $
+# $Id: HelmertTransform.pm,v 1.2 2005-06-14 19:43:26 chris Exp $
 #
 
 package Geo::HelmertTransform;
@@ -21,14 +21,46 @@ use strict;
 
 Geo::HelmertTransform
 
+=head1 SYNOPSIS
+
+    use Geo::HelmertTransform;
+
+    my ($lat, $lon, $height) = ...; # perhaps from OS National Grid coords?
+    my $airy1830 = new Geo::HelmertTransform::Datum(Name => 'Airy1830');
+    my $wgs84 = new Geo::HelmertTransform::Datum(Name => 'WGS84');
+
+    ($lat, $lon, $height)
+        = Geo::HelmertTransform::convert_datum($airy1830, $wgs84,
+                                                $lat, $lon, $h);
+    
+
 =head1 DESCRIPTION
 
 Perform transformations between geographical coordinates in different datums.
+
+It is usual to describe geographical points in terms of their polar coordinates
+(latitude, longitude and altitude) referenced to a "datum ellipsoid", which is
+used to approximate the Earth's geoid. The latitude, longitude and altitude of
+a given physical point vary depending on which datum ellipsoid is in use.
+Unfortunately, a number of ellipsoids are in everyday use, and so it is often
+necessary to transform geographical coordinates between different datum
+ellipsoids.
+
+Two different datum ellipsoids may differ in the locations of their centers, or
+in their shape; and there may be an angle between their equatorial planes or
+the meridians relative to which longitude is measured. The Helmert Transform,
+which this module implements, is a linear transformation of coordinates between
+pairs of datum ellipsoids in the limit of small angles of deviation between
+them. 
 
 =head1 CONVENTIONS
 
 Latitude is expressed in degrees, positive-north; longitude in degrees,
 positive-east. Heights (ellipsoid) and cartesian coordinates are in meters.
+
+=head1 FUNCTIONS
+
+=over 4
 
 =cut
 
@@ -36,6 +68,7 @@ use constant M_PI => 3.141592654;
 
 =item rad_to_deg RADIANS
 
+Convert RADIANS to degrees.
 
 =cut
 sub rad_to_deg ($) {
@@ -43,6 +76,8 @@ sub rad_to_deg ($) {
 }
 
 =item deg_to_rad DEGREES
+
+Convert DEGREES to radians.
 
 =cut
 sub deg_to_rad ($) {
@@ -142,10 +177,43 @@ sub convert_datum ($$$$$) {
     return xyz_to_geo($d2, $x2, $y2, $z2);
 }
 
+=item datum NAME
+
+Return the datum of the given NAME. Currently implemented are:
+
+=over 4
+
+=item Airy1830
+
+The 1830 Airy ellipsoid to which the British Ordnance Survey's National Grid is
+referenced.
+
+=item Airy1830Modified
+
+The modified 1830 Airy ellipsoid to which the Irish Grid (as used by Ordnance
+Survey Ireland and Ordnance Survey Northern Ireland); also known as the Ireland
+1975 datum.
+
+=item WGS84
+
+The global datum used for GPS.
+
+=back
+
+=cut
+sub datum ($) {
+    return new Geo::HelmertTransform::Datum(Name => $_[0]);
+}
+
+=back
+
+=cut
+
+# Datum class for internal use (alternative spelling: "I can't be bothered to
+# document it now").
 package Geo::HelmertTransform::Datum;
 
 use fields qw(name a b e2 tx ty tz s rx ry rz is_wgs84);
-
 
 # Fields are: semi-major and -minor axes; and the x-, y-, and z-displacements,
 # scale change, and rotations to transform from this datum into WGS84.
@@ -160,8 +228,6 @@ my %known_datums = (
 #        International1924 => [6_378_388.000, 6_356_911.946,  ??? ],
         WGS84             => [6_378_137.000, 6_356_752.3141,   0.000,    0.000,    0.000,   0.0000,  0.0000,  0.0000,  0.0000]
     );
-
-
 
 sub new ($%) {
     my ($class, %p) = @_;
@@ -183,18 +249,21 @@ sub new ($%) {
         die "must specify semi-major axis a and semi-minor axis b";
     } else {
         my $s = fields::new($class);
-        $s->{a} = $p{a};
-        $s->{b} = $p{b};
+        foreach (qw(a b tx ty tz s rx ry rz)) {
+            $s->{$_} = 0;
+            $s->{$_} = $p{$_} if (exists($p{$_}));
+        }
+        $s->{is_wgs84} = 0;
         return $s;
     }
 }
 
-sub a ($) {
-    return $_[0]->{a};
+foreach (qw(a b tx ty tz s rx ry rz)) {
+    eval <<EOF;
+sub $_ (\$) {
+    return \$_[0]->{$_};
 }
-
-sub b ($) {
-    return $_[0]->{b};
+EOF
 }
 
 sub e2 ($) {
@@ -205,5 +274,28 @@ sub e2 ($) {
     }
     return $s->{e2}
 }
+
+=head1 SEE ALSO
+
+I<A guide to coordinate systems in Great Britain>,
+http://www.gps.gov.uk/guidecontents.asp
+
+I<Making maps compatible with GPS>,
+http://www.osni.gov.uk/downloads/Making%20maps%20GPS%20compatible.pdf
+
+=head1 AUTHOR AND COPYRIGHT
+
+Written by Chris Lightfoot, chris@mysociety.org
+
+Copyright (c) UK Citizens Online Democracy.
+
+Released under the terms of the Affero General Public License,
+http://www.affero.org/oagpl.html
+
+=head1 VERSION
+
+$Id: HelmertTransform.pm,v 1.2 2005-06-14 19:43:26 chris Exp $
+
+=cut
 
 1;
