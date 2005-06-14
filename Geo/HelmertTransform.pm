@@ -10,7 +10,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: HelmertTransform.pm,v 1.2 2005-06-14 19:43:26 chris Exp $
+# $Id: HelmertTransform.pm,v 1.3 2005-06-14 19:45:43 chris Exp $
 #
 
 package Geo::HelmertTransform;
@@ -25,9 +25,9 @@ Geo::HelmertTransform
 
     use Geo::HelmertTransform;
 
-    my ($lat, $lon, $height) = ...; # perhaps from OS National Grid coords?
-    my $airy1830 = new Geo::HelmertTransform::Datum(Name => 'Airy1830');
-    my $wgs84 = new Geo::HelmertTransform::Datum(Name => 'WGS84');
+    my ($lat, $lon, $height) = ...; # from OS map
+    my $airy1830 = Geo::HelmertTransform::datum('Airy1830');
+    my $wgs84 = Geo::HelmertTransform::datum('WGS84');
 
     ($lat, $lon, $height)
         = Geo::HelmertTransform::convert_datum($airy1830, $wgs84,
@@ -294,7 +294,7 @@ http://www.affero.org/oagpl.html
 
 =head1 VERSION
 
-$Id: HelmertTransform.pm,v 1.2 2005-06-14 19:43:26 chris Exp $
+$Id: HelmertTransform.pm,v 1.3 2005-06-14 19:45:43 chris Exp $
 
 =cut
 
