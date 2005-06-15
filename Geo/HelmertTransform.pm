@@ -10,7 +10,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: HelmertTransform.pm,v 1.3 2005-06-14 19:45:43 chris Exp $
+# $Id: HelmertTransform.pm,v 1.4 2005-06-15 12:02:45 chris Exp $
 #
 
 package Geo::HelmertTransform;
@@ -131,7 +131,7 @@ sub xyz_to_geo ($$$$) {
     return (rad_to_deg($lat), rad_to_deg($lon), $h);
 }
 
-=item convert_datum D1 LAT LON H D2
+=item convert_datum D1 D2 LAT LON H
 
 Given geographical coordinates (LAT, LON, H) in datum D1, return the
 corresponding coordinates in datum D2. This assumes that the transformations
@@ -139,7 +139,7 @@ are small, and always converts via WGS84.
 
 =cut
 sub convert_datum ($$$$$) {
-    my ($d1, $d2, $lat, $lon, $h, $d2) = @_;
+    my ($d1, $d2, $lat, $lon, $h) = @_;
     my ($x1, $y1, $z1) = geo_to_xyz($d1, $lat, $lon, $h);
     my ($x, $y, $z) = ($x1, $y1, $z1);
     if (!$d1->is_wgs84()) {
@@ -239,9 +239,9 @@ sub new ($%) {
         foreach (qw(a b tx ty tz)) {
             $s->{$_} = shift(@$d);
         }
-        $s->{s} = shift(@$s) / 1_000_000;               # ppm
+        $s->{s} = shift(@$d) / 1_000_000;               # ppm
         foreach (qw(rx ry rz)) {
-            $s->{$_} = deg_to_rad(shift(@$d) / 3600.);  # seconds
+            $s->{$_} = Geo::HelmertTransform::deg_to_rad(shift(@$d) / 3600.);  # seconds
         }
         $s->{is_wgs84} = ($p{Name} eq 'WGS84');
         return $s;
@@ -258,7 +258,7 @@ sub new ($%) {
     }
 }
 
-foreach (qw(a b tx ty tz s rx ry rz)) {
+foreach (qw(a b tx ty tz s rx ry rz is_wgs84)) {
     eval <<EOF;
 sub $_ (\$) {
     return \$_[0]->{$_};
@@ -270,7 +270,6 @@ sub e2 ($) {
     my $s = shift;
     if (!exists($_[0]->{e2})) {
         $s->{e2} = 1 - ($s->b() / $s->a()) ** 2;
-        warn "e2 = $s->{e2}\n";
     }
     return $s->{e2}
 }
@@ -294,7 +293,7 @@ http://www.affero.org/oagpl.html
 
 =head1 VERSION
 
-$Id: HelmertTransform.pm,v 1.3 2005-06-14 19:45:43 chris Exp $
+$Id: HelmertTransform.pm,v 1.4 2005-06-15 12:02:45 chris Exp $
 
 =cut
 
