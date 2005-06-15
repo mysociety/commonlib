@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.36 2005-06-10 18:26:03 matthew Exp $
+ * $Id: utility.php,v 1.37 2005-06-15 20:36:14 matthew Exp $
  * 
  */
 
@@ -426,12 +426,16 @@ function merge_spaces($text) {
  * Returns TEXT with obvious links made into HTML hrefs.  Set
  * NOFOLLOW to true to add rel='nofollow' to the links. */
 // Taken from WordPress, tweaked slightly to work with , and . at end of some URLs.
-function make_clickable($ret, $nofollow = false) {
+function make_clickable($ret, $params = array()) {
+    $nofollow = array_key_exists('nofollow', $params) && $params['nofollow']==true;
+    $contract = array_key_exists('contract', $params) && $params['contract']==true;
     $ret = ' ' . $ret . ' ';
     $ret = preg_replace("#(https?)://([^\s<>{}()]+[^\s.,<>{}()])#i", "<a href='$1://$2'" . 
                 ($nofollow ? " rel='nofollow'" : ""). ">$1://$2</a>", $ret);
     $ret = preg_replace("#(\s)www\.([a-z0-9\-]+)((?:\.[a-z0-9\-\~]+)+)((?:/[^ <>{}()\n\r]*[^., <>{}()\n\r])?)#i", 
                 "$1<a href='http://www.$2$3$4'" . ($nofollow ? " rel='nofollow'" : "") . ">www.$2$3$4</a>", $ret);
+    if ($contract)
+        $ret = preg_replace("#(<a href='[^']*'>)(.{30}).*?</a>#", '$1$2...</a>', $ret);
     $ret = preg_replace("#(\s)([a-z0-9\-_.]+)@([^,< \n\r]*[^.,< \n\r])#i", "$1<a href=\"mailto:$2@$3\">$2@$3</a>", $ret);
     $ret = trim($ret);
     return $ret;
