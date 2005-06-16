@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: RABX.pm,v 1.10 2005-02-23 13:13:13 chris Exp $
+# $Id: RABX.pm,v 1.11 2005-06-16 12:07:50 chris Exp $
 
 # References:
 #   Netstrings are documented here: http://cr.yp.to/proto/netstrings.txt
@@ -237,8 +237,13 @@ sub wire_rd ($) {
 
     if ($type eq 'N') {
         return undef;
-    } elsif ($type =~ m#^[IRBT]$#) {
+    } elsif ($type =~ m#^[IRB]$#) {
         return netstring_rd($h); # XXX type checks
+    } elsif ($type eq 'T') {
+        my $t = netstring_rd($h);
+        throw RABX::Error("data in 'T' string are not valid UTF-8 octets: '$t'")
+            if (!utf8::decode($t));
+        return $t;
     } elsif ($type eq 'L') {
         my $len = netstring_rd($h);
         throw RABX::Error("bad list length '$len'", RABX::Error::PROTOCOL) unless ($len =~ m#^(0|[1-9]\d*)$#);
@@ -379,7 +384,7 @@ use HTTP::Request;
 use HTTP::Response;
 use Regexp::Common qw(URI);
 
-my $rcsid = ''; $rcsid .= '$Id: RABX.pm,v 1.10 2005-02-23 13:13:13 chris Exp $';
+my $rcsid = ''; $rcsid .= '$Id: RABX.pm,v 1.11 2005-06-16 12:07:50 chris Exp $';
 
 =back
 
