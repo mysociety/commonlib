@@ -11,7 +11,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.14 2005-05-25 11:56:21 francis Exp $
+# $Id: WebTestHarness.pm,v 1.15 2005-06-20 23:27:59 francis Exp $
 #
 
 package mySociety::WebTestHarness;
@@ -126,14 +126,76 @@ sub database_cycle_sequences ($) {
 ############################################################################
 # Browser, user agent
 
-=item browser_get_agent
+=item browser_get
 
-Returns an instance of WWW::Mechanize.
+Acts as function in WWW::Mechanize, but intercepts HTML pages
+for validating and logging.
 
 =cut
-sub browser_get_agent ($) {
-    my ($self) = @_;
-    return $self->{useragent};
+sub browser_get {
+    my $self = shift;
+    @_ = $self->{useragent}->get(@_);
+    $self->_browser_html_hook();
+    return @_;
+}
+
+=item browser_post
+
+Acts as function in WWW::Mechanize, but intercepts HTML pages
+for validating and logging.
+
+=cut
+sub browser_post {
+    my $self = shift;
+    @_ = $self->{useragent}->post(@_);
+    $self->_browser_html_hook();
+    return @_;
+}
+
+=item browser_submit_form
+
+Acts as function in WWW::Mechanize, but intercepts HTML pages
+for validating and logging.
+
+=cut
+sub browser_submit_form {
+    my $self = shift;
+    @_ = $self->{useragent}->submit_form(@_);
+    $self->_browser_html_hook();
+    return @_;
+}
+
+=item browser_follow_link
+
+Acts as function in WWW::Mechanize, but intercepts HTML pages
+for validating and logging.
+
+=cut
+sub browser_follow_link {
+    my $self = shift;
+    @_ = $self->{useragent}->follow_link(@_) or die "browser_follow_link failed";
+    $self->_browser_html_hook();
+    return @_;
+}
+
+=item browser_uri
+
+Acts as function in WWW::Mechanize.
+
+=cut
+sub browser_uri {
+    my $self = shift;
+    return $self->{useragent}->uri(@_);
+}
+
+=item browser_content
+
+Acts as function in WWW::Mechanize.
+
+=cut
+sub browser_content {
+    my $self = shift;
+    return $self->{useragent}->content(@_);
 }
 
 =item browser_check_contents STRING
@@ -166,6 +228,11 @@ sub browser_check_no_contents ($$) {
     }
 }
 
+# Internal use only, called each HTML page made.  Can do
+# validating and logging, etc.
+sub _browser_html_hook () {
+
+}
 
 ############################################################################
 # Log watcher
