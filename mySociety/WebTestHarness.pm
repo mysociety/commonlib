@@ -11,7 +11,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.15 2005-06-20 23:27:59 francis Exp $
+# $Id: WebTestHarness.pm,v 1.16 2005-06-22 11:18:24 francis Exp $
 #
 
 package mySociety::WebTestHarness;
@@ -336,7 +336,7 @@ sub email_get_containing($$) {
         $mails = dbh()->selectall_arrayref("select id, content from testharness_mail
             where content like ?", {}, $check);
         $got = scalar @$mails;
-        die "Email containing '$check' not found even after $c sec wait" if ($got == 0 && $c > 10);
+        die "Email containing '$check' not found even after $c sec wait" if ($got == 0 && $c > 20);
         die "Too many emails found containing '$check'" if ($got > 1);
         $c++;
         sleep 1;
