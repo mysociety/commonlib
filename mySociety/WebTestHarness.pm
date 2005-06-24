@@ -11,7 +11,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.16 2005-06-22 11:18:24 francis Exp $
+# $Id: WebTestHarness.pm,v 1.17 2005-06-24 11:42:51 francis Exp $
 #
 
 package mySociety::WebTestHarness;
@@ -352,6 +352,10 @@ sub email_get_containing($$) {
     # Delete from incoming queue
     dbh()->do("delete from testharness_mail where id = ?", {}, $id);
     dbh()->commit();
+    # Remove quoted-printable
+    # TODO: Do this properly, and return headers and body in unencoded UTF-8
+    $content =~ s/=20/ /g;
+    $content =~ s/=$/ /g;
     return $content;
 }
 
