@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: MaPit.pm,v 1.6 2005-01-19 11:32:08 chris Exp $
+# $Id: MaPit.pm,v 1.7 2005-06-24 12:29:32 chris Exp $
 #
 
 package mySociety::MaPit;
@@ -99,6 +99,8 @@ instance, 'CTY' or 'SPC'.
 The name of the area, as defined by the Ordnance Survey; for instance,
 "Cambridgeshire County".
 
+=back
+
 =cut
 sub get_voting_area_info ($) {
     my ($id) = @_;
@@ -108,11 +110,30 @@ sub get_voting_area_info ($) {
 
 =item get_location POSTCODE
 
-On success, return a reference to an array giving information about the
-location of the given POSTCODE. The elements of this array are: 'G', to
-indicate that the coordinates are referenced to the OSGB grid, or 'I' to
-indicate that they are referenced to the Irish grid; the easting of the
-coordinate, and the northing of the coordinate.
+Return the location of the given POSTCODE. The return value is a reference to
+a hash containing elements,
+
+=over 4
+
+=item coordsyst
+
+=item easting
+
+=item northing
+
+Coordinates of the point in a UTM coordinate system. The coordinate system is
+identified by the coordsyst element, which is "G" for OSGB (the Ordnance Survey
+"National Grid" for Great Britain) or "I" for the Irish Grid (used in the
+island of Ireland).
+
+=item wgs83_lat
+
+=item wgs84_lon
+
+Latitude and longitude in the WGS84 coordinate system, expressed as decimal
+degrees, north- and east-positive.
+
+=back
 
 =cut
 sub get_location ($) {
