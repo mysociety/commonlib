@@ -11,7 +11,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.18 2005-06-24 16:48:21 francis Exp $
+# $Id: WebTestHarness.pm,v 1.19 2005-06-24 19:17:46 francis Exp $
 #
 
 package mySociety::WebTestHarness;
@@ -230,7 +230,7 @@ sub browser_check_no_contents ($$) {
     }
 }
 
-=item browser_validate_all_html COMMAND
+=item browser_set_validator COMMAND
 
 Uses COMMAND to validate every HTML page browsed to.  The command should take
 an HTML file as a parameter, write errors to STDERR and return an error code
@@ -238,7 +238,7 @@ only if the HTML is invalid.  /usr/bin/validate from the Debian package
 wdg-html-validator is an example suitable COMMAND.
 
 =cut
-sub browser_validate_all_html ($$) {
+sub browser_set_validator ($$) {
     my ($self, $validator) = @_;
     $self->{htmlvalidator} = $validator;
 }
@@ -248,8 +248,8 @@ sub browser_validate_all_html ($$) {
 sub _browser_html_hook ($) {
     my ($self) = @_;
 
-    # If validator set, validate HTML
-    if (defined($self->{htmlvalidator})) {
+    # If validator set and HTML then validate
+    if ($self->{useragent}->is_html() && defined($self->{htmlvalidator})) {
         my ($fh, $filename) = File::Temp::tempfile( DIR => $self->{tempdir}, SUFFIX => '.html');
         print $fh $self->{useragent}->content();
         close $fh;
