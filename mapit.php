@@ -18,7 +18,7 @@ define('MAPIT_AREA_NOT_FOUND', 2003);      /* not a valid voting area id */
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: mapit.php,v 1.14 2005-06-03 16:04:03 francis Exp $
+ * $Id: mapit.php,v 1.15 2005-06-24 12:29:32 chris Exp $
  *
  */
 
@@ -114,10 +114,24 @@ function mapit_get_voting_area_children($id) {
 
 /* mapit_get_location POSTCODE
 
-  Return the location of the given POSTCODE, including the grid system to
-  which it is registered. The return value is a list of three elements: the
-  coordinate system ("G" for OSGB or "I" for the Irish grid) and eastings
-  and northings in meters. */
+  Return the location of the given POSTCODE. The return value is a reference to
+  a hash containing elements,
+
+  * coordsyst
+  * easting
+  * northing
+
+    Coordinates of the point in a UTM coordinate sys­ tem. The coordinate
+    system is identified by the coordsyst element, which is "G" for OSGB (the
+    Ord­ nance Survey "National Grid" for Great Britain) or "I" for the Irish
+    Grid (used in the island of Ireland).
+
+  * wgs83_lat
+  * wgs84_lon
+
+    Latitude and longitude in the WGS84 coordinate system, expressed as decimal
+    degrees, north- and east-positive. */
+
 function mapit_get_location($postcode) {
     global $mapit_client;
     $params = func_get_args();
