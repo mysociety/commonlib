@@ -11,13 +11,14 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.17 2005-06-24 11:42:51 francis Exp $
+# $Id: WebTestHarness.pm,v 1.18 2005-06-24 16:48:21 francis Exp $
 #
 
 package mySociety::WebTestHarness;
 
 use File::Find;
 use File::Slurp;
+use File::Temp;
 use WWW::Mechanize;
 use Data::Dumper;
 
@@ -40,6 +41,7 @@ sub new ($$) {
     my ($class, $params) = @_;
     my $self = {};
 
+    $self->{tempdir} = File::Temp::tempdir( CLEANUP => 0 );
     $self->{useragent} = new WWW::Mechanize(autocheck => 1);
 
     my $db_option_prefix = $params->{db_option_prefix};
@@ -228,10 +230,31 @@ sub browser_check_no_contents ($$) {
     }
 }
 
+=item browser_validate_all_html COMMAND
+
+Uses COMMAND to validate every HTML page browsed to.  The command should take
+an HTML file as a parameter, write errors to STDERR and return an error code
+only if the HTML is invalid.  /usr/bin/validate from the Debian package
+wdg-html-validator is an example suitable COMMAND.
+
+=cut
+sub browser_validate_all_html ($$) {
+    my ($self, $validator) = @_;
+    $self->{htmlvalidator} = $validator;
+}
+
 # Internal use only, called each HTML page made.  Can do
 # validating and logging, etc.
-sub _browser_html_hook () {
+sub _browser_html_hook ($) {
+    my ($self) = @_;
 
+    # If validator set, validate HTML
+    if (defined($self->{htmlvalidator})) {
+        my ($fh, $filename) = File::Temp::tempfile( DIR => $self->{tempdir}, SUFFIX => '.html');
+        print $fh $self->{useragent}->content();
+        close $fh;
+        system($self->{htmlvalidator}, $filename) and die "HTML $filename doesn't validate, URL " . $self->{useragent}->uri();
+    }
 }
 
 ############################################################################
