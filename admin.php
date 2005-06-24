@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin.php,v 1.29 2005-06-13 16:53:17 francis Exp $
+ * $Id: admin.php,v 1.30 2005-06-24 19:17:46 francis Exp $
  * 
  */
 
@@ -70,25 +70,15 @@ function admin_page_display($site_name, $pages) {
         if (!$url) {
             $url = "?page=" . $pages[0]->id;
         }
-?>
-<html><head>
-<title><?=$maintitle?></title>
-<script language="JavaScript"><!--
-function onloadcontent() {
-// Attempt to put a usable URL in the URL
-//    document.title = self.content.document.title;
-//   newloc = "?url=" + escape(self.content.location);
-//    if (document.location.search != newloc) 
-// This is no good, as it gets page to reload
-//        document.location.search = newloc;
-}
-//--></script>
-<frameset cols=*,180>
+?><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head><title><?=$maintitle?></title></head>
+<frameset cols="*,180">
 <noframes><h1><?=$maintitle?></h1><?=$navlinks?></noframes>
-<frame name="content" src="<?=$url?>" onload="onloadcontent()">
+<frame name="content" src="<?=$url?>">
 <frame name="navigation" src="?navframe=yes">
 </frameset>
-</head></html>
+</html>
 <?
     }
 }
@@ -97,10 +87,9 @@ function onloadcontent() {
 // Header at start of page
 function admin_html_header($title) {
 ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<title><?=$title?></title>
 <style type="text/css"><!--
 body {background-color: #ffffff;  color: #000000; }
 body,  td,  th,  h1,  h2 {font-family: sans-serif; }
@@ -126,8 +115,12 @@ h2 {font-size: 125%; }
 i {color: #666666;  background-color: #cccccc; }
 img.mslogo {float: left;  border: 0px; }
 hr {width: 600px;  background-color: #cccccc;  border: 0px;  height: 1px;  color: #000000; }
-img.creatorpicture { float: left; display: inline; margin-right: 10px;
+img.creatorpicture { float: left; display: inline; margin-right: 10px; }
+.timeline dt {   clear: left; float: left; font-weight: bold; }
+.timeline dd { margin-left: 8em; }
 //--></style>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title><?=$title?></title>
 </head>
 <body>
 <?
