@@ -18,7 +18,7 @@ define('MAPIT_AREA_NOT_FOUND', 2003);      /* not a valid voting area id */
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: mapit.php,v 1.15 2005-06-24 12:29:32 chris Exp $
+ * $Id: mapit.php,v 1.16 2005-06-25 07:30:10 francis Exp $
  *
  */
 
@@ -126,7 +126,7 @@ function mapit_get_voting_area_children($id) {
     Ord­ nance Survey "National Grid" for Great Britain) or "I" for the Irish
     Grid (used in the island of Ireland).
 
-  * wgs83_lat
+  * wgs84_lat
   * wgs84_lon
 
     Latitude and longitude in the WGS84 coordinate system, expressed as decimal
