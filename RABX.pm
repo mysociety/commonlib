@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: RABX.pm,v 1.11 2005-06-16 12:07:50 chris Exp $
+# $Id: RABX.pm,v 1.12 2005-06-28 15:09:38 chris Exp $
 
 # References:
 #   Netstrings are documented here: http://cr.yp.to/proto/netstrings.txt
@@ -123,7 +123,11 @@ Return STRING, formatted as a netstring.
 
 =cut
 sub netstring_wr ($$) {
-    $_[1]->print(length($_[0]), ':', $_[0], ',');
+    my ($str, $h) = @_;
+    # If the string has the UTF-8 flag on, then length() will count characters
+    # rather than bytes.
+    utf8::encode($str) if (utf8::is_utf8($str));
+    $h->print(length($str), ':', $str, ',');
 }
 
 =item netstring_rd HANDLE
@@ -384,7 +388,7 @@ use HTTP::Request;
 use HTTP::Response;
 use Regexp::Common qw(URI);
 
-my $rcsid = ''; $rcsid .= '$Id: RABX.pm,v 1.11 2005-06-16 12:07:50 chris Exp $';
+my $rcsid = ''; $rcsid .= '$Id: RABX.pm,v 1.12 2005-06-28 15:09:38 chris Exp $';
 
 =back
 
@@ -534,6 +538,9 @@ Serve RABX methods from a CGI/FastCGI script.
 sub dispatch (%) { # XXX should take stream + environment hash
     my (%funcs) = @_;
     my $ret;
+
+    binmode(STDIN);
+    binmode(STDOUT);
 
     try {
         my $meth = $ENV{REQUEST_METHOD};
