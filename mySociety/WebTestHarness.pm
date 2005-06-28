@@ -11,7 +11,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.19 2005-06-24 19:17:46 francis Exp $
+# $Id: WebTestHarness.pm,v 1.20 2005-06-28 16:40:21 francis Exp $
 #
 
 package mySociety::WebTestHarness;
@@ -21,6 +21,7 @@ use File::Slurp;
 use File::Temp;
 use WWW::Mechanize;
 use Data::Dumper;
+use MIME::QuotedPrint;
 
 use mySociety::Logfile;
 use mySociety::DBHandle qw(dbh);
@@ -344,12 +345,17 @@ sub email_run_eveld($) {
 
 Returns the email containing the given STRING as an SQL expression.  i.e. Use %
 for wildcard.  It is an error if no matching mails are found within a few
-seconds, or there is more than one match.
+seconds, or there is more than one match.  The email is returned with any
+quoted printable characters decoded.
 
 =cut
 sub email_get_containing($$) {
     my ($self, $check) = @_;
     $self->email_run_eveld();
+    
+    # need search string in quoted-printable, as email in the database is
+    # encoded like that
+    my $quoted_check = encode_qp($check, "");
 
     # Wait for email
     my $mails;
@@ -357,29 +363,32 @@ sub email_get_containing($$) {
     my $c = 0;
     while ($got == 0) {
         $mails = dbh()->selectall_arrayref("select id, content from testharness_mail
-            where content like ?", {}, $check);
+            where content like ?", {}, $quoted_check);
         $got = scalar @$mails;
-        die "Email containing '$check' not found even after $c sec wait" if ($got == 0 && $c > 20);
-        die "Too many emails found containing '$check'" if ($got > 1);
+        die "Email containing '$quoted_check' not found even after $c sec wait" if ($got == 0 && $c > 20);
+        die "Too many emails found containing '$quoted_check'" if ($got > 1);
         $c++;
         sleep 1;
     }
+
     # Get content
     my ($id, $content) = @{$mails->[0]};
+
     # Save to logging mailbox
     if ($self->{log_mailbox}) {
         open LOG_MAILBOX, ">>", $self->{log_mailbox} or die "Failed to open $self->{log_mailbox} for writing.";
         print LOG_MAILBOX $content if ($self->{log_mailbox});
         close LOG_MAILBOX
     }
+
     # Delete from incoming queue
     dbh()->do("delete from testharness_mail where id = ?", {}, $id);
     dbh()->commit();
+
     # Remove quoted-printable
-    # TODO: Do this properly, and return headers and body in unencoded UTF-8
-    $content =~ s/=20/ /g;
-    $content =~ s/=$/ /g;
-    return $content;
+    my $unquoted_content;
+    $unquoted_content = decode_qp($content);
+    return $unquoted_content;
 }
 
 =item email_check_none_left
