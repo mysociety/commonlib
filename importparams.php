@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: importparams.php,v 1.4 2005-06-09 11:22:42 francis Exp $
+ * $Id: importparams.php,v 1.5 2005-07-01 22:06:54 francis Exp $
  * 
  */
 
@@ -44,9 +44,9 @@ function importparams() {
 
         /* Obtain parameter value. */
         if (array_key_exists($name, $_POST))
-            $val = $_POST[$name];
+            $val = trim($_POST[$name]);
         else if (array_key_exists($name, $_GET))
-            $val = $_GET[$name];
+            $val = trim($_GET[$name]);
         else
             $val = null;
             
@@ -113,6 +113,14 @@ function importparams_validate_postcode($pc) {
         return null;
     } else {
         return "Please enter a valid postcode, such as OX1 3DR";
+    }
+}
+
+function importparams_validate_email($email) {
+    if (validate_email($email)) {
+        return null;
+    } else {
+        return "Please enter a valid email address";
     }
 }
 

@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.39 2005-06-21 18:19:27 matthew Exp $
+ * $Id: utility.php,v 1.40 2005-07-01 22:06:54 francis Exp $
  * 
  */
 
@@ -120,17 +120,19 @@ function vardump($blah) {
 
 
 /* validate_email STRING
- * Return TRUE if the passed STRING may be a valid email address. */
-function validate_email ($string) {
-	if (!ereg('^[-!#$%&\'*+\\./0-9=?A-Z^_`a-z{|}~]+'.
-		'@'.
-		'[-!#$%&\'*+\\/0-9=?A-Z^_`a-z{|}~]+\.'.
-		'[-!#$%&\'*+\\./0-9=?A-Z^_`a-z{|}~]+$', $string)) {
-		return false;
-	} else {
-		return true;
-	}
+ * Return TRUE if the passed STRING may be a valid email address. 
+ * This is derived from Paul Warren's code here,
+ *  http://www.ex-parrot.com/~pdw/Mail-RFC822-Address.html
+ * as adapted in EvEl (to look only at the addr-spec part of an address --
+ * that is, the "foo@bar" bit).
+ */
+function validate_email ($address) {
+    if (preg_match('/^([^()<>@,;:\\".\[\] \000-\037\177\200-\377]+(\s*\.\s*[^()<>@,;:\\".\[\] \000-\037\177\200-\377]+)*|"([^"\\\r\n\200-\377]|\.)*")\s*@\s*[A-Za-z0-9][A-Za-z0-9-]*(\s*\.\s*[A-Za-z0-9][A-Za-z0-9-]*)*$/', $address))
+        return true;
+    else
+        return false;
 }
+
 
 /* validate_postcode POSTCODE
  * Return true is POSTCODE is in the proper format for a UK postcode. Does not
@@ -269,9 +271,9 @@ function convert_to_unix_newlines($text) {
  * empty string (""). */
 function get_http_var($name, $default='') {
     if (array_key_exists($name, $_GET))
-        return $_GET[$name];
+        return trim($_GET[$name]);
     else if (array_key_exists($name, $_POST))
-        return $_POST[$name];
+        return trim($_POST[$name]);
     else 
         return $default;
 }
@@ -455,8 +457,8 @@ print "vardump(...)\n";
 vardump(array(1, 2, 3));
 print "done\n";
 
-foreach (array('chris@ex-parrot.com', 'fish soup') as $e) {
-    print "validate_email('$e') = " . validate_email($e) . "\n";
+foreach (array('chris', 'chris@ex-parrot.com', 'chris@[127.0.0.1]', 'fish soup @octopus', 'chris@_.com') as $a) {
+    print "$a -> " . (validate_email($a) ? 'VALID' : 'NOT VALID') . "\n";
 }
 
 foreach (array('CB4 1EP', 'fish soup') as $pc) {
