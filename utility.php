@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.40 2005-07-01 22:06:54 francis Exp $
+ * $Id: utility.php,v 1.41 2005-07-04 22:24:57 francis Exp $
  * 
  */
 
@@ -158,6 +158,17 @@ function validate_postcode ($postcode) {
     } else {
         return false;
     }
+}
+
+/* canonicalise_postcode
+ * Convert UK postcode to a unique form.  That is, remove all spaces and
+ * capitalise it.  Then put back in a space in the right place.  */
+function canonicalise_postcode($pc) {
+    $pc = str_replace(' ', '', $pc);
+    $pc = trim($pc);
+    $pc = strtoupper($pc);
+    $pc = preg_replace('#(\d[A-Z]{2})#', ' $1', $pc);
+    return $pc;
 }
 
 /* getmicrotime
