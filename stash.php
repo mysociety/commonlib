@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: stash.php,v 1.1 2005-07-08 11:33:02 matthew Exp $
+ * $Id: stash.php,v 1.2 2005-07-08 16:53:12 francis Exp $
  * 
  */
 
@@ -35,7 +35,7 @@ function stash_request($extra = null) {
  * be reconstructed from the variables.  This function lets you create a stash
  * which represents that request, rather than the current one. */
 function stash_new_request($method, $url, $params, $extra = null) {
-    $key = bin2hex(random_bytes(4));
+    $key = bin2hex(random_bytes(8));
     if ($method == 'GET') {
         if (!is_null($params)) {
             /* Strip query. */

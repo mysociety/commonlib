@@ -6,12 +6,13 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: person.php,v 1.1 2005-07-08 12:01:39 matthew Exp $
+ * $Id: person.php,v 1.2 2005-07-08 16:53:12 francis Exp $
  * 
  */
 
 require_once 'utility.php';
 require_once 'stash.php';
+require_once 'auth.php';
 
 function person_canonicalise_name($n) {
     return preg_replace('/[^A-Za-z-]/', '', strtolower($n));
