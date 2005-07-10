@@ -18,7 +18,7 @@ define('MAPIT_AREA_NOT_FOUND', 2003);      /* not a valid voting area id */
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: mapit.php,v 1.16 2005-06-25 07:30:10 francis Exp $
+ * $Id: mapit.php,v 1.17 2005-07-10 00:40:24 francis Exp $
  *
  */
 
@@ -112,27 +112,32 @@ function mapit_get_voting_area_children($id) {
     return $result;
 }
 
-/* mapit_get_location POSTCODE
+/* mapit_get_location POSTCODE [PARTIAL]
 
-  Return the location of the given POSTCODE. The return value is a reference to
-  a hash containing elements,
+  Return the location of the given POSTCODE. The return value is a
+  reference to a hash containing elements. If PARTIAL is present set to 1,
+  will use only the first part of the postcode, and generate the mean
+  coordinate. If PARTIAL is set POSTCODE can optionally be just the first
+  part of the postcode.
 
   * coordsyst
+
   * easting
+
   * northing
 
-    Coordinates of the point in a UTM coordinate sys­ tem. The coordinate
-    system is identified by the coordsyst element, which is "G" for OSGB (the
-    Ord­ nance Survey "National Grid" for Great Britain) or "I" for the Irish
-    Grid (used in the island of Ireland).
+    Coordinates of the point in a UTM coordinate system. The coordinate
+    system is identified by the coordsyst element, which is "G" for OSGB
+    (the Ordnance Survey "National Grid" for Great Britain) or "I" for the
+    Irish Grid (used in the island of Ireland).
 
   * wgs84_lat
+
   * wgs84_lon
 
-    Latitude and longitude in the WGS84 coordinate system, expressed as decimal
-    degrees, north- and east-positive. */
-
-function mapit_get_location($postcode) {
+    Latitude and longitude in the WGS84 coordinate system, expressed as
+    decimal degrees, north- and east-positive. */
+function mapit_get_location($postcode, $partial = null) {
     global $mapit_client;
     $params = func_get_args();
     $result = $mapit_client->call('MaPit.get_location', $params);

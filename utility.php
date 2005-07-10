@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.41 2005-07-04 22:24:57 francis Exp $
+ * $Id: utility.php,v 1.42 2005-07-10 00:40:24 francis Exp $
  * 
  */
 
@@ -154,6 +154,29 @@ function validate_postcode ($postcode) {
         preg_match("/^[$fst][$sec][$num][$num][$gap]*[$nom][$in][$in]$/i", $postcode) ||
         preg_match("/^[$fst][$num][$thd][$gap]*[$nom][$in][$in]$/i", $postcode) ||
         preg_match("/^[$fst][$sec][$num][$fth][$gap]*[$nom][$in][$in]$/i", $postcode)) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+/* validate_partial_postcode PARTIAL_POSTCODE
+ * Return true is POSTCODE is the first part of a UK postcode.  e.g. WC1.
+ */
+function validate_partial_postcode ($postcode) {
+    // See http://www.govtalk.gov.uk/gdsc/html/noframes/PostCode-2-1-Release.htm
+    $fst = 'ABCDEFGHIJKLMNOPRSTUWYZ';
+    $sec = 'ABCDEFGHJKLMNOPQRSTUVWXY';
+    $thd = 'ABCDEFGHJKSTUW';
+    $fth = 'ABEHMNPRVWXY';
+    $num = '0123456789';
+
+    if (preg_match("/^[$fst][$num]$/i", $postcode) ||
+        preg_match("/^[$fst][$num][$num]$/i", $postcode) ||
+        preg_match("/^[$fst][$sec][$num]$/i", $postcode) ||
+        preg_match("/^[$fst][$sec][$num][$num]$/i", $postcode) ||
+        preg_match("/^[$fst][$num][$thd]$/i", $postcode) ||
+        preg_match("/^[$fst][$sec][$num][$fth]$/i", $postcode)) {
         return true;
     } else {
         return false;
