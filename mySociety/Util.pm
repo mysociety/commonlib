@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Util.pm,v 1.20 2005-04-06 13:50:52 chris Exp $
+# $Id: Util.pm,v 1.21 2005-07-10 00:40:23 francis Exp $
 #
 
 package mySociety::Util::Error;
@@ -491,14 +491,40 @@ sub is_valid_postcode ($) {
     my $thd = 'ABCDEFGHJKSTUW';
     my $fth = 'ABEHMNPRVWXY';
 
-    return 1 if ($pc =~ m#^[$fst]\d\d[$in][$in]$#
-                || $pc =~ m#^[$fst]\d\d\d[$in][$in]$#
-                || $pc =~ m#^[$fst]\d\d[$in][$in]$#
+    return 1 if (  $pc =~ m#^[$fst]\d\d[$in][$in]$#
                 || $pc =~ m#^[$fst]\d\d\d[$in][$in]$#
                 || $pc =~ m#^[$fst][$sec]\d\d[$in][$in]$#
                 || $pc =~ m#^[$fst][$sec]\d\d\d[$in][$in]$#
                 || $pc =~ m#^[$fst]\d[$thd]\d[$in][$in]$#
                 || $pc =~ m#^[$fst][$sec]\d[$fth]\d[$in][$in]$#);
+    return 0;
+}
+
+=item is_valid_partial_postcode STRING
+
+Is STRING (once it has been converted to upper-case and spaces removed) a valid
+first part of a UK postcode?  e.g. WC1
+
+=cut
+sub is_valid_partial_postcode ($) {
+    my $pc = uc($_[0]);
+    $pc =~ s#\s##g;
+
+    # Our test postcode
+    return 1 if $pc eq 'ZZ9';
+    
+    # See http://www.govtalk.gov.uk/gdsc/html/noframes/PostCode-2-1-Release.htm
+    my $fst = 'ABCDEFGHIJKLMNOPRSTUWYZ';
+    my $sec = 'ABCDEFGHJKLMNOPQRSTUVWXY';
+    my $thd = 'ABCDEFGHJKSTUW';
+    my $fth = 'ABEHMNPRVWXY';
+  
+    return 1 if ($pc =~ m#^[$fst]\d$#
+                || $pc =~ m#^[$fst]\d\d$#
+                || $pc =~ m#^[$fst][$sec]\d$#
+                || $pc =~ m#^[$fst][$sec]\d\d$#
+                || $pc =~ m#^[$fst]\d[$thd]$#
+                || $pc =~ m#^[$fst][$sec]\d[$fth]$#);
     return 0;
 }
 

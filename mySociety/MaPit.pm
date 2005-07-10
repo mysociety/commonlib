@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: MaPit.pm,v 1.7 2005-06-24 12:29:32 chris Exp $
+# $Id: MaPit.pm,v 1.8 2005-07-10 00:40:23 francis Exp $
 #
 
 package mySociety::MaPit;
@@ -108,10 +108,12 @@ sub get_voting_area_info ($) {
     return $rabx_client->call('MaPit.get_voting_area_info', $id);
 }
 
-=item get_location POSTCODE
+=item get_location POSTCODE [PARTIAL]
 
 Return the location of the given POSTCODE. The return value is a reference to
-a hash containing elements,
+a hash containing elements.  If PARTIAL is present set to 1, will use only
+the first part of the postcode, and generate the mean coordinate.  If PARTIAL
+is set POSTCODE can optionally be just the first part of the postcode.
 
 =over 4
 
@@ -136,10 +138,10 @@ degrees, north- and east-positive.
 =back
 
 =cut
-sub get_location ($) {
-    my ($postcode) = @_;
+sub get_location ($;$) {
+    my ($postcode, $partial) = @_;
     configure() if !defined $rabx_client;
-    return $rabx_client->call('MaPit.get_location', $postcode);
+    return $rabx_client->call('MaPit.get_location', $postcode, $partial);
 }
 
 1;
