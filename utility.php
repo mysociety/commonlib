@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.42 2005-07-10 00:40:24 francis Exp $
+ * $Id: utility.php,v 1.43 2005-07-11 12:09:40 francis Exp $
  * 
  */
 
@@ -475,6 +475,26 @@ function make_clickable($ret, $params = array()) {
     $ret = preg_replace("#(\s)([a-z0-9\-_.]+)@([^,< \n\r]*[^.,< \n\r])#i", "$1<a href=\"mailto:$2@$3\">$2@$3</a>", $ret);
     $ret = trim($ret);
     return $ret;
+}
+
+# Converts an ordinal number 1, 2, 3... into a cardinal 1st, 2nd, 3rd...
+# Taken from make_ranking in TWFY codebase.
+function english_ordinal($cardinal)
+{
+    # 11th, 12th, 13th use "th" not "st", "nd", "rd"
+    if (floor(($cardinal % 100) / 10) == 1)
+        return $cardinal . "th";
+    # 1st
+    if ($cardinal % 10 == 1)
+        return $cardinal . "st";
+    # 2nd
+    if ($cardinal % 10 == 2)
+        return $cardinal . "nd";
+    # 3rd
+    if ($cardinal % 10 == 3)
+        return $cardinal . "rd";
+    # Everything else use th
+    return $cardinal . "th";
 }
 
 /*
