@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin.php,v 1.30 2005-06-24 19:17:46 francis Exp $
+ * $Id: admin.php,v 1.31 2005-07-12 18:33:40 francis Exp $
  * 
  */
 
@@ -28,14 +28,17 @@ function admin_page_display($site_name, $pages) {
     // generate navigation bar
     $navlinks = "";
     foreach ($pages as $page) {
-        if (isset($page))
+        if (isset($page)) {
+            # $target = "target=\"content\" ";
+            $target = "";
             if (isset($page->url)) {
-                $navlinks .= "<a target=\"content\" href=\"". $page->url."\">" . $page->navname. "</a><br>";
+                $navlinks .= "<a $target href=\"". $page->url."\">" . $page->navname. "</a><br>";
             } else {
-                $navlinks .= "<a target=\"content\" href=\"?page=". $page->id."\">" . $page->navname. "</a><br>";
+                $navlinks .= "<a $target href=\"?page=". $page->id."\">" . $page->navname. "</a><br>";
             }
-        else
+        } else {
             $navlinks .= "<br>";
+        }
     }
 
     $maintitle = "$site_name admin";
@@ -56,7 +59,7 @@ function admin_page_display($site_name, $pages) {
         $page->self_link = $self_link;
         $page->display($self_link); # TODO remove this as parameter, use class member
         admin_html_footer();
-    } elseif (get_http_var("navframe")) {
+    } else/*if (get_http_var("navframe"))*/ {
         // right hand nav frame
         admin_html_header($maintitle);
 ?>
@@ -65,7 +68,9 @@ function admin_page_display($site_name, $pages) {
 <p><a href="http://www.mysociety.org/"><img class="mslogo" src="https://secure.mysociety.org/mysociety_sm.gif" border="0" alt="mySociety"></a></p>
 <?
         admin_html_footer();
-    } else {
+    } 
+    // Turn off frames for now, as never used
+    /* else {
         $url = get_http_var('url');
         if (!$url) {
             $url = "?page=" . $pages[0]->id;
@@ -80,7 +85,7 @@ function admin_page_display($site_name, $pages) {
 </frameset>
 </html>
 <?
-    }
+    } */
 }
 
 
