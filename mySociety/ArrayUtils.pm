@@ -6,7 +6,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: ArrayUtils.pm,v 1.1 2005-07-14 16:46:41 francis Exp $
+# $Id: ArrayUtils.pm,v 1.2 2005-07-14 17:51:05 francis Exp $
 #
 
 package mySociety::ArrayUtils;
@@ -45,6 +45,28 @@ sub symmetric_diff {
             push @{ $count{$element} > 1 ? \@intersection : \@difference }, $element;
     }
     return \@difference;
+}
+
+=item intersection ARRAYREF1 ARRAYREF2
+
+Return items which are in both arrays.
+
+=cut
+
+sub intersection {
+    my ($array1, $array2) = @_;
+
+    my @union = ();
+    my @intersection = ();
+    my @difference = ();
+
+    my %count = ();
+    foreach my $element (@$array1, @$array2) { $count{$element}++ }
+    foreach my $element (keys %count) {
+            push @union, $element;
+            push @{ $count{$element} > 1 ? \@intersection : \@difference }, $element;
+    }
+    return \@intersection;
 }
 
 
