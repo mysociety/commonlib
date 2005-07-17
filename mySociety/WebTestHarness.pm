@@ -11,7 +11,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.20 2005-06-28 16:40:21 francis Exp $
+# $Id: WebTestHarness.pm,v 1.21 2005-07-17 22:52:14 francis Exp $
 #
 
 package mySociety::WebTestHarness;
@@ -25,6 +25,14 @@ use MIME::QuotedPrint;
 
 use mySociety::Logfile;
 use mySociety::DBHandle qw(dbh);
+
+# Enable stack backtraces upon "die"
+use Carp qw(confess cluck verbose);
+$SIG{__DIE__} = sub { confess @_ };
+$SIG{__WARN__} = sub { cluck @_ };
+
+# How long have to wait to be sure a mail hasn't arrived
+our $mail_sleep_time = 20;
 
 ############################################################################
 # Constructor
@@ -365,7 +373,7 @@ sub email_get_containing($$) {
         $mails = dbh()->selectall_arrayref("select id, content from testharness_mail
             where content like ?", {}, $quoted_check);
         $got = scalar @$mails;
-        die "Email containing '$quoted_check' not found even after $c sec wait" if ($got == 0 && $c > 20);
+        die "Email containing '$quoted_check' not found even after $c sec wait" if ($got == 0 && $c > $mail_sleep_time);
         die "Too many emails found containing '$quoted_check'" if ($got > 1);
         $c++;
         sleep 1;
@@ -400,7 +408,7 @@ Throws an error if there are any emails left.
 sub email_check_none_left($) {
     my ($self) = @_;
     $self->email_run_eveld();
-    sleep 5;
+    sleep $mail_sleep_time;
     my $emails_left = dbh()->selectrow_array("select count(*) from testharness_mail");
     die "$emails_left unexpected emails left" if $emails_left > 0;
 }
