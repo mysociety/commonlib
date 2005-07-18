@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Config.pm,v 1.14 2005-03-03 12:58:32 francis Exp $
+# $Id: Config.pm,v 1.15 2005-07-18 13:31:39 francis Exp $
 #
 
 package mySociety::Config;
@@ -17,7 +17,7 @@ use IO::Handle;
 use IO::Pipe;
 use Error qw(:try);
 use Data::Dumper;
-use POSIX;
+use POSIX ();
 
 =head1 NAME
 

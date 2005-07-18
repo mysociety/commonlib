@@ -6,7 +6,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Logfile.pm,v 1.2 2005-01-28 19:45:13 chris Exp $
+# $Id: Logfile.pm,v 1.3 2005-07-18 13:31:39 francis Exp $
 #
 
 package mySociety::Logfile::Error;
@@ -20,7 +20,7 @@ package mySociety::Logfile;
 use Error qw(:try);
 use File::stat;
 use IO::File;
-use POSIX;
+use POSIX ();
 use Sys::Mmap;
 use Time::HiRes;
 
@@ -44,11 +44,11 @@ package mySociety::Logfile;
 # maplen SIZE
 # Return the length of a mapping which should be used to cover a file of SIZE
 # bytes.
-use constant PAGESIZE => POSIX::sysconf(POSIX::_SC_PAGESIZE);
 sub maplen ($) {
     my ($size) = @_;
     use integer;
-    return (($size + PAGESIZE - 1) / PAGESIZE) * PAGESIZE;
+    my $pagesize = POSIX::sysconf(POSIX::_SC_PAGESIZE);
+    return (($size + $pagesize - 1) / $pagesize) * $pagesize;
 }
 
 # _update

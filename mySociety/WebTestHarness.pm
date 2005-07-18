@@ -11,7 +11,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.21 2005-07-17 22:52:14 francis Exp $
+# $Id: WebTestHarness.pm,v 1.22 2005-07-18 13:31:39 francis Exp $
 #
 
 package mySociety::WebTestHarness;
@@ -41,10 +41,6 @@ our $mail_sleep_time = 20;
 
 Create a new test harness object.  PARAMS is a hash ref containing:
 
-db_option_prefix - The prefix of the mySociety configuration parameters for the
-database being used. e.g. PB_ for PB_DB_NAME.  SCHEMA is the database schema
-file.  Compulsory.
-
 =cut
 sub new ($$) {
     my ($class, $params) = @_;
@@ -53,7 +49,21 @@ sub new ($$) {
     $self->{tempdir} = File::Temp::tempdir( CLEANUP => 0 );
     $self->{useragent} = new WWW::Mechanize(autocheck => 1);
 
-    my $db_option_prefix = $params->{db_option_prefix};
+    return bless($self, $class);
+}
+
+=item database_connect PREFIX
+
+Connects to a database, for later commands. PREFIX is the prefix of the
+mySociety configuration parameters for the database being used. e.g. PB_ for
+PB_DB_NAME.  
+
+=cut
+sub database_connect($$) {
+    my ($self, $db_option_prefix) = @_;
+
+    mySociety::DBHandle::disconnect();
+
     $self->{dbhost} = mySociety::Config::get($db_option_prefix.'DB_HOST', undef);
     $self->{dbport} = mySociety::Config::get($db_option_prefix.'DB_PORT', undef);
     $self->{dbname}  = mySociety::Config::get($db_option_prefix.'DB_NAME');
@@ -63,8 +73,6 @@ sub new ($$) {
     mySociety::DBHandle::configure(Name => $self->{dbname}, 
             User => $self->{dbuser}, Password => $self->{dbpass},
             Host => $self->{dbhost}, Port => $self->{dbport});
-
-    return bless($self, $class);
 }
 
 =item database_drop_reload SCHEMA_FILE

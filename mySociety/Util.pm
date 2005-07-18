@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Util.pm,v 1.21 2005-07-10 00:40:23 francis Exp $
+# $Id: Util.pm,v 1.22 2005-07-18 13:31:39 francis Exp $
 #
 
 package mySociety::Util::Error;
@@ -23,7 +23,7 @@ use Getopt::Std;
 use IO::File;
 use IO::Handle;
 use IO::Pipe;
-use POSIX;
+use POSIX ();
 use Sys::Syslog;
 
 BEGIN {
@@ -171,7 +171,9 @@ sub send_email ($$@) {
     if (0 == $pid) {
         # Close all filehandles other than standard ones. This will prevent
         # perl from messing up database connections etc. on exit.
-        for (my $fd = 3; $fd < POSIX::sysconf(POSIX::_SC_OPEN_MAX); ++$fd) {
+        use POSIX;
+        my $openmax = POSIX::_SC_OPEN_MAX();
+        for (my $fd = 3; $fd < POSIX::sysconf($openmax); ++$fd) {
             POSIX::close($fd);
         }
         # Child.
