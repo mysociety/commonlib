@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Util.pm,v 1.22 2005-07-18 13:31:39 francis Exp $
+# $Id: Util.pm,v 1.23 2005-07-19 18:08:26 francis Exp $
 #
 
 package mySociety::Util::Error;
@@ -103,7 +103,7 @@ sub named_tempfile (;$) {
     die "unable to create temporary file; last attempted name was \"$name\" and open failed with error $!";
 }
 
-=item pipe_via PROGRAM ARG ... [HANDLE]
+=item pipe_via PROGRAM [ARG ...] [HANDLE]
 
 Sets up a pipe via the given PROGRAM (passing it the given ARGs), and (if
 given) connecting its standard output to HANDLE. If called in list context,
@@ -113,7 +113,7 @@ returns the handle and the PID of the child process. Dies on error.
 sub pipe_via (@) {
     my ($prog, @args) = @_;
     my $outh;
-    if (UNIVERSAL::isa($args[$#args], 'IO::Handle')) {
+    if (scalar(@args) and UNIVERSAL::isa($args[$#args], 'IO::Handle')) {
         $outh = pop(@args)->fileno();
     }
 

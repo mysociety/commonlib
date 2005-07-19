@@ -11,7 +11,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.23 2005-07-18 15:31:57 francis Exp $
+# $Id: WebTestHarness.pm,v 1.24 2005-07-19 18:08:26 francis Exp $
 #
 
 package mySociety::WebTestHarness;
@@ -215,6 +215,16 @@ Acts as function in WWW::Mechanize.
 sub browser_content {
     my $self = shift;
     return $self->{useragent}->content(@_);
+}
+
+=item browser_reload
+
+Acts as function in WWW::Mechanize.
+
+=cut
+sub browser_reload {
+    my $self = shift;
+    return $self->{useragent}->reload(@_);
 }
 
 =item browser_check_contents STRING
