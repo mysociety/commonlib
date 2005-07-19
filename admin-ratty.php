@@ -6,7 +6,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-ratty.php,v 1.37 2005-02-21 11:37:32 francis Exp $
+ * $Id: admin-ratty.php,v 1.38 2005-07-19 09:44:26 francis Exp $
  * 
  */
 
@@ -36,6 +36,9 @@ class ADMIN_PAGE_RATTY {
         $action = get_http_var('action');
         if ($action == "")
             $action = "listrules";
+        if ($action <> "editrule" && $action <> "listrules") {
+            print "<p>Unknown ratty admin display action '$action'</p>";
+        }
 
         if ($action == "editrule") {
             if (!array_key_exists('sequence', $_POST)) {
