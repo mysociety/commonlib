@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin.php,v 1.31 2005-07-12 18:33:40 francis Exp $
+ * $Id: admin.php,v 1.32 2005-07-19 13:59:12 matthew Exp $
  * 
  */
 
@@ -24,23 +24,7 @@ function admin_display_error($num, $message, $file, $line, $context) {
 }
 err_set_handler_display('admin_display_error');
 
-function admin_page_display($site_name, $pages) {
-    // generate navigation bar
-    $navlinks = "";
-    foreach ($pages as $page) {
-        if (isset($page)) {
-            # $target = "target=\"content\" ";
-            $target = "";
-            if (isset($page->url)) {
-                $navlinks .= "<a $target href=\"". $page->url."\">" . $page->navname. "</a><br>";
-            } else {
-                $navlinks .= "<a $target href=\"?page=". $page->id."\">" . $page->navname. "</a><br>";
-            }
-        } else {
-            $navlinks .= "<br>";
-        }
-    }
-
+function admin_page_display($site_name, $pages, $default = null) {
     $maintitle = "$site_name admin";
     if (get_http_var("page"))  {
         // find page
@@ -59,33 +43,33 @@ function admin_page_display($site_name, $pages) {
         $page->self_link = $self_link;
         $page->display($self_link); # TODO remove this as parameter, use class member
         admin_html_footer();
-    } else/*if (get_http_var("navframe"))*/ {
-        // right hand nav frame
+    } else {
         admin_html_header($maintitle);
+        print '<h3>' . $site_name . '</h3>';
+        if (!is_null($default)) {
+            $default->display();
+        }
+
+        // generate navigation bar
+        $navlinks = "<ul>";
+        foreach ($pages as $page) {
+            if (isset($page)) {
+                if (isset($page->url)) {
+                    $navlinks .= "<li><a href=\"". $page->url."\">" . $page->navname. "</a>";
+                } else {
+                    $navlinks .= "<li><a href=\"?page=". $page->id."\">" . $page->navname. "</a>";
+                }
+            } else {
+                $navlinks .= '</ul> <ul>';
+            }
+        }
+        $navlinks .= '</ul>';
+        print $navlinks;
 ?>
-<h3><?=$site_name?></h3>
-<?=$navlinks?>
 <p><a href="http://www.mysociety.org/"><img class="mslogo" src="https://secure.mysociety.org/mysociety_sm.gif" border="0" alt="mySociety"></a></p>
 <?
         admin_html_footer();
     } 
-    // Turn off frames for now, as never used
-    /* else {
-        $url = get_http_var('url');
-        if (!$url) {
-            $url = "?page=" . $pages[0]->id;
-        }
-?><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html>
-<head><title><?=$maintitle?></title></head>
-<frameset cols="*,180">
-<noframes><h1><?=$maintitle?></h1><?=$navlinks?></noframes>
-<frame name="content" src="<?=$url?>">
-<frame name="navigation" src="?navframe=yes">
-</frameset>
-</html>
-<?
-    } */
 }
 
 
