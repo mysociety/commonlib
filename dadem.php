@@ -1,7 +1,6 @@
 <?
 # this part from rabxtophp-all.sh 
 
-require_once('error.php');
 require_once('utility.php');
 require_once('votingarea.php');
 
@@ -23,7 +22,7 @@ define('DADEM_CONTACT_EMAIL', 102);
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: dadem.php,v 1.18 2005-07-10 00:40:24 francis Exp $
+ * $Id: dadem.php,v 1.19 2005-07-20 18:56:19 francis Exp $
  *
  */
 
@@ -257,6 +256,16 @@ function dadem_admin_set_area_status($area_id, $new_status) {
     global $dadem_client;
     $params = func_get_args();
     $result = $dadem_client->call('DaDem.admin_set_area_status', $params);
+    return $result;
+}
+
+/* dadem_admin_get_raw_council_status
+
+  Returns how many councils are not in the made-live state. */
+function dadem_admin_get_raw_council_status() {
+    global $dadem_client;
+    $params = func_get_args();
+    $result = $dadem_client->call('DaDem.admin_get_raw_council_status', $params);
     return $result;
 }
 
