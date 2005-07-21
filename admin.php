@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin.php,v 1.32 2005-07-19 13:59:12 matthew Exp $
+ * $Id: admin.php,v 1.33 2005-07-21 11:19:19 francis Exp $
  * 
  */
 
@@ -141,6 +141,19 @@ function admin_render_form($form) {
 
     $form->accept($renderer);
     echo $renderer->toHtml();
+}
+
+function make_ids_links($text) {
+    $text = htmlspecialchars($text);
+    // Message ids e.g. 0361593135850d75745e
+    $text = preg_replace("/([a-f0-9]{20})/",
+            "<a href=\"?page=fyrqueue&id=\$1\">\$1</a>",
+            $text);
+    // Ratty rules e.g. rule #10
+    $text = preg_replace("/rule #([0-9]+)/",
+            "<a href=\"?page=ratty-fyr-abuse&action=editrule&rule_id=\$1\">rule #\$1</a>",
+            $text);
+    return $text;
 }
 
 ?>
