@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-reps.php,v 1.23 2005-07-21 17:23:48 francis Exp $
+ * $Id: admin-reps.php,v 1.24 2005-07-21 18:18:19 francis Exp $
  * 
  */
 
@@ -18,12 +18,13 @@ class ADMIN_PAGE_REPS {
         $this->navname= "Representative Data";
     }
 
-    function render_reps($self_link, $reps, $link_extra = "") {
+    function render_reps($self_link, $reps, $bad_link = false) {
         $html = "";
         $info = dadem_get_representatives_info($reps);
         dadem_check_error($info);
 
-        foreach ($reps as $rep) {
+        for ($i = 0; $i < count($reps); $i++) {
+            $rep = $reps[$i];
             $repinfo = $info[$rep];
             if ($repinfo['deleted']) {
                 $html .= "<i>deleted</i> ";
@@ -34,7 +35,10 @@ class ADMIN_PAGE_REPS {
                 $html .= $repinfo['type'] . " ";
             else
                 $html .= $repinfo['area_type'] . " ";
-            $html .= "<a href=\"$self_link&pc=" .  urlencode(get_http_var('pc')). "&rep_id=" . $rep .  "&$link_extra\">" . $repinfo['name'] . " (". $repinfo['party'] . ")</a> \n";
+            $link_extra = "";
+            if ($bad_link && $i < count($reps) - 1) 
+                $link_extra = "&nextbad=".urlencode($reps[$i+1]);
+            $html .= "<a href=\"$self_link&pc=" .  urlencode(get_http_var('pc')). "&rep_id=" . $rep .  "$link_extra\">" . $repinfo['name'] . " (". $repinfo['party'] . ")</a> \n";
             $html .= "prefer " . $repinfo['method'];
             if ($repinfo['email']) 
                 $html .= ", " .  $repinfo['email'];
@@ -51,6 +55,21 @@ class ADMIN_PAGE_REPS {
         $html .= "</a>";
         $html .= " (" .  $area_info['type_name'] . ")";
         return $html;
+    }
+
+    function get_next_bad_contact($rep_id) {
+        $badcontacts = dadem_get_bad_contacts();
+        dadem_check_error($badcontacts);
+        $prev = null;
+        array_push($badcontacts, null);
+        foreach ($badcontacts as $badcontact) {
+            if ($prev == $rep_id) {
+                $rep_id = $badcontact;
+                break;
+            }
+           $prev = $badcontact;
+        }
+        return $rep_id;
     }
 
     function display($self_link) {
@@ -98,44 +117,35 @@ class ADMIN_PAGE_REPS {
             dadem_check_error($result);
             $rep_id = $result;
             $new_in_va_id = null;
-            print "<p><i>Successfully updated representative ". htmlspecialchars($rep_id) . "</i></i>";
+            print "<p><i>Successfully updated representative ". htmlspecialchars($rep_id) . "</i></p>";
 
-            if (get_http_var('bad')) {
-                // Find next bad contact
-                $badcontacts = dadem_get_bad_contacts();
-                dadem_check_error($badcontacts);
-                $prev = null;
-                array_push($badcontacts, null);
-                foreach ($badcontacts as $badcontact) {
-                    if ($prev == $rep_id) {
-                        $rep_id = $badcontact;
-                        break;
-                    }
-                   $prev = $badcontact;
-                }
+            if (get_http_var('nextbad')) {
+                $rep_id = get_http_var('nextbad');
+                $url = $self_link . "&nextbad=" . urlencode($this->get_next_bad_contact($rep_id)) . "&just_done_bad=1&rep_id=" . urlencode($rep_id);
+                header("Location: $url");
+                exit;
             } else {
                 $rep_id = null;
             }
-            if ($rep_id <> null) {
-               $url = $self_link . "&bad=" . urlencode(get_http_var('bad')) . "&rep_id=" . urlencode($rep_id);
-               header("Location: $url");
-            }
+        }
+        if (get_http_var('just_done_bad')) {
+            print "<p><i>Moved on to next bad contact</i></p>";
         }
         if (get_http_var('delete') != "") {
             $result = dadem_admin_edit_representative($rep_id, null, http_auth_user(), get_http_var('note'));
             dadem_check_error($result);
-            print "<p><i>Successfully deleted representative ". htmlspecialchars($rep_id) . "</i></i>";
+            print "<p><i>Successfully deleted representative ". htmlspecialchars($rep_id) . "</i></p>";
             $rep_id = null;
         }
         if (get_http_var('ucclose') != "") {
             $result = dadem_admin_done_user_correction(get_http_var('ucid'));
             dadem_check_error($result);
-            print "<p><i>Successfully closed correction ". htmlspecialchars(get_http_var('ucid')) . "</i></i>";
+            print "<p><i>Successfully closed correction ". htmlspecialchars(get_http_var('ucid')) . "</i></p>";
         }
         if (get_http_var('vaupdate') != "") {
             $result = dadem_admin_set_area_status(get_http_var('va_id'), get_http_var('new_status'));
             dadem_check_error($result);
-            print "<p><i>Successfully updated voting area status ". htmlspecialchars(get_http_var('va_id')) . " to " . htmlspecialchars(get_http_var('new_status')) . "</i></i>";
+            print "<p><i>Successfully updated voting area status ". htmlspecialchars(get_http_var('va_id')) . " to " . htmlspecialchars(get_http_var('new_status')) . "</i></p>";
         }
 
         // Postcode and search box
@@ -223,8 +233,8 @@ class ADMIN_PAGE_REPS {
             $form->addElement('text', 'fax', "Fax:", array('size' => 60, $readonly => 1));
             $form->addElement('textarea', 'note', "Notes for log:", array('rows' => 3, 'cols' => 60, $readonly => 1));
             $form->addElement('hidden', 'pc', $pc);
-            if (get_http_var('bad'))
-                $form->addElement('hidden', 'bad', get_http_var('bad'));
+            if (get_http_var('nextbad'))
+                $form->addElement('hidden', 'nextbad', get_http_var('nextbad'));
             if ($rep_id) 
                 $form->addElement('hidden', 'rep_id', $rep_id);
             else
@@ -364,7 +374,7 @@ class ADMIN_PAGE_REPS {
             $badcontacts = dadem_get_bad_contacts();
             dadem_check_error($badcontacts);
             $form->addElement('header', '', 'Bad Contacts ' . count($badcontacts));
-            $html = $this->render_reps($self_link, $badcontacts, "&bad=1");
+            $html = $this->render_reps($self_link, $badcontacts, true);
             $form->addElement('static', 'badcontacts', null, $html);
             admin_render_form($form);
 
