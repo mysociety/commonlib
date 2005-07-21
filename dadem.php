@@ -22,7 +22,7 @@ define('DADEM_CONTACT_EMAIL', 102);
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: dadem.php,v 1.19 2005-07-20 18:56:19 francis Exp $
+ * $Id: dadem.php,v 1.20 2005-07-21 11:15:34 francis Exp $
  *
  */
 
@@ -234,14 +234,15 @@ function dadem_admin_done_user_correction($id) {
     return $result;
 }
 
-/* dadem_admin_mark_failing_contact ID METHOD X EDITOR
+/* dadem_admin_mark_failing_contact ID METHOD X EDITOR COMMENT
 
   Report that a delivery to representative ID by METHOD ('email' or 'fax')
   to the number or address X failed. Marks the representative as having
   unknown contact details if X is still the current contact method for that
   representative. EDITOR is the name of the entity making the correction
-  (e.g. 'fyr-queue'). */
-function dadem_admin_mark_failing_contact($id, $method, $x, $editor) {
+  (e.g. 'fyr-queue'), COMMENT is an extra comment to add to the change log
+  of the representatives details. */
+function dadem_admin_mark_failing_contact($id, $method, $x, $editor, $comment) {
     global $dadem_client;
     $params = func_get_args();
     $result = $dadem_client->call('DaDem.admin_mark_failing_contact', $params);
