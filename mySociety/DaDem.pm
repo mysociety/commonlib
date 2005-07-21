@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: DaDem.pm,v 1.9 2005-02-21 12:23:06 chris Exp $
+# $Id: DaDem.pm,v 1.10 2005-07-21 11:15:34 francis Exp $
 #
 
 package mySociety::DaDem;
@@ -141,10 +141,10 @@ sub get_representative_info ($) {
     return $rabx_client->call('DaDem.get_representative_info', $id);
 }
 
-sub admin_mark_failing_contact ($$$$) {
-    my ($id, $method, $x, $editor) = @_;
+sub admin_mark_failing_contact ($$$$$) {
+    my ($id, $method, $x, $editor, $comment) = @_;
     configure() if (!defined($rabx_client));
-    return $rabx_client->call('DaDem.admin_mark_failing_contact', $id, $method, $x, $editor);
+    return $rabx_client->call('DaDem.admin_mark_failing_contact', $id, $method, $x, $editor, $comment);
 }
 
 1;
