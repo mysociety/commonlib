@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-reps.php,v 1.22 2005-07-21 11:19:19 francis Exp $
+ * $Id: admin-reps.php,v 1.23 2005-07-21 17:23:48 francis Exp $
  * 
  */
 
@@ -18,7 +18,7 @@ class ADMIN_PAGE_REPS {
         $this->navname= "Representative Data";
     }
 
-    function render_reps($self_link, $reps) {
+    function render_reps($self_link, $reps, $link_extra = "") {
         $html = "";
         $info = dadem_get_representatives_info($reps);
         dadem_check_error($info);
@@ -34,7 +34,7 @@ class ADMIN_PAGE_REPS {
                 $html .= $repinfo['type'] . " ";
             else
                 $html .= $repinfo['area_type'] . " ";
-            $html .= "<a href=\"$self_link&pc=" .  urlencode(get_http_var('pc')). "&rep_id=" . $rep .  "\">" . $repinfo['name'] . " (". $repinfo['party'] . ")</a> \n";
+            $html .= "<a href=\"$self_link&pc=" .  urlencode(get_http_var('pc')). "&rep_id=" . $rep .  "&$link_extra\">" . $repinfo['name'] . " (". $repinfo['party'] . ")</a> \n";
             $html .= "prefer " . $repinfo['method'];
             if ($repinfo['email']) 
                 $html .= ", " .  $repinfo['email'];
@@ -99,7 +99,27 @@ class ADMIN_PAGE_REPS {
             $rep_id = $result;
             $new_in_va_id = null;
             print "<p><i>Successfully updated representative ". htmlspecialchars($rep_id) . "</i></i>";
-            $rep_id = null;
+
+            if (get_http_var('bad')) {
+                // Find next bad contact
+                $badcontacts = dadem_get_bad_contacts();
+                dadem_check_error($badcontacts);
+                $prev = null;
+                array_push($badcontacts, null);
+                foreach ($badcontacts as $badcontact) {
+                    if ($prev == $rep_id) {
+                        $rep_id = $badcontact;
+                        break;
+                    }
+                   $prev = $badcontact;
+                }
+            } else {
+                $rep_id = null;
+            }
+            if ($rep_id <> null) {
+               $url = $self_link . "&bad=" . urlencode(get_http_var('bad')) . "&rep_id=" . urlencode($rep_id);
+               header("Location: $url");
+            }
         }
         if (get_http_var('delete') != "") {
             $result = dadem_admin_edit_representative($rep_id, null, http_auth_user(), get_http_var('note'));
@@ -117,7 +137,6 @@ class ADMIN_PAGE_REPS {
             dadem_check_error($result);
             print "<p><i>Successfully updated voting area status ". htmlspecialchars(get_http_var('va_id')) . " to " . htmlspecialchars(get_http_var('new_status')) . "</i></i>";
         }
-
 
         // Postcode and search box
         $form = new HTML_QuickForm('adminRepsSearchForm', 'get', $self_link);
@@ -204,6 +223,8 @@ class ADMIN_PAGE_REPS {
             $form->addElement('text', 'fax', "Fax:", array('size' => 60, $readonly => 1));
             $form->addElement('textarea', 'note', "Notes for log:", array('rows' => 3, 'cols' => 60, $readonly => 1));
             $form->addElement('hidden', 'pc', $pc);
+            if (get_http_var('bad'))
+                $form->addElement('hidden', 'bad', get_http_var('bad'));
             if ($rep_id) 
                 $form->addElement('hidden', 'rep_id', $rep_id);
             else
@@ -343,7 +364,7 @@ class ADMIN_PAGE_REPS {
             $badcontacts = dadem_get_bad_contacts();
             dadem_check_error($badcontacts);
             $form->addElement('header', '', 'Bad Contacts ' . count($badcontacts));
-            $html = $this->render_reps($self_link, $badcontacts);
+            $html = $this->render_reps($self_link, $badcontacts, "&bad=1");
             $form->addElement('static', 'badcontacts', null, $html);
             admin_render_form($form);
 
