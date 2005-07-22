@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.43 2005-07-11 12:09:40 francis Exp $
+ * $Id: utility.php,v 1.44 2005-07-22 11:48:59 matthew Exp $
  * 
  */
 
@@ -495,6 +495,53 @@ function english_ordinal($cardinal)
         return $cardinal . "rd";
     # Everything else use th
     return $cardinal . "th";
+}
+
+/* prettify THING [HTML]
+   Returns a nicer form of THING for things that it knows about, otherwise just returns the string.
+ */
+function prettify($s, $html = true) {
+    global $lang;
+
+    if (preg_match('#^(\d{4})-(\d\d)-(\d\d)$#',$s,$m)) {
+        list(,$y,$m,$d) = $m;
+        $e = mktime(12,0,0,$m,$d,$y);
+        if ($lang == 'en') {
+            if ($html)
+                return date('j<\sup>S</\sup> F Y', $e);
+            return date('jS F Y', $e);
+        }
+        return strftime('%e %B %Y', $e);
+    }
+    if (preg_match('#^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d:\d\d)$#',$s,$m)) {
+        list(,$y,$m,$d,$tim) = $m;
+        $e = mktime(12,0,0,$m,$d,$y);
+        if ($lang == 'en') {
+            if ($html)
+                return date('j<\sup>S</\sup> F Y', $e);
+            return date('jS F Y', $e);
+        }
+        return strftime('%e %B %Y', $e)." $tim";
+    }
+    if ($s>100000000) {
+        # Assume it's an epoch
+        $tt = strftime('%H:%M', $s);
+        $t = time();
+        if (strftime('%Y%m%d', $s) == strftime('%Y%m%d', $t))
+            $tt = "$tt today";
+        elseif (strftime('%U', $s) == strftime('%U', $t))
+            $tt = "$tt, " . strftime('%A', $s);
+        elseif (strftime('%Y', $s) == strftime('%Y', $t))
+            $tt = "$tt, " . strftime('%A&nbsp;%e&nbsp;%B', $s);
+        else
+            $tt = "$tt, " . strftime('%a&nbsp;%e&nbsp;%B&nbsp;%Y', $s);
+        return $tt;
+    }
+    if (ctype_digit($s)) {
+        $locale_info = localeconv();
+        return number_format($s, 0, $locale_info['decimal_point'], $locale_info['thousands_sep']);
+    }
+    return $s;
 }
 
 /*
