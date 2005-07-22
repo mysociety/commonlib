@@ -8,7 +8,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: gaze.php,v 1.1 2005-07-22 12:39:50 francis Exp $
+ * $Id: gaze.php,v 1.2 2005-07-22 13:57:39 francis Exp $
  *
  */
 
@@ -49,6 +49,17 @@ function gaze_find_places($country, $query, $maxresults = null) {
     global $gaze_client;
     $params = func_get_args();
     $result = $gaze_client->call('Gaze.find_places', $params);
+    return $result;
+}
+
+/* gaze_get_country_from_ip ADDRESS
+
+  Return the country code for the given IP address, or undef if none could
+  be found. */
+function gaze_get_country_from_ip($address) {
+    global $gaze_client;
+    $params = func_get_args();
+    $result = $gaze_client->call('Gaze.get_country_from_ip', $params);
     return $result;
 }
 

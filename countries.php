@@ -6,11 +6,11 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: countries.php,v 1.1 2005-07-22 12:39:50 francis Exp $
+ * $Id: countries.php,v 1.2 2005-07-22 13:57:39 francis Exp $
  * 
  */
 
-$countries_all = array(
+$countries_name_to_code = array(
     "Afghanistan" => "AF",
     "Åland Islands" => "AX",
     "Albania" => "AL",
@@ -252,5 +252,10 @@ $countries_all = array(
     "Zambia" => "ZM",
     "Zimbabwe" => "ZW",
 );
+
+$countries_code_to_name = array();
+foreach ($countries_name_to_code as $countries_country => $countries_code) {
+    $countries_code_to_name[$countries_code] = $countries_country;
+}
 
 ?>
