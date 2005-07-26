@@ -7,7 +7,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: CouncilMatch.pm,v 1.29 2005-05-12 15:36:37 francis Exp $
+# $Id: CouncilMatch.pm,v 1.30 2005-07-26 17:42:56 francis Exp $
 #
 
 package mySociety::CouncilMatch;
@@ -37,11 +37,19 @@ sub process_ge_data ($$) {
     my ($area_id, $verbosity) = @_;
     my ($status, $error, $details);
 
-    # Match up wards
-    my $ret = match_council_wards($area_id, $verbosity);
-    $status = $ret->{error} ? 'wards-mismatch' : 'wards-match';
+    # Check for CONFLICT markers
+    my $ret = find_conflicts($area_id, $verbosity);
+    $status = $ret->{error} ? 'conflicts-found' : 'conflicts-none';
     $error .= $ret->{error} ? $ret->{error} : "";
-    $details .= $ret->{details};
+    $details = $ret->{details} . "\n" . $details;
+
+    # Match up wards
+    if ($status eq "conflicts-none") {
+        my $ret = match_council_wards($area_id, $verbosity);
+        $status = $ret->{error} ? 'wards-mismatch' : 'wards-match';
+        $error .= $ret->{error} ? $ret->{error} : "";
+        $details .= $ret->{details};
+    }
 
     # Get any extra data
     my $extra_data = get_extradata($area_id);
@@ -185,6 +193,28 @@ sub refresh_live_data($$) {
     return { 'details' => $details, 'error' => $error };
 }
 
+# find_conflicts COUNCIL_ID VERBOSITY 
+# Looks for CONFLICT in any field, which indicates that a field had conflict during merge.
+sub find_conflicts($$) {
+    my ($area_id, $verbose) = @_;
+    print "checking for conflicts council " . $area_id . "\n" if $verbose;
+    my $details = "";
+    my $error = "";
+
+    # Get updated data from raw table
+    my @raw = mySociety::CouncilMatch::get_raw_data($area_id);
+    # ... find any CONFLICT
+    foreach my $row (@raw) {
+        foreach my $field (keys %$row) {
+            my $value = $row->{$field};
+            if ($value =~ m/CONFLICT/) {
+                $error .= "Found conflict in field $field: $value\n";
+            }
+        }
+    }
+    return { 'details' => $details, 'error' => $error };
+}
+ 
 # get_process_status COUNCIL_ID
 # Returns the text string saying what state of GE data processing
 # the council is in.
@@ -670,12 +700,13 @@ sub match_council_wards ($$) {
              'error' => $error };
 }
 
-# get_raw_data COUNCIL_ID 
+# get_raw_data COUNCIL_ID [LAST_MERGE]
 # Return raw input data, with any admin modifications, for a given council.
 # In the form of an array of references to hashes.  Each hash contains the
-# ward_name, rep_first, rep_last, rep_party, rep_email, rep_fax.
-sub get_raw_data($) {
-    my ($area_id) = @_;
+# ward_name, rep_first, rep_last, rep_party, rep_email, rep_fax.  If
+# LAST_MERGE is set returns data at last merge or input from GovEval.
+sub get_raw_data($;$) {
+    my ($area_id, $last_merge) = @_;
 
     # Hash from representative key (either ge_id or newrow_id, with appropriate
     # prefix to distinguish them) to data about the representative.
@@ -693,10 +724,21 @@ sub get_raw_data($) {
     }
 
     # Override with other data
-    $sth = $d_dbh->prepare(
-            q#select * from raw_input_data_edited where
-            council_id = ? order by order_id#, {});
-    $sth->execute($area_id);
+    if ($last_merge) {
+        # Get data up to last merge or import
+        $sth = $d_dbh->prepare(
+                q#select * from raw_input_data_edited where
+                council_id = ? and order_id <= 
+                    coalesce((select max(order_id) from raw_input_data_edited where council_id = ? and editor = 'merge'), 0)
+                order by order_id#, {});
+        $sth->execute($area_id, $area_id);
+    } else {
+        # Get all data
+        $sth = $d_dbh->prepare(
+                q#select * from raw_input_data_edited where
+                council_id = ? order by order_id#, {});
+        $sth->execute($area_id);
+    }
     # Apply each transaction in order
     while (my $edit = $sth->fetchrow_hashref) {
         my $key = $edit->{ge_id} ? 'ge_id'.$edit->{ge_id} : 'newrow_id'.$edit->{newrow_id};
@@ -721,7 +763,8 @@ sub get_raw_data($) {
 # (from get_raw_data above).  Include all the councils, as deletions are
 # applied.  ADMIN_USER is name of person who made this edit.
 # COUNCIL_NAME and COUNCIL_TYPE are stored in the edit for reference later if
-# for some reason ids get broken, really only COUNCIL_ID matters.
+# for some reason ids get broken, really only COUNCIL_ID matters.  Doesn't
+# commit transaction, calling code needs to do that.
 sub edit_raw_data($$$$$$) {
     my ($area_id, $area_name, $area_type, $area_ons_code, $newref, $user) = @_;
     my @new = @$newref;
@@ -759,7 +802,6 @@ sub edit_raw_data($$$$$$) {
             my $changed = 0;
             foreach my $fieldname qw(ward_name rep_first rep_last rep_party rep_email rep_fax) {
                 if ($old{$key}->{$fieldname} ne $rep->{$fieldname}) {
-                    print "changed";
                     $changed = 1;
                 }
             }
@@ -790,7 +832,6 @@ sub edit_raw_data($$$$$$) {
             $user, time(), "");
 
     }
-    $d_dbh->commit();
 }
 
 # get_url_via_cache URL
