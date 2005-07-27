@@ -7,7 +7,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: CouncilMatch.pm,v 1.30 2005-07-26 17:42:56 francis Exp $
+# $Id: CouncilMatch.pm,v 1.31 2005-07-27 03:48:11 francis Exp $
 #
 
 package mySociety::CouncilMatch;
@@ -729,7 +729,9 @@ sub get_raw_data($;$) {
         $sth = $d_dbh->prepare(
                 q#select * from raw_input_data_edited where
                 council_id = ? and order_id <= 
-                    coalesce((select max(order_id) from raw_input_data_edited where council_id = ? and editor = 'merge'), 0)
+                    coalesce((select max(order_id) from raw_input_data_edited 
+                                where council_id = ? and (editor = 'import'))
+                            , 0)
                 order by order_id#, {});
         $sth->execute($area_id, $area_id);
     } else {
