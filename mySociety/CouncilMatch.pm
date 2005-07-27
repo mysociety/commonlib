@@ -7,7 +7,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: CouncilMatch.pm,v 1.31 2005-07-27 03:48:11 francis Exp $
+# $Id: CouncilMatch.pm,v 1.32 2005-07-27 19:09:53 francis Exp $
 #
 
 package mySociety::CouncilMatch;
@@ -36,6 +36,7 @@ sub set_db_handles($$) {
 sub process_ge_data ($$) {
     my ($area_id, $verbosity) = @_;
     my ($status, $error, $details);
+    $details = "";
 
     # Check for CONFLICT markers
     my $ret = find_conflicts($area_id, $verbosity);
@@ -48,7 +49,7 @@ sub process_ge_data ($$) {
         my $ret = match_council_wards($area_id, $verbosity);
         $status = $ret->{error} ? 'wards-mismatch' : 'wards-match';
         $error .= $ret->{error} ? $ret->{error} : "";
-        $details .= $ret->{details};
+        $details .= $ret->{details} . "\n" . $details;
     }
 
     # Get any extra data
@@ -207,7 +208,7 @@ sub find_conflicts($$) {
     foreach my $row (@raw) {
         foreach my $field (keys %$row) {
             my $value = $row->{$field};
-            if ($value =~ m/CONFLICT/) {
+            if ($value && $value =~ m/CONFLICT/) {
                 $error .= "Found conflict in field $field: $value\n";
             }
         }
