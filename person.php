@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: person.php,v 1.2 2005-07-08 16:53:12 francis Exp $
+ * $Id: person.php,v 1.3 2005-07-28 14:38:04 chris Exp $
  * 
  */
 
@@ -214,7 +214,7 @@ function person_if_signed_on($norenew = false) {
             if (!$norenew) {
                 /* Valid, so renew the cookie. */
                 $duration = person_cookie_token_duration($_COOKIE['pb_person_id']);
-                setcookie('pb_person_id', person_cookie_token($id, $duration), time() + $duration, '/', OPTION_WEB_DOMAIN, false);
+                setcookie('pb_person_id', person_cookie_token($id, $duration), time() + $duration, '/', '.' . OPTION_WEB_DOMAIN, false);
                 $person_signed_on = $P; /* save this here so we will renew the cookie on a later call to this function without NORENEW */
             }
             return $P;
@@ -289,7 +289,7 @@ function person_signon($template_data, $email = null, $name = null) {
 /* person_signoff
  * Log out anyone who is logged in */
 function person_signoff() {
-    setcookie('pb_person_id', false, null, '/', OPTION_WEB_DOMAIN, false);
+    setcookie('pb_person_id', false, null, '/', '.' . OPTION_WEB_DOMAIN, false);
 }
 
 /* person_make_signon_url DATA EMAIL METHOD URL PARAMETERS
