@@ -1,15 +1,18 @@
 <?
 /*
- * ISO 3166-1 alpha-2 country names and two letter codes, taken from 
- * http://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
+ * countries.php:
+ * Data on countries and (in some cases) named divisions within them.
  * 
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: countries.php,v 1.3 2005-07-28 11:38:17 chris Exp $
+ * $Id: countries.php,v 1.4 2005-07-28 11:48:42 chris Exp $
  * 
  */
 
+/* $countries_name_to_code
+ * ISO 3166-1 alpha-2 country names and two letter codes, taken from
+ * http://en.wikipedia.org/wiki/ISO_3166-1_alpha-2. */
 $countries_name_to_code = array(
     "Afghanistan" => "AF",
     "Åland Islands" => "AX",
@@ -253,8 +256,17 @@ $countries_name_to_code = array(
     "Zimbabwe" => "ZW",
 );
 
-/* Top-level administrative areas within countries. */
-$countries_states = array(
+/* $countries_code_to_name
+ * Map from ISO 3166 code to country name. */
+$countries_code_to_name = array();
+foreach ($countries_name_to_code as $countries_country => $countries_code) {
+    $countries_code_to_name[$countries_code] = $countries_country;
+}
+
+/* $coujntries_statecode_to_name
+ * Top-level administrative areas within countries and identifying codes for
+ * theem. */
+$countries_statecode_to_name = array(
     'US' => array(
         'AK' => 'Alaska',
         'AL' => 'Alabama',
@@ -308,10 +320,5 @@ $countries_states = array(
         'WY' => 'Wyoming'
     )
 );
-
-$countries_code_to_name = array();
-foreach ($countries_name_to_code as $countries_country => $countries_code) {
-    $countries_code_to_name[$countries_code] = $countries_country;
-}
 
 ?>
