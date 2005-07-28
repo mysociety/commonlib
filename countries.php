@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: countries.php,v 1.2 2005-07-22 13:57:39 francis Exp $
+ * $Id: countries.php,v 1.3 2005-07-28 11:38:17 chris Exp $
  * 
  */
 
@@ -251,6 +251,62 @@ $countries_name_to_code = array(
     "Yemen" => "YE",
     "Zambia" => "ZM",
     "Zimbabwe" => "ZW",
+);
+
+/* Top-level administrative areas within countries. */
+$countries_states = array(
+    'US' => array(
+        'AK' => 'Alaska',
+        'AL' => 'Alabama',
+        'AR' => 'Arkansas',
+        'AZ' => 'Arizona',
+        'CA' => 'California',
+        'CO' => 'Colorado',
+        'CT' => 'Connecticut',
+        'DE' => 'Delaware',
+        'FL' => 'Florida',
+        'GA' => 'Georgia',
+        'HI' => 'Hawaii',
+        'IA' => 'Iowa',
+        'ID' => 'Idaho',
+        'IL' => 'Illinois',
+        'IN' => 'Indiana',
+        'KS' => 'Kansas',
+        'KY' => 'Kentucky',
+        'LA' => 'Louisiana',
+        'MA' => 'Massachusetts',
+        'MD' => 'Maryland',
+        'ME' => 'Maine',
+        'MI' => 'Michigan',
+        'MN' => 'Minnesota',
+        'MO' => 'Missouri',
+        'MS' => 'Mississippi',
+        'MT' => 'Montana',
+        'NC' => 'North Carolina',
+        'ND' => 'North Dakota',
+        'NE' => 'Nebraska',
+        'NH' => 'New Hampshire',
+        'NJ' => 'New Jersey',
+        'NM' => 'New Mexico',
+        'NV' => 'Nevada',
+        'NY' => 'New York',
+        'OH' => 'Ohio',
+        'OK' => 'Oklahoma',
+        'OR' => 'Oregon',
+        'PA' => 'Pennsylvania',
+        'RI' => 'Rhode Island',
+        'SC' => 'South Carolina',
+        'SD' => 'South Dakota',
+        'TN' => 'Tennessee',
+        'TX' => 'Texas',
+        'UT' => 'Utah',
+        'VT' => 'Vermont',
+        'VA' => 'Virginia',
+        'WA' => 'Washington',
+        'WI' => 'Wisconsin',
+        'WV' => 'West Virginia',
+        'WY' => 'Wyoming'
+    )
 );
 
 $countries_code_to_name = array();
