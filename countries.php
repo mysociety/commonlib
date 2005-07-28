@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: countries.php,v 1.4 2005-07-28 11:48:42 chris Exp $
+ * $Id: countries.php,v 1.5 2005-07-28 14:21:13 chris Exp $
  * 
  */
 
@@ -263,7 +263,7 @@ foreach ($countries_name_to_code as $countries_country => $countries_code) {
     $countries_code_to_name[$countries_code] = $countries_country;
 }
 
-/* $coujntries_statecode_to_name
+/* $countries_statecode_to_name
  * Top-level administrative areas within countries and identifying codes for
  * theem. */
 $countries_statecode_to_name = array(
