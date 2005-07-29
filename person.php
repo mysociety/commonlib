@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: person.php,v 1.3 2005-07-28 14:38:04 chris Exp $
+ * $Id: person.php,v 1.4 2005-07-29 17:48:09 chris Exp $
  * 
  */
 
@@ -14,6 +14,10 @@ require_once 'utility.php';
 require_once 'stash.php';
 require_once 'auth.php';
 
+/* person_canonicalise_name NAME
+ * Return NAME with all but alphabetic characters removed; this is used to
+ * compare names entered by users to see when the record in the person table
+ * should be updated. */
 function person_canonicalise_name($n) {
     return preg_replace('/[^A-Za-z-]/', '', strtolower($n));
 }
@@ -224,22 +228,21 @@ function person_if_signed_on($norenew = false) {
 }
 
 /* person_signon DATA [EMAIL] [NAME]
- * 
  * Return a record of a person, if necessary requiring them to sign on to an
  * existing account or to create a new one. 
  * 
  * DATA is an array of data about the pledge, including 
- *      'reason_web' which is something like 'Before you can send a message to
- *          all the signers, we need to check that you created the pledge.' and
- *          appears above the send confirm email / login by password dialog.
- *      'template' which is the name of the template to use for the confirm mail
- *          if the user authenticates by email rather than password.
- *      'reason_email' is used if and only if 'template' isn't present, and
- *          goes into the generic-confirm template.  It says something like 'Then
- *          you will be able to send a message to everyone who has signed your
- *          pledge.'
- *      'reason_email_subject' gives Subject: line of email, must be present
- *          when 'reason_email' is present.
+ *  'reason_web' which is something like 'Before you can send a message to
+ *      all the signers, we need to check that you created the pledge.' and
+ *      appears above the send confirm email / login by password dialog.
+ *  'template' which is the name of the template to use for the confirm
+ *      mail if the user authenticates by email rather than password.
+ *  'reason_email' is used if and only if 'template' isn't present, and
+ *      goes into the generic-confirm template.  It says something like 'Then
+ *      you will be able to send a message to everyone who has signed your
+ *      pledge.'
+ *  'reason_email_subject' gives Subject: line of email, must be present
+ *      when 'reason_email' is present.
  * The rest of the DATA is passed through to the email template. 
  * 
  * EMAIL, if present, is the email address to log in with.  Otherwise, an email
@@ -250,8 +253,7 @@ function person_if_signed_on($norenew = false) {
  * calling the $this->name() function later will give an error.  Instead call
  * $this->name_or_blank() or $this->has_name().  The intention here is that if
  * the action requires a name, you will have prompted for it in an earlier form
- * and included it in the call to this function.
- */
+ * and included it in the call to this function. */
 function person_signon($template_data, $email = null, $name = null) {
     if (!is_null($email) && !validate_email($email))
         err("'$email' is not a valid email address");
@@ -309,7 +311,6 @@ function person_make_signon_url($data, $email, $method, $url, $params) {
                 ));
     return OPTION_BASE_URL . "/L/$token";
 }
-
 
 /* person_get EMAIL
  * Return a person object for the account with the given EMAIL address, if one
