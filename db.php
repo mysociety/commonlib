@@ -6,7 +6,7 @@
 // Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 // Email: francis@mysociety.org. WWW: http://www.mysociety.org
 //
-// $Id: db.php,v 1.1 2005-07-08 11:33:02 matthew Exp $
+// $Id: db.php,v 1.2 2005-07-30 15:35:40 matthew Exp $
 
 require_once "DB.php";
 require_once "utility.php";
@@ -106,6 +106,17 @@ function db_getRow_list($query, $params = array()) {
     return $result;
 }
 
+function db_getAll($query, $params = array()) {
+    global $pbdb;
+    if (!is_array($params))
+        $params = array($params);
+    if (!isset($pbdb))
+        db_connect();
+    $result = $pbdb->getAll($query, $params, DB_FETCHMODE_ASSOC);
+    if (DB::isError($result))
+        die($result->getMessage().': "'.$result->getDebugInfo().'"; query was: ' . $query);
+    return $result;
+}
 
 /* db_fetch_array QUERY
  * Fetch values of the next row from QUERY as an associative array from column
