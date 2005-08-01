@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.44 2005-07-22 11:48:59 matthew Exp $
+ * $Id: utility.php,v 1.45 2005-08-01 22:54:59 francis Exp $
  * 
  */
 
@@ -191,6 +191,23 @@ function canonicalise_postcode($pc) {
     $pc = trim($pc);
     $pc = strtoupper($pc);
     $pc = preg_replace('#(\d[A-Z]{2})#', ' $1', $pc);
+    return $pc;
+}
+
+/* canonicalise_partial_postcode
+ * Convert UK postcode to display form of first part.  That is, remove all
+ * spaces and capitalise it.  Then put back in a space in the right place.  */
+function canonicalise_partial_postcode($pc) {
+    $pc = str_replace(' ', '', $pc);
+    $pc = trim($pc);
+    $pc = strtoupper($pc);
+    if (validate_postcode($pc)) {
+        $pc = preg_replace('#(\d[A-Z]{2})#', '', $pc);
+    } elseif (validate_partial_postcode($pc)) {
+        # OK
+    } else {
+        err('Unexpected not full or partial postcode');
+    }
     return $pc;
 }
 
