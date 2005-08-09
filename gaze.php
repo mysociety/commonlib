@@ -8,7 +8,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: gaze.php,v 1.2 2005-07-22 13:57:39 francis Exp $
+ * $Id: gaze.php,v 1.3 2005-08-09 15:55:41 francis Exp $
  *
  */
 
@@ -33,22 +33,34 @@ function gaze_check_error($data) {
 $gaze_client = new RABX_Client(OPTION_GAZE_URL);
 
 
-/* gaze_find_places COUNTRY QUERY [MAXRESULTS]
+/* gaze_find_places COUNTRY STATE QUERY [MAXRESULTS]
 
   Search for places in COUNTRY (ISO code) which match the given search
-  QUERY. Returns a reference to a list of [NAME, QUALIFICATION, QUALIFIER,
-  LATITUDE, LONGITUDE]. When NAME is unique, QUALIFICATION and QUALIFIER
-  will be undef; otherwise, QUALIFICATION will either be 'in' and QUALIFIER
-  the name of an enclosing administrative area (for instance, a state or
-  county), or 'near' and the names of nearby places, respectively. LATITUDE
-  and LONGITUDE are in decimal degrees, north- and east-positive, in WGS84.
-  Earlier entries in the returned list are better matches to the query. At
-  most MAXRESULTS (default, 10) results are returned. On error, throws an
-  exception. */
-function gaze_find_places($country, $query, $maxresults = null) {
+  QUERY. STATE, if specified, is a customary code for a top-level
+  administrative subregion within the given COUNTRY; at present, this is
+  only useful for the United States, and should be passed as undef
+  otherwise. Returns a reference to a list of [NAME, IN, NEAR, LATITUDE,
+  LONGITUDE]. When IN is defined, it gives the name of a region in which
+  the place lies; when NEAR is defined, it gives a short list of other
+  places near to the returned place. These allow nonunique names to be
+  disambiguated by the user. LATITUDE and LONGITUDE are in decimal degrees,
+  north- and east-positive, in WGS84. Earlier entries in the returned list
+  are better matches to the query. At most MAXRESULTS (default, 10) results
+  are returned. On error, throws an exception. */
+function gaze_find_places($country, $state, $query, $maxresults = null) {
     global $gaze_client;
     $params = func_get_args();
     $result = $gaze_client->call('Gaze.find_places', $params);
+    return $result;
+}
+
+/* gaze_get_find_places_countries
+
+  Return list of countries which find_places will work for. */
+function gaze_get_find_places_countries() {
+    global $gaze_client;
+    $params = func_get_args();
+    $result = $gaze_client->call('Gaze.get_find_places_countries', $params);
     return $result;
 }
 
