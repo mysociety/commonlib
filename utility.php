@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.46 2005-08-12 16:04:17 matthew Exp $
+ * $Id: utility.php,v 1.47 2005-08-26 16:29:27 matthew Exp $
  * 
  */
 
@@ -559,6 +559,10 @@ function prettify($s, $html = true) {
         return number_format($s, 0, $locale_info['decimal_point'], $locale_info['thousands_sep']);
     }
     return $s;
+}
+
+function spoonerise($s) {
+    return preg_replace('#^(.)(.*? )(.)#', '$3$2$1', $s);
 }
 
 /*
