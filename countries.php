@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: countries.php,v 1.7 2005-09-02 13:56:23 matthew Exp $
+ * $Id: countries.php,v 1.8 2005-09-02 14:33:38 matthew Exp $
  * 
  */
 
@@ -262,12 +262,6 @@ $countries_code_to_name = array();
 foreach ($countries_name_to_code as $countries_country => $countries_code) {
     $countries_code_to_name[$countries_code] = $countries_country;
 }
-
-/* Map from ISO 3166 code to ISO 639-1 language code
- * representing 'main' language of that country */
-$countries_code_to_language = array(
-    'GB' => 'en'
-);
 
 /* $countries_statecode_to_name
  * Top-level administrative areas within countries and identifying codes for
