@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: countries.php,v 1.6 2005-09-01 12:17:47 francis Exp $
+ * $Id: countries.php,v 1.7 2005-09-02 13:56:23 matthew Exp $
  * 
  */
 
@@ -47,7 +47,7 @@ $countries_name_to_code = array(
     _("Brazil") => "BR",
     _("British Indian Ocean Territory") => "IO",
     _("British Virgin Islands") => "VG",
-    _("Brunei Darussalam") => "BN",
+    _("Brunei") => "BN",
     _("Bulgaria") => "BG",
     _("Burkina Faso") => "BF",
     _("Burundi") => "BI",
@@ -72,7 +72,7 @@ $countries_name_to_code = array(
     _("Cuba") => "CU",
     _("Cyprus") => "CY",
     _("Czech Republic") => "CZ",
-    _("Democratic People's Republic of Korea") => "KP",
+    _("North Korea") => "KP",
     _("Democratic Republic of the Congo") => "CD",
     _("Denmark") => "DK",
     _("Djibouti") => "DJ",
@@ -90,7 +90,7 @@ $countries_name_to_code = array(
     _("Federated States of Micronesia") => "FM",
     _("Fiji") => "FJ",
     _("Finland") => "FI",
-    _("Former Yugoslav Republic of Macedonia") => "MK",
+    _("Republic of Macedonia") => "MK",
     _("France") => "FR",
     _("French Guiana") => "GF",
     _("French Polynesia") => "PF",
@@ -112,7 +112,7 @@ $countries_name_to_code = array(
     _("Guyana") => "GY",
     _("Haiti") => "HT",
     _("Heard Island and McDonald Islands") => "HM",
-    _("Holy See") => "VA",
+    _("Vatican City") => "VA",
     _("Honduras") => "HN",
     _("Hong Kong") => "HK",
     _("Hungary") => "HU",
@@ -132,12 +132,12 @@ $countries_name_to_code = array(
     _("Kiribati") => "KI",
     _("Kuwait") => "KW",
     _("Kyrgyzstan") => "KG",
-    _("Lao People's Democratic Republic") => "LA",
+    _("Laos") => "LA",
     _("Latvia") => "LV",
     _("Lebanon") => "LB",
     _("Lesotho") => "LS",
     _("Liberia") => "LR",
-    _("Libyan Arab Jamahiriya") => "LY",
+    _("Libya") => "LY",
     _("Liechtenstein") => "LI",
     _("Lithuania") => "LT",
     _("Luxembourg") => "LU",
@@ -189,7 +189,7 @@ $countries_name_to_code = array(
     _("Portugal") => "PT",
     _("Puerto Rico") => "PR",
     _("Qatar") => "QA",
-    _("Republic of Korea") => "KR",
+    _("South Korea") => "KR",
     _("Réunion") => "RE",
     _("Romania") => "RO",
     _("Russia") => "RU",
@@ -222,11 +222,11 @@ $countries_name_to_code = array(
     _("Swaziland") => "SZ",
     _("Sweden") => "SE",
     _("Switzerland") => "CH",
-    _("Syrian Arab Republic") => "SY",
+    _("Syria") => "SY",
     _("Taiwan") => "TW",
     _("Tajikistan") => "TJ",
     _("Thailand") => "TH",
-    _("Timor-Leste") => "TL",
+    _("East Timor") => "TL",
     _("Togo") => "TG",
     _("Tokelau") => "TK",
     _("Tonga") => "TO",
@@ -240,7 +240,7 @@ $countries_name_to_code = array(
     _("Ukraine") => "UA",
     _("United Arab Emirates") => "AE",
     _("United Kingdom") => "GB",
-    _("United Republic of Tanzania") => "TZ",
+    _("Tanzania") => "TZ",
     _("United States Minor Outlying Islands") => "UM",
     _("United States") => "US",
     _("Uruguay") => "UY",
@@ -248,7 +248,7 @@ $countries_name_to_code = array(
     _("Uzbekistan") => "UZ",
     _("Vanuatu") => "VU",
     _("Venezuela") => "VE",
-    _("Viet Nam") => "VN",
+    _("Vietnam") => "VN",
     _("Wallis and Futuna") => "WF",
     _("Western Sahara") => "EH",
     _("Yemen") => "YE",
@@ -263,9 +263,15 @@ foreach ($countries_name_to_code as $countries_country => $countries_code) {
     $countries_code_to_name[$countries_code] = $countries_country;
 }
 
+/* Map from ISO 3166 code to ISO 639-1 language code
+ * representing 'main' language of that country */
+$countries_code_to_language = array(
+    'GB' => 'en'
+);
+
 /* $countries_statecode_to_name
  * Top-level administrative areas within countries and identifying codes for
- * theem. */
+ * them. */
 $countries_statecode_to_name = array(
     'US' => array(
         'AK' => 'Alaska',
