@@ -11,7 +11,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.24 2005-07-19 18:08:26 francis Exp $
+# $Id: WebTestHarness.pm,v 1.25 2005-09-05 12:23:35 francis Exp $
 #
 
 package mySociety::WebTestHarness;
@@ -179,9 +179,9 @@ for validating and logging.
 =cut
 sub browser_submit_form {
     my $self = shift;
-    @_ = $self->{useragent}->submit_form(@_) or die "browser_submit_form failed";
+    $_ = $self->{useragent}->submit_form(@_) or die "browser_submit_form failed";
     $self->_browser_html_hook();
-    return @_;
+    return $_;
 }
 
 =item browser_follow_link
@@ -192,9 +192,9 @@ for validating and logging.
 =cut
 sub browser_follow_link {
     my $self = shift;
-    @_ = $self->{useragent}->follow_link(@_) or die "browser_follow_link failed";
+    $_ = $self->{useragent}->follow_link(@_) or die "browser_follow_link failed";
     $self->_browser_html_hook();
-    return @_;
+    return $_;
 }
 
 =item browser_uri
