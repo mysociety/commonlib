@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: person.php,v 1.4 2005-07-29 17:48:09 chris Exp $
+ * $Id: person.php,v 1.5 2005-09-05 12:23:35 francis Exp $
  * 
  */
 
@@ -80,7 +80,7 @@ class Person {
     /* has_name
      * Returns true if we have a name for the person */
     function has_name() {
-        return !is_null($this->name);
+        return $this->name ? true : false;
     }
 
     /* set_website WEBSIte
