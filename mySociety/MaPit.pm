@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: MaPit.pm,v 1.8 2005-07-10 00:40:23 francis Exp $
+# $Id: MaPit.pm,v 1.9 2005-09-07 21:53:19 matthew Exp $
 #
 
 package mySociety::MaPit;
@@ -44,6 +44,7 @@ The postcode was not found in the database.
 The area ID refers to a non-existent area.
 
 =back
+
 =cut
 
 use constant BAD_POSTCODE => 2001;
