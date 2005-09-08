@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: countries.php,v 1.9 2005-09-02 16:19:21 matthew Exp $
+ * $Id: countries.php,v 1.10 2005-09-08 16:47:24 francis Exp $
  * 
  */
 
@@ -240,8 +240,8 @@ $countries_name_to_code = array(
     _("Ukraine") => "UA",
     _("United Arab Emirates") => "AE",
     _("United Kingdom") => "GB",
-    _("United States Minor Outlying Islands") => "UM",
     _("United States") => "US",
+    _("United States Minor Outlying Islands") => "UM",
     _("Uruguay") => "UY",
     _("U.S. Virgin Islands") => "VI",
     _("Uzbekistan") => "UZ",
