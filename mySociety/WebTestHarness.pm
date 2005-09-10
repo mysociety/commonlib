@@ -11,7 +11,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.26 2005-09-10 12:32:26 francis Exp $
+# $Id: WebTestHarness.pm,v 1.27 2005-09-10 15:17:54 francis Exp $
 #
 
 package mySociety::WebTestHarness;
@@ -32,7 +32,7 @@ $SIG{__DIE__} = sub { confess @_ };
 $SIG{__WARN__} = sub { cluck @_ };
 
 # How long have to wait to be sure a mail hasn't arrived
-our $mail_sleep_time = 40;
+our $mail_sleep_time = 10;
 
 ############################################################################
 # Constructor
