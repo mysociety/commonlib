@@ -11,7 +11,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.27 2005-09-10 15:17:54 francis Exp $
+# $Id: WebTestHarness.pm,v 1.28 2005-09-13 15:11:05 francis Exp $
 #
 
 package mySociety::WebTestHarness;
@@ -227,10 +227,10 @@ sub browser_reload {
     return $self->{useragent}->reload(@_);
 }
 
-=item browser_check_contents STRING
+=item browser_check_contents STRING/REGEXP
 
-Checks the current page which is being browsed contains
-the given string.
+Checks the current page which is being browsed contains the given string
+or regular expression.
 
 =cut
 sub browser_check_contents ($$) {
