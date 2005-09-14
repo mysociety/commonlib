@@ -7,7 +7,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: CouncilMatch.pm,v 1.32 2005-07-27 19:09:53 francis Exp $
+# $Id: CouncilMatch.pm,v 1.33 2005-09-14 15:41:44 francis Exp $
 #
 
 package mySociety::CouncilMatch;
@@ -106,7 +106,10 @@ sub refresh_live_data($$) {
         # ... get ward id
         my $name_matches = $m_dbh->selectall_arrayref(q#select area_id, type 
             from area_name, area where area_name.area_id = area.id and
-            name_type = 'G' and name = ?  and parent_area_id = ?#, {}, 
+            name_type = 'G' and name = ?  and parent_area_id = ?
+            and generation_low <= (select id from current_generation) and
+                (select id from current_generation) <= generation_high
+            #, {}, 
             $row->{ward_name}, $area_id);
         if (scalar(@$name_matches) != 1) {
             # This should never happen, as we have matched ward names before running this
@@ -493,6 +496,8 @@ sub match_council_wards ($$) {
         area_name.area_id = area.id and parent_area_id = ? and 
         (name_type = 'O' or name_type = 'S' or name_type = 'M' or name_type = 'L') and
         (# . join(' or ', map { "type = '$_'" } @$mySociety::VotingArea::council_child_types) . q#) 
+        and generation_low <= (select id from current_generation) and
+            (select id from current_generation) <= generation_high
         order by area_id, o
         #, {}, $area_id);
     my $wards_database = [];
@@ -869,7 +874,10 @@ sub check_councillors_against_website($$) {
     my @raw = mySociety::CouncilMatch::get_raw_data($area_id);
     my $wardnames = $m_dbh->selectall_hashref(
             q#select * from area_name, area where area_name.area_id = area.id and
-            parent_area_id = ?#, 'name', {}, $area_id);
+            parent_area_id = ?
+            and generation_low <= (select id from current_generation) and
+                (select id from current_generation) <= generation_high
+            #, 'name', {}, $area_id);
     my $wardnamescanon;
     do { $wardnamescanon->{canonicalise_ward_name($_)} = $wardnames->{$_}; print "canonward: " . canonicalise_ward_name($_) . "\n" if $verbose; } for keys %$wardnames;
     # Various lookup tables
