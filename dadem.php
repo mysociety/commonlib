@@ -22,7 +22,7 @@ define('DADEM_CONTACT_EMAIL', 102);
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: dadem.php,v 1.24 2005-09-15 13:21:28 francis Exp $
+ * $Id: dadem.php,v 1.25 2005-09-15 13:23:42 francis Exp $
  *
  */
 
