@@ -8,7 +8,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: gaze.php,v 1.3 2005-08-09 15:55:41 francis Exp $
+ * $Id: gaze.php,v 1.4 2005-09-15 13:21:28 francis Exp $
  *
  */
 
@@ -33,21 +33,105 @@ function gaze_check_error($data) {
 $gaze_client = new RABX_Client(OPTION_GAZE_URL);
 
 
-/* gaze_find_places COUNTRY STATE QUERY [MAXRESULTS]
+/* gaze_find_places COUNTRY STATE QUERY [MAXRESULTS [MINSCORE]]
 
   Search for places in COUNTRY (ISO code) which match the given search
-  QUERY. STATE, if specified, is a customary code for a top-level
-  administrative subregion within the given COUNTRY; at present, this is
-  only useful for the United States, and should be passed as undef
-  otherwise. Returns a reference to a list of [NAME, IN, NEAR, LATITUDE,
-  LONGITUDE]. When IN is defined, it gives the name of a region in which
+  QUERY. The country must be from the list returned by
+  get_gaze_find_places_countries. STATE, if specified, is a customary code for a
+  top-level administrative subregion within the given COUNTRY; at present,
+  this is only useful for the United States, and should be passed as undef
+  otherwise. 
+
+  Returns a reference to a list of [NAME, IN, NEAR, LATITUDE, LONGITUDE,
+  STATE, SCORE]. When IN is defined, it gives the name of a region in which
   the place lies; when NEAR is defined, it gives a short list of other
   places near to the returned place. These allow nonunique names to be
   disambiguated by the user. LATITUDE and LONGITUDE are in decimal degrees,
   north- and east-positive, in WGS84. Earlier entries in the returned list
-  are better matches to the query. At most MAXRESULTS (default, 10) results
-  are returned. On error, throws an exception. */
-function gaze_find_places($country, $state, $query, $maxresults = null) {
+  are better matches to the query. 
+
+  At most MAXRESULTS (default, 20) results, and only results with score at
+  least MINSCORE (default 0, percentage from 0 to 100) are returned. The
+  MAXRESULTS limit is ignored when the top results all have the same
+  relevancy. They are all returned. So for example, this means that if you
+  search for Cambridge in the US with MAXRESULTS of 5, it will return all
+  the Cambridges, even though there are more than 5 of them.
+
+  On error, throws an exception. =cut sub gaze_find_places ($$$;$$) { my
+  ($country, $state, $query, $maxresults, $minscore) = @_; $maxresults ||=
+  10; $minscore ||= 0; throw RABX::Error("Country code must be exactly two
+  capital letters") unless ($country =~ m/^[A-Z][A-Z]$/);
+
+      # Xapian databases for different countries.
+      our %X;
+      my $countryxapiandb = mySociety::Config::get('GAZE_XAPIAN_INDEX_DIR') . "/gazeidx-$country";
+      throw RABX::Error("Gazeteer not available for $country") if (!-d $countryxapiandb);
+      $X{$country} ||= new Search::Xapian::Database($countryxapiandb);
+      my $X = $X{$country};
+
+      # Collect matches from Xapian. In the case where we are searching with a
+      # state as well as a country, we may need to expand the number of results
+      # requested in order to find all those relevant (because matches for, say,
+      # Brooklyn, NY may be crowded out by matches for Brooklyns not in NY).
+      my ($match_start, $match_num);
+
+      # We coalesce matches by UFI for the case where there are several names per
+      # feature. For each feature we record the highest-scoring matching UNI, its
+      # score, and whether the matched name was the primary name.
+      my %uni;
+      my %score;
+      my %isprimary;
+
+      my $terms = Gaze::split_name_parts($query);
+      my $enq = $X->enquire(OP_OR, keys(%$terms));
+
+      # grab more than maxresults from xapian, so we can show all those with
+      # same highest score (e.g. there are about 30 Cambridges)
+      my $xapian_maxresults = $maxresults + 100; 
+      while (keys(%score) < $xapian_maxresults) {
+          if (!defined($match_start)) {
+              $match_start = 0;
+              $match_num = $xapian_maxresults;
+          } else {
+              $match_start += $match_num;
+              $match_num += int($match_num / 2);
+          }
+          my @matches = $enq->matches($match_start, $match_num);
+
+          last if (@matches == 0);
+
+          foreach my $match (@matches) {
+              my $score = $match->get_percent();
+              my $uni = $match->get_document()->get_data();
+              my ($ufi, $isprimary);
+              if ($state) {
+                  ($ufi, $isprimary) = dbh()->selectrow_array('select ufi, is_primary from name where uni = ? and (select state from feature where feature.ufi = name.ufi) = ?', {}, $uni, $state);
+              } else {
+                  ($ufi, $isprimary) = dbh()->selectrow_array('select ufi, is_primary from name where uni = ?', {}, $uni);
+              }
+              if (defined($ufi) && (!exists($score{$ufi}) || $score{$ufi} < $score)) {
+                  $score{$ufi} = $score;
+                  $uni{$ufi} = $uni;
+                  $isprimary{$ufi} = $isprimary;
+              }
+          }
+      }
+
+      my @results;
+      my $first_score;
+      foreach my $ufi (sort { $score{$b} <=> $score{$a} || $isprimary{$b} <=> $isprimary{$a} } keys(%score)) {
+          # Stop when we 
+          # - exceed max results AND
+          # - we have shown all the entries with the highest score (this makes
+          #   sure all towns with same name get shown)
+          last if ($first_score && $score{$ufi} < $first_score && @results >= $maxresults);
+          last if ($score{$ufi} < $minscore);
+          push(@results, [dbh()->selectrow_array('select full_name, in_qualifier, near_qualifier, lat, lon, state, ? from feature, name where feature.ufi = name.ufi and feature.ufi = ? and is_primary', {}, $score{$ufi}, $ufi)]);
+          $first_score = $score{$ufi} if !$first_score;
+      }
+      return \@results;
+  } */
+function gaze_find_places($country, $state, $query, $maxresults = null, $minscore = null) {
     global $gaze_client;
     $params = func_get_args();
     $result = $gaze_client->call('Gaze.find_places', $params);

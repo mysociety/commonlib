@@ -9,7 +9,7 @@ etc.
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: evel.php,v 1.11 2005-08-09 15:55:41 francis Exp $
+ * $Id: evel.php,v 1.12 2005-09-15 13:21:28 francis Exp $
  *
  */
 
