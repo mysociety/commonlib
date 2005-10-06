@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-reps.php,v 1.24 2005-07-21 18:18:19 francis Exp $
+ * $Id: admin-reps.php,v 1.25 2005-10-06 18:05:44 francis Exp $
  * 
  */
 
@@ -378,6 +378,8 @@ class ADMIN_PAGE_REPS {
             $form->addElement('static', 'badcontacts', null, $html);
             admin_render_form($form);
 
+            // No longer needed now emailed to GovEval
+            /*
             // User submitted corrections
             $form = new HTML_QuickForm('adminRepsCorrectionsHeader', 'post', $self_link);
             $corrections = dadem_get_user_corrections();
@@ -446,6 +448,7 @@ class ADMIN_PAGE_REPS {
                 $form->addGroup($usercorr, 'stuff', null, '&nbsp', false);
                 admin_render_form($form);
             }
+            */
 
             $form = new HTML_QuickForm('adminRepsStats', 'post', $self_link);
 
