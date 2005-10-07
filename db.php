@@ -6,7 +6,7 @@
 // Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 // Email: francis@mysociety.org. WWW: http://www.mysociety.org
 //
-// $Id: db.php,v 1.2 2005-07-30 15:35:40 matthew Exp $
+// $Id: db.php,v 1.3 2005-10-07 19:07:58 matthew Exp $
 
 require_once "DB.php";
 require_once "utility.php";
@@ -17,6 +17,9 @@ function db_connect() {
     global $pbdb;
     $vars = array('hostspec'=>'HOST', 'port'=>'PORT', 'database'=>'NAME', 'username'=>'USER', 'password'=>'PASS');
     $connstr = array('phptype'=>'pgsql');
+    if (defined('OPTION_DB_TYPE')) {
+        $connstr['phptype'] = OPTION_DB_TYPE;
+    }
     $prefix = OPTION_PHP_MAINDB;
     foreach ($vars as $k => $v) {
         if (defined('OPTION_' . $prefix . '_DB_' . $v)) {

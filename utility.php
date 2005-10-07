@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.47 2005-08-26 16:29:27 matthew Exp $
+ * $Id: utility.php,v 1.48 2005-10-07 19:07:58 matthew Exp $
  * 
  */
 
@@ -321,12 +321,17 @@ function convert_to_unix_newlines($text) {
  * such parameter is present, DEFAULT; or, if DEFAULT is not specified, the
  * empty string (""). */
 function get_http_var($name, $default='') {
-    if (array_key_exists($name, $_GET))
-        return trim($_GET[$name]);
-    else if (array_key_exists($name, $_POST))
-        return trim($_POST[$name]);
-    else 
+    if (array_key_exists($name, $_GET)) {
+        $var = $_GET[$name];
+        if (!is_array($var)) $var = trim($var);
+        return $var;
+    } elseif (array_key_exists($name, $_POST)) {
+        $var = $_POST[$name];
+        if (!is_array($var)) $var = trim($var);
+        return $var;
+    } else { 
         return $default;
+    }
 }
 
 /* make_plural NUMBER SINGULAR PLURAL
