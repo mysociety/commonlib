@@ -18,7 +18,7 @@ define('MAPIT_AREA_NOT_FOUND', 2003);      /* not a valid voting area id */
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: mapit.php,v 1.24 2005-09-15 13:23:42 francis Exp $
+ * $Id: mapit.php,v 1.25 2005-10-07 10:08:50 francis Exp $
  *
  */
 

@@ -22,7 +22,7 @@ define('DADEM_CONTACT_EMAIL', 102);
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: dadem.php,v 1.25 2005-09-15 13:23:42 francis Exp $
+ * $Id: dadem.php,v 1.26 2005-10-07 10:08:50 francis Exp $
  *
  */
 
@@ -267,6 +267,30 @@ function dadem_admin_get_raw_council_status() {
     global $dadem_client;
     $params = func_get_args();
     $result = $dadem_client->call('DaDem.admin_get_raw_council_status', $params);
+    return $result;
+}
+
+/* dadem_admin_get_diligency_council TIME
+
+  Returns how many edits each administrator has made to the raw council
+  data since unix time TIME. Data is returned as an array of pairs of
+  count, name with largest counts first. */
+function dadem_admin_get_diligency_council($time) {
+    global $dadem_client;
+    $params = func_get_args();
+    $result = $dadem_client->call('DaDem.admin_get_diligency_council', $params);
+    return $result;
+}
+
+/* dadem_admin_get_diligency_reps TIME
+
+  Returns how many edits each administrator has made to representatives
+  since unix time TIME. Data is returned as an array of pairs of count,
+  name with largest counts first. */
+function dadem_admin_get_diligency_reps($time) {
+    global $dadem_client;
+    $params = func_get_args();
+    $result = $dadem_client->call('DaDem.admin_get_diligency_reps', $params);
     return $result;
 }
 

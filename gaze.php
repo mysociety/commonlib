@@ -8,7 +8,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: gaze.php,v 1.5 2005-09-15 13:23:42 francis Exp $
+ * $Id: gaze.php,v 1.6 2005-10-07 10:08:50 francis Exp $
  *
  */
 

@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-reps.php,v 1.25 2005-10-06 18:05:44 francis Exp $
+ * $Id: admin-reps.php,v 1.26 2005-10-07 10:08:50 francis Exp $
  * 
  */
 
@@ -266,26 +266,32 @@ class ADMIN_PAGE_REPS {
                     . $vainfo['parent_area_id'] . '">... or edit Democratic Services for this council</a>');
             }
     
-            $form->addElement('header', '', 'Historical Changes (each
-                relative to imported data)');
+            $form->addElement('header', '', 'Historical Changes');
             $html = "<table border=1>";
             $html .= "<th>Order</th><th>Date</th><th>Editor</th><th>Note</th>
                 <th>Name</th> <th>Party</th> <th>Method</th> <th>Email</th>
                 <th>Fax</th><th>Deleted</th>";
 
+            $previous_row = null;
             foreach ($rephistory as $row) {
                 $html .= "<tr>";
-                $html .= "<td>" . $row['order_id'] . "</td>\n";
-                $html .= "<td>" . strftime('%Y-%m-%d %H:%M:%S', $row['whenedited']) . "</td>\n";
-                $html .= "<td>" . $row['editor'] . "</td>\n";
-                $html .= "<td>" . make_ids_links($row['note']) . "</td>\n";
-                $html .= "<td>" . $row['name'] . "</td>\n";
-                $html .= "<td>" . $row['party'] . "</td>\n";
-                $html .= "<td>" . $row['method'] . "</td>\n";
-                $html .= "<td>" . $row['email'] . "</td>\n";
-                $html .= "<td>" . $row['fax'] . "</td>\n";
-                $html .= "<td>" . $row['deleted'] . "</td>\n";
+                foreach (array('order_id', 'whenedited', 'editor', 'note', 
+                    'name', 'party', 'method', 'email', 'fax', 'deleted') as $field) {
+                    $value = $row[$field];
+                    if ($field == 'note')
+                        $display_value = make_ids_links($value);
+                    elseif ($field == 'whenedited')
+                        $display_value = strftime('%Y-%m-%d %H:%M:%S', $value);
+                    else
+                        $display_value = $value;
+                    if ($field != "order_id" && $field != "whenedited" &&
+                        $field != "editor" && $field != "note" &&
+                        $previous_row && $previous_row[$field] != $value) 
+                        $display_value = "<strong>$display_value</strong>";
+                    $html .= "<td>" . $display_value. "</td>\n";
+                }
                 $html .= "</tr>";
+                $previous_row = $row;
             }
             $html .= "</table>";
             $form->addElement('static', 'bytype', null, $html);
