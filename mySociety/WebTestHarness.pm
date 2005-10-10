@@ -3,7 +3,7 @@
 # mySociety/WebTestHarness.pm;
 # Used for testing websites.  Can do the following:
 # - Rebuild a database with given schema (database_drop_reload)
-# - Some extentions to WWW::Mechanize (browser_* functions)
+# - Extend WWW::Mechanize to assert on contents, and validate HTML (browser_* functions)
 # - Watch HTTP logs files for new errors (log_watcher_* functions)
 # - Store email in db and check it (email_* functions)
 # - Check PHP syntax for given files (php_check_syntax)
@@ -11,7 +11,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.28 2005-09-13 15:11:05 francis Exp $
+# $Id: WebTestHarness.pm,v 1.29 2005-10-10 12:30:18 francis Exp $
 #
 
 package mySociety::WebTestHarness;
