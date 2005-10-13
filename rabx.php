@@ -10,7 +10,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: rabx.php,v 1.14 2005-02-21 11:53:03 chris Exp $
+ * $Id: rabx.php,v 1.15 2005-10-13 20:50:31 chris Exp $
  * 
  */
 
@@ -133,7 +133,8 @@ function rabx_wire_wr(&$x, &$buffer) {
         if ($f) {
             /* "List" */
             $buffer .= 'L';
-            if (rabx_is_error($e = rabx_netstring_wr(count($x), $buffer)))
+            $cnx = count($x);
+            if (rabx_is_error($e = rabx_netstring_wr($cnx, $buffer)))
                 return $e;
             for ($i = 0; $i < $n; ++$i) {
                 if (rabx_is_error($e = rabx_wire_wr($x[$i], $buffer)))
@@ -143,7 +144,8 @@ function rabx_wire_wr(&$x, &$buffer) {
         } else {
             /* "Associative array" */
             $buffer .= 'A';
-            if (rabx_is_error($e = rabx_netstring_wr(count($x), &$buffer)))
+            $cnx = count($x);
+            if (rabx_is_error($e = rabx_netstring_wr($cnx, &$buffer)))
                 return $e;
             foreach ($x as $k => $v) {
                 if (rabx_is_error($e = rabx_wire_wr($k, &$buffer))
