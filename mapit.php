@@ -18,7 +18,7 @@ define('MAPIT_AREA_NOT_FOUND', 2003);      /* not a valid voting area id */
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: mapit.php,v 1.25 2005-10-07 10:08:50 francis Exp $
+ * $Id: mapit.php,v 1.26 2005-10-15 00:13:55 francis Exp $
  *
  */
 
@@ -94,13 +94,14 @@ function mapit_get_voting_areas_info($ary) {
     return $result;
 }
 
-/* mapit_get_example_postcode ID
+/* mapit_get_areas_by_type TYPE
 
-  Given an area ID, returns one postcode that maps to it. */
-function mapit_get_example_postcode($id) {
+  Returns an array of ids of all the voting areas of type TYPE. TYPE is the
+  three letter code such as WMC. */
+function mapit_get_areas_by_type($type) {
     global $mapit_client;
     $params = func_get_args();
-    $result = $mapit_client->call('MaPit.get_example_postcode', $params);
+    $result = $mapit_client->call('MaPit.get_areas_by_type', $params);
     return $result;
 }
 

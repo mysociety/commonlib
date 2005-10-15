@@ -22,7 +22,7 @@ define('DADEM_CONTACT_EMAIL', 102);
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: dadem.php,v 1.26 2005-10-07 10:08:50 francis Exp $
+ * $Id: dadem.php,v 1.27 2005-10-15 00:13:55 francis Exp $
  *
  */
 
@@ -213,7 +213,8 @@ function dadem_get_representative_history($id) {
   make a new one (in which case DETAILS needs to contain area_id and
   area_type). DETAILS is a hash from name, party, method, email and fax to
   their new values, or DETAILS is not defined to delete the representative.
-  Not every value has to be present. Any modification counts as an
+  Every value has to be present - or else values are reset to their initial
+  ones when import first happened. Any modification counts as an
   undeletion. EDITOR is the name of the person who edited the data. NOTE is
   any explanation of why / where from. Returns ID, or if ID was undefined
   the new id. */
