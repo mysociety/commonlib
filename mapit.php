@@ -18,7 +18,7 @@ define('MAPIT_AREA_NOT_FOUND', 2003);      /* not a valid voting area id */
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: mapit.php,v 1.26 2005-10-15 00:13:55 francis Exp $
+ * $Id: mapit.php,v 1.27 2005-10-16 20:24:43 francis Exp $
  *
  */
 
@@ -102,6 +102,16 @@ function mapit_get_areas_by_type($type) {
     global $mapit_client;
     $params = func_get_args();
     $result = $mapit_client->call('MaPit.get_areas_by_type', $params);
+    return $result;
+}
+
+/* mapit_get_example_postcode ID
+
+  Given an area ID, returns one postcode that maps to it. */
+function mapit_get_example_postcode($id) {
+    global $mapit_client;
+    $params = func_get_args();
+    $result = $mapit_client->call('MaPit.get_example_postcode', $params);
     return $result;
 }
 
