@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Util.pm,v 1.23 2005-07-19 18:08:26 francis Exp $
+# $Id: Util.pm,v 1.24 2005-10-17 15:27:25 chris Exp $
 #
 
 package mySociety::Util::Error;
@@ -29,7 +29,7 @@ use Sys::Syslog;
 BEGIN {
     use Exporter ();
     our @ISA = qw(Exporter);
-    our @EXPORT_OK = qw(&print_log &random_bytes &ordinal);
+    our @EXPORT_OK = qw(&print_log &random_bytes &ordinal &is_valid_email);
 }
 our @EXPORT_OK;
 
@@ -549,5 +549,53 @@ sub ordinal ($) {
         }
     }
 }
+
+=item is_valid_email ADDRESS
+
+Restricted syntax-check for ADDRESS. We check for what RFC2821 calls a
+"mailbox", which is "local-part@domain", with the restriction of no
+address-literal domains (e.g "[127.0.0.1]"). We also don't do bang paths.
+
+=cut
+sub is_valid_email ($) {
+    my $addr = shift;
+    our $is_valid_address_re;
+
+    if (!defined($is_valid_address_re)) {
+        # mailbox = local-part "@" domain
+        # local-part = dot-string | quoted-string
+        # dot-string = atom ("." atom)*
+        # atom = atext+
+        # atext = any character other than space, specials or controls
+        # quoted-string = '"' (qtext|quoted-pair)* '"'
+        # qtext = any character other than '"', '\', or CR
+        # quoted-pair = "\" any character
+        # domain = sub-domain ("." sub-domain)* | address-literal
+        # sub-domain = [A-Za-z0-9][A-Za-z0-9-]*
+        # XXX ignore address-literal because nobody uses those...
+
+        my $specials = '()<>@,;:\\\\".\\[\\]';
+        my $controls = '\\000-\\037\\177';
+        my $highbit = '\\200-\\377';
+        my $atext = "[^$specials $controls$highbit]";
+        my $atom = "$atext+";
+        my $dot_string = "$atom(\\s*\\.\\s*$atom)*";
+        my $qtext = "[^\"\\\\\\r\\n$highbit]";
+        my $quoted_pair = '\\.';
+        my $quoted_string = "\"($qtext|$quoted_pair)*\"";
+        my $local_part = "($dot_string|$quoted_string)";
+        my $sub_domain = '[A-Za-z0-9][A-Za-z0-9-]*';
+        my $domain = "$sub_domain(\\s*\\.\\s*$sub_domain)*";
+
+        $is_valid_address_re = "^$local_part\\s*@\\s*$domain\$";
+    }
+    
+    if ($addr =~ m#$is_valid_address_re#) {
+        return 1;
+    } else {
+        return 0;
+    }
+}   
+
 
 1;
