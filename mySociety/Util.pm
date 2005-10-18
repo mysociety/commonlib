@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Util.pm,v 1.24 2005-10-17 15:27:25 chris Exp $
+# $Id: Util.pm,v 1.25 2005-10-18 17:38:45 chris Exp $
 #
 
 package mySociety::Util::Error;
@@ -29,7 +29,7 @@ use Sys::Syslog;
 BEGIN {
     use Exporter ();
     our @ISA = qw(Exporter);
-    our @EXPORT_OK = qw(&print_log &random_bytes &ordinal &is_valid_email);
+    our @EXPORT_OK = qw(&print_log &random_bytes &ordinal &is_valid_email &is_valid_postcode);
 }
 our @EXPORT_OK;
 
