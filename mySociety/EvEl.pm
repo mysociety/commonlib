@@ -6,10 +6,10 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: EvEl.pm,v 1.1 2005-10-18 16:46:57 chris Exp $
+# $Id: EvEl.pm,v 1.2 2005-10-18 17:39:09 chris Exp $
 #
 
-package EvEl;
+package mySociety::EvEl;
 
 use strict;
 
