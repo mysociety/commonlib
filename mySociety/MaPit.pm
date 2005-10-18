@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: MaPit.pm,v 1.9 2005-09-07 21:53:19 matthew Exp $
+# $Id: MaPit.pm,v 1.10 2005-10-18 15:32:19 chris Exp $
 #
 
 package mySociety::MaPit;
@@ -129,7 +129,7 @@ identified by the coordsyst element, which is "G" for OSGB (the Ordnance Survey
 "National Grid" for Great Britain) or "I" for the Irish Grid (used in the
 island of Ireland).
 
-=item wgs83_lat
+=item wgs84_lat
 
 =item wgs84_lon
 
