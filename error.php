@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: error.php,v 1.9 2005-05-26 02:19:05 francis Exp $
+ * $Id: error.php,v 1.10 2005-10-19 16:29:28 wechsler Exp $
  * 
  */
 
@@ -118,6 +118,9 @@ $err_handler_display = null;
 function err_global_handler($num, $str, $file, $line, $context) {
     global $err_handler_log;
     global $err_handler_display;
+
+    //PHP5.1RC* a bit overzealous about strict errors, even if not set to display:
+	 if($num==E_STRICT) { return; }
     if (isset($err_handler_log))
         $err_handler_log($num, $str, $file, $line, $context);
     if (isset($err_handler_display))
