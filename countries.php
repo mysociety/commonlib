@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: countries.php,v 1.10 2005-09-08 16:47:24 francis Exp $
+ * $Id: countries.php,v 1.11 2005-10-20 12:50:49 francis Exp $
  * 
  */
 
@@ -162,8 +162,8 @@ $countries_name_to_code = array(
     _("Namibia") => "NA",
     _("Nauru") => "NR",
     _("Nepal") => "NP",
-    _("Netherlands Antilles") => "AN",
     _("Netherlands") => "NL",
+    _("Netherlands Antilles") => "AN",
     _("New Caledonia") => "NC",
     _("New Zealand") => "NZ",
     _("Nicaragua") => "NI",
