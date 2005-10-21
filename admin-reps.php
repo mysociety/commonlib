@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-reps.php,v 1.26 2005-10-07 10:08:50 francis Exp $
+ * $Id: admin-reps.php,v 1.27 2005-10-21 10:32:33 francis Exp $
  * 
  */
 
@@ -26,11 +26,10 @@ class ADMIN_PAGE_REPS {
         for ($i = 0; $i < count($reps); $i++) {
             $rep = $reps[$i];
             $repinfo = $info[$rep];
-            if ($repinfo['deleted']) {
+            if ($repinfo['deleted'])
                 $html .= "<i>deleted</i> ";
-            } else if (array_key_exists('edited', $repinfo) and $repinfo['edited']) {
-                $html .= "<i>edited</i> ";
-            }
+            elseif ($repinfo['last_editor'] == 'fyr-queue') 
+                $html .= "<i>failed</i> ";
             if (array_key_exists('type', $repinfo))
                 $html .= $repinfo['type'] . " ";
             else
