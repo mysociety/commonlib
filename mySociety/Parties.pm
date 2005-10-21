@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Parties.pm,v 1.6 2005-05-12 11:54:33 francis Exp $
+# $Id: Parties.pm,v 1.7 2005-10-21 16:59:57 francis Exp $
 #
 
 package mySociety::Parties;
@@ -31,20 +31,24 @@ Map names of parties to their canonical name.
     "Conservative" => "Conservative",
     "Con" => "Conservative",
     "Ind Con" => "Independent Conservative",
+    "Scottish Conservative and Unionist Party" => "Conservative",
 
     "DUP" => "DUP",
     "DU" => "DUP",
 
     "Green" => "Green",
+    "Scottish Green Party" => "Green",
 
     "Ind" => "Independent",
 
     "Labour" => "Labour",
     "Lab" => "Labour",
     "Lab/Co-op" => "Labour / Co-operative",
+    "Scottish Labour" => "Labour",
 
     "LDem" => "Liberal Democrat",
     "Liberal Democrat" => "Liberal Democrat",
+    "Scottish Liberal Democrats" => "Liberal Democrat",
 
     "PC" => "Plaid Cymru",
     "Plaid Cymru" => "Plaid Cymru",
@@ -54,16 +58,19 @@ Map names of parties to their canonical name.
 
     "SDLP" => "SDLP",
 
+    "Scottish National Party" => "SNP",
     "SNP" => "SNP",
 
+    "Scottish Socialist Party" => "SSP",
     "SSP" => "SSP",
 
-    # Scottish Senior Citizens United Party
+    "Scottish Senior Citizens Unity Party" => "SSCUP",
     "SSCUP" => "SSCUP",
 
-    "SPK" => "Speaker",
-    "DCWM" => "Deputy Speaker",
-    "CWM" => "Deputy Speaker",
+    "SPK" => "Speaker", # Westminster
+    "DCWM" => "Deputy Speaker", # Westminster
+    "CWM" => "Deputy Speaker", # Westminster
+    "Presiding Officer" => "Presiding Officer", # Scottish Parliament
 
     "SF" => "Sinn Féin",
     "Sinn Fein" => "Sinn Féin",
