@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Parties.pm,v 1.7 2005-10-21 16:59:57 francis Exp $
+# $Id: Parties.pm,v 1.8 2005-10-21 18:54:35 dademcron Exp $
 #
 
 package mySociety::Parties;
@@ -35,6 +35,8 @@ Map names of parties to their canonical name.
 
     "DUP" => "DUP",
     "DU" => "DUP",
+
+    "Forward Wales" => "Forward Wales",
 
     "Green" => "Green",
     "Scottish Green Party" => "Green",
