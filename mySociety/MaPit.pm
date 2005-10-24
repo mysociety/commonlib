@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: MaPit.pm,v 1.11 2005-10-24 15:22:47 chris Exp $
+# $Id: MaPit.pm,v 1.12 2005-10-24 15:29:56 chris Exp $
 #
 
 package mySociety::MaPit;
@@ -128,7 +128,7 @@ Return an array of all voting areas having the given TYPE.
 sub get_areas_by_type ($) {
     my ($type) = @_;
     configure() if !defined $rabx_client;
-    return $rabx_client->call('MaPit.get_areas_by_tyoe', $type);
+    return $rabx_client->call('MaPit.get_areas_by_type', $type);
 }
 
 =item get_location POSTCODE [PARTIAL]
