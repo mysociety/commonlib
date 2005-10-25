@@ -7,7 +7,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: locale.php,v 1.2 2005-10-25 11:35:55 francis Exp $
+ * $Id: locale.php,v 1.3 2005-10-25 11:55:25 francis Exp $
  * 
  */
 
@@ -55,7 +55,10 @@ function locale_change($l = "") {
         return;
     putenv('LANGUAGE='); # clear this if set
     putenv('LANG='.$langmap[$l].'.UTF-8');
-    setlocale(LC_ALL, $langmap[$l].'.UTF-8');
+    $os_locale = $langmap[$l].'.UTF-8';
+    $ret = setlocale(LC_ALL, $os_locale);
+    if ($ret != $os_locale)
+        err("setlocale failed for $os_locale");
     $locale_current = $l;
 }
 
