@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Parties.pm,v 1.8 2005-10-21 18:54:35 dademcron Exp $
+# $Id: Parties.pm,v 1.9 2005-10-26 10:07:39 francis Exp $
 #
 
 package mySociety::Parties;
@@ -51,6 +51,8 @@ Map names of parties to their canonical name.
     "LDem" => "Liberal Democrat",
     "Liberal Democrat" => "Liberal Democrat",
     "Scottish Liberal Democrats" => "Liberal Democrat",
+
+    "One London Group" => "One London Group",
 
     "PC" => "Plaid Cymru",
     "Plaid Cymru" => "Plaid Cymru",
