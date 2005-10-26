@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: RABX.pm,v 1.12 2005-06-28 15:09:38 chris Exp $
+# $Id: RABX.pm,v 1.13 2005-10-26 15:31:03 chris Exp $
 
 # References:
 #   Netstrings are documented here: http://cr.yp.to/proto/netstrings.txt
@@ -173,6 +173,13 @@ sub netstring_rd ($) {
     return $string;
 }
 
+# is_really_utf8 DATA
+# utf8::is_utf8 returns false for a UTF-8 string which does not contain any
+# characters outside the ASCII range.
+sub is_really_utf8 ($) {
+    return utf8::is_utf8($_[0]) || $_[0] !~ /[^\x00-\x7f]/;
+}
+
 =item wire_wr X HANDLE
 
 Format X (which may be a reference or a scalar) into HANDLE.
@@ -193,11 +200,11 @@ sub wire_wr ($$) {
         if (!defined($$ref)) {
             $h->print('N');
             return;
-        } elsif ($$ref =~ m#^-?[1-9]\d*$#) {
+        } elsif ($$ref =~ m#^-?([1-9]\d*|0)$#) {
             $h->print('I');
         } elsif ($$ref =~ m#^-?(?:0|[1-9]\d*)(?:\.\d*)(?:|e[+-]?\d+)$#) {
             $h->print('R');
-        } elsif (utf8::is_utf8($$ref)) {
+        } elsif (is_really_utf8($$ref)) {
             $h->print('T');
         } else {
             $h->print('B');
@@ -388,7 +395,7 @@ use HTTP::Request;
 use HTTP::Response;
 use Regexp::Common qw(URI);
 
-my $rcsid = ''; $rcsid .= '$Id: RABX.pm,v 1.12 2005-06-28 15:09:38 chris Exp $';
+my $rcsid = ''; $rcsid .= '$Id: RABX.pm,v 1.13 2005-10-26 15:31:03 chris Exp $';
 
 =back
 
