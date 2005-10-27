@@ -1,12 +1,13 @@
 <?php
 /*
  * auth.php:
- * Authentication for pledgebank.  Token related code.
+ * Authentication code (originally written for PledgeBank).  Token related
+ * code.
  * 
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: auth.php,v 1.1 2005-07-08 11:33:02 matthew Exp $
+ * $Id: auth.php,v 1.2 2005-10-27 14:59:14 francis Exp $
  * 
  */
 
@@ -76,4 +77,29 @@ function auth_token_destroy($scope, $token) {
             array($scope, $token));
 }
 
+/* auth_sign_with_shared_secret ITEM SECRET
+ * Signs a string ITEM, using a shared secret string SECRET.  Returns the
+ * SIGNATURE. Pass the ITEM and SIGNATURE into auth_verify_with_shared_secret
+ * to check it.
+ */
+function auth_sign_with_shared_secret($item, $secret) {
+    $salt = bin2hex(random_bytes(8));
+    $sha = sha1("$salt-$secret-$item");
+    return "$sha-$salt";
+}
+
+/* auth_verify_with_shared_secret ITEM SECRET SIGNATURE
+ * Verifies that the ITEM has been correctly signed with SIGNATURE.  The signer
+ * must also have had SECRET and will have called auth_sign_with_shared_secret
+ * to make the SIGNATURE.
+ */
+function auth_verify_with_shared_secret($item, $secret, $signature) {
+    if (!preg_match('#^([0-9a-f]+)-([0-9a-f]+)$#', $signature, $matches))
+        return false;
+    list($dummy, $sha, $salt) = $matches;
+    $verify_sha = sha1("$salt-$secret-$item");
+    if ($verify_sha == $sha)
+        return true;
+    return false;
+}
 

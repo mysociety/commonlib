@@ -22,7 +22,7 @@ define('DADEM_CONTACT_EMAIL', 102);
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: dadem.php,v 1.28 2005-10-16 20:24:43 francis Exp $
+ * $Id: dadem.php,v 1.29 2005-10-27 14:59:14 francis Exp $
  *
  */
 
@@ -47,11 +47,12 @@ function dadem_check_error($data) {
 $dadem_client = new RABX_Client(OPTION_DADEM_URL);
 
 
-/* dadem_get_representatives ID_OR_ARRAY
+/* dadem_get_representatives ID_or_ARRAY
 
   Given the ID of an area (or an ARRAY of IDs of several areas), return a
-  list of the representatives returned by that area, or, on failure, an
-  error code. */
+  list of the representatives returned by that area, or, for an array, a
+  hash mapping area ID to a list of representatives for each; or, on
+  failure, an error code. */
 function dadem_get_representatives($id_or_array) {
     global $dadem_client;
     $params = func_get_args();
