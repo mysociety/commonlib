@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Util.pm,v 1.25 2005-10-18 17:38:45 chris Exp $
+# $Id: Util.pm,v 1.26 2005-10-27 15:27:37 chris Exp $
 #
 
 package mySociety::Util::Error;
@@ -23,6 +23,7 @@ use Getopt::Std;
 use IO::File;
 use IO::Handle;
 use IO::Pipe;
+use Net::SMTP;
 use POSIX ();
 use Sys::Syslog;
 
@@ -147,22 +148,13 @@ sub pipe_via (@) {
     }
 }
 
-=item send_email TEXT SENDER RECIPIENT ...
-
-Send an email. TEXT is the full, already-formatted, with-headers, on-the-wire
-form of the email (except that line-endings should be "\n" not "\r\n"). SENDER
-is the B<envelope> sender of the mail (B<not> the From: address, which you
-should specify yourself). RECIPIENTs are the B<envelope> recipients of the
-mail. Returns one of the constants EMAIL_SUCCESS, EMAIL_SOFT_FAILURE, or
-EMAIL_HARD_FAILURE depending on whether the email was successfully sent (or
-queued), a temporary ("soft") error occurred, or a permanent ("hard") error
-occurred.
-
-=cut
 use constant EMAIL_SUCCESS => 0;
 use constant EMAIL_SOFT_ERROR => 1;
 use constant EMAIL_HARD_ERROR => 2;
-sub send_email ($$@) {
+
+# send_email_sendmail TEXT SENDER RECIPIENT ...
+# Implementation of send_email which calls out to /usr/sbin/sendmail.
+sub send_email_sendmail ($$@) {
     my ($text, $sender, @recips) = @_;
     my $pid;
     my $ret;
@@ -240,6 +232,62 @@ sub send_email ($$@) {
     close(SENDMAIL);
 
     return $ret;
+
+}
+
+# send_email_smtp SMARTHOST TEXT SENDER RECIPIENT ...
+# Implementation of send_email which calls out to an SMTP server.
+sub send_email_smtp ($$$@) {
+    my ($smarthost, $text, $sender, @recips) = @_;
+    my $smtp = new Net::SMTP($smarthost, Timeout => 15);
+    return EMAIL_SOFT_ERROR if (!$smtp);
+
+    # Actually this could be a hard error, but since that could only really be
+    # the result of a misconfiguration, treat it as a soft error and give the
+    # admins a chance to fix the problem.
+    return EMAIL_SOFT_ERROR
+        unless ($smtp->mail($sender));
+
+    foreach my $addr (@recips) {
+        if (!$smtp->to($addr)) {
+            # 5xx means "known to be undeliverable".
+            my $c = $smtp->code();
+            return (defined($c) && $c =~ /^5..$/)
+                    ? EMAIL_HARD_ERROR
+                    : EMAIL_SOFT_ERROR;
+        }
+    }
+
+    my @ll = map { "$_\r\n" } split(/\n/, $text);
+    return EMAIL_SOFT_ERROR
+        unless ($smtp->data(\@ll));
+
+    $smtp->quit();
+    undef $smtp;
+    return EMAIL_SUCCESS;
+}
+
+=item send_email TEXT SENDER RECIPIENT ...
+
+Send an email. TEXT is the full, already-formatted, with-headers, on-the-wire
+form of the email (except that line-endings should be "\n" not "\r\n"). SENDER
+is the B<envelope> sender of the mail (B<not> the From: address, which you
+should specify yourself). RECIPIENTs are the B<envelope> recipients of the
+mail. Returns one of the constants EMAIL_SUCCESS, EMAIL_SOFT_FAILURE, or
+EMAIL_HARD_FAILURE depending on whether the email was successfully sent (or
+queued), a temporary ("soft") error occurred, or a permanent ("hard") error
+occurred.
+
+=cut
+sub send_email ($$@) {
+    my ($text, $sender, @recips) = @_;
+    my $smarthost = mySociety::Config::get('SMTP_SMARTHOST', undef);
+    if ($smarthost) {
+        return send_email_smtp($smarthost, $text, $sender, @recips);
+    } else {
+        warn "No OPTION_SMTP_SMARTHOST defined; calling sendmail binary instead";
+        return send_email_sendmail($text, $sender, @recips);
+    }
 }
 
 =item daemon 
