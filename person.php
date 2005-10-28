@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: person.php,v 1.5 2005-09-05 12:23:35 francis Exp $
+ * $Id: person.php,v 1.6 2005-10-28 10:17:33 matthew Exp $
  * 
  */
 
@@ -272,6 +272,11 @@ function person_signon($template_data, $email = null, $name = null) {
     if (headers_sent())
         err("Headers have already been sent in person_signon without cookie being present");
 
+    if (array_key_exists('instantly_send_email', $template_data)) {
+        $send_email_part = "&SendEmail=1";
+        unset($template_data['instantly_send_email']);
+    } else
+        $send_email_part = '';
     /* No or invalid cookie. We will need to redirect the user via another
      * page, either to log in or to prove their email address. */
     $st = stash_request(serialize($template_data));
@@ -284,7 +289,7 @@ function person_signon($template_data, $email = null, $name = null) {
         $name_part = "&name=" . urlencode($name);
     else
         $name_part = "";
-    header("Location: /login?stash=$st$email_part$name_part");
+    header("Location: /login?stash=$st$send_email_part$email_part$name_part");
     exit();
 }
 
