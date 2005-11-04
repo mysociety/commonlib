@@ -7,7 +7,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: auth.php,v 1.2 2005-10-27 14:59:14 francis Exp $
+ * $Id: auth.php,v 1.3 2005-11-04 12:48:19 chris Exp $
  * 
  */
 
@@ -35,7 +35,7 @@ function auth_random_token() {
  * Returns a randomly generated token, suitable for use in URLs. SCOPE is the
  * associated scope. DATA (of arbitrary, non-object type) are serialised and
  * stored in the database associated with that scope and token, for later
- * retrieval with auth_random_token_retrieve. */
+ * retrieval with auth_token_retrieve. */
 function auth_token_store($scope, $data) {
     $token = auth_random_token();
     $ser = '';
