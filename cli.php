@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: cli.php,v 1.1 2005-11-04 11:12:39 chris Exp $
+ * $Id: cli.php,v 1.2 2005-11-04 12:43:08 chris Exp $
  * 
  */
 
@@ -22,8 +22,14 @@ function verbose($str) {
     fwrite(STDERR, "$cli_program_name: $str\n");
 }
 
-/* error STRING
+/* warning STRING
  * Print STRING to standard error, followed by a \n. */
+function warning($str) {
+    fwrite(STDERR, "$cli_program_name: $str\n");
+}
+
+/* error STRING
+ * Print STRING to standard error, prefixed "ERROR", followed by a \n. */
 function error($str) {
     fwrite(STDERR, "$cli_program_name: ERROR: $str\n");
     /* XXX abort at this point? */
