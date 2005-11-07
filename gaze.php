@@ -8,7 +8,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: gaze.php,v 1.10 2005-11-07 18:24:24 matthew Exp $
+ * $Id: gaze.php,v 1.11 2005-11-07 18:52:51 matthew Exp $
  *
  */
 
@@ -25,8 +25,8 @@ function gaze_get_error($e) {
 
 /* gaze_check_error R
  * If R indicates failure, displays error message and stops procesing. */
-function gaze_check_error($data, $output_error = true) {
-    if ($error_message = gaze_get_error($data) && $output_error)
+function gaze_check_error($data) {
+    if ($error_message = gaze_get_error($data))
         err($error_message);
 }
 
