@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: cli.php,v 1.3 2005-11-07 16:45:52 sandpit Exp $
+ * $Id: cli.php,v 1.4 2005-11-07 16:47:11 sandpit Exp $
  * 
  */
 
@@ -17,7 +17,7 @@ $cli_is_verbose = false;
  * If $cli_is_verbose is true, then print STRING to standard error, followed
  * by a \n. */
 function verbose($str) {
-    global $cli_is_verbose;
+    global $cli_is_verbose, $cli_program_name;
     if (!$cli_is_verbose) return;
     fwrite(STDERR, "$cli_program_name: $str\n");
 }
