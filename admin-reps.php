@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-reps.php,v 1.28 2005-10-21 11:07:35 francis Exp $
+ * $Id: admin-reps.php,v 1.29 2005-11-08 15:58:23 francis Exp $
  * 
  */
 
@@ -158,7 +158,7 @@ class ADMIN_PAGE_REPS {
 
         // Conditional parts: 
         if ($rep_id or $new_in_va_id) {
-            $form = new HTML_QuickForm('adminRepsEditForm', 'get', $self_link);
+            $form = new HTML_QuickForm('adminRepsEditForm', 'post', $self_link);
             $form->addElement('hidden', 'page', $this->id);
 
             // Edit representative
