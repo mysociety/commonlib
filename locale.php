@@ -7,7 +7,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: locale.php,v 1.4 2005-11-08 15:04:41 francis Exp $
+ * $Id: locale.php,v 1.5 2005-11-08 15:52:38 francis Exp $
  * 
  */
 
@@ -60,7 +60,8 @@ function locale_change($l = "") {
     if ($ret != $os_locale)
         err("setlocale failed for $os_locale");
     $locale_current = $l;
-    // Clear gettext's cache
+    // Clear gettext's cache - you have to do this when
+    // you change environment variables.
     textdomain(textdomain(NULL));
 }
 
