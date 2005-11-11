@@ -1,13 +1,13 @@
 <?php
 
 /* phpcgi:
- * To be included in all PHP CGI scripts, to sort out constants,
+ * To be included in all PHP CLI scripts, to sort out constants,
  * read command line arguments, and things
  *
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: matthew@mysociety.org. WWW: http://www.mysociety.org/
  *
- * $Id: phpcgi,v 1.1 2005-07-20 18:56:19 francis Exp $
+ * $Id: phpcli.php,v 1.1 2005-11-11 12:34:57 francis Exp $
  *
  */
 
