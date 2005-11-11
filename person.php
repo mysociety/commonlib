@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: person.php,v 1.7 2005-11-10 09:55:42 francis Exp $
+ * $Id: person.php,v 1.8 2005-11-11 11:35:40 francis Exp $
  * 
  */
 
@@ -305,7 +305,10 @@ function person_signoff() {
  * stash_new_request). DATA is as for person_signon (but the 'template' and
  * 'reason_' entires won't be used since presumably the caller is constructing
  * its own email to send). */
-function person_make_signon_url($data, $email, $method, $url, $params) {
+function person_make_signon_url($data, $email, $method, $url, $params, $url_base = null) {
+    if (!$url_base)
+        $url_base = OPTION_BASE_URL . "/";
+
     $st = stash_new_request($method, $url, $params, $data);
     /* XXX should combine this and the similar code in login.php. */
     $token = auth_token_store('login', array(
@@ -314,7 +317,7 @@ function person_make_signon_url($data, $email, $method, $url, $params) {
                     'stash' => $st,
                     'direct' => 1
                 ));
-    return OPTION_BASE_URL . "/L/$token";
+    return $url_base . "L/$token";
 }
 
 /* person_get EMAIL
