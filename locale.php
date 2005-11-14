@@ -7,7 +7,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: locale.php,v 1.5 2005-11-08 15:52:38 francis Exp $
+ * $Id: locale.php,v 1.6 2005-11-14 16:59:23 matthew Exp $
  * 
  */
 
@@ -108,6 +108,7 @@ function negotiateLanguage(&$supported) {
                     }
                     $candidates[$l] = $q;
                 } else {
+                    $l = preg_quote($l);
                     foreach (array_keys($supported) as $value) {
                         if (preg_match("/^$l-/",$value)) {
                             if ($q == 1) {
