@@ -10,11 +10,9 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: rabx.php,v 1.15 2005-10-13 20:50:31 chris Exp $
+ * $Id: rabx.php,v 1.16 2005-11-15 15:12:22 chris Exp $
  * 
  */
-
-require_once "HTTP/Request.php";
 
 /*
  * Errors and error codes.
