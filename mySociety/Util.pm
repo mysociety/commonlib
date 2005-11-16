@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Util.pm,v 1.29 2005-11-16 15:45:06 chris Exp $
+# $Id: Util.pm,v 1.30 2005-11-16 17:15:12 chris Exp $
 #
 
 package mySociety::Util::Error;
@@ -693,7 +693,7 @@ symbolic mode. Does not honour the process's current umask.
 
 =cut
 sub symbolic_permissions ($$) {
-    my ($mode, $s) = @_;
+    my ($mode, $symbolic) = @_;
 
     #
     # The syntax is defined here:
@@ -718,7 +718,7 @@ sub symbolic_permissions ($$) {
     my $action_re    = '[-+=][rstwxXugo]*';
 
     # Find the current permissions. This is what we start with.
-    my $mode         = sprintf('%04o', $mode);
+    $mode            = sprintf('%04o', $mode);
     my $current      = substr($mode, -3);  # rwx permissions for ugo.
 
     my %perms;
@@ -887,7 +887,7 @@ sub symbolic_permissions ($$) {
         $bit <<= 1;
     }
 
-    return($first << 9 | $perms{u} << 6 | $perms{g} << 3 | $perms{o});
+    return ($first << 9 | $perms{u} << 6 | $perms{g} << 3 | $perms{o});
 }
 
 1;
