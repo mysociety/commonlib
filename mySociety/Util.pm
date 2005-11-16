@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Util.pm,v 1.26 2005-10-27 15:27:37 chris Exp $
+# $Id: Util.pm,v 1.27 2005-11-16 14:32:54 chris Exp $
 #
 
 package mySociety::Util::Error;
@@ -17,6 +17,7 @@ package mySociety::Util;
 
 use strict;
 
+use Errno;
 use Error qw(:try);
 use Fcntl;
 use Getopt::Std;
@@ -102,6 +103,43 @@ sub named_tempfile (;$) {
     }
 
     die "unable to create temporary file; last attempted name was \"$name\" and open failed with error $!";
+}
+
+=item tempdir [PREFIX]
+
+Return the name of a newly-created temporary directory. The directory will be
+created with mode 0700. If specified, PREFIX specifies the first part of the
+name of the new directory. Dies on error.
+
+=cut
+sub tempdir ($) {
+    my ($prefix) = @_;
+    if (!$prefix) {
+        $prefix = $0;
+        $prefix =~ s#^.*/##;
+    }
+    my ($where) = grep { defined($_) and -d $_ and -w $_ } ($ENV{TEMP}, $ENV{TMPDIR}, $ENV{TEMPDIR}, "/tmp");
+    die "no temporary directory available (last tried was \"$where\", error was $!)" unless (defined($where));
+    my $name;
+    do {
+        $name = sprintf('%s/%s-temp-%08x-%08x', $where, $prefix, int(rand(0xffffffff)), int(rand(0xffffffff)));
+        if (mkdir($name, 0700)) {
+            return $name;
+        } elsif (!$!{EEXIST}) {
+            die "$name: mkdir: $!";
+        }
+    }
+}
+
+=item tempdir_cleanup DIRECTORY
+
+Delete DIRECTORY and its contents.
+
+=cut
+sub tempdir_cleanup ($) {
+    my ($tempdir) = @_;
+    die "$tempdir: not a directory" if (!-d $tempdir);
+    system('/bin/rm', '-rf', $tempdir); # XXX
 }
 
 =item pipe_via PROGRAM [ARG ...] [HANDLE]
