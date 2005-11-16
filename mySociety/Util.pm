@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Util.pm,v 1.30 2005-11-16 17:15:12 chris Exp $
+# $Id: Util.pm,v 1.31 2005-11-16 17:18:09 chris Exp $
 #
 
 package mySociety::Util::Error;
@@ -113,7 +113,7 @@ name of the new directory; otherwise, the last part of $0 is used. Dies on
 error.
 
 =cut
-sub tempdir ($) {
+sub tempdir (;$) {
     my ($prefix) = @_;
     if (!$prefix) {
         $prefix = $0;
