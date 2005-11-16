@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.49 2005-10-28 15:47:09 matthew Exp $
+ * $Id: utility.php,v 1.50 2005-11-16 12:33:44 francis Exp $
  * 
  */
 
@@ -138,6 +138,10 @@ function validate_email ($address) {
  * Return true is POSTCODE is in the proper format for a UK postcode. Does not
  * require spaces in the appropriate place. */
 function validate_postcode ($postcode) {
+    // Our test postcode
+    if (preg_match("/^zz9\s*9zz$/i", $postcode))
+        return true; 
+    
     // See http://www.govtalk.gov.uk/gdsc/html/noframes/PostCode-2-1-Release.htm
     $in  = 'ABDEFGHJLNPQRSTUWXYZ';
     $fst = 'ABCDEFGHIJKLMNOPRSTUWYZ';
@@ -164,6 +168,10 @@ function validate_postcode ($postcode) {
  * Return true is POSTCODE is the first part of a UK postcode.  e.g. WC1.
  */
 function validate_partial_postcode ($postcode) {
+    // Our test postcode
+    if (preg_match("/^zz9/i", $postcode))
+        return true; 
+
     // See http://www.govtalk.gov.uk/gdsc/html/noframes/PostCode-2-1-Release.htm
     $fst = 'ABCDEFGHIJKLMNOPRSTUWYZ';
     $sec = 'ABCDEFGHJKLMNOPQRSTUVWXY';
