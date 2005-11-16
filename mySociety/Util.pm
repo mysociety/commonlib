@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Util.pm,v 1.27 2005-11-16 14:32:54 chris Exp $
+# $Id: Util.pm,v 1.28 2005-11-16 14:37:24 chris Exp $
 #
 
 package mySociety::Util::Error;
@@ -109,7 +109,8 @@ sub named_tempfile (;$) {
 
 Return the name of a newly-created temporary directory. The directory will be
 created with mode 0700. If specified, PREFIX specifies the first part of the
-name of the new directory. Dies on error.
+name of the new directory; otherwise, the last part of $0 is used. Dies on
+error.
 
 =cut
 sub tempdir ($) {
