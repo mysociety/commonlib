@@ -8,7 +8,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: votingarea.php,v 1.35 2005-02-10 18:17:25 francis Exp $
+ * $Id: votingarea.php,v 1.36 2005-11-18 10:55:41 chris Exp $
  * 
  */
 
@@ -199,5 +199,14 @@ $va_council_parent_types = array('DIS', 'LBO', 'MTD', 'UTA', 'LGD', 'CTY', 'COI'
 Types which are wards or electoral divisions in councils. */
 
 $va_council_child_types = array('DIW', 'LBW', 'MTW', 'UTE', 'UTW', 'LGE', 'CED', 'COP');
+
+/* va_is_fictional_area ID
+ * Does ID refer to a test area (i.e., one invented for our own purposes)? */
+function va_is_fictional_area($id) {
+    if ($id >= 1000001 && $id <= 1000008)
+        return true;
+    else
+        return false;
+}
 
 ?>
