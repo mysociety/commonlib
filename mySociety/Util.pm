@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Util.pm,v 1.32 2005-11-18 12:08:06 chris Exp $
+# $Id: Util.pm,v 1.33 2005-11-18 20:11:15 chris Exp $
 #
 
 package mySociety::Util::Error;
@@ -122,7 +122,7 @@ sub tempdir (;$) {
     my ($where) = grep { defined($_) and -d $_ and -w $_ } ($ENV{TEMP}, $ENV{TMPDIR}, $ENV{TEMPDIR}, "/tmp");
     die "no temporary directory available (last tried was \"$where\", error was $!)" unless (defined($where));
     my $name;
-    do {
+    while (1) {
         $name = sprintf('%s/%s-temp-%08x-%08x', $where, $prefix, int(rand(0xffffffff)), int(rand(0xffffffff)));
         if (mkdir($name, 0700)) {
             return $name;
