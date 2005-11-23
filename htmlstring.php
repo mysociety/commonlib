@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: htmlstring.php,v 1.1 2005-11-16 16:04:28 francis Exp $
+ * $Id: htmlstring.php,v 1.2 2005-11-23 12:19:10 francis Exp $
  * 
  */
 
@@ -23,6 +23,7 @@
  - format is a bit too generic a name. Chris suggests F(), but ugly.
  - PledgeBank already uses obvious names like p() and so on.
    Maybe put all the functions in an (effectively singleton) object like $q in CGI.pm?
+ - Let <li> say take an array and wrap elements separately in <li> and join together
 */
 
 // Prints an HTMLString, can construct one wth format parameters
