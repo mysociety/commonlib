@@ -6,12 +6,14 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Distance.pm,v 1.1 2005-11-24 14:44:48 chris Exp $
+# $Id: Distance.pm,v 1.2 2005-11-24 15:14:09 chris Exp $
 #
 
 package Geo::Distance;
 
 use strict;
+
+use POSIX qw(acos);
 
 =head1 NAME
 
@@ -73,7 +75,7 @@ http://www.affero.org/oagpl.html
 
 =head1 VERSION
 
-$Id: Distance.pm,v 1.1 2005-11-24 14:44:48 chris Exp $
+$Id: Distance.pm,v 1.2 2005-11-24 15:14:09 chris Exp $
 
 =cut
 
