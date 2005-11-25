@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.51 2005-11-18 11:18:11 matthew Exp $
+ * $Id: utility.php,v 1.52 2005-11-25 23:27:05 matthew Exp $
  * 
  */
 
@@ -505,6 +505,15 @@ function make_clickable($ret, $params = array()) {
     $ret = preg_replace("#(\s)([a-z0-9\-_.]+)@([^,< \n\r]*[^.,< \n\r])#i", "$1<a href=\"mailto:$2@$3\">$2@$3</a>", $ret);
     $ret = trim($ret);
     return $ret;
+}
+
+function ordinal($cardinal) {
+    global $lang;
+    if ($lang == 'eo') {
+        return $cardinal . '-a';
+    } else {
+        return english_ordinal($cardinal);
+    }
 }
 
 # Converts an ordinal number 1, 2, 3... into a cardinal 1st, 2nd, 3rd...
