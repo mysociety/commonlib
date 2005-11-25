@@ -9,7 +9,7 @@ etc.
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: evel.php,v 1.17 2005-10-27 14:59:14 francis Exp $
+ * $Id: evel.php,v 1.18 2005-11-25 16:27:14 francis Exp $
  *
  */
 
@@ -32,7 +32,6 @@ function evel_check_error($data) {
 }
 
 $evel_client = new RABX_Client(OPTION_EVEL_URL);
-
 
 /* evel_construct_email SPEC
 
