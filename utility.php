@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.53 2005-11-26 13:30:17 matthew Exp $
+ * $Id: utility.php,v 1.54 2005-11-26 14:29:23 matthew Exp $
  * 
  */
 
@@ -339,7 +339,8 @@ function get_http_var($name, $default='') {
     } else { 
         $var = $default;
     }
-    if ($lang == 'eo')
+    if ($lang == 'eo' && $name != 'data')
+        # XXX: Cludgy hack to not 'translate' and corrput the base64 data variable
         $var = input_esperanto($var);
     return $var;
 }
