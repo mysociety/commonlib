@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: importparams.php,v 1.6 2005-11-26 13:30:17 matthew Exp $
+ * $Id: importparams.php,v 1.7 2005-11-26 17:09:55 matthew Exp $
  * 
  */
 
@@ -50,7 +50,7 @@ function importparams() {
             $val = trim($_GET[$name]);
         else
             $val = null;
-        if ($lang == 'eo')
+        if (!is_null($val) && $lang == 'eo')
             $val = input_esperanto($val);
             
         $check = $pp[1];
