@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.52 2005-11-25 23:27:05 matthew Exp $
+ * $Id: utility.php,v 1.53 2005-11-26 13:30:17 matthew Exp $
  * 
  */
 
@@ -329,19 +329,37 @@ function convert_to_unix_newlines($text) {
  * such parameter is present, DEFAULT; or, if DEFAULT is not specified, the
  * empty string (""). */
 function get_http_var($name, $default='') {
+    global $lang;
     if (array_key_exists($name, $_GET)) {
         $var = $_GET[$name];
         if (!is_array($var)) $var = trim($var);
-        return $var;
     } elseif (array_key_exists($name, $_POST)) {
         $var = $_POST[$name];
         if (!is_array($var)) $var = trim($var);
-        return $var;
     } else { 
-        return $default;
+        $var = $default;
     }
+    if ($lang == 'eo')
+        $var = input_esperanto($var);
+    return $var;
 }
 
+function input_esperanto($text) {
+    $search = array ('/C[Xx]/', '/c[Xx]/',
+                     '/G[Xx]/', '/g[Xx]/',
+                     '/H[Xx]/', '/h[Xx]/',
+                     '/J[Xx]/', '/j[Xx]/',
+                     '/S[Xx]/', '/s[Xx]/',
+                     '/U[Xx]/', '/u[Xx]/');
+    $replace = array ("\xc4\x88", "\xc4\x89",
+                      "\xc4\x9c", "\xc4\x9d",
+                      "\xc4\xa4", "\xc4\xa5",
+                      "\xc4\xb4", "\xc4\xb5",
+                      "\xc5\x9c", "\xc5\x9d",
+                      "\xc5\xac", "\xc5\xad");
+    return preg_replace($search, $replace, $text);
+}
+    
 /* make_plural NUMBER SINGULAR PLURAL
  * If NUMBER is 1, return SINGULAR; if NUMBER is not 1, return PLURAL
  * if it's there, otherwise WORD catenated with "s". */

@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: importparams.php,v 1.5 2005-07-01 22:06:54 francis Exp $
+ * $Id: importparams.php,v 1.6 2005-11-26 13:30:17 matthew Exp $
  * 
  */
 
@@ -31,6 +31,7 @@ require_once("utility.php");
  * null on success or an array mapping named PARAMETERs to error strings if any
  * of the parameters didn't match. */
 function importparams() {
+    global $lang;
     $i = 0;
     $errors = array();
     $valid = array();
@@ -49,6 +50,8 @@ function importparams() {
             $val = trim($_GET[$name]);
         else
             $val = null;
+        if ($lang == 'eo')
+            $val = input_esperanto($val);
             
         $check = $pp[1];
         $error = null;
