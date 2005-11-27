@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: person.php,v 1.8 2005-11-11 11:35:40 francis Exp $
+ * $Id: person.php,v 1.9 2005-11-27 12:29:58 matthew Exp $
  * 
  */
 
@@ -161,10 +161,11 @@ function person_cookie_token($id, $duration = null) {
         err("ID should be a decimal integer, not '$id'");
     if (!preg_match('/^[1-9]\d*$/', $duration) || $duration <= 0)
         err("DURATION should be a positive decimal integer, not '$duration'");
+    $site = OPTION_WEB_HOST;
     $salt = bin2hex(random_bytes(8));
     $start = time();
-    $sha = sha1("$id/$start/$duration/$salt/" . db_secret());
-    return sprintf('%d/%d/%d/%s/%s', $id, $start, $duration, $salt, $sha);
+    $sha = sha1("$id/$start/$duration/$site/$salt/" . db_secret());
+    return sprintf('%d/%d/%d/%s/%s/%s', $id, $start, $duration, $site, $salt, $sha);
 }
 
 /* person_check_cookie_token TOKEN
@@ -174,14 +175,16 @@ function person_cookie_token($id, $duration = null) {
  * have been locked with SELECT ... FOR UPDATE. */
 function person_check_cookie_token($token) {
     $a = array();
-    if (!preg_match('#^([1-9]\d*)/([1-9]\d*)/([1-9]\d*)/([0-9a-f]+)/([0-9a-f]+)$#', $token, $a))
+    if (!preg_match('#^([1-9]\d*)/([1-9]\d*)/([1-9]\d*)/(?:([0-9a-z]+)/)?([0-9a-f]+)/([0-9a-f]+)$#', $token, $a))
         return null;
-    list($x, $id, $start, $duration, $salt, $sha) = $a;
-    if (sha1("$id/$start/$duration/$salt/" . db_secret()) != $sha)
+    list($x, $id, $start, $duration, $site, $salt, $sha) = $a;
+    if (sha1("$id/$start/$duration/$site/$salt/" . db_secret()) != $sha)
         return null;
-    else if ($start + $duration < time())
+    elseif ($start + $duration < time())
         return null;
-    else if (is_null(db_getOne('select id from person where id = ? for update', $id)))
+    elseif ($site && $site != OPTION_WEB_HOST)
+        return null;
+    elseif (is_null(db_getOne('select id from person where id = ? for update', $id)))
         return null;
     else
         return $id;
