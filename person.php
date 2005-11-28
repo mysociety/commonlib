@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: person.php,v 1.9 2005-11-27 12:29:58 matthew Exp $
+ * $Id: person.php,v 1.10 2005-11-28 23:28:24 matthew Exp $
  * 
  */
 
@@ -60,6 +60,7 @@ class Person {
     function name($name = null) {
         if (!is_null($name)) {
             db_query('update person set name = ? where id = ?', array($name, $this->id));
+            db_commit();
             $this->name = $name;
         } elseif (is_null($this->name)) {
             err(_("Person has no name in name() function")); // try calling name_or_blank or has_name 
