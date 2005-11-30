@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Parties.pm,v 1.9 2005-10-26 10:07:39 francis Exp $
+# $Id: Parties.pm,v 1.10 2005-11-30 21:02:32 francis Exp $
 #
 
 package mySociety::Parties;
@@ -32,13 +32,16 @@ Map names of parties to their canonical name.
     "Con" => "Conservative",
     "Ind Con" => "Independent Conservative",
     "Scottish Conservative and Unionist Party" => "Conservative",
+    "Scottish Conservative & Unionist Party" => "Conservative",
 
     "DUP" => "DUP",
     "DU" => "DUP",
+    "Democratic Unionist Party" => "DUP",
 
     "Forward Wales" => "Forward Wales",
 
     "Green" => "Green",
+    "Greens" => "Green",
     "Scottish Green Party" => "Green",
 
     "Ind" => "Independent",
@@ -78,11 +81,15 @@ Map names of parties to their canonical name.
 
     "SF" => "Sinn Féin",
     "Sinn Fein" => "Sinn Féin",
+    "Sinn Féin" => "Sinn Féin",
+    "Sinn F\x{e9}in" => "Sinn Féin",
 
+    "UK Independence Party" => "UK Independence",
     "UK Independence" => "UK Independence",
 
     "UU" => "UUP",
     "UUP" => "UUP",
+    "Ulster Unionist Party" => "UUP",
 
     # Latest Robert Kilroy-Silk vehicle
     "Veritas" => "Veritas",
