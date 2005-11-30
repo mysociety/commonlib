@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin.php,v 1.34 2005-08-12 16:04:17 matthew Exp $
+ * $Id: admin.php,v 1.35 2005-11-30 12:54:16 francis Exp $
  * 
  */
 
@@ -107,6 +107,7 @@ hr {width: 600px;  background-color: #cccccc;  border: 0px;  height: 1px;  color
 img.creatorpicture { float: left; display: inline; margin-right: 10px; }
 .timeline dt {   clear: left; float: left; font-weight: bold; }
 .timeline dd { margin-left: 8em; }
+#pledge { border: solid 2px #522994; background-color: #f6e5ff; margin-bottom: 1em; margin-left: 1em; padding: 10px; text-align: center; width: 30%; float: right; margin: 1em auto; }
 //--></style>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title><?=$title?></title>
