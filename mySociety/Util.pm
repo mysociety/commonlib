@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Util.pm,v 1.33 2005-11-18 20:11:15 chris Exp $
+# $Id: Util.pm,v 1.34 2005-12-01 15:50:46 chris Exp $
 #
 
 package mySociety::Util::Error;
@@ -683,6 +683,26 @@ sub is_valid_email ($) {
     } else {
         return 0;
     }
+}
+
+=item create_accessor_methods 
+
+For a package which is derived from "fields", create any accessor methods which
+have not already been defined.
+
+=cut
+sub create_accessor_methods () {
+    no strict refs;
+    next if (exists(&{$_}));
+    eval <<EOF;
+sub $_ (\$;\$) {
+    my \$self = shift;
+    if (\@_) {
+        \$self->{$_} = \$_[0];
+    }
+    return \$self->{$_};
+}
+EOF
 }
 
 1;
