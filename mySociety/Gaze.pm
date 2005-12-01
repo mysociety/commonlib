@@ -8,7 +8,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # WWW: http://www.mysociety.org
 #
-# $Id: Gaze.pm,v 1.2 2005-11-25 16:27:14 francis Exp $
+# $Id: Gaze.pm,v 1.3 2005-12-01 17:02:08 francis Exp $
 
 package mySociety::Gaze;
 
@@ -82,6 +82,30 @@ sub get_find_places_countries () {
 sub get_country_from_ip ($) {
     configure() if !defined $rabx_client;
     return $rabx_client->call('Gaze.get_country_from_ip', @_);
+}
+
+=item Gaze::get_population_density LAT LON
+
+  Return an estimate of the population density at (LAT, LON) in persons per
+  square kilometer.
+
+=cut
+sub get_population_density ($$) {
+    configure() if !defined $rabx_client;
+    return $rabx_client->call('Gaze.get_population_density', @_);
+}
+
+=item Gaze::get_radius_containing_population LAT LON NUMBER [MAXIMUM]
+
+  Return an estimate of the radius (in km) of the smallest circle around
+  (LAT, LON) which contains at least NUMBER people. If MAXIMUM is defined,
+  return that value rather than any larger computed radius; if not
+  specified, use 150km.
+
+=cut
+sub get_radius_containing_population ($$$;$) {
+    configure() if !defined $rabx_client;
+    return $rabx_client->call('Gaze.get_radius_containing_population', @_);
 }
 
 
