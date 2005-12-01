@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Util.pm,v 1.35 2005-12-01 18:19:17 francis Exp $
+# $Id: Util.pm,v 1.36 2005-12-01 18:35:59 chris Exp $
 #
 
 package mySociety::Util::Error;
@@ -691,18 +691,20 @@ For a package which is derived from "fields", create any accessor methods which
 have not already been defined.
 
 =cut
-#sub create_accessor_methods () {
-#    no strict refs;
-#    next if (exists(&{$_}));
-#    eval <<EOF;
-#sub $_ (\$;\$) {
-#    my \$self = shift;
-#    if (\@_) {
-#        \$self->{$_} = \$_[0];
-#    }
-#    return \$self->{$_};
-#}
-#EOF
-#}
+sub create_accessor_methods () {
+    my $h = fields::new((caller())[0]);
+    foreach (keys %$h) {
+        next if (eval "exists($_)");
+        eval <<EOF;
+sub $_ (\$;\$) {
+    my \$self = shift;
+    if (\@_) {
+        \$self->{$_} = \$_[0];
+    }
+    return \$self->{$_};
+}
+EOF
+    }
+}
 
 1;
