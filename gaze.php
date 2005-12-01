@@ -8,7 +8,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: gaze.php,v 1.12 2005-11-25 16:27:14 francis Exp $
+ * $Id: gaze.php,v 1.13 2005-12-01 17:02:08 francis Exp $
  *
  */
 
@@ -82,6 +82,30 @@ function gaze_get_country_from_ip($address) {
     global $gaze_client;
     $params = func_get_args();
     $result = $gaze_client->call('Gaze.get_country_from_ip', $params);
+    return $result;
+}
+
+/* gaze_get_population_density LAT LON
+
+  Return an estimate of the population density at (LAT, LON) in persons per
+  square kilometer. */
+function gaze_get_population_density($lat, $lon) {
+    global $gaze_client;
+    $params = func_get_args();
+    $result = $gaze_client->call('Gaze.get_population_density', $params);
+    return $result;
+}
+
+/* gaze_get_radius_containing_population LAT LON NUMBER [MAXIMUM]
+
+  Return an estimate of the radius (in km) of the smallest circle around
+  (LAT, LON) which contains at least NUMBER people. If MAXIMUM is defined,
+  return that value rather than any larger computed radius; if not
+  specified, use 150km. */
+function gaze_get_radius_containing_population($lat, $lon, $number, $maximum = null) {
+    global $gaze_client;
+    $params = func_get_args();
+    $result = $gaze_client->call('Gaze.get_radius_containing_population', $params);
     return $result;
 }
 
