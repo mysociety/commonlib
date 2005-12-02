@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: tracking.php,v 1.1 2005-12-02 18:48:55 chris Exp $
+ * $Id: tracking.php,v 1.2 2005-12-02 23:49:27 chris Exp $
  * 
  */
 
@@ -41,7 +41,7 @@ function track_code($extra = null) {
                 );
     }
 
-    return '<img alt="" src="' . $img . '">'
+    return '<!-- This tracking image is used to collect data which we use to improve our services. More on this at XXX INSERT URL WITH EXPLANATION HERE XXX --><img alt="" src="' . $img . '">'
 }
 
 /* track_event [EXTRA]
