@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: RABX.pm,v 1.13 2005-10-26 15:31:03 chris Exp $
+# $Id: RABX.pm,v 1.14 2005-12-05 20:57:34 francis Exp $
 
 # References:
 #   Netstrings are documented here: http://cr.yp.to/proto/netstrings.txt
@@ -395,7 +395,7 @@ use HTTP::Request;
 use HTTP::Response;
 use Regexp::Common qw(URI);
 
-my $rcsid = ''; $rcsid .= '$Id: RABX.pm,v 1.13 2005-10-26 15:31:03 chris Exp $';
+my $rcsid = ''; $rcsid .= '$Id: RABX.pm,v 1.14 2005-12-05 20:57:34 francis Exp $';
 
 =back
 
@@ -545,6 +545,7 @@ Serve RABX methods from a CGI/FastCGI script.
 sub dispatch (%) { # XXX should take stream + environment hash
     my (%funcs) = @_;
     my $ret;
+
 
     binmode(STDIN);
     binmode(STDOUT);
