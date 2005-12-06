@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.57 2005-11-28 23:28:24 matthew Exp $
+ * $Id: utility.php,v 1.58 2005-12-06 00:10:35 matthew Exp $
  * 
  */
 
@@ -324,12 +324,25 @@ function convert_to_unix_newlines($text) {
     return $text;
 }
 
-/* get_http_var NAME [DEFAULT]
+/* get_http_var NAME [DEFAULTorALLOW]
  * Return the value of the GET or POST parameter with the given NAME; or, if no
- * such parameter is present, DEFAULT; or, if DEFAULT is not specified, the
- * empty string (""). */
+ * such parameter is present, DEFAULT; or, if DEFAULT is not specified or is a
+ * boolean, the empty string ("").
+ * If DEFAULT is a boolean, allow the input to be changed (currently, only
+ * for Esperanto input to take .x to various accented characters). It's thus
+ * currently impossible to have a default and have changed input, but nowhere
+ * on the PledgeBank site requires a default anyway.
+ */
 function get_http_var($name, $default='') {
     global $lang;
+
+    if (is_bool($default)) {
+        $allow_changes = true;
+        $default = '';
+    } else {
+        $allow_changes = false;
+    }
+
     if (array_key_exists($name, $_GET)) {
         $var = $_GET[$name];
         if (!is_array($var)) $var = trim($var);
@@ -339,8 +352,7 @@ function get_http_var($name, $default='') {
     } else { 
         $var = $default;
     }
-    if ($lang == 'eo' && $name != 'data' && $name != 'ref' && $name != 't')
-        # XXX: Cludgy hack to not 'translate' and corrupt the base64 data variable, or the URLed shortref
+    if ($allow_changes && $lang == 'eo')
         $var = input_esperanto($var);
     return $var;
 }

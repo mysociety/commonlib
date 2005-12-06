@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: importparams.php,v 1.7 2005-11-26 17:09:55 matthew Exp $
+ * $Id: importparams.php,v 1.8 2005-12-06 00:10:35 matthew Exp $
  * 
  */
 
@@ -29,7 +29,11 @@ require_once("utility.php");
  * values will also be written into $q_unchecked_PARAMETER and
  * $q_h_unchecked_PARAMETER, whether or not they are valid.  Import returns
  * null on success or an array mapping named PARAMETERs to error strings if any
- * of the parameters didn't match. */
+ * of the parameters didn't match.
+ * If PARAMETER is an array, the first entry is the PARAMETER name for the above,
+ * the second is a boolean stating whether user input changes can be made (for
+ * Esperanto only currently)
+ */
 function importparams() {
     global $lang;
     $i = 0;
@@ -39,7 +43,14 @@ function importparams() {
         $pp = func_get_arg($i);
         if (!is_array($pp) || count($pp) < 2 || count($pp) > 4)
             err("each SPEC must be an array of 2, 3 or 4 elements");
+
+        $allow_changes = false;
         $name = $pp[0];
+        if (is_array($name)) {
+            $allow_changes = $name[1];
+            $name = $name[0];
+        }
+
         if (!is_string($name))
             err("PARAMETER should be a string");
 
@@ -50,7 +61,7 @@ function importparams() {
             $val = trim($_GET[$name]);
         else
             $val = null;
-        if (!is_null($val) && $lang == 'eo')
+        if (!is_null($val) && $allow_changes && $lang == 'eo')
             $val = input_esperanto($val);
             
         $check = $pp[1];
