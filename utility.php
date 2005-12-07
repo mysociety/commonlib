@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.58 2005-12-06 00:10:35 matthew Exp $
+ * $Id: utility.php,v 1.59 2005-12-07 20:37:52 matthew Exp $
  * 
  */
 
@@ -405,7 +405,7 @@ function invoked_url() {
         $url .= "s";
         $ssl = TRUE;
     }
-    $url .= "://" . $_SERVER['SERVER_NAME'];
+    $url .= "://" . $_SERVER['HTTP_HOST'];
 
     if ((!$ssl && $_SERVER['SERVER_PORT'] != 80)
         || ($ssl && $_SERVER['SERVER_PORT'] != 443))
