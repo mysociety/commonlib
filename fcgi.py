@@ -163,7 +163,7 @@ class record:
                 0]
         hdr = string.joinfields(map(chr, hdr), '')
 
-        sock.send(hdr + content + padLen*'\000')
+        sock.sendall(hdr + content + padLen*'\000')
 
 #---------------------------------------------------------------------------
 
