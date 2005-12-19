@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.59 2005-12-07 20:37:52 matthew Exp $
+ * $Id: utility.php,v 1.60 2005-12-19 09:46:05 matthew Exp $
  * 
  */
 
@@ -266,7 +266,7 @@ function trim_characters ($text, $start, $length) {
         if (preg_match ("/.+?\b(.*)/", $text, $matches)) {
             $text = $matches[1];
             // Strip spare space at the start.
-            $text = preg_replace ("/^\s/", '', $text);
+            $text = ltrim($text);
         }
         $text = '...' . $text;
     }
@@ -275,13 +275,13 @@ function trim_characters ($text, $start, $length) {
     if (strlen($text) > $length) {
 
         // Allow space for ellipsis.
-        $text = substr($text, 0, $length - 3); 
+        $text = mb_substr($text, 0, $length - 3, 'utf-8'); 
 
         // Word boundary.         
         if (preg_match ("/(.*)\b.+/", $text, $matches)) {
             $text = $matches[1];
             // Strip spare space at the end.
-            $text = preg_replace ("/\s$/", '', $text);
+            $text = rtrim($text);
         }
         // We don't want to use the HTML entity for an ellipsis (&#8230;), because then 
         // it screws up when we subsequently use htmlentities() to print the returned
