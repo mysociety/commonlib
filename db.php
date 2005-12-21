@@ -1,12 +1,12 @@
 <?
 // db.php:
-// Interface to database for PledgeBank
+// Interface to database (originally for PledgeBank)
 // TODO:  Perhaps get rid of this file, as PEAR's DB is good enough alone.
 //
 // Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 // Email: francis@mysociety.org. WWW: http://www.mysociety.org
 //
-// $Id: db.php,v 1.3 2005-10-07 19:07:58 matthew Exp $
+// $Id: db.php,v 1.4 2005-12-21 01:19:22 francis Exp $
 
 require_once "DB.php";
 require_once "utility.php";
@@ -39,6 +39,8 @@ function db_connect() {
     $pbdb->commit();
     
     $pbdb->autoCommit(false);
+
+    $pbdb->query('begin');
 }
 
 /* db_secret
@@ -154,6 +156,7 @@ function db_affected_rows() {
 function db_commit () {
     global $pbdb;
     $pbdb->commit();
+    $pbdb->query('begin');
 }
 
 /* db_rollback
@@ -161,6 +164,7 @@ function db_commit () {
 function db_rollback () {
     global $pbdb;
     $pbdb->rollback();
+    $pbdb->query('begin');
 }
 
 ?>
