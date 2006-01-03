@@ -6,7 +6,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Tracking.pm,v 1.1 2006-01-03 16:05:49 chris Exp $
+# $Id: Tracking.pm,v 1.2 2006-01-03 16:50:07 chris Exp $
 #
 
 package mySociety::Tracking;
@@ -32,9 +32,12 @@ sub code ($$) {
     return '' if (!mySociety::Config::get('TRACKING', 0));
     my ($q, $extra) = @_;
     my $salt = sprintf('%08x', rand(0xffffffff));
-    my $url = $q->url();
+    my $url = $q->url(-path_info => 1);
+    # XXX Can't use $q->query_string(), because that's reconstructed to include
+    # the POST parameters too. Sigh.
+    $url .= "?$ENV{QUERY_STRING}" if ($ENV{QUERY_STRING});
     my $img = mySociety::Config::get('TRACKING_URL');
-    if ($img = /\?/) {
+    if ($img =~ /\?/) {
         $img .= ";";
     } else {
         $img .= "?";
@@ -43,7 +46,7 @@ sub code ($$) {
     my $d = mySociety::Config::get('TRACKING_SECRET') . "\0$salt\0$url";
     if (defined($extra)) {
         $d .= "\0$extra";
-        $url .= ";extra=" . urlencode($extra);
+        $img .= ";extra=" . urlencode($extra);
     }
     $img .= ";sign=" . Digest::SHA1::sha1_hex($d);
     return '<!- This "web bug" image is used to collect data which we use to improve our services. More on this at XXX INSERT URL WITH EXPLANATION HERE XXX --><img alt="" src="' . $img . '">';
