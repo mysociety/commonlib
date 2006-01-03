@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: tracking.php,v 1.5 2006-01-03 16:04:37 chris Exp $
+ * $Id: tracking.php,v 1.6 2006-01-03 16:50:07 chris Exp $
  * 
  */
 
@@ -25,14 +25,14 @@ function track_code($extra = null) {
     $sign = null;
     $img = null;
     if (is_null($extra)) {
-        $sign = sha1(OPTION_TRACKING_SECRET . "\0$salt\0$url\0");
+        $sign = sha1(OPTION_TRACKING_SECRET . "\0$salt\0$url");
         $img = new_url(OPTION_TRACKING_URL, false,
                     "salt", $salt,
                     "url", $url,
                     "sign", $sign
                 );
     } else {
-        $sign = sha1(OPTION_TRACKING_SECRET . "\0$salt\0$url\0$extra\0");
+        $sign = sha1(OPTION_TRACKING_SECRET . "\0$salt\0$url\0$extra");
         $img = new_url(OPTION_TRACKING_URL, false,
                     "salt", $salt,
                     "url", $url,
