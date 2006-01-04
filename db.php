@@ -6,7 +6,7 @@
 // Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 // Email: francis@mysociety.org. WWW: http://www.mysociety.org
 //
-// $Id: db.php,v 1.4 2005-12-21 01:19:22 francis Exp $
+// $Id: db.php,v 1.5 2006-01-04 15:30:59 francis Exp $
 
 require_once "DB.php";
 require_once "utility.php";
@@ -36,7 +36,7 @@ function db_connect() {
     $r = $pbdb->getOne('select secret from secret');
     if (is_null($r))
         $pbdb->query('insert into secret (secret) values (?)', array(bin2hex(random_bytes(32))));
-    $pbdb->commit();
+    $pbdb->query('commit');
     
     $pbdb->autoCommit(false);
 
@@ -155,7 +155,9 @@ function db_affected_rows() {
  * Commit current transaction. */
 function db_commit () {
     global $pbdb;
-    $pbdb->commit();
+    // PEAR DB ->commit() doesn't commit if it believes no updates/inserts
+    // were done. So any select with side effects wouldn't commit.
+    $pbdb->query('commit');
     $pbdb->query('begin');
 }
 
