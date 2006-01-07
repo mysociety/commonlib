@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: importparams.php,v 1.8 2005-12-06 00:10:35 matthew Exp $
+ * $Id: importparams.php,v 1.9 2006-01-07 18:34:26 matthew Exp $
  * 
  */
 
@@ -55,11 +55,13 @@ function importparams() {
             err("PARAMETER should be a string");
 
         /* Obtain parameter value. */
-        if (array_key_exists($name, $_POST))
-            $val = trim($_POST[$name]);
-        else if (array_key_exists($name, $_GET))
-            $val = trim($_GET[$name]);
-        else
+        if (array_key_exists($name, $_POST)) {
+            $val = $_POST[$name];
+            if (!is_array($val)) $val = trim($val);
+        } elseif (array_key_exists($name, $_GET)) {
+            $val = $_GET[$name];
+            if (!is_array($val)) $val = trim($val);
+        } else
             $val = null;
         if (!is_null($val) && $allow_changes && $lang == 'eo')
             $val = input_esperanto($val);
