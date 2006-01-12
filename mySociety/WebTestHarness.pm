@@ -7,11 +7,12 @@
 # - Watch HTTP logs files for new errors (log_watcher_* functions)
 # - Store email in db and check it (email_* functions)
 # - Check PHP syntax for given files (php_check_syntax)
+# - Miscellaneous other functions (multi_spawn)
 #
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.29 2005-10-10 12:30:18 francis Exp $
+# $Id: WebTestHarness.pm,v 1.30 2006-01-12 15:35:19 francis Exp $
 #
 
 package mySociety::WebTestHarness;
@@ -481,5 +482,35 @@ sub php_check_syntax($$;$) {
 
 
 ############################################################################
+# Extra functions
+
+=item multi_spawn NUMBER_OF_TIMES COMMAND VERBOSE
+
+Launch the COMMAND multiple times, and wait for them all to finish. Die if any
+of them return an error code. This is useful for testing the COMMAND works when
+run concurrently (say from cron on multiple servers). Print the command being
+run, and how many copies, if VERBOSE >= 2.
+
+=cut
+sub multi_spawn($$$) {
+    my ($self, $nprocs, $command, $verbose) = @_;
+    print "$nprocs x $command\n" if $verbose >= 2;
+
+    my @pids; 
+    for (my $i = 0; $i < $nprocs; ++$i) { 
+        my $p = fork(); 
+        if ($p) { 
+            push(@pids, $p); 
+        } else { 
+            { exec("/bin/sh", "-c", $command); } 
+            die "Couldn't exec '$command'";
+        } 
+    } 
+        
+    for (my $i = 0; $i < @pids; ++$i) { 
+        waitpid($pids[$i], 0);
+        die "exit code $? from '$command'" if ($? != 0);
+    }
+}
 
 1;
