@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Util.pm,v 1.37 2006-01-17 20:23:10 maint Exp $
+# $Id: Util.pm,v 1.38 2006-01-17 20:36:52 maint Exp $
 #
 
 package mySociety::Util::Error;
@@ -723,7 +723,6 @@ sub create_file_to_replace ($) {
         my $n = File::Spec->catpath($v, $path, sprintf('.%s.%08x.%08x', $file, int(rand(0xffffffff)), time()));
         my $h = new IO::File($n, O_CREAT | O_EXCL | O_WRONLY, defined($st) ? $st->mode() : 0600);
         last if (!$h and !$!{EEXIST});
-        chown($wwwdata_uid, $wwwdata_gid, $n);
         return ($n, $h);
     }
     die $!;
