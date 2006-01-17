@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: person.php,v 1.11 2005-11-29 00:56:10 matthew Exp $
+ * $Id: person.php,v 1.12 2006-01-17 23:05:03 chris Exp $
  * 
  */
 
@@ -340,9 +340,9 @@ function person_get_or_create($email, $name = null) {
     if (is_null($email))
         err('EMAIL null in person_get_or_create');
         /* XXX case-insensitivity of email addresses? */
-    db_query('lock table person in share mode');    /* Guard against double-insert. */
     $id = db_getOne('select id from person where email = ?', $email);
     if (is_null($id)) {
+        db_query('lock table person in share mode');    /* Guard against double-insert. */
         $id = db_getOne("select nextval('person_id_seq')");
         db_query('insert into person (id, email, name) values (?, ?, ?)', array($id, $email, $name));
     }
