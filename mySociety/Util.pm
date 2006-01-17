@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Util.pm,v 1.36 2005-12-01 18:35:59 chris Exp $
+# $Id: Util.pm,v 1.37 2006-01-17 20:23:10 maint Exp $
 #
 
 package mySociety::Util::Error;
@@ -31,7 +31,7 @@ use Sys::Syslog;
 BEGIN {
     use Exporter ();
     our @ISA = qw(Exporter);
-    our @EXPORT_OK = qw(&print_log &random_bytes &ordinal &is_valid_email &is_valid_postcode);
+    our @EXPORT_OK = qw(&print_log &random_bytes &ordinal &is_valid_email &is_valid_postcode &create_file_to_replace);
 }
 our @EXPORT_OK;
 
@@ -705,6 +705,28 @@ sub $_ (\$;\$) {
 }
 EOF
     }
+}
+
+=item create_file_to_replace FILE
+
+Create a file to replace the named FILE. Returns in list context a handle open
+on the new file, and its name.
+
+=cut
+sub create_file_to_replace ($) {
+    my ($name) = @_;
+
+    my $st = stat($name);
+    my ($v, $path, $file) = File::Spec->splitpath($name);
+
+    for (my $i = 0; $i < 10; ++$i) {
+        my $n = File::Spec->catpath($v, $path, sprintf('.%s.%08x.%08x', $file, int(rand(0xffffffff)), time()));
+        my $h = new IO::File($n, O_CREAT | O_EXCL | O_WRONLY, defined($st) ? $st->mode() : 0600);
+        last if (!$h and !$!{EEXIST});
+        chown($wwwdata_uid, $wwwdata_gid, $n);
+        return ($n, $h);
+    }
+    die $!;
 }
 
 1;
