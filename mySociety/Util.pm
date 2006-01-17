@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Util.pm,v 1.38 2006-01-17 20:36:52 maint Exp $
+# $Id: Util.pm,v 1.39 2006-01-17 20:51:46 maint Exp $
 #
 
 package mySociety::Util::Error;
@@ -20,6 +20,7 @@ use strict;
 use Errno;
 use Error qw(:try);
 use Fcntl;
+use File::stat;
 use Getopt::Std;
 use IO::File;
 use IO::Handle;
