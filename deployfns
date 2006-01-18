@@ -4,7 +4,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: deployfns,v 1.14 2005-04-05 17:12:32 francis Exp $
+# $Id: deployfns,v 1.15 2006-01-18 18:07:54 maint Exp $
 #
 
 # Warnings and errors
@@ -104,6 +104,7 @@ check_config_files () {
     cd -
 }
 
+# TODO - obsolete, remove this when we have moved from very fully
 # Tests if the schema in a file is the same as in a postgra postgresql
 # database.
 # $1 - unix user who can access db
