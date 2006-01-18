@@ -1,12 +1,24 @@
 <?
 // db.php:
-// Interface to database (originally for PledgeBank)
-// TODO:  Perhaps get rid of this file, as PEAR's DB is good enough alone.
+// Interface to (PostgreSQL) database 
+//
+// This is a wrapper round PEAR's DB. Unfortunately, DB doesn't behave
+// in the same way as Perl's DBI. It 
+// - doesn't start a transaction automatically, unless you make a query
+//   it believes to be a modifying one
+// - doesn't commit at all unless you have done a query which it 
+//   believes to be a modifying one
+// Its test of "modifying query" is based on simple string search, so
+// it fails when you call a function with side effects via SELECT.
+//
+// So, we do our own query calls through to begin, commit and rollback.
+// This also means we have to maintain transaction_opcount ourselves,
+// so DB/pgsql.php doesn't do its own unnecessary extra "begin" calls.
 //
 // Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 // Email: francis@mysociety.org. WWW: http://www.mysociety.org
 //
-// $Id: db.php,v 1.6 2006-01-18 11:10:15 francis Exp $
+// $Id: db.php,v 1.7 2006-01-18 12:37:18 francis Exp $
 
 require_once "DB.php";
 require_once "utility.php";
@@ -30,17 +42,20 @@ function db_connect() {
     if (DB::isError($pbdb)) {
         die($pbdb->getMessage());
     }
+
+    $pbdb->autoCommit(false);
     
     /* Ensure that we have a site shared secret. */
+    $pbdb->transaction_opcount++;
     $pbdb->query('begin');
     $pbdb->query('lock table secret in share mode');
     $r = $pbdb->getOne('select secret from secret');
     if (is_null($r))
         $pbdb->query('insert into secret (secret) values (?)', array(bin2hex(random_bytes(32))));
     $pbdb->query('commit');
+    $pbdb->transaction_opcount=0;
     
-    $pbdb->autoCommit(false);
-
+    $pbdb->transaction_opcount++;
     $pbdb->query('begin');
 }
 
@@ -159,6 +174,8 @@ function db_commit () {
     // PEAR DB ->commit() doesn't commit if it believes no updates/inserts
     // were done. So any select with side effects wouldn't commit.
     $pbdb->query('commit');
+    $pbdb->transaction_opcount=0;
+    $pbdb->transaction_opcount++;
     $pbdb->query('begin');
 }
 
@@ -167,6 +184,8 @@ function db_commit () {
 function db_rollback () {
     global $pbdb;
     $pbdb->query('rollback');
+    $pbdb->transaction_opcount=0;
+    $pbdb->transaction_opcount++;
     $pbdb->query('begin');
 }
 
