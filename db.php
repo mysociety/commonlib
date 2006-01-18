@@ -6,7 +6,7 @@
 // Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 // Email: francis@mysociety.org. WWW: http://www.mysociety.org
 //
-// $Id: db.php,v 1.5 2006-01-04 15:30:59 francis Exp $
+// $Id: db.php,v 1.6 2006-01-18 11:10:15 francis Exp $
 
 require_once "DB.php";
 require_once "utility.php";
@@ -32,6 +32,7 @@ function db_connect() {
     }
     
     /* Ensure that we have a site shared secret. */
+    $pbdb->query('begin');
     $pbdb->query('lock table secret in share mode');
     $r = $pbdb->getOne('select secret from secret');
     if (is_null($r))
@@ -165,7 +166,7 @@ function db_commit () {
  * Roll back current transaction. */
 function db_rollback () {
     global $pbdb;
-    $pbdb->rollback();
+    $pbdb->query('rollback');
     $pbdb->query('begin');
 }
 
