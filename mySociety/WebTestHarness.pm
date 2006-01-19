@@ -12,7 +12,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.30 2006-01-12 15:35:19 francis Exp $
+# $Id: WebTestHarness.pm,v 1.31 2006-01-19 19:50:56 francis Exp $
 #
 
 package mySociety::WebTestHarness;
@@ -340,6 +340,9 @@ Prepares for incoming email.  PARAMS is a hash reference, containing:
 eveld_bin - The binary for eveld, which the email test code will run to send
 outgoing messages.  Optional.
 
+eveld_multispawn - Number of times to spawn eveld_bin at once, to test for
+concurrency problems. Optional, default 1.
+
 log_mailbox - Mail file to additionally put all received messages in.  Deletes
 any existing file.  Optional.
 
@@ -352,6 +355,7 @@ sub email_setup($$) {
     dbh()->commit();
 
     $self->{eveld_bin} = $params->{eveld_bin};
+    $self->{eveld_multispawn} = $params->{eveld_multispawn};
     $self->{log_mailbox} = $params->{log_mailbox};
     unlink $self->{log_mailbox} if $self->{log_mailbox};
 }
@@ -365,7 +369,9 @@ was not set in email_setup, does nothing.
 sub email_run_eveld($) {
     my ($self) = @_;
     return if !$self->{eveld_bin};
-    system($self->{eveld_bin}, "--once") and die "Failed to call eveld";
+    my $multispawn = $self->{eveld_multispawn};
+    $multispawn = 1 if !$multispawn;
+    $self->multi_spawn($multispawn, $self->{eveld_bin} . " --once", 2); # TODO: pass verbose in?
 }
 
 =item email_get_containing STRING
