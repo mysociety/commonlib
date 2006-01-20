@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Util.pm,v 1.39 2006-01-17 20:51:46 maint Exp $
+# $Id: Util.pm,v 1.40 2006-01-20 17:44:38 chris Exp $
 #
 
 package mySociety::Util::Error;
@@ -727,6 +727,48 @@ sub create_file_to_replace ($) {
         return ($n, $h);
     }
     die $!;
+}
+
+=item describe_waitval VALUE [FUNCTION]
+
+Given VALUE, returned by one of the wait syscalls or system, return undef if
+it indicates a successful, normal exit, or a string describing the error
+encountered. This will be one of,
+
+=over 4
+
+=item FUNCTION: ERROR
+
+if the system call itself failed;
+
+=item killed by signal NUMBER
+
+if the process was killed by a signal; or
+
+=item exited with status STATUS
+
+if the process exited with a nonzero exit status.
+
+=back
+
+FUNCTION should specify the name of the function which returned VALUE. It
+defaults to "wait".
+
+=cut
+sub describe_waitval ($;$) {
+    my ($value, $fn) = @_;
+    $fn ||= 'wait';
+    if (!defined($value) || $value == -1) {
+        my $e = $!;
+        $e ||= 'Unknown error';
+        return "$fn: $e";
+    } elsif ($value == 0) {
+        return undef;
+    } elsif ($value & 127) {
+        return "killed by signal " . ($value & 127);
+    } else {
+        return "exited with status " . ($value >> 8);
+    }
 }
 
 1;
