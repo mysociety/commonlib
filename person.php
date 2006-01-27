@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: person.php,v 1.12 2006-01-17 23:05:03 chris Exp $
+ * $Id: person.php,v 1.13 2006-01-27 15:09:19 chris Exp $
  * 
  */
 
@@ -154,10 +154,10 @@ class Person {
 /* person_cookie_token ID [DURATION]
  * Return an opaque version of ID to identify a person in a cookie. If
  * supplied, DURATION is how long the cookie will last (verified by the
- * server); if not specified, a short default lifetime is used. */
+ * server); if not specified, a default of one year is used. */
 function person_cookie_token($id, $duration = null) {
     if (is_null($duration))
-        $duration = 1 * 24 * 3600; /* one day */
+        $duration = 365 * 86400; /* one year */
     if (!preg_match('/^[1-9]\d*$/', $id))
         err("ID should be a decimal integer, not '$id'");
     if (!preg_match('/^[1-9]\d*$/', $duration) || $duration <= 0)

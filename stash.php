@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: stash.php,v 1.2 2005-07-08 16:53:12 francis Exp $
+ * $Id: stash.php,v 1.3 2006-01-27 15:09:19 chris Exp $
  * 
  */
 
@@ -67,7 +67,7 @@ function stash_new_request($method, $url, $params, $extra = null) {
      * do this as two queries, one to produce the threshold time and another to
      * actually do the delete because PG isn't smart enough (in 7.3.x, anyway)
      * to use the index for the query if the RHS of the < is nonconstant. */
-    $t = db_getOne("select pb_current_timestamp() - '7 days'::interval");
+    $t = db_getOne("select pb_current_timestamp() - '365 days'::interval");
     db_query("delete from requeststash where whensaved < ?", $t);
 
     return $key;
@@ -80,7 +80,7 @@ function stash_new_request($method, $url, $params, $extra = null) {
 function stash_redirect($key) {
     list($method, $url, $post_data) = db_getRow_list('select method, url, post_data from requeststash where key = ?', $key);
     if (is_null($method))
-        err(_("If you got the email more than a week ago, then your request has probably expired.  Please try doing what you were doing from the beginning."));
+        err(_("If you got the email more than a year ago, then your request has probably expired.  Please try doing what you were doing from the beginning."));
     if (headers_sent())
         err("Headers have already been sent in stash_redirect('$key')");
     if ($method == 'GET') {
@@ -114,7 +114,7 @@ function stash_check_for_post_redirect() {
     /* Extract the post data */
     list($method, $url, $post_data) = db_getRow_list('select method, url, post_data from requeststash where key = ?', $key);
     if (is_null($method))
-        err(_("If you got the email more than a week ago, then your request has probably expired.  Please try doing what you were doing from the beginning."));
+        err(_("If you got the email more than a year ago, then your request has probably expired.  Please try doing what you were doing from the beginning."));
 
     /* Postgres/PEAR DB BYTEA madness -- see comment in auth.php. */
     $post_data = pg_unescape_bytea($post_data);

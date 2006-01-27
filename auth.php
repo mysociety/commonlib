@@ -7,7 +7,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: auth.php,v 1.3 2005-11-04 12:48:19 chris Exp $
+ * $Id: auth.php,v 1.4 2006-01-27 15:09:19 chris Exp $
  * 
  */
 
@@ -80,8 +80,7 @@ function auth_token_destroy($scope, $token) {
 /* auth_sign_with_shared_secret ITEM SECRET
  * Signs a string ITEM, using a shared secret string SECRET.  Returns the
  * SIGNATURE. Pass the ITEM and SIGNATURE into auth_verify_with_shared_secret
- * to check it.
- */
+ * to check it. */
 function auth_sign_with_shared_secret($item, $secret) {
     $salt = bin2hex(random_bytes(8));
     $sha = sha1("$salt-$secret-$item");
@@ -91,8 +90,7 @@ function auth_sign_with_shared_secret($item, $secret) {
 /* auth_verify_with_shared_secret ITEM SECRET SIGNATURE
  * Verifies that the ITEM has been correctly signed with SIGNATURE.  The signer
  * must also have had SECRET and will have called auth_sign_with_shared_secret
- * to make the SIGNATURE.
- */
+ * to make the SIGNATURE. */
 function auth_verify_with_shared_secret($item, $secret, $signature) {
     if (!preg_match('#^([0-9a-f]+)-([0-9a-f]+)$#', $signature, $matches))
         return false;
