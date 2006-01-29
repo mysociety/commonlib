@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.60 2005-12-19 09:46:05 matthew Exp $
+ * $Id: utility.php,v 1.61 2006-01-29 02:12:46 matthew Exp $
  * 
  */
 
@@ -539,8 +539,8 @@ function make_clickable($ret, $params = array()) {
 }
 
 function ordinal($cardinal) {
-    global $lang;
-    if ($lang == 'eo') {
+    global $locale_current;
+    if ($locale_current == 'eo') {
         return $cardinal . '-a';
     } else {
         return english_ordinal($cardinal);
@@ -571,23 +571,23 @@ function english_ordinal($cardinal)
    Returns a nicer form of THING for things that it knows about, otherwise just returns the string.
  */
 function prettify($s, $html = true) {
-    global $lang;
+    global $locale_current;
 
     if (preg_match('#^(\d{4})-(\d\d)-(\d\d)$#',$s,$m)) {
         list(,$y,$m,$d) = $m;
         $e = mktime(12,0,0,$m,$d,$y);
-        if ($lang == 'en-gb') {
+        if ($locale_current == 'en-gb') {
             if ($html)
                 return date('j<\sup>S</\sup> F Y', $e);
             return date('jS F Y', $e);
-        } elseif ($lang == 'eo')
+        } elseif ($locale_current == 'eo')
             return strftime('la %e-a de %B %Y', $e);
         return strftime('%e %B %Y', $e);
     }
     if (preg_match('#^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d:\d\d)$#',$s,$m)) {
         list(,$y,$m,$d,$tim) = $m;
         $e = mktime(12,0,0,$m,$d,$y);
-        if ($lang == 'en-gb') {
+        if ($locale_current == 'en-gb') {
             if ($html)
                 return date('j<\sup>S</\sup> F Y', $e);
             return date('jS F Y', $e);
