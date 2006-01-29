@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.62 2006-01-29 13:16:27 matthew Exp $
+ * $Id: utility.php,v 1.63 2006-01-29 16:27:54 matthew Exp $
  * 
  */
 
@@ -278,7 +278,7 @@ function trim_characters ($text, $start, $length) {
         $text = mb_substr($text, 0, $length - 3, 'utf-8'); 
 
         // Word boundary.         
-        if (preg_match ("/(.*)\s.+/", $text, $matches)) {
+        if (preg_match ("/(.*)\b.+/u", $text, $matches)) {
             $text = $matches[1];
             // Strip spare space at the end.
             $text = rtrim($text);
@@ -540,10 +540,10 @@ function make_clickable($ret, $params = array()) {
 
 function ordinal($cardinal) {
     global $locale_current;
-    if ($locale_current == 'eo') {
-        return $cardinal . '-a';
-    } else {
-        return english_ordinal($cardinal);
+    switch ($locale_current) {
+        case 'eo': return $cardinal . '-a';
+        case 'nl': return $cardinal . 'e';
+        default: return english_ordinal($cardinal);
     }
 }
 
