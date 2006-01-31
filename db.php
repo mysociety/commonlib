@@ -18,7 +18,7 @@
 // Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 // Email: francis@mysociety.org. WWW: http://www.mysociety.org
 //
-// $Id: db.php,v 1.7 2006-01-18 12:37:18 francis Exp $
+// $Id: db.php,v 1.8 2006-01-31 11:41:32 chris Exp $
 
 require_once "DB.php";
 require_once "utility.php";
@@ -29,6 +29,10 @@ function db_connect() {
     global $pbdb;
     $vars = array('hostspec'=>'HOST', 'port'=>'PORT', 'database'=>'NAME', 'username'=>'USER', 'password'=>'PASS');
     $connstr = array('phptype'=>'pgsql');
+        /* might also want to set 'persistent' => true to get persistent DB
+         * connections, though we'd want also to ensure that the connection
+         * hasn't died, and ensure that we can't have more PHP processes than
+         * the database server permits connections. */
     if (defined('OPTION_DB_TYPE')) {
         $connstr['phptype'] = OPTION_DB_TYPE;
     }
