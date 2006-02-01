@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Util.pm,v 1.41 2006-01-20 17:46:45 chris Exp $
+# $Id: Util.pm,v 1.42 2006-02-01 12:23:26 chris Exp $
 #
 
 package mySociety::Util::Error;
@@ -359,11 +359,28 @@ Start system logging, under TAG. If you don't call this explicitly, the first
 call to print_log will, constructing an appropriate tag from $0.
 
 =cut
-my $logopen;
+my ($logopen, $savedlogtag, $triedconnect);
 sub open_log ($) {
-    Sys::Syslog::setlogsock('unix');    # Sys::Syslog is nasty
-    openlog($_[0], 'pid,ndelay', 'daemon');    
-    $logopen = $_[0];
+    # Wrap the openlog call in eval because it will fail if it can't connect
+    # to /dev/log (god alone knows why -- it's a datagram socket, so they could
+    # just use sendto). It's possible (though unlikely) that the connection
+    # could fail, but this doesn't matter because we'd just call openlog again
+    # on the next invocation of print_log. However, openlog's default behaviour
+    # is to die if connect fails.
+    $savedlogtag ||= $_[0];
+    my $w;
+    eval {
+        $SIG{__WARN__} = sub { $w = $_[0] };
+        Sys::Syslog::setlogsock('unix');    # Sys::Syslog is nasty
+        openlog($_[0], 'pid,ndelay', 'daemon');
+        $logopen = $_[0];
+    };
+    $w =~ s# at .+line \d+$##;
+    if (!$logopen && !$triedconnect) {
+        print STDERR "$_[0]: open_log: $w";
+        print STDERR "$_[0]: that means that errors will not be logged to the system log, at least until we're able to connect to /dev/log\n";
+        $triedconnect = 1;
+    }
 }
 
 =item log_to_stderr [FLAG]
@@ -386,16 +403,22 @@ use from daemons etc; web scripts should just log to standard error.
 
 =cut
 sub print_log ($$) {
-    if (!defined($logopen)) {
-        my $tag = $0;
-        $tag =~ s#^.*/##;
+    my $tag = $logopen;
+    if (!defined($tag)) {
+        $tag = $savedlogtag;
+        if (!$tag) {
+            $tag = $0;
+            $tag =~ s#^.*/##;
+        }
         open_log($tag);
     }
     my ($pri, @a) = @_;
     my $str = join('', @a);
     chomp($str);
-    STDERR->print("$logopen: ", $str, "\n") if ($logtostderr);
-    syslog($pri, '%s', $str);
+    # Log to standard error if either we have been told to explicitly, or we
+    # have not been able to open the log.
+    STDERR->print("$tag: ", $str, "\n") if ($logtostderr || ($triedconnect && !$logopen));
+    syslog($pri, '%s', $str) if ($logopen);
 }
 
 =item manage_child_processes SPEC [SIGNALS]
