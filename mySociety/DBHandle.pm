@@ -9,7 +9,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: DBHandle.pm,v 1.12 2005-07-18 13:31:39 francis Exp $
+# $Id: DBHandle.pm,v 1.13 2006-02-01 11:48:30 chris Exp $
 #
 
 package mySociety::DBHandle::Error;
@@ -72,7 +72,12 @@ host on which to contact database server;
 
 =item Port
 
-port on which to contact database server.
+port on which to contact database server;
+
+=item OnFirstUse
+
+reference to code to be executed after the first connection to the database is
+made.
 
 =back
 
@@ -81,7 +86,7 @@ A key whose value is not defined is treated as if it were not present.
 =cut
 sub configure (%) {
     my %conf = @_;
-    my %allowed = map { $_ => 1 } qw(Host Port Name User Password);
+    my %allowed = map { $_ => 1 } qw(Host Port Name User Password OnFirstUse);
     foreach (keys %conf) {
         delete($conf{$_}) if (!defined($conf{$_}));
         die "Unknown key '$_' passed to configure" if (!exists($allowed{$_}));
@@ -152,6 +157,11 @@ sub dbh () {
         $dbh->{InactiveDestroy} = 1 if (defined($dbh));
         $dbh = new_dbh();
         $dbh_process = $$;
+        if (exists($mySociety::DBHandle::conf{OnFirstUse})) {
+            my $f = $mySociety::DBHandle::conf{OnFirstUse};
+            delete $mySociety::DBHandle::conf{OnFirstUse};
+            &$f();
+        }
     }
     return $dbh;
 }
