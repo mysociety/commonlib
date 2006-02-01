@@ -9,7 +9,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: DBHandle.pm,v 1.13 2006-02-01 11:48:30 chris Exp $
+# $Id: DBHandle.pm,v 1.14 2006-02-01 12:07:18 chris Exp $
 #
 
 package mySociety::DBHandle::Error;
@@ -181,7 +181,8 @@ sub disconnect () {
 }
 
 END {
-    dbh()->disconnect();
+    our $dbh;
+    $dbh->disconnect() if (defined($dbh));
 }
 
 1;
