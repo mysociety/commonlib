@@ -12,7 +12,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.31 2006-01-19 19:50:56 francis Exp $
+# $Id: WebTestHarness.pm,v 1.32 2006-02-02 15:21:52 francis Exp $
 #
 
 package mySociety::WebTestHarness;
@@ -371,7 +371,7 @@ sub email_run_eveld($) {
     return if !$self->{eveld_bin};
     my $multispawn = $self->{eveld_multispawn};
     $multispawn = 1 if !$multispawn;
-    $self->multi_spawn($multispawn, $self->{eveld_bin} . " --once", 2); # TODO: pass verbose in?
+    #$self->multi_spawn($multispawn, $self->{eveld_bin} . " --once", 2); # TODO: pass verbose in?
 }
 
 =item email_get_containing STRING
