@@ -10,7 +10,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: rabx.php,v 1.16 2005-11-15 15:12:22 chris Exp $
+ * $Id: rabx.php,v 1.17 2006-02-03 17:56:36 chris Exp $
  * 
  */
 
@@ -79,7 +79,10 @@ function rabx_is_error($e) {
  * Append STRING to BUFFER, formatted as a netstring. Returns true on success
  * or an error on failure. */
 function rabx_netstring_wr(&$string, &$buffer) {
+    $l = setlocale(LC_NUMERIC, "0");
+    setlocale(LC_NUMERIC, "C");
     $buffer .= sprintf("%d:%s,", strlen(&$string), &$string);
+    setlocale(LC_NUMERIC, $l);
     return TRUE;
 }
 
