@@ -18,7 +18,7 @@
 // Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 // Email: francis@mysociety.org. WWW: http://www.mysociety.org
 //
-// $Id: db.php,v 1.8 2006-01-31 11:41:32 chris Exp $
+// $Id: db.php,v 1.9 2006-02-07 11:42:39 chris Exp $
 
 require_once "DB.php";
 require_once "utility.php";
@@ -42,6 +42,7 @@ function db_connect() {
             $connstr[$k] = constant('OPTION_' . $prefix . '_DB_' . $v);
         }
     }
+    $connstr .= " connect_timeout=10";
     $pbdb = DB::connect($connstr);
     if (DB::isError($pbdb)) {
         die($pbdb->getMessage());
