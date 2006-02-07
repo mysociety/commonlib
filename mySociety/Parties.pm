@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Parties.pm,v 1.10 2005-11-30 21:02:32 francis Exp $
+# $Id: Parties.pm,v 1.11 2006-02-07 20:35:54 francis Exp $
 #
 
 package mySociety::Parties;
@@ -24,10 +24,14 @@ names for them.
 
 =item %type_name
 
-Map names of parties to their canonical name.
+Map names of parties to their canonical name. i.e. The name we should
+display them with.
 
 =cut
 %mySociety::Parties::canonical = (
+    "Alliance" => "Alliance",
+    "Alliance Party of Northern Ireland" => "Alliance",
+
     "Conservative" => "Conservative",
     "Con" => "Conservative",
     "Ind Con" => "Independent Conservative",
@@ -60,6 +64,9 @@ Map names of parties to their canonical name.
     "PC" => "Plaid Cymru",
     "Plaid Cymru" => "Plaid Cymru",
 
+    "PUP" => "PUP",
+    "Progressive Unionist Party" => "PUP",
+
     "Res" => "Respect",
     "Respect" => "Respect",
 
@@ -91,6 +98,9 @@ Map names of parties to their canonical name.
     "UUP" => "UUP",
     "Ulster Unionist Party" => "UUP",
 
+    "UKUP" => "UKUP",
+    "United Kingdom Unionist Party" => "UKUP",
+
     # Latest Robert Kilroy-Silk vehicle
     "Veritas" => "Veritas",
 
@@ -101,6 +111,16 @@ Map names of parties to their canonical name.
 # Ensure that canonical party values are themselves canonical....
 foreach (values(%mySociety::Parties::canonical)) {
     $mySociety::Parties::canonical{$_} ||= $_;
+}
+
+# Add upper case maps correctly.
+foreach (keys(%mySociety::Parties::canonical)) {
+    my $value = $mySociety::Parties::canonical{$_};
+    if ($mySociety::Parties::canonical{uc($_)}) {
+        die "case sensitive variation for $_" if $mySociety::Parties::canonical{uc($_)} ne $value;
+    } else {
+        $mySociety::Parties::canonical{uc($_)} = $_;
+    }
 }
 
 1;
