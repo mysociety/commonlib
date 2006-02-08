@@ -8,7 +8,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: dadem.php,v 1.33 2005-12-07 16:42:16 francis Exp $
+ * $Id: dadem.php,v 1.34 2006-02-08 00:53:48 francis Exp $
  *
  */
 
@@ -38,13 +38,15 @@ define('DADEM_AREA_WITHOUT_REPS', 3003);        /*    Area ID refers to an area 
 define('DADEM_CONTACT_FAX', 101);        /*    Means of contacting representative is fax.  */
 define('DADEM_CONTACT_EMAIL', 102);        /*    Means of contacting representative is email.  */
 
-/* dadem_get_representatives ID_or_ARRAY
+/* dadem_get_representatives ID_or_ARRAY [ALL]
 
   Given the ID of an area (or an ARRAY of IDs of several areas), return a
   list of the representatives returned by that area, or, for an array, a
   hash mapping area ID to a list of representatives for each; or, on
-  failure, an error code. */
-function dadem_get_representatives($id_or_array) {
+  failure, an error code. The default is to return only current
+  reprenatives. If ALL has value 1, then even deleted representatives are
+  returned.  */
+function dadem_get_representatives($id_or_array, $all = null) {
     global $dadem_client;
     $params = func_get_args();
     $result = $dadem_client->call('DaDem.get_representatives', $params);
