@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-reps.php,v 1.30 2005-11-25 16:27:14 francis Exp $
+ * $Id: admin-reps.php,v 1.31 2006-02-08 10:15:01 francis Exp $
  * 
  */
 
@@ -266,15 +266,17 @@ class ADMIN_PAGE_REPS {
                     '<br><a href="'.$self_link.'&ds_va_id='
                     . $vainfo['parent_area_id'] . '">... or edit Democratic Services for this council</a>');
             }
-            $search_links = "Search for: ";
-            foreach (array(
-                "tel ". $repinfo['name'],
-                "fax ". $repinfo['name'],
-                "tel ". $repinfo['name'] . " " . $vainfo['rep_name'],
-                "fax ". $repinfo['name'] . " " . $vainfo['rep_name']
-                ) as $searchq) 
-                $search_links .= "<a href=\"http://search.yahoo.com/search?p=".htmlspecialchars($searchq)."\"> ".htmlspecialchars($searchq)."</a> | ";
-            $form->addElement('static', 'newlink', null, $search_links);
+            if ($rep_id) {
+                $search_links = "Search for: ";
+                foreach (array(
+                    "tel ". $repinfo['name'],
+                    "fax ". $repinfo['name'],
+                    "tel ". $repinfo['name'] . " " . $vainfo['rep_name'],
+                    "fax ". $repinfo['name'] . " " . $vainfo['rep_name']
+                    ) as $searchq) 
+                    $search_links .= "<a href=\"http://search.yahoo.com/search?p=".htmlspecialchars($searchq)."\"> ".htmlspecialchars($searchq)."</a> | ";
+                $form->addElement('static', 'newlink', null, $search_links);
+            }
     
             $form->addElement('header', '', 'Historical Changes');
             $html = "<table border=1>";
