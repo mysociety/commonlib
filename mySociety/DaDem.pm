@@ -8,7 +8,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # WWW: http://www.mysociety.org
 #
-# $Id: DaDem.pm,v 1.15 2005-12-07 16:42:15 francis Exp $
+# $Id: DaDem.pm,v 1.16 2006-02-08 00:53:48 francis Exp $
 
 package mySociety::DaDem;
 
@@ -66,15 +66,17 @@ use constant CONTACT_FAX => 101;
 =cut
 use constant CONTACT_EMAIL => 102;
 
-=item DaDem::get_representatives ID_or_ARRAY
+=item DaDem::get_representatives ID_or_ARRAY [ALL]
 
   Given the ID of an area (or an ARRAY of IDs of several areas), return a
   list of the representatives returned by that area, or, for an array, a
   hash mapping area ID to a list of representatives for each; or, on
-  failure, an error code.
+  failure, an error code. The default is to return only current
+  reprenatives. If ALL has value 1, then even deleted representatives are
+  returned. 
 
 =cut
-sub get_representatives ($) {
+sub get_representatives ($;$) {
     configure() if !defined $rabx_client;
     return $rabx_client->call('DaDem.get_representatives', @_);
 }
