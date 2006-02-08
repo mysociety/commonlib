@@ -4,12 +4,12 @@
 # 
 # EvEl.pm:
 # Generic email sending and mailing list functionality, with bounce detection
-etc.
+# etc.
 #
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # WWW: http://www.mysociety.org
 #
-# $Id: EvEl.pm,v 1.8 2006-02-08 00:53:48 francis Exp $
+# $Id: EvEl.pm,v 1.9 2006-02-08 08:27:44 matthew Exp $
 
 package mySociety::EvEl;
 
