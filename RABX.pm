@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: RABX.pm,v 1.14 2005-12-05 20:57:34 francis Exp $
+# $Id: RABX.pm,v 1.15 2006-02-09 15:41:17 chris Exp $
 
 # References:
 #   Netstrings are documented here: http://cr.yp.to/proto/netstrings.txt
@@ -395,7 +395,7 @@ use HTTP::Request;
 use HTTP::Response;
 use Regexp::Common qw(URI);
 
-my $rcsid = ''; $rcsid .= '$Id: RABX.pm,v 1.14 2005-12-05 20:57:34 francis Exp $';
+my $rcsid = ''; $rcsid .= '$Id: RABX.pm,v 1.15 2006-02-09 15:41:17 chris Exp $';
 
 =back
 
@@ -421,6 +421,7 @@ sub new ($$) {
     throw RABX::Error(qq("$url" is not a valid URL), RABX::Error::INTERFACE)
         unless ($url =~ m#^$RE{URI}{HTTP}{-scheme => 'https?'}$#);
     my $self = [new LWP::UserAgent(), 0, $url];
+    $self->[0]->env_proxy();
     bless($self, $class);
     $self->ua()->agent("RABX::HTTP, $rcsid");
     return $self;
