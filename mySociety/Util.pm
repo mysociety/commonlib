@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Util.pm,v 1.42 2006-02-01 12:23:26 chris Exp $
+# $Id: Util.pm,v 1.43 2006-02-10 15:43:45 francis Exp $
 #
 
 package mySociety::Util::Error;
@@ -28,6 +28,7 @@ use IO::Pipe;
 use Net::SMTP;
 use POSIX ();
 use Sys::Syslog;
+use Statistics::Distributions qw(fdistr);
 
 BEGIN {
     use Exporter ();
@@ -793,5 +794,51 @@ sub describe_waitval ($;$) {
         return "exited with status " . ($value >> 8);
     }
 }
+
+=item binomial_confidence_interval SUCCESSES SAMPLES
+
+Returns the mean probability for one trial and its 95% confidence interval,
+given the result of a particular series of bernoulli trials. SAMPLES is the
+total number of trials, and SUCCESSES is the number that resulted in true.
+Return values are ( mean, low, high ).
+
+So, for example, these two series of trials have the same mean, but
+a different confidence interval, because the latter has more samples.
+
+3 / 10: mean = 0.300000; 95% CI = [0.066739, 0.652454]
+300 / 1000: mean = 0.300000; 95% CI = [0.271728, 0.329452]
+
+=cut
+sub binomial_confidence_interval($$) {
+    my ($x, $N) = @_;
+
+    # http://www.statsresearch.co.nz/pdf/confint.pdf
+    # Non Asymptotic Binomial Confidence Intervals
+    # x successes from N trials; print estimate of mean and 95% confidence
+    # interval.
+    my $alpha = 0.05;
+
+    my $mean = ($x / $N);
+
+    my $lower;
+    if ($x == 0) {
+        $lower = 0;
+    } else {
+        $lower = $x
+                    / ($x + ($N - $x + 1) * fdistr(2 * ($N - $x + 1), 2 * $x, $alpha / 2));
+    }
+
+    my $upper;
+    if ($x == $N) {
+        $upper = 1;
+    } else {
+        $upper = (($x + 1) * fdistr(2 * ($x + 1), 2 * ($N - $x), $alpha / 2))
+                    / ($N - $x + ($x + 1) * fdistr(2 * ($x + 1), 2 * ($N - $x), $alpha / 2));
+    }
+
+    #printf "%d / %d: mean = %f; 95%% CI = [%f, %f]\n", $x, $N, $mean, $lower, $upper;
+    return ($mean, $lower, $upper);
+}
+
 
 1;
