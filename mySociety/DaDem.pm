@@ -8,7 +8,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # WWW: http://www.mysociety.org
 #
-# $Id: DaDem.pm,v 1.16 2006-02-08 00:53:48 francis Exp $
+# $Id: DaDem.pm,v 1.17 2006-02-10 04:06:24 francis Exp $
 
 package mySociety::DaDem;
 
@@ -226,6 +226,18 @@ sub admin_get_stats () {
 sub get_representative_history ($) {
     configure() if !defined $rabx_client;
     return $rabx_client->call('DaDem.get_representative_history', @_);
+}
+
+=item DaDem::get_representatives_history ID
+
+  Given an array of ids of representatives, returns a hash from
+  representative ids to an array of history of changes to that
+  representative's contact info.
+
+=cut
+sub get_representatives_history ($) {
+    configure() if !defined $rabx_client;
+    return $rabx_client->call('DaDem.get_representatives_history', @_);
 }
 
 =item DaDem::admin_edit_representative ID DETAILS EDITOR NOTE
