@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Util.pm,v 1.43 2006-02-10 15:43:45 francis Exp $
+# $Id: Util.pm,v 1.44 2006-02-10 16:08:45 chris Exp $
 #
 
 package mySociety::Util::Error;
@@ -800,17 +800,21 @@ sub describe_waitval ($;$) {
 Returns the mean probability for one trial and its 95% confidence interval,
 given the result of a particular series of bernoulli trials. SAMPLES is the
 total number of trials, and SUCCESSES is the number that resulted in true.
-Return values are ( mean, low, high ).
+Return values are (mean, low, high).
 
-So, for example, these two series of trials have the same mean, but
-a different confidence interval, because the latter has more samples.
+So, for example, these two series of trials have the same mean, but a different
+confidence interval, because the latter has more samples.
 
-3 / 10: mean = 0.300000; 95% CI = [0.066739, 0.652454]
+  3 /   10: mean = 0.300000; 95% CI = [0.066739, 0.652454]
 300 / 1000: mean = 0.300000; 95% CI = [0.271728, 0.329452]
 
 =cut
-sub binomial_confidence_interval($$) {
+sub binomial_confidence_interval ($$) {
     my ($x, $N) = @_;
+
+    die "number of SAMPLES, $N, must be > 0" unless ($N > 0);
+    die "number of SUCCESSES, $x, must be >= 0" if ($x < 0);
+    die "number of SUCCESSES, $x must be <= SAMPLES, $N" if ($x > $N);
 
     # http://www.statsresearch.co.nz/pdf/confint.pdf
     # Non Asymptotic Binomial Confidence Intervals
@@ -819,6 +823,11 @@ sub binomial_confidence_interval($$) {
     my $alpha = 0.05;
 
     my $mean = ($x / $N);
+
+    if ($x == 0 || $x == $N) {
+        # One-sided; see note in http://m2.aol.com/johnp71/confint.html
+        $alpha *= 2;
+    }
 
     my $lower;
     if ($x == 0) {
