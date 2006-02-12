@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Parties.pm,v 1.11 2006-02-07 20:35:54 francis Exp $
+# $Id: Parties.pm,v 1.12 2006-02-12 18:27:24 dademcron Exp $
 #
 
 package mySociety::Parties;
@@ -119,7 +119,7 @@ foreach (keys(%mySociety::Parties::canonical)) {
     if ($mySociety::Parties::canonical{uc($_)}) {
         die "case sensitive variation for $_" if $mySociety::Parties::canonical{uc($_)} ne $value;
     } else {
-        $mySociety::Parties::canonical{uc($_)} = $_;
+        $mySociety::Parties::canonical{uc($_)} = $value;
     }
 }
 
