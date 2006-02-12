@@ -8,7 +8,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: mapit.php,v 1.34 2006-02-10 04:06:25 francis Exp $
+ * $Id: mapit.php,v 1.35 2006-02-12 13:39:14 francis Exp $
  *
  */
 
@@ -91,11 +91,13 @@ function mapit_get_voting_areas_info($ary) {
     return $result;
 }
 
-/* mapit_get_areas_by_type TYPE
+/* mapit_get_areas_by_type TYPE [ALL]
 
   Returns an array of ids of all the voting areas of type TYPE. TYPE is the
-  three letter code such as WMC. */
-function mapit_get_areas_by_type($type) {
+  three letter code such as WMC. By default only gets active areas in
+  current generation, if ALL is true then gets all areas for all
+  generations. */
+function mapit_get_areas_by_type($type, $all = null) {
     global $mapit_client;
     $params = func_get_args();
     $result = $mapit_client->call('MaPit.get_areas_by_type', $params);
