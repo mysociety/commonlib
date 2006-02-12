@@ -8,7 +8,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # WWW: http://www.mysociety.org
 #
-# $Id: Gaze.pm,v 1.7 2006-02-10 04:06:24 francis Exp $
+# $Id: Gaze.pm,v 1.8 2006-02-12 13:39:14 francis Exp $
 
 package mySociety::Gaze;
 
