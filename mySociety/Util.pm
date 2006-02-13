@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Util.pm,v 1.44 2006-02-10 16:08:45 chris Exp $
+# $Id: Util.pm,v 1.45 2006-02-13 16:02:46 chris Exp $
 #
 
 package mySociety::Util::Error;
@@ -815,6 +815,13 @@ sub binomial_confidence_interval ($$) {
     die "number of SAMPLES, $N, must be > 0" unless ($N > 0);
     die "number of SUCCESSES, $x, must be >= 0" if ($x < 0);
     die "number of SUCCESSES, $x must be <= SAMPLES, $N" if ($x > $N);
+
+    # If n p q is large, use the normal approximation.
+    my $p = $x / $N;
+    return ($p, $p - sqrt($p * (1 - $p) / $N), $p + sqrt($p * (1 - $p) / $N))
+        if ($N * $p * (1 - $p) > 25);
+
+    # Otherwise we do it properly.
 
     # http://www.statsresearch.co.nz/pdf/confint.pdf
     # Non Asymptotic Binomial Confidence Intervals
