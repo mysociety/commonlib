@@ -18,7 +18,7 @@
 // Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 // Email: francis@mysociety.org. WWW: http://www.mysociety.org
 //
-// $Id: db.php,v 1.10 2006-02-07 12:52:39 chris Exp $
+// $Id: db.php,v 1.11 2006-02-16 12:19:05 chris Exp $
 
 require_once "DB.php";
 require_once "utility.php";
@@ -51,17 +51,17 @@ function db_connect() {
     $pbdb->autoCommit(false);
     
     /* Ensure that we have a site shared secret. */
-    $pbdb->transaction_opcount++;
     $pbdb->query('begin');
-    $pbdb->query('lock table secret in share mode');
     $r = $pbdb->getOne('select secret from secret');
-    if (is_null($r))
-        $pbdb->query('insert into secret (secret) values (?)', array(bin2hex(random_bytes(32))));
-    $pbdb->query('commit');
-    $pbdb->transaction_opcount=0;
-    
-    $pbdb->transaction_opcount++;
-    $pbdb->query('begin');
+    if (is_null($r)) {
+        $pbdb->transaction_opcount++;
+        if (DB_OK == $pbdb->query('insert into secret (secret) values (?)', array(bin2hex(random_bytes(32)))))
+            $pbdb->query('commit');
+        else
+            $pbdb->query('rollback');
+        $pbdb->transaction_opcount++;
+        $pbdb->query('begin');
+    }
 }
 
 /* db_secret
