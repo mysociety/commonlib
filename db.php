@@ -18,7 +18,7 @@
 // Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 // Email: francis@mysociety.org. WWW: http://www.mysociety.org
 //
-// $Id: db.php,v 1.11 2006-02-16 12:19:05 chris Exp $
+// $Id: db.php,v 1.12 2006-02-22 13:08:17 francis Exp $
 
 require_once "DB.php";
 require_once "utility.php";
@@ -29,10 +29,6 @@ function db_connect() {
     global $pbdb;
     $vars = array('hostspec'=>'HOST', 'port'=>'PORT', 'database'=>'NAME', 'username'=>'USER', 'password'=>'PASS');
     $connstr = array('phptype'=>'pgsql');
-        /* might also want to set 'persistent' => true to get persistent DB
-         * connections, though we'd want also to ensure that the connection
-         * hasn't died, and ensure that we can't have more PHP processes than
-         * the database server permits connections. */
     if (defined('OPTION_DB_TYPE')) {
         $connstr['phptype'] = OPTION_DB_TYPE;
     }
@@ -43,7 +39,17 @@ function db_connect() {
         }
     }
     $connstr['connect_timeout'] = 10;
-    $pbdb = DB::connect($connstr);
+    /*  set 'persistent' => true to get persistent DB connections. 
+     *  TODO: ensure
+     *  - the connection hasn't died (I think it handles this)
+     *  - that we can't have more PHP processes than the database server
+     *  permits connections. */
+    $persistent = false;
+    if (defined('OPTION_' . $prefix . '_DB_' . 'PERSISTENT')) {
+        $persistent = constant('OPTION_' . $prefix . '_DB_' . 'PERSISTENT') ? true : false;
+    }
+    $options = array( 'persistent' => $persistent );
+    $pbdb = DB::connect($connstr, $options);
     if (DB::isError($pbdb)) {
         die($pbdb->getMessage());
     }
