@@ -6,7 +6,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-ratty.php,v 1.38 2005-07-19 09:44:26 francis Exp $
+ * $Id: admin-ratty.php,v 1.39 2006-02-22 22:47:19 francis Exp $
  * 
  */
 
@@ -214,9 +214,9 @@ class ADMIN_PAGE_RATTY {
             if ($action == "editrule") {
                 admin_render_form($form);
 
-                print "<h2>Help &mdash What goes in the action box?</h2>";
+                print "<h2>Help &mdash; What goes in the action box?</h2>";
                 print "<p>" . $this->scope_messageblurb . "</p>";
-                print "<h2>Help &mdash What do all the fields mean?</h2>";
+                print "<h2>Help &mdash; What do all the fields mean?</h2>";
                 print "<p>";
                 foreach ($fieldarray as $row) {
                     list($field_name, $field_description, $field_examples) = $row;
