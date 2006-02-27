@@ -9,7 +9,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: DBHandle.pm,v 1.14 2006-02-01 12:07:18 chris Exp $
+# $Id: DBHandle.pm,v 1.15 2006-02-27 17:05:30 chris Exp $
 #
 
 package mySociety::DBHandle::Error;
@@ -114,7 +114,6 @@ sub new_dbh () {
     my $dbh = DBI->connect($connstr,
                         $mySociety::DBHandle::conf{User},
                         $mySociety::DBHandle::conf{Password}, {
-                            RaiseError => 0,
                             AutoCommit => 0,
                             PrintError => 0,
                             PrintWarn => 0,
