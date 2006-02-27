@@ -6,7 +6,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Distance.pm,v 1.2 2005-11-24 15:14:09 chris Exp $
+# $Id: Distance.pm,v 1.3 2006-02-27 17:08:55 chris Exp $
 #
 
 package Geo::Distance;
@@ -31,6 +31,11 @@ purposes.
 
 =cut
 
+=item R_e
+
+The radius of the earth, in km.
+
+=cut
 use constant R_e => 6372.8; # radius of the earth in km
 use constant M_PI => 3.141592654;
 
@@ -75,7 +80,7 @@ http://www.affero.org/oagpl.html
 
 =head1 VERSION
 
-$Id: Distance.pm,v 1.2 2005-11-24 15:14:09 chris Exp $
+$Id: Distance.pm,v 1.3 2006-02-27 17:08:55 chris Exp $
 
 =cut
 
