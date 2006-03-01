@@ -12,7 +12,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.33 2006-02-06 10:54:49 francis Exp $
+# $Id: WebTestHarness.pm,v 1.34 2006-03-01 16:42:20 francis Exp $
 #
 
 package mySociety::WebTestHarness;
@@ -377,18 +377,30 @@ sub email_run_eveld($) {
 =item email_get_containing STRING
 
 Returns the email containing the given STRING as an SQL expression.  i.e. Use %
-for wildcard.  It is an error if no matching mails are found within a few
-seconds, or there is more than one match.  The email is returned with any
-quoted printable characters decoded.
+for wildcard.  STRING can also be an array of such strings, any of which need 
+to match. It is an error if no matching mails are found within a few seconds,
+or there is more than one match.  The email is returned with any quoted
+printable characters decoded.
 
 =cut
 sub email_get_containing($$) {
     my ($self, $check) = @_;
-    $self->email_run_eveld();
     
+    die "STRING must be scalar or array" if (ref($check) ne 'ARRAY' && ref($check) ne '');
+    $check = [ $check ] if (ref($check) eq '');
+
     # need search string in quoted-printable, as email in the database is
     # encoded like that
-    my $quoted_check = encode_qp($check, "");
+    my @params;
+    foreach my $c (@$check) {
+        my $quoted_c = encode_qp($c, "");
+        push @params, $quoted_c;
+    }
+    $qfragment = join(' or ' , map { 'content like ?' } @params);
+    $qdesc = join(' or ' , map { "'$_'" } @params);
+
+    # Provoke any sending of mails
+    $self->email_run_eveld();
 
     # Wait for email
     my $mails;
@@ -396,10 +408,10 @@ sub email_get_containing($$) {
     my $c = 0;
     while ($got == 0) {
         $mails = dbh()->selectall_arrayref("select id, content from testharness_mail
-            where content like ?", {}, $quoted_check);
+            where $qfragment", {}, @params);
         $got = scalar @$mails;
-        die "Email containing '$quoted_check' not found even after $c sec wait" if ($got == 0 && $c > $mail_sleep_time);
-        die "Too many emails found containing '$quoted_check'" if ($got > 1);
+        die "Email containing $qdesc not found even after $c sec wait" if ($got == 0 && $c > $mail_sleep_time);
+        die "Too many emails found containing $qdesc" if ($got > 1);
         $c++;
         sleep 1;
     }
