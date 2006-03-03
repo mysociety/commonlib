@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-reps.php,v 1.32 2006-03-03 14:30:48 francis Exp $
+ * $Id: admin-reps.php,v 1.33 2006-03-03 14:44:47 francis Exp $
  * 
  */
 
@@ -282,7 +282,7 @@ class ADMIN_PAGE_REPS {
             }
             if ($rep_id) {
                 $search_links = "Search for: ";
-                $search_links .= "<a href=\"$self_link&page=fyrqueue&rep_id=" . $samerep .  "\">WriteToThem messages</a> | ";
+                $search_links .= "<a href=\"$self_link&page=fyrqueue&rep_id=" . $rep_id .  "\">WriteToThem messages</a> | ";
                 foreach (array(
                     "tel ". $repinfo['name'],
                     "fax ". $repinfo['name'],
