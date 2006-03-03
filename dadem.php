@@ -8,7 +8,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: dadem.php,v 1.36 2006-02-12 13:39:14 francis Exp $
+ * $Id: dadem.php,v 1.37 2006-03-03 14:30:48 francis Exp $
  *
  */
 
@@ -35,6 +35,7 @@ $dadem_client = new RABX_Client(OPTION_DADEM_URL);
 define('DADEM_UNKNOWN_AREA', 3001);        /*    Area ID refers to a non-existent area.  */
 define('DADEM_REP_NOT_FOUND', 3002);        /*    Representative ID refers to a non-existent representative.  */
 define('DADEM_AREA_WITHOUT_REPS', 3003);        /*    Area ID refers to an area for which no representatives are returned.  */
+define('DADEM_PERSON_NOT_FOUND', 3004);        /*    Preson ID refers to a non-existent person.  */
 define('DADEM_CONTACT_FAX', 101);        /*    Means of contacting representative is fax.  */
 define('DADEM_CONTACT_EMAIL', 102);        /*    Means of contacting representative is email.  */
 
@@ -150,15 +151,14 @@ function dadem_get_representatives_info($array) {
     return $result;
 }
 
-/* dadem_store_user_correction VA_ID REP_ID CHANGE NAME PARTY NOTES EMAIL
+/* dadem_get_same_person PERSON_ID
 
-  Records a correction to representative data made by a user on the
-  website. CHANGE is either "add", "delete" or "modify". NAME and PARTY are
-  new values. NOTES and EMAIL are fields the user can put extra info in. */
-function dadem_store_user_correction($va_id, $rep_id, $change, $name, $party, $notes, $email) {
+  Returns an array of representative identifiers which are known to be the
+  same person as PERSON_ID. Currently, this information only covers MPs. */
+function dadem_get_same_person($person_id) {
     global $dadem_client;
     $params = func_get_args();
-    $result = $dadem_client->call('DaDem.store_user_correction', $params);
+    $result = $dadem_client->call('DaDem.get_same_person', $params);
     return $result;
 }
 

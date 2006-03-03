@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-reps.php,v 1.31 2006-02-08 10:15:01 francis Exp $
+ * $Id: admin-reps.php,v 1.32 2006-03-03 14:30:48 francis Exp $
  * 
  */
 
@@ -164,9 +164,14 @@ class ADMIN_PAGE_REPS {
             $form->addElement('hidden', 'page', $this->id);
 
             // Edit representative
+            $sameperson = null;
             if ($rep_id) {
                 $repinfo = dadem_get_representative_info($rep_id);
                 dadem_check_error($repinfo);
+                if ($repinfo['parlparse_person_id']) {
+                    $sameperson = dadem_get_same_person($repinfo['parlparse_person_id']);
+                    dadem_check_error($sameperson);
+                }
             }
             $va_id = $rep_id ? $repinfo['voting_area'] : $new_in_va_id;
             $vainfo = mapit_get_voting_area_info($va_id);
@@ -208,11 +213,20 @@ class ADMIN_PAGE_REPS {
                 $form->addElement('header', '', 'New Representative');
             if ($rep_id and $editable_here) {
                 $form->addElement('static', 'note1', null, "
-                Edit only the values which you need to.  Blank to return to default.
-                If a representative has changed delete them and make a new one.
-                Do not just edit their values, as this would ruin our reponsiveness
-                stats.");
+                Edit only the values which you need to.  If a representative
+                has changed delete them and make a new one.  Do not just edit
+                their values, as this would ruin our reponsiveness stats.");
             }
+            if ($rep_id and $sameperson) {
+                $html = '(Note that these representatives are the same person: ';
+                foreach ($sameperson as $samerep) {
+                    $html .= "<a href=\"$self_link&pc=" .  urlencode(get_http_var('pc')). "&rep_id=" . $samerep .  "\">" . $samerep. "</a> \n";
+                }
+                $html = trim($html);
+                $html .= ')';
+                $form->addElement('static', 'sameperson', null, $html);
+            }
+
             $form->addElement('static', 'office', 'Office:',
                 htmlspecialchars($vainfo['rep_name']) . " for " . 
                 htmlspecialchars($vainfo['name']) . " " . htmlspecialchars($vainfo['type_name']) . 
@@ -268,6 +282,7 @@ class ADMIN_PAGE_REPS {
             }
             if ($rep_id) {
                 $search_links = "Search for: ";
+                $search_links .= "<a href=\"$self_link&page=fyrqueue&rep_id=" . $samerep .  "\">WriteToThem messages</a> | ";
                 foreach (array(
                     "tel ". $repinfo['name'],
                     "fax ". $repinfo['name'],
