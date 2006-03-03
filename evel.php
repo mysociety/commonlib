@@ -4,12 +4,11 @@
  * 
  * evel.php:
  * Generic email sending and mailing list functionality, with bounce detection
-etc.
  *
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: evel.php,v 1.25 2006-03-03 14:30:48 francis Exp $
+ * $Id: evel.php,v 1.26 2006-03-03 14:53:51 francis Exp $
  *
  */
 
