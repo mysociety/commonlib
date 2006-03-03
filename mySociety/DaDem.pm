@@ -8,7 +8,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # WWW: http://www.mysociety.org
 #
-# $Id: DaDem.pm,v 1.18 2006-02-12 13:39:14 francis Exp $
+# $Id: DaDem.pm,v 1.19 2006-03-03 14:30:47 francis Exp $
 
 package mySociety::DaDem;
 
@@ -51,6 +51,13 @@ use constant REP_NOT_FOUND => 3002;
 
 =cut
 use constant AREA_WITHOUT_REPS => 3003;
+
+=item PERSON_NOT_FOUND 3004
+
+  Preson ID refers to a non-existent person.
+
+=cut
+use constant PERSON_NOT_FOUND => 3004;
 
 =item CONTACT_FAX 101
 
@@ -178,16 +185,15 @@ sub get_representatives_info ($) {
     return $rabx_client->call('DaDem.get_representatives_info', @_);
 }
 
-=item DaDem::store_user_correction VA_ID REP_ID CHANGE NAME PARTY NOTES EMAIL
+=item DaDem::get_same_person PERSON_ID
 
-  Records a correction to representative data made by a user on the
-  website. CHANGE is either "add", "delete" or "modify". NAME and PARTY are
-  new values. NOTES and EMAIL are fields the user can put extra info in.
+  Returns an array of representative identifiers which are known to be the
+  same person as PERSON_ID. Currently, this information only covers MPs.
 
 =cut
-sub store_user_correction ($$$$$$$) {
+sub get_same_person ($) {
     configure() if !defined $rabx_client;
-    return $rabx_client->call('DaDem.store_user_correction', @_);
+    return $rabx_client->call('DaDem.get_same_person', @_);
 }
 
 =item DaDem::admin_get_stats
