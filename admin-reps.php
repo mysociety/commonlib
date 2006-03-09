@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-reps.php,v 1.33 2006-03-03 14:44:47 francis Exp $
+ * $Id: admin-reps.php,v 1.34 2006-03-09 16:48:46 francis Exp $
  * 
  */
 
@@ -78,6 +78,8 @@ class ADMIN_PAGE_REPS {
         $rep_id = get_http_var('rep_id');
         $va_id = get_http_var('va_id');
         $ds_va_id = get_http_var('ds_va_id');
+        $bad_contacts = get_http_var('bad_contacts');
+        $user_corrections = get_http_var('user_corrections');
         if (!$rep_id && $ds_va_id) {
             // Democratic services
             $ds_vainfo = dadem_get_representatives($ds_va_id);
@@ -399,9 +401,7 @@ class ADMIN_PAGE_REPS {
             $form->addElement('static', 'bytype', null, $html);
 
             admin_render_form($form);
-        } else {
-            // General Statistics
-
+        } elseif ($bad_contacts) {
             // Bad contacts
             $form = new HTML_QuickForm('adminRepsBad', 'post', $self_link);
             $badcontacts = dadem_get_bad_contacts();
@@ -410,9 +410,7 @@ class ADMIN_PAGE_REPS {
             $html = $this->render_reps($self_link, $badcontacts, true);
             $form->addElement('static', 'badcontacts', null, $html);
             admin_render_form($form);
-
-            // No longer needed now emailed to GovEval
-            /*
+        } elseif ($user_corrections) {
             // User submitted corrections
             $form = new HTML_QuickForm('adminRepsCorrectionsHeader', 'post', $self_link);
             $corrections = dadem_get_user_corrections();
@@ -481,44 +479,10 @@ class ADMIN_PAGE_REPS {
                 $form->addGroup($usercorr, 'stuff', null, '&nbsp', false);
                 admin_render_form($form);
             }
-            */
-
-            $form = new HTML_QuickForm('adminRepsStats', 'post', $self_link);
-
-            // MaPit
-            $form->addElement('header', '', 'Postcode/Area Statistics (MaPit)');
-            $mapitstats = mapit_admin_get_stats();
-            mapit_check_error($mapitstats);
-            $form->addElement('static', 'mapitstats', "Areas: ", $mapitstats['area_count']);
-            $form->addElement('static', 'mapitstats', "Postcodes: ",  $mapitstats['postcode_count']);
-            
-            // DaDem
-            $form->addElement('header', '', 'Representative Statistics (DaDem)');
-            $dademstats = dadem_admin_get_stats();
-            dadem_check_error($dademstats);
-            $form->addElement('static', 'dademstats', "Representatives: ",  $dademstats['representative_count']);
-            $form->addElement('static', 'dademstats', "Voting Areas: ", $dademstats['area_count']);
-
-            $form->addElement('static', 'dademstats', "Fax or Email Coverage: ", 
-                    round(100*$dademstats['either_present']/$dademstats['representative_count'],2) .  "% (" . $dademstats['either_present'] . ")");
-            $form->addElement('static', 'dademstats', "Email Coverage: ", 
-                    round(100*$dademstats['email_present']/$dademstats['representative_count'],2) .  "% (" . $dademstats['email_present'] . ")");
-            $form->addElement('static', 'dademstats', "Fax Coverage: ", 
-                    round(100*$dademstats['fax_present']/$dademstats['representative_count'],2) .  "% (" . $dademstats['fax_present'] . ")");
-
-            // MaPit counts by Area Type
-            $form->addElement('header', '', 'MaPit Counts by Area Type');
-            $html = "<table>";
-            foreach ($mapitstats as $k=>$v) {
-                preg_match("/area_count_([A-Z]+)/", $k, $matches);
-                if ($matches) {
-                    $html .= "<tr><td>" . $matches[1] . "</td><td>$v</td></tr>\n";
-                }
-            }
-            $html .= "</table>";
-            $form->addElement('static', 'bytype', null, $html);
-
-            admin_render_form($form);
+        } else {
+            // General info
+            print '<p><a href="?page=reps&bad_contacts=1">Bad contacts</a> (please fix these!)';
+            print '<br><a href="?page=reps&user_corrections=1">User corrections</a> (just for your interest, as sent automatically to GovEval)';
         }
    }
 }
