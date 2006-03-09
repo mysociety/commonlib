@@ -8,7 +8,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: dadem.php,v 1.38 2006-03-03 14:53:51 francis Exp $
+ * $Id: dadem.php,v 1.39 2006-03-09 16:17:42 francis Exp $
  *
  */
 
@@ -94,8 +94,9 @@ function dadem_get_user_corrections() {
 /* dadem_get_bad_contacts
 
   Returns list of representatives whose contact details are bad. That is,
-  listed as 'unknown', listed as 'fax' or 'email' or 'either' without
-  appropriate details being present. 
+  listed as 'unknown', listed as 'fax' or 'email' without appropriate
+  details being present, or listed as 'either'. (There's a new policy to
+  discourages 'eithers' at all, as they are confusing).
 
   TODO: Check 'via' type as well somehow. */
 function dadem_get_bad_contacts() {
@@ -159,6 +160,18 @@ function dadem_get_same_person($person_id) {
     global $dadem_client;
     $params = func_get_args();
     $result = $dadem_client->call('DaDem.get_same_person', $params);
+    return $result;
+}
+
+/* dadem_store_user_correction VA_ID REP_ID CHANGE NAME PARTY NOTES EMAIL
+
+  Records a correction to representative data made by a user on the
+  website. CHANGE is either "add", "delete" or "modify". NAME and PARTY are
+  new values. NOTES and EMAIL are fields the user can put extra info in. */
+function dadem_store_user_correction($va_id, $rep_id, $change, $name, $party, $notes, $email) {
+    global $dadem_client;
+    $params = func_get_args();
+    $result = $dadem_client->call('DaDem.store_user_correction', $params);
     return $result;
 }
 
