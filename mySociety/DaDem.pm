@@ -8,7 +8,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # WWW: http://www.mysociety.org
 #
-# $Id: DaDem.pm,v 1.20 2006-03-03 14:53:51 francis Exp $
+# $Id: DaDem.pm,v 1.21 2006-03-09 16:17:41 francis Exp $
 
 package mySociety::DaDem;
 
@@ -128,8 +128,9 @@ sub get_user_corrections () {
 =item DaDem::get_bad_contacts
 
   Returns list of representatives whose contact details are bad. That is,
-  listed as 'unknown', listed as 'fax' or 'email' or 'either' without
-  appropriate details being present. 
+  listed as 'unknown', listed as 'fax' or 'email' without appropriate
+  details being present, or listed as 'either'. (There's a new policy to
+  discourages 'eithers' at all, as they are confusing).
 
   TODO: Check 'via' type as well somehow.
 
@@ -194,6 +195,18 @@ sub get_representatives_info ($) {
 sub get_same_person ($) {
     configure() if !defined $rabx_client;
     return $rabx_client->call('DaDem.get_same_person', @_);
+}
+
+=item DaDem::store_user_correction VA_ID REP_ID CHANGE NAME PARTY NOTES EMAIL
+
+  Records a correction to representative data made by a user on the
+  website. CHANGE is either "add", "delete" or "modify". NAME and PARTY are
+  new values. NOTES and EMAIL are fields the user can put extra info in.
+
+=cut
+sub store_user_correction ($$$$$$$) {
+    configure() if !defined $rabx_client;
+    return $rabx_client->call('DaDem.store_user_correction', @_);
 }
 
 =item DaDem::admin_get_stats
