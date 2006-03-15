@@ -18,7 +18,7 @@
 // Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 // Email: francis@mysociety.org. WWW: http://www.mysociety.org
 //
-// $Id: db.php,v 1.13 2006-03-15 10:33:22 chris Exp $
+// $Id: db.php,v 1.14 2006-03-15 11:35:44 chris Exp $
 
 require_once "DB.php";
 require_once "utility.php";
@@ -59,7 +59,7 @@ function db_connect() {
     /* Since we are using persistent connections we might end up re-using a
      * connection which is in the middle of a transaction. So try to roll back
      * any open transaction on termination of the script. */
-    register_shutdown_function('db_rollback');
+    register_shutdown_function('db_end');
 
     /* Ensure that we have a site shared secret. */
     $pbdb->query('begin');
@@ -201,6 +201,16 @@ function db_rollback () {
     $pbdb->query('rollback');
     $pbdb->transaction_opcount = 1;
     $pbdb->query('begin');
+}
+
+/* db_end
+ * Cleanup at end of session. */
+function db_end() {
+    global $pbdb;
+    if (isset($pbdb)) {
+        $pbdb->query('rollback');
+        $pbdb = null;
+    }
 }
 
 ?>
