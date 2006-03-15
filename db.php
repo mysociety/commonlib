@@ -18,7 +18,7 @@
 // Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 // Email: francis@mysociety.org. WWW: http://www.mysociety.org
 //
-// $Id: db.php,v 1.12 2006-02-22 13:08:17 francis Exp $
+// $Id: db.php,v 1.13 2006-03-15 10:33:22 chris Exp $
 
 require_once "DB.php";
 require_once "utility.php";
@@ -55,7 +55,12 @@ function db_connect() {
     }
 
     $pbdb->autoCommit(false);
-    
+
+    /* Since we are using persistent connections we might end up re-using a
+     * connection which is in the middle of a transaction. So try to roll back
+     * any open transaction on termination of the script. */
+    register_shutdown_function('db_rollback');
+
     /* Ensure that we have a site shared secret. */
     $pbdb->query('begin');
     $r = $pbdb->getOne('select secret from secret');
@@ -185,8 +190,7 @@ function db_commit () {
     // PEAR DB ->commit() doesn't commit if it believes no updates/inserts
     // were done. So any select with side effects wouldn't commit.
     $pbdb->query('commit');
-    $pbdb->transaction_opcount=0;
-    $pbdb->transaction_opcount++;
+    $pbdb->transaction_opcount = 1;
     $pbdb->query('begin');
 }
 
@@ -195,8 +199,7 @@ function db_commit () {
 function db_rollback () {
     global $pbdb;
     $pbdb->query('rollback');
-    $pbdb->transaction_opcount=0;
-    $pbdb->transaction_opcount++;
+    $pbdb->transaction_opcount = 1;
     $pbdb->query('begin');
 }
 
