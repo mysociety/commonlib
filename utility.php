@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.64 2006-03-21 13:02:35 francis Exp $
+ * $Id: utility.php,v 1.65 2006-03-21 17:29:12 chris Exp $
  * 
  */
 
@@ -387,12 +387,23 @@ function make_plural($number, $singular, $plural='') {
 /* debug_timestamp
  * Output a timestamp since the page was started. */
 $timestamp_last = $timestamp_start = getmicrotime();
-function debug_timestamp() {
+function debug_timestamp($comment = false) {
     global $timestamp_last, $timestamp_start;
     $t = getmicrotime();
-    debug("TIMESTAMP", sprintf("%f seconds since start; %f seconds since last",
-            $t - $timestamp_start, $t - $timestamp_last));
+    if ($comment)
+        printf("<!--\n   TIMESTAMP %f seconds since start; %f seconds since last\n-->",
+                $t - $timestamp_start, $t - $timestamp_last);
+    else
+        debug("TIMESTAMP", sprintf("%f seconds since start; %f seconds since last",
+                $t - $timestamp_start, $t - $timestamp_last));
     $timestamp_last = $t;
+}
+
+/* debug_timestamp_comment
+ * As debug_timestamp, but print the timestamp in an HTML comment, whether or
+ * not the debug flags are set. */
+function debug_timestamp_comment() {
+    debug_timestamp(true);
 }
 
 /* invoked_url
