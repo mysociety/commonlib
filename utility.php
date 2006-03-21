@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.63 2006-01-29 16:27:54 matthew Exp $
+ * $Id: utility.php,v 1.64 2006-03-21 13:02:35 francis Exp $
  * 
  */
 
@@ -519,11 +519,11 @@ function merge_spaces($text) {
     return $text;
 }
 
-/* make_clickable TEXT NOFOLLOW
+/* ms_make_clickable TEXT NOFOLLOW
  * Returns TEXT with obvious links made into HTML hrefs.  Set
  * NOFOLLOW to true to add rel='nofollow' to the links. */
 // Taken from WordPress, tweaked slightly to work with , and . at end of some URLs.
-function make_clickable($ret, $params = array()) {
+function ms_make_clickable($ret, $params = array()) {
     $nofollow = array_key_exists('nofollow', $params) && $params['nofollow']==true;
     $contract = array_key_exists('contract', $params) && $params['contract']==true;
     $ret = ' ' . $ret . ' ';
