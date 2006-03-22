@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.65 2006-03-21 17:29:12 chris Exp $
+ * $Id: utility.php,v 1.66 2006-03-22 12:22:18 chris Exp $
  * 
  */
 
@@ -387,23 +387,24 @@ function make_plural($number, $singular, $plural='') {
 /* debug_timestamp
  * Output a timestamp since the page was started. */
 $timestamp_last = $timestamp_start = getmicrotime();
-function debug_timestamp($comment = false) {
+function debug_timestamp($comment = false, $extra = null) {
     global $timestamp_last, $timestamp_start;
     $t = getmicrotime();
     if ($comment)
-        printf("<!--\n   TIMESTAMP %f seconds since start; %f seconds since last\n-->",
-                $t - $timestamp_start, $t - $timestamp_last);
+        printf("<!--\n   %s\n    %f seconds since start\n    %f seconds since last\n-->",
+                is_null($extra) ? 'TIMESTAMP' : $extra, $t - $timestamp_start, $t - $timestamp_last);
     else
         debug("TIMESTAMP", sprintf("%f seconds since start; %f seconds since last",
                 $t - $timestamp_start, $t - $timestamp_last));
     $timestamp_last = $t;
 }
 
-/* debug_timestamp_comment
+/* debug_timestamp_comment [NOTE]
  * As debug_timestamp, but print the timestamp in an HTML comment, whether or
- * not the debug flags are set. */
-function debug_timestamp_comment() {
-    debug_timestamp(true);
+ * not the debug flags are set. If specified, NOTE will be printed in the
+ * comment. */
+function debug_timestamp_comment($extra = null) {
+    debug_timestamp(true, $extra);
 }
 
 /* invoked_url
