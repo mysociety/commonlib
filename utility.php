@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.66 2006-03-22 12:22:18 chris Exp $
+ * $Id: utility.php,v 1.67 2006-03-22 18:12:15 francis Exp $
  * 
  */
 
@@ -399,11 +399,11 @@ function debug_timestamp($comment = false, $extra = null) {
     $timestamp_last = $t;
 }
 
-/* debug_timestamp_comment [NOTE]
+/* debug_comment_timestamp [NOTE]
  * As debug_timestamp, but print the timestamp in an HTML comment, whether or
  * not the debug flags are set. If specified, NOTE will be printed in the
  * comment. */
-function debug_timestamp_comment($extra = null) {
+function debug_comment_timestamp($extra = null) {
     debug_timestamp(true, $extra);
 }
 
