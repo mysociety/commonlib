@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Util.pm,v 1.45 2006-02-13 16:02:46 chris Exp $
+# $Id: Util.pm,v 1.46 2006-03-23 13:19:39 louise Exp $
 #
 
 package mySociety::Util::Error;
@@ -718,9 +718,12 @@ have not already been defined.
 =cut
 sub create_accessor_methods () {
     my $h = fields::new((caller())[0]);
+    my $caller = caller();
     foreach (keys %$h) {
-        next if (eval "exists($_)");
+        
+	next if (eval "exists($_)");
         eval <<EOF;
+package $caller; 
 sub $_ (\$;\$) {
     my \$self = shift;
     if (\@_) {
