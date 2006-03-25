@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Util.pm,v 1.48 2006-03-25 03:21:08 chris Exp $
+# $Id: Util.pm,v 1.49 2006-03-25 03:45:28 chris Exp $
 #
 
 package mySociety::Util::Error;
@@ -792,9 +792,9 @@ sub describe_waitval ($;$) {
     } elsif ($value == 0) {
         return undef;
     } elsif ($value & 127) {
-        return "killed by signal " . ($value & 127);
+        return "$fn: killed by signal " . ($value & 127);
     } else {
-        return "exited with status " . ($value >> 8);
+        return "$fn: exited with status " . ($value >> 8);
     }
 }
 
