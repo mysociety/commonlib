@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Util.pm,v 1.46 2006-03-23 13:19:39 louise Exp $
+# $Id: Util.pm,v 1.47 2006-03-25 03:20:46 chris Exp $
 #
 
 package mySociety::Util::Error;
@@ -33,7 +33,7 @@ use Statistics::Distributions qw(fdistr);
 BEGIN {
     use Exporter ();
     our @ISA = qw(Exporter);
-    our @EXPORT_OK = qw(&print_log &random_bytes &ordinal &is_valid_email &is_valid_postcode &create_file_to_replace &describe_waitval);
+    our @EXPORT_OK = qw(&open_log &print_log &random_bytes &ordinal &is_valid_email &is_valid_postcode &create_file_to_replace &describe_waitval);
 }
 our @EXPORT_OK;
 
