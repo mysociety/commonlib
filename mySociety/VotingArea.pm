@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: VotingArea.pm,v 1.25 2005-02-10 16:47:14 chris Exp $
+# $Id: VotingArea.pm,v 1.26 2006-04-10 08:01:08 francis Exp $
 #
 
 package mySociety::VotingArea;
@@ -108,6 +108,7 @@ Known 3-letter area types.
         'WAS', 'WAE', 'WAC', # Welsh Assembly, Electoral Region, Constituency
         'NIA', 'NIE', # Northern Ireland Assembly, Electoral Region
         'WMP', 'WMC', # Westminster Parliament, Constituency
+        'HOL', # House of Lords
         'EUP', 'EUR', # European Parliament, Region
     );
 
@@ -171,9 +172,10 @@ for instance "Ward" or "Electoral Division".
         
         WMP =>  "House of Commons",
         WMC =>  "Constituency",
+        HOL =>  "House of Lords",
 
         EUP =>  "European Parliament",
-        EUR =>  "Region"
+        EUR =>  "Region",
     );
 
 =item %attend_prep
@@ -250,8 +252,9 @@ that area.  For example, "Councillor" or "MEP".
         NIE => 'MLA',
 
         WMC => 'MP',
+        HOL => 'Lord',
 
-        EUR => 'MEP'
+        EUR => 'MEP',
     );
 
 =item %rep_name_long
@@ -290,6 +293,7 @@ area.  For example, "Councillor" or "Member of the European Parliament".
         WAC => 'Assembly Member',
 
         WMC => 'Member of Parliament',
+        HOL => 'Member of Parliament',
 
         EUR => 'Member of the European Parliament'
     );
@@ -330,6 +334,7 @@ Plural short version of rep_name.
         NIE => 'MLAs',
 
         WMC => 'MPs',
+        HOL => 'Lords',
 
         EUR => 'MEPs'
     );
@@ -369,6 +374,7 @@ Plural long version of rep_name.
         NIE => 'Members of the Legislative Assembly',
 
         WMC => 'Members of Parliament',
+        HOL => 'Members of Parliament',
 
         EUR => 'Members of the European Parliament'
     );
@@ -411,6 +417,7 @@ that area.  For example, "AM" for Assembly Members.
         NIE => 'MLA',
 
         WMC => 'MP',
+        HOL => '',
 
         EUR => 'MEP'
     );
@@ -451,6 +458,7 @@ that area.  For example, "Cllr" for Councillors.
         NIE => '',
 
         WMC => '',
+        HOL => 'Lord',
 
         EUR => ''
     );
