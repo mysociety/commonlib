@@ -8,7 +8,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: votingarea.php,v 1.38 2006-02-14 17:02:08 francis Exp $
+ * $Id: votingarea.php,v 1.39 2006-04-10 08:01:09 francis Exp $
  * 
  */
 
@@ -65,8 +65,8 @@ $va_display_order = array(
         array('WAC', 'WAE'),
         array('SPC', 'SPE'),
         'NIE',
-        /* HoC and European Parliament */
-        'WMC', 'EUR'
+        /* Westminster Parliament and European Parliament */
+        'WMC', 'HOL', 'EUR'
     );
 
 /* va_salaried
@@ -100,6 +100,7 @@ $va_salaried = array(
         'NIE' => 1,
 
         'WMC' => 1,
+        'HOL' => 1, /* Although in contrast to MPs, Lords are paid according to attendance */
 
         'EUR' => 1
     );
