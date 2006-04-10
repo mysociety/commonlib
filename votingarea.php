@@ -8,7 +8,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: votingarea.php,v 1.39 2006-04-10 08:01:09 francis Exp $
+ * $Id: votingarea.php,v 1.40 2006-04-10 17:30:24 francis Exp $
  * 
  */
 
@@ -44,6 +44,7 @@ $va_inside = array(
         'NIE' => 'NIA',
 
         'WMC' => 'WMP',
+        'HOC' => 'HOL',
 
         'EUR' => 'EUP'
     );
