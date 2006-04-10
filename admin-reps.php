@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-reps.php,v 1.34 2006-03-09 16:48:46 francis Exp $
+ * $Id: admin-reps.php,v 1.35 2006-04-10 15:46:12 francis Exp $
  * 
  */
 
@@ -293,6 +293,9 @@ class ADMIN_PAGE_REPS {
                     ) as $searchq) 
                     $search_links .= "<a href=\"http://search.yahoo.com/search?p=".htmlspecialchars($searchq)."\"> ".htmlspecialchars($searchq)."</a> | ";
                 $form->addElement('static', 'newlink', null, $search_links);
+            }
+            if ($repinfo['parlparse_person_id']) {
+                $form->addElement('static', 'person', 'parlparse person_id:', $repinfo['parlparse_person_id']);
             }
     
             $form->addElement('header', '', 'Historical Changes');
