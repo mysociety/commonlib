@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: VotingArea.pm,v 1.27 2006-04-10 11:33:32 francis Exp $
+# $Id: VotingArea.pm,v 1.28 2006-04-10 17:30:23 francis Exp $
 #
 
 package mySociety::VotingArea;
@@ -89,6 +89,13 @@ House of Lords. Theoretically coterminous with WMP :)
 =cut
 use constant HOL_AREA_ID => 900007;
 
+=item HOC_AREA_ID
+
+House of Lords dummy constituency
+
+=cut
+use constant HOC_AREA_ID => 900008;
+
 =back
 
 =head1 DATA
@@ -114,7 +121,7 @@ Known 3-letter area types.
         'WAS', 'WAE', 'WAC', # Welsh Assembly, Electoral Region, Constituency
         'NIA', 'NIE', # Northern Ireland Assembly, Electoral Region
         'WMP', 'WMC', # Westminster Parliament, Constituency
-        'HOL', # House of Lords
+        'HOL', 'HOC', # House of Lords, Dummy constituency
         'EUP', 'EUR', # European Parliament, Region
     );
 
@@ -179,6 +186,7 @@ for instance "Ward" or "Electoral Division".
         WMP =>  "House of Commons",
         WMC =>  "Constituency",
         HOL =>  "House of Lords",
+        HOC =>  "Constituency",
 
         EUP =>  "European Parliament",
         EUR =>  "Region",
@@ -217,8 +225,44 @@ you in the European Parliament".
         NIA =>  "on the",
 
         WMP =>  "in the",
+        HOL =>  "in the",
 
         EUP =>  "in the",
+    );
+
+=item %general_prep
+
+Whether the place needs "the" or similar before its name when used as a noun.
+
+=cut
+
+%mySociety::VotingArea::general_prep = (
+        LBO =>  "the",
+
+        LAS =>  "the",
+
+        CTY =>  "",
+
+        DIS =>  "",
+
+        UTA =>  "",
+
+        MTD =>  "",
+
+        COI =>  "",
+
+        LGD =>  "",
+
+        SPA =>  "the",
+
+        WAS =>  "the",
+
+        NIA =>  "the",
+
+        WMP =>  "the",
+        HOL =>  "the",
+
+        EUP =>  "the",
     );
 
 
@@ -258,7 +302,7 @@ that area.  For example, "Councillor" or "MEP".
         NIE => 'MLA',
 
         WMC => 'MP',
-        HOL => 'Lord',
+        HOC => 'Lord',
 
         EUR => 'MEP',
     );
@@ -299,7 +343,7 @@ area.  For example, "Councillor" or "Member of the European Parliament".
         WAC => 'Assembly Member',
 
         WMC => 'Member of Parliament',
-        HOL => 'Member of Parliament',
+        HOC => 'Member of Parliament',
 
         EUR => 'Member of the European Parliament'
     );
@@ -340,7 +384,7 @@ Plural short version of rep_name.
         NIE => 'MLAs',
 
         WMC => 'MPs',
-        HOL => 'Lords',
+        HOC => 'Lords',
 
         EUR => 'MEPs'
     );
@@ -380,7 +424,7 @@ Plural long version of rep_name.
         NIE => 'Members of the Legislative Assembly',
 
         WMC => 'Members of Parliament',
-        HOL => 'Members of Parliament',
+        HOC => 'Members of Parliament',
 
         EUR => 'Members of the European Parliament'
     );
@@ -423,7 +467,7 @@ that area.  For example, "AM" for Assembly Members.
         NIE => 'MLA',
 
         WMC => 'MP',
-        HOL => '', # has neither prefix or suffix as titles in names
+        HOC => '', # has neither prefix or suffix as titles in names
 
         EUR => 'MEP'
     );
@@ -464,7 +508,7 @@ that area.  For example, "Cllr" for Councillors.
         NIE => '',
 
         WMC => '',
-        HOL => '', # has neither prefix or suffix as titles in names
+        HOC => '', # has neither prefix or suffix as titles in names
 
         EUR => ''
     );
