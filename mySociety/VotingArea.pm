@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: VotingArea.pm,v 1.26 2006-04-10 08:01:08 francis Exp $
+# $Id: VotingArea.pm,v 1.27 2006-04-10 11:33:32 francis Exp $
 #
 
 package mySociety::VotingArea;
@@ -82,6 +82,12 @@ London Asssembly.  Coterminous with GLA.
 =cut
 use constant LAS_AREA_ID => 900006;
 
+=item HOL_AREA_ID
+
+House of Lords. Theoretically coterminous with WMP :)
+
+=cut
+use constant HOL_AREA_ID => 900007;
 
 =back
 
@@ -417,7 +423,7 @@ that area.  For example, "AM" for Assembly Members.
         NIE => 'MLA',
 
         WMC => 'MP',
-        HOL => '',
+        HOL => '', # has neither prefix or suffix as titles in names
 
         EUR => 'MEP'
     );
@@ -458,7 +464,7 @@ that area.  For example, "Cllr" for Councillors.
         NIE => '',
 
         WMC => '',
-        HOL => 'Lord',
+        HOL => '', # has neither prefix or suffix as titles in names
 
         EUR => ''
     );

@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Parties.pm,v 1.12 2006-02-12 18:27:24 dademcron Exp $
+# $Id: Parties.pm,v 1.13 2006-04-10 11:33:32 francis Exp $
 #
 
 package mySociety::Parties;
@@ -32,11 +32,17 @@ display them with.
     "Alliance" => "Alliance",
     "Alliance Party of Northern Ireland" => "Alliance",
 
+    "Bp" => "Bishop", # House of Lords
+    "Bishop" => "Bishop",
+
     "Conservative" => "Conservative",
     "Con" => "Conservative",
     "Ind Con" => "Independent Conservative",
     "Scottish Conservative and Unionist Party" => "Conservative",
     "Scottish Conservative & Unionist Party" => "Conservative",
+
+    "XB" => "Crossbench", # House of Lords
+    "Crossbench" => "Crossbench",
 
     "DUP" => "DUP",
     "DU" => "DUP",
@@ -56,10 +62,13 @@ display them with.
     "Scottish Labour" => "Labour",
 
     "LDem" => "Liberal Democrat",
+    "Dem" => "Liberal Democrat", # House of Lords
     "Liberal Democrat" => "Liberal Democrat",
     "Scottish Liberal Democrats" => "Liberal Democrat",
 
     "One London Group" => "One London Group",
+
+    "Other" => "Other", # House of Lords
 
     "PC" => "Plaid Cymru",
     "Plaid Cymru" => "Plaid Cymru",
