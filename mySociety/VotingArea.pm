@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: VotingArea.pm,v 1.28 2006-04-10 17:30:23 francis Exp $
+# $Id: VotingArea.pm,v 1.29 2006-04-12 15:10:17 francis Exp $
 #
 
 package mySociety::VotingArea;
@@ -27,7 +27,8 @@ DaDem, MaPit, etc.
 =head2 Special area IDs
 
 These represent regions which should exist in the schema but which are not
-present in Boundary Line.
+present in Boundary Line. See if you need to update phplib/votingarea.php when
+you update these.
 
 =over 4
 
