@@ -8,7 +8,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: votingarea.php,v 1.41 2006-04-12 11:04:00 francis Exp $
+ * $Id: votingarea.php,v 1.42 2006-04-12 15:10:17 francis Exp $
  * 
  */
 
@@ -211,5 +211,7 @@ function va_is_fictional_area($id) {
         return false;
 }
 
+/* Special area IDs (see perllib/mysociety/VotingArea.pm for more) */
+$HOC_AREA_ID = 900008;
 
 ?>
