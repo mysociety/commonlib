@@ -8,7 +8,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: votingarea.php,v 1.40 2006-04-10 17:30:24 francis Exp $
+ * $Id: votingarea.php,v 1.41 2006-04-12 11:04:00 francis Exp $
  * 
  */
 
@@ -67,7 +67,7 @@ $va_display_order = array(
         array('SPC', 'SPE'),
         'NIE',
         /* Westminster Parliament and European Parliament */
-        'WMC', 'HOL', 'EUR'
+        'WMC', 'EUR'
     );
 
 /* va_salaried
