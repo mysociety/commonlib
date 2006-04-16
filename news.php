@@ -8,7 +8,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: news.php,v 1.1 2006-03-23 17:58:48 louise Exp $
+ * $Id: news.php,v 1.2 2006-04-16 18:42:04 louise Exp $
  *
  */
 
@@ -60,6 +60,17 @@ function news_publish_update($id, $editor, $hash) {
     global $news_client;
     $params = func_get_args();
     $result = $news_client->call('NeWs.publish_update', $params);
+    return $result;
+}
+
+/* news_get_history ID
+
+  Given a newspaper ID, returns the history of edits to that newspaper's
+  record in the database  */
+function news_get_history($id) {
+    global $news_client;
+    $params = func_get_args();
+    $result = $news_client->call('NeWs.get_history', $params);
     return $result;
 }
 
