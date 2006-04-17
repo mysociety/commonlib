@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.67 2006-03-22 18:12:15 francis Exp $
+ * $Id: utility.php,v 1.68 2006-04-17 14:06:40 matthew Exp $
  * 
  */
 
@@ -357,22 +357,31 @@ function get_http_var($name, $default='') {
     return $var;
 }
 
+$eo_search = array('/C[Xx]/', '/c[Xx]/',
+                   '/G[Xx]/', '/g[Xx]/',
+                   '/H[Xx]/', '/h[Xx]/',
+                   '/J[Xx]/', '/j[Xx]/',
+                   '/S[Xx]/', '/s[Xx]/',
+                   '/U[Xx]/', '/u[Xx]/');
+$eo_replace = array("\xc4\x88", "\xc4\x89",
+                    "\xc4\x9c", "\xc4\x9d",
+                    "\xc4\xa4", "\xc4\xa5",
+                    "\xc4\xb4", "\xc4\xb5",
+                    "\xc5\x9c", "\xc5\x9d",
+                    "\xc5\xac", "\xc5\xad");
+$eo_replace2 = array_map(create_function('$a', 'return substr($a, 1, 1)."x";'), $eo_search);
+$eo_search2 = array_map(create_function('$a', 'return "/$a/";'), $eo_replace);
 function input_esperanto($text) {
-    $search = array ('/C[Xx]/', '/c[Xx]/',
-                     '/G[Xx]/', '/g[Xx]/',
-                     '/H[Xx]/', '/h[Xx]/',
-                     '/J[Xx]/', '/j[Xx]/',
-                     '/S[Xx]/', '/s[Xx]/',
-                     '/U[Xx]/', '/u[Xx]/');
-    $replace = array ("\xc4\x88", "\xc4\x89",
-                      "\xc4\x9c", "\xc4\x9d",
-                      "\xc4\xa4", "\xc4\xa5",
-                      "\xc4\xb4", "\xc4\xb5",
-                      "\xc5\x9c", "\xc5\x9d",
-                      "\xc5\xac", "\xc5\xad");
-    return preg_replace($search, $replace, $text);
+    global $eo_search, $eo_replace, $eo_search2, $eo_replace2;
+    $text = preg_replace($eo_search, $eo_replace, $text);
+    $search = array("#https?://[^\s<>{}()]+[^\s.,<>{}()]#ie", 
+                    "#\swww\.[a-z0-9\-]+(?:\.[a-z0-9\-\~]+)+(?:/[^ <>{}()\n\r]*[^., <>{}()\n\r])?#ie",
+                    "#\s[a-z0-9\-_.]+@[^,< \n\r]*[^.,< \n\r]#ie");
+    $text = preg_replace($search, 'preg_replace($eo_search2, $eo_replace2, "$0");', " $text ");
+    $text = trim($text);
+    return $text;
 }
-    
+
 /* make_plural NUMBER SINGULAR PLURAL
  * If NUMBER is 1, return SINGULAR; if NUMBER is not 1, return PLURAL
  * if it's there, otherwise WORD catenated with "s". */
