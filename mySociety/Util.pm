@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Util.pm,v 1.49 2006-03-25 03:45:28 chris Exp $
+# $Id: Util.pm,v 1.50 2006-04-18 08:35:20 chris Exp $
 #
 
 package mySociety::Util::Error;
@@ -737,8 +737,10 @@ EOF
 
 =item create_file_to_replace FILE
 
-Create a file to replace the named FILE. Returns in list context a handle open
-on the new file, and its name.
+Create a file to replace the named FILE. Returns in list context the name of
+the new file, and a handle open on it.
+
+XXX this is inconsistent compared to named_tempfile -- should fix.
 
 =cut
 sub create_file_to_replace ($) {
