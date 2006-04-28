@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: VotingArea.pm,v 1.29 2006-04-12 15:10:17 francis Exp $
+# $Id: VotingArea.pm,v 1.30 2006-04-28 20:42:11 francis Exp $
 #
 
 package mySociety::VotingArea;
@@ -137,7 +137,7 @@ Hash having an entry for each element of @known_types.
 
 Map names of types of areas. For administrative areas, this is their full name,
 for instance "County" or "London Borough"; for voting areas, it's a short name,
-for instance "Ward" or "Electoral Division".
+for instance "Ward" or "Electoral Division". NB: Also update in phplib/votingarea.php
 
 =cut
 %mySociety::VotingArea::type_name = (
