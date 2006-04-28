@@ -8,7 +8,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: votingarea.php,v 1.42 2006-04-12 15:10:17 francis Exp $
+ * $Id: votingarea.php,v 1.43 2006-04-28 20:42:11 francis Exp $
  * 
  */
 
@@ -104,6 +104,60 @@ $va_salaried = array(
         'HOL' => 1, /* Although in contrast to MPs, Lords are paid according to attendance */
 
         'EUR' => 1
+    );
+
+// If you update this, also update in perllib/mySociety/VotingArea.pm
+$va_type_name = array(
+        'LBO' =>  "London Borough",
+        'LBW' =>  "Ward",
+
+        'GLA' =>  "Greater London Authority",
+
+        'LAS' =>  "London Assembly",
+        'LAC' =>  "Constituency",
+        'LAE' =>  "Electoral Region",
+
+        'CTY' =>  "County",
+        'CED' =>  "Electoral Division",
+
+        'DIS' =>  "District",
+        'DIW' =>  "Ward",
+
+        'LGD' =>  "Local Council",
+        'LGE' =>  "Electoral Area",
+
+        'UTA' =>  "Unitary Authority",
+        'UTE' =>  "Electoral Division",
+        'UTW' =>  "Ward",
+
+        'MTD' =>  "Metropolitan District",
+        'MTW' =>  "Ward",
+
+        'COI' =>  "Council of the Isles",
+        'COP' =>  "Parish",
+
+        'SPA' =>  "Scottish Parliament",
+        'SPE' =>  "Electoral Region",
+        'SPC' =>  "Constituency",
+
+        'WAS' =>  "National Assembly for Wales",
+        'WAE' =>  "Electoral Region",
+        'WAC' =>  "Constituency",
+
+        'NIA' =>  "Northern Ireland Assembly",
+        'NIE' =>  "Constituency", # These are the same as the Westminster
+                                # constituencies but return several members
+                                # using a proportional system. It looks like
+                                # most people just refer to them as
+                                # "constituencies".
+        
+        'WMP' =>  "House of Commons",
+        'WMC' =>  "Constituency",
+        'HOL' =>  "House of Lords",
+        'HOC' =>  "Constituency",
+
+        'EUP' =>  "European Parliament",
+        'EUR' =>  "Region",
     );
 
 /* va_responsibility_description
