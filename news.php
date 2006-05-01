@@ -8,7 +8,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: news.php,v 1.2 2006-04-16 18:42:04 louise Exp $
+ * $Id: news.php,v 1.3 2006-05-01 15:12:32 louise Exp $
  *
  */
 
@@ -52,6 +52,17 @@ function news_get_newspapers() {
     return $result;
 }
 
+/* news_get_newspapers_by_name
+
+  Get a hash keyed on id of newspapers in the DB matching a partial name
+  string */
+function news_get_newspapers_by_name() {
+    global $news_client;
+    $params = func_get_args();
+    $result = $news_client->call('NeWs.get_newspapers_by_name', $params);
+    return $result;
+}
+
 /* news_publish_update ID EDITOR HASH
 
   Update the newspaper with the ID using the attribute values in the hash
@@ -71,6 +82,17 @@ function news_get_history($id) {
     global $news_client;
     $params = func_get_args();
     $result = $news_client->call('NeWs.get_history', $params);
+    return $result;
+}
+
+/* news_get_coverage ID
+
+  Given a newspaper ID, returns the coverage information related to that
+  newspaper */
+function news_get_coverage($id) {
+    global $news_client;
+    $params = func_get_args();
+    $result = $news_client->call('NeWs.get_coverage', $params);
     return $result;
 }
 
