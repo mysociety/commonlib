@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.69 2006-05-04 11:42:08 chris Exp $
+ * $Id: utility.php,v 1.70 2006-05-04 11:58:32 chris Exp $
  * 
  */
 
@@ -50,6 +50,8 @@ set_magic_quotes_runtime(0);
  * that they can be called from TWFY (which has namespace clashes with the
  * functions in this file). So we include it here for compatibility. */
 require_once('urls.php');
+
+require_once('random.php');
 
 /* debug HEADER TEXT [VARIABLE]
  * Print, to the page, a debugging variable, if a debug=... parameter is
@@ -455,21 +457,6 @@ function http_auth_user() {
  * browsers. */
 function add_tooltip($text, $tip) {
     return "<span title=\"" . htmlspecialchars($tip) . "\">$text</span>";
-}
-
-/* random_bytes NUM
- * Return NUM bytes of random data. */
-function random_bytes($num) {
-    global $random_bytes_filehandle;
-    if ($num < 0)
-        err("NUM must be nonnegative in random_bytes");
-    if (!isset($random_bytes_filehandle)
-        && !($random_bytes_filehandle = fopen("/dev/random", "r")))
-            err("Unable to open /dev/random");
-    $res = '';
-    while (strlen($res) < $num)
-        $res .= fread($random_bytes_filehandle, $num - strlen($res));
-    return $res;
 }
 
 /* merge_spaces TEXT
