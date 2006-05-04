@@ -6,14 +6,14 @@
  * Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: urls.php,v 1.2 2006-05-04 12:14:13 chris Exp $
+ * $Id: urls.php,v 1.3 2006-05-04 12:19:43 chris Exp $
  * 
  */
 
 /* url_invoked 
  * Return the URL under which the script was invoked. The port is specified
  * only if it is not the default (i.e. 80 for HTTP and 443 for HTTPS). */
-function url_new() {
+function url_invoked() {
     $url = 'http';
     $ssl = FALSE;
     if (array_key_exists('SSL', $_SERVER)) {
