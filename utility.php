@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.71 2006-05-04 12:14:13 chris Exp $
+ * $Id: utility.php,v 1.72 2006-05-04 12:15:16 chris Exp $
  * 
  */
 
@@ -298,6 +298,8 @@ function trim_characters ($text, $start, $length) {
 
     return $text;
 }
+
+/* XXX should these two go in urls.php? */
 
 /* trim_url URL
  * Returns the URL formatted as a link to itself.  The displayed
