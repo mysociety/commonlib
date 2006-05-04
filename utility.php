@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.70 2006-05-04 11:58:32 chris Exp $
+ * $Id: utility.php,v 1.71 2006-05-04 12:14:13 chris Exp $
  * 
  */
 
@@ -616,7 +616,7 @@ foreach (array('\w*\s*\w*', 'fish soup', '**') as $re) {
     print "check_is_valid_regexp('$re') = " . check_is_valid_regexp($re) . "\n";
 }
 
-print "new_url('http://www.microsoft.com', 0, 'fish', 'soup') = '" . new_url('http://www.microsoft.com', 0, 'fish', 'soup')  . "'\n";
+print "url_new('http://www.microsoft.com', 0, 'fish', 'soup') = '" . url_new('http://www.microsoft.com', 0, 'fish', 'soup')  . "'\n";
 
 print "http_auth_user() = '" . http_auth_user() . "'\n";
 

@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: stash.php,v 1.4 2006-02-06 16:39:13 chris Exp $
+ * $Id: stash.php,v 1.5 2006-05-04 12:14:13 chris Exp $
  * 
  */
 
@@ -20,7 +20,7 @@ require_once 'db.php';
  * parameters in the content) in the database, and return a key for the stashed
  * data. EXTRA is an optional extra string stored with the stashed request. */
 function stash_request($extra = null) {
-    $url = invoked_url();
+    $url = url_invoked();
     if (!is_null($_SERVER['QUERY_STRING']))
         $url .= "?${_SERVER['QUERY_STRING']}";
     $v = null;

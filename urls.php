@@ -6,14 +6,14 @@
  * Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: urls.php,v 1.1 2006-05-04 11:42:08 chris Exp $
+ * $Id: urls.php,v 1.2 2006-05-04 12:14:13 chris Exp $
  * 
  */
 
-/* invoked_url
+/* url_invoked 
  * Return the URL under which the script was invoked. The port is specified
  * only if it is not the default (i.e. 80 for HTTP and 443 for HTTPS). */
-function invoked_url() {
+function url_new() {
     $url = 'http';
     $ssl = FALSE;
     if (array_key_exists('SSL', $_SERVER)) {
@@ -31,7 +31,7 @@ function invoked_url() {
     return $url;
 }
 
-/* new_url PAGE RETAIN [PARAM VALUE ...]
+/* url_new PAGE RETAIN [PARAM VALUE ...]
  * Return a new URL for PAGE with added parameters. If RETAIN is true, then all
  * of the parameters with which the page was originally invoked will be
  * retained in the original URL; additionally, any PARAM VALUE pairs will be
@@ -39,7 +39,7 @@ function invoked_url() {
  * a VALUE is null, any retained PARAM is removed. If a VALUE is an array,
  * multiple URL parameters will be added. If PAGE is null the URL under which
  * this page was invoked is used. */
-function new_url($page, $retain) {
+function url_new($page, $retain) {
     if (!isset($page))
         $page = invoked_url();
     $url = "$page";
@@ -52,7 +52,7 @@ function new_url($page, $retain) {
 
     if (func_num_args() > 2) {
         if ((func_num_args() % 2) != 0)
-            die("call to new_url with odd number of arguments");
+            die("call to url_new with odd number of arguments");
         for ($i = 2; $i < func_num_args(); $i += 2) {
             $k = func_get_arg($i);
             $v = func_get_arg($i + 1);
