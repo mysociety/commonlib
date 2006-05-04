@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: tracking.php,v 1.10 2006-05-04 12:14:13 chris Exp $
+ * $Id: tracking.php,v 1.11 2006-05-04 15:11:50 twfy-staging Exp $
  * 
  */
 
@@ -41,7 +41,7 @@ function track_code($extra = null) {
                 );
     }
 
-    return '<!-- This "web bug" image is used to collect data which we use to improve our services. More on this at https://secure.mysociety.org/track/ --><img alt="" src="' . $img . '">';
+    return '<!-- This "web bug" image is used to collect data which we use to improve our services. More on this at https://secure.mysociety.org/track/ --><img alt="" src="' . htmlspecialchars($img) . '" width="1" height="1">';
 }
 
 /* track_event [EXTRA]
