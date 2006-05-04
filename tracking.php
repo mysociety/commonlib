@@ -6,11 +6,11 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: tracking.php,v 1.8 2006-03-09 14:46:09 chris Exp $
+ * $Id: tracking.php,v 1.9 2006-05-04 11:44:16 chris Exp $
  * 
  */
 
-require_once('utility.php');
+require_once('urls.php');
 
 /* track_code [EXTRA]
  * Return some HTML which will cause the page visit to be
