@@ -8,7 +8,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: dadem.php,v 1.39 2006-03-09 16:17:42 francis Exp $
+ * $Id: dadem.php,v 1.40 2006-05-18 13:55:19 matthew Exp $
  *
  */
 
@@ -64,6 +64,19 @@ function dadem_get_area_status($area_id) {
     global $dadem_client;
     $params = func_get_args();
     $result = $dadem_client->call('DaDem.get_area_status', $params);
+    return $result;
+}
+
+/* dadem_get_area_statuses
+
+  Get the current electoral statuses. Can be any of these: none - no
+  special status pending_election - representative data invalid due to
+  forthcoming election recent_election - representative data invalid
+  because we haven't updated since election */
+function dadem_get_area_statuses() {
+    global $dadem_client;
+    $params = func_get_args();
+    $result = $dadem_client->call('DaDem.get_area_statuses', $params);
     return $result;
 }
 
@@ -180,21 +193,14 @@ function dadem_store_user_correction($va_id, $rep_id, $change, $name, $party, $n
   Return a hash of information about the number of representatives in the
   database. The elements of the hash are,
 
+  * representative_count
+
+    Number of representatives in total (including deleted, out of
+    generation)
+
   * area_count
 
-    Number of areas for which representative information is stored.
-
-  * email_present
-
-    Number of representatives who have a contact email address.
-
-  * fax_present
-
-    Number of representatives who have a contact fax number.
-
-  * either_present
-
-    Number of representatives who have either email address or fax number. */
+    Number of areas for which representative information is stored. */
 function dadem_admin_get_stats() {
     global $dadem_client;
     $params = func_get_args();
