@@ -8,7 +8,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # WWW: http://www.mysociety.org
 #
-# $Id: DaDem.pm,v 1.21 2006-03-09 16:17:41 francis Exp $
+# $Id: DaDem.pm,v 1.22 2006-05-18 13:55:13 matthew Exp $
 
 package mySociety::DaDem;
 
@@ -99,6 +99,19 @@ sub get_representatives ($;$) {
 sub get_area_status ($) {
     configure() if !defined $rabx_client;
     return $rabx_client->call('DaDem.get_area_status', @_);
+}
+
+=item DaDem::get_area_statuses
+
+  Get the current electoral statuses. Can be any of these: none - no
+  special status pending_election - representative data invalid due to
+  forthcoming election recent_election - representative data invalid
+  because we haven't updated since election
+
+=cut
+sub get_area_statuses () {
+    configure() if !defined $rabx_client;
+    return $rabx_client->call('DaDem.get_area_statuses', @_);
 }
 
 =item DaDem::search_representatives QUERY
@@ -214,21 +227,14 @@ sub store_user_correction ($$$$$$$) {
   Return a hash of information about the number of representatives in the
   database. The elements of the hash are,
 
+  * representative_count
+
+    Number of representatives in total (including deleted, out of
+    generation)
+
   * area_count
 
     Number of areas for which representative information is stored.
-
-  * email_present
-
-    Number of representatives who have a contact email address.
-
-  * fax_present
-
-    Number of representatives who have a contact fax number.
-
-  * either_present
-
-    Number of representatives who have either email address or fax number.
 
 =cut
 sub admin_get_stats () {
