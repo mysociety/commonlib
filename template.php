@@ -6,7 +6,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: template.php,v 1.8 2006-02-20 14:22:15 francis Exp $
+ * $Id: template.php,v 1.9 2006-05-18 15:16:07 matthew Exp $
  * 
  */
 
@@ -63,6 +63,7 @@ function template_draw($template_name, $values = null) {
         }
     }
     if (!$found) {
+    	header('HTTP/1.0 404 Not Found');
         err("template file for \"$template_name\" does not exist");
     }
 }
