@@ -6,7 +6,7 @@
  * Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: crosssell.php,v 1.1 2006-04-28 17:14:10 francis Exp $
+ * $Id: crosssell.php,v 1.2 2006-05-18 17:05:12 matthew Exp $
  * 
  */
 
@@ -69,6 +69,9 @@ function crosssell_display_twfy_alerts_advert($user_email, $postcode) {
     $rep_info = dadem_get_representative_info($reps[0]);
     dadem_check_error($rep_info);
 
+    if (!array_key_exists('parlparse_person_id', $rep_info)) {
+    	return false;
+    }
     $person_id = str_replace("uk.org.publicwhip/person/", "", $rep_info['parlparse_person_id']);
     if (!$person_id) {
         return false;
