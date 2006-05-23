@@ -6,7 +6,7 @@
  * Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: crosssell.php,v 1.2 2006-05-18 17:05:12 matthew Exp $
+ * $Id: crosssell.php,v 1.3 2006-05-23 17:05:47 matthew Exp $
  * 
  */
 
@@ -76,20 +76,23 @@ function crosssell_display_twfy_alerts_advert($user_email, $postcode) {
     if (!$person_id) {
         return false;
     }
+
+    $auth_signature = auth_sign_with_shared_secret($user_email, OPTION_AUTH_SHARED_SECRET);
 ?>
 
-<h2 style="padding-top: 1em; font-size: 200%">Would you like to be emailed when your MP talks in parliament?</h2>
-<form style="text-align: center" action="http://www.theyworkforyou.com/alert">
-                <strong>Your email:</strong> <input type="text" name="email" value="<?=$user_email ?>" maxlength="100" size="30" />
-                <input type="hidden" name="pid" value="<?=$person_id?>">            
-                <input type="submit" value="Sign me up!" />
-                <input type="hidden" name="submitted" value="true" />
-                <input type="hidden" name="pg" value="alert" />
+<h2 style="border-top: solid 3px #9999ff; font-weight: normal; padding-top: 1em; font-size: 150%">Seeing as you're interested in hearing from your MP, would you also like to be emailed when they say something in parliament?</h2>
+<form style="text-align: center" action="http://www.theyworkforyou.com/alert/">
+    <strong>Your email:</strong> <input type="text" name="email" value="<?=$user_email ?>" maxlength="100" size="30">
+    <input type="hidden" name="pid" value="<?=$person_id?>">            
+    <input type="submit" value="Sign me up!">
+    <input type="hidden" name="submitted" value="true">
+    <input type="hidden" name="pg" value="alert">
+    <input type="hidden" name="sign" value="<?=$auth_signature?>">
 </form>
 
-<p><a href="http://www.theyworkforyou.com">TheyWorkForYou.com</a>, which sends these email alerts, is 
-another <a href="http://www.mysociety.org">mySociety</a> site and we will treat
-your data with the same diligence as we do on all our sites.  Obviously, you
+<p>Parliament email alerts are a free service of <a href="http://www.theyworkforyou.com">TheyWorkForYou.com</a>,
+another <a href="http://www.mysociety.org">mySociety</a> site. We will treat
+your data with the same diligence as we do on all our sites, and obviously you
 can unsubscribe at any time.
 <?  
     return true;
