@@ -6,7 +6,7 @@
  * Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: crosssell.php,v 1.4 2006-05-26 07:32:38 matthew Exp $
+ * $Id: crosssell.php,v 1.5 2006-05-26 08:05:09 matthew Exp $
  * 
  */
 
@@ -104,10 +104,10 @@ can unsubscribe at any time.
 function crosssell_display_advert($this_site, $user_email, $user_name, $postcode) {
     if ($this_site != "hfymp") 
         if (crosssell_display_hfymp_advert($user_email, $user_name, $postcode))
-            return;
+            return 'hfymp';
     if ($this_site != "twfy")
         if (crosssell_display_twfy_alerts_advert($this_site, $user_email, $postcode))
-            return;
+            return 'twfy';
     /* if ($this_site != "pb")
         if (crosssell_display_pb_local_pledges($postcode))
             return; */
@@ -116,6 +116,8 @@ function crosssell_display_advert($this_site, $user_email, $user_name, $postcode
 <h2 style="padding: 1em; font-size: 200%" align="center">
 Have you ever wanted to <a href="http://www.pledgebank.com">change the world</a> but stopped short because no-one would help?</h2>
 <?
+        return 'pb';
     }
+    return '';
 }
 
