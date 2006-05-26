@@ -6,7 +6,7 @@
  * Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: crosssell.php,v 1.3 2006-05-23 17:05:47 matthew Exp $
+ * $Id: crosssell.php,v 1.4 2006-05-26 07:32:38 matthew Exp $
  * 
  */
 
@@ -54,7 +54,7 @@ function crosssell_display_pb_local_pledges($postcode) {
     return true;
 }
 
-function crosssell_display_twfy_alerts_advert($user_email, $postcode) {
+function crosssell_display_twfy_alerts_advert($this_site, $user_email, $postcode) {
     // Look up who the MP is
     $voting_areas = mapit_get_voting_areas($postcode);
     mapit_check_error($voting_areas);
@@ -88,6 +88,7 @@ function crosssell_display_twfy_alerts_advert($user_email, $postcode) {
     <input type="hidden" name="submitted" value="true">
     <input type="hidden" name="pg" value="alert">
     <input type="hidden" name="sign" value="<?=$auth_signature?>">
+    <input type="hidden" name="site" value="<?=$this_site?>">
 </form>
 
 <p>Parliament email alerts are a free service of <a href="http://www.theyworkforyou.com">TheyWorkForYou.com</a>,
@@ -105,7 +106,7 @@ function crosssell_display_advert($this_site, $user_email, $user_name, $postcode
         if (crosssell_display_hfymp_advert($user_email, $user_name, $postcode))
             return;
     if ($this_site != "twfy")
-        if (crosssell_display_twfy_alerts_advert($user_email, $postcode))
+        if (crosssell_display_twfy_alerts_advert($this_site, $user_email, $postcode))
             return;
     /* if ($this_site != "pb")
         if (crosssell_display_pb_local_pledges($postcode))
