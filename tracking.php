@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: tracking.php,v 1.11 2006-05-04 15:11:50 twfy-staging Exp $
+ * $Id: tracking.php,v 1.12 2006-05-26 08:42:49 matthew Exp $
  * 
  */
 
@@ -18,7 +18,7 @@ require_once('urls.php');
  * exploits). If specified, EXTRA should be a simple string which will be
  * recorded with the visit. */
 function track_code($extra = null) {
-    if (!OPTION_TRACKING)
+    if (!defined('OPTION_TRACKING') || !OPTION_TRACKING)
         return '';
     $salt = sprintf('%08x', rand());
     $url = url_invoked();
