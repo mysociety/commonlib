@@ -6,7 +6,7 @@
  * Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: crosssell.php,v 1.5 2006-05-26 08:05:09 matthew Exp $
+ * $Id: crosssell.php,v 1.6 2006-05-26 08:44:39 matthew Exp $
  * 
  */
 
@@ -78,9 +78,13 @@ function crosssell_display_twfy_alerts_advert($this_site, $user_email, $postcode
     }
 
     $auth_signature = auth_sign_with_shared_secret($user_email, OPTION_AUTH_SHARED_SECRET);
+    // See if already signed up
+    $already_signed = file_get_contents('http://www.theyworkforyou.com/alert/authed.php?pid='.$person_id.'&email='.urlencode($user_email)."&sign=".urlencode($auth_signature));
+    if ($already_signed != 'not signed')
+        return false;
 ?>
 
-<h2 style="border-top: solid 3px #9999ff; font-weight: normal; padding-top: 1em; font-size: 150%">Seeing as you're interested in hearing from your MP, would you also like to be emailed when they say something in parliament?</h2>
+<h2 style="border-top: solid 3px #9999ff; font-weight: normal; padding-top: 1em; font-size: 150%">Seeing as you're interested in your MP, would you also like to be emailed when they say something in parliament?</h2>
 <form style="text-align: center" action="http://www.theyworkforyou.com/alert/">
     <strong>Your email:</strong> <input type="text" name="email" value="<?=$user_email ?>" maxlength="100" size="30">
     <input type="hidden" name="pid" value="<?=$person_id?>">            
