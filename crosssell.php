@@ -6,7 +6,7 @@
  * Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: crosssell.php,v 1.6 2006-05-26 08:44:39 matthew Exp $
+ * $Id: crosssell.php,v 1.7 2006-05-30 14:53:36 twfy-live Exp $
  * 
  */
 
@@ -17,6 +17,8 @@
 
 require_once 'dadem.php';
 require_once 'mapit.php';
+require_once 'auth.php';
+require_once 'random.php';
 
 function crosssell_display_hfymp_advert($user_email, $user_name, $postcode) {
     $auth_signature = auth_sign_with_shared_secret($user_email, OPTION_AUTH_SHARED_SECRET);
@@ -109,9 +111,12 @@ function crosssell_display_advert($this_site, $user_email, $user_name, $postcode
     if ($this_site != "hfymp") 
         if (crosssell_display_hfymp_advert($user_email, $user_name, $postcode))
             return 'hfymp';
-    if ($this_site != "twfy")
+    if ($this_site != "twfy") {
         if (crosssell_display_twfy_alerts_advert($this_site, $user_email, $postcode))
             return 'twfy';
+    } else {
+        return 'other-twfy-alert-type';
+    }
     /* if ($this_site != "pb")
         if (crosssell_display_pb_local_pledges($postcode))
             return; */
