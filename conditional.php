@@ -6,7 +6,7 @@
  * Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: conditional.php,v 1.2 2006-05-30 20:55:15 chris Exp $
+ * $Id: conditional.php,v 1.3 2006-05-30 20:58:50 chris Exp $
  * 
  */
 
@@ -73,9 +73,9 @@ function cond_parse_http_date($date) {
  * Send Last-Modified: and ETag: headers. The ETAG is assumed to be a weak
  * one. */
 function cond_headers($time, $etag = null) {
-    if (defined($time))
+    if (isset($time))
         header('Last-Modified: ' . gmstrftime('%a, %d %b %Y %H:%M:%S GMT', $time);
-    if (defined($etag)) {
+    if (isset($etag)) {
         header('ETag: W/"' . preg_replace('/[\\"]/', '\$1', $etag) . '"');
 }
 
@@ -101,15 +101,15 @@ function cond_maybe_respond($time, $etag = null) {
         return false;
 
     /* Look for an if-last-modified header */
-    if (defined($time) && array_key_exists('HTTP_IF_MODIFIED_SINCE', $_SERVER)) {
+    if (isset($time) && array_key_exists('HTTP_IF_MODIFIED_SINCE', $_SERVER)) {
         $t = cond_parse_http_date($_SERVER['HTTP_IF_MODIFIED_SINCE']);
-        if (defined($t) && $t >= $time) {
+        if (isset($t) && $t >= $time) {
             cond_304($time, $etag);
             return true;
         }
     }
     
-    if (defined($etag) && array_key_exists('HTTP_IF_NONE_MATCH', $_SERVER)) {
+    if (isset($etag) && array_key_exists('HTTP_IF_NONE_MATCH', $_SERVER)) {
         $etags = preg_split('/\s*,\s*/', $_SERVER['HTTP_IF_NONE_MATCH']);
         $q = 'W/"' . preg_replace('/[\\"]/', '\$1', $etag) . '"';
         foreach ($etags as $q2) {
