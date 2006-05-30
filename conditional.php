@@ -6,7 +6,7 @@
  * Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: conditional.php,v 1.3 2006-05-30 20:58:50 chris Exp $
+ * $Id: conditional.php,v 1.4 2006-05-30 20:59:40 chris Exp $
  * 
  */
 
@@ -74,7 +74,7 @@ function cond_parse_http_date($date) {
  * one. */
 function cond_headers($time, $etag = null) {
     if (isset($time))
-        header('Last-Modified: ' . gmstrftime('%a, %d %b %Y %H:%M:%S GMT', $time);
+        header('Last-Modified: ' . gmstrftime('%a, %d %b %Y %H:%M:%S GMT', $time));
     if (isset($etag)) {
         header('ETag: W/"' . preg_replace('/[\\"]/', '\$1', $etag) . '"');
 }
