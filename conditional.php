@@ -6,28 +6,67 @@
  * Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: conditional.php,v 1.1 2006-05-30 17:20:51 chris Exp $
+ * $Id: conditional.php,v 1.2 2006-05-30 20:55:15 chris Exp $
  * 
  */
+
+$cond_wkday_re = '(Sun|Mon|Tue|Wed|Thu|Fri|Sat)';
+$cond_weekday_re = '(Sunday|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday)';
+$cond_month_re = '(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)';
+$cond_month_map = array(
+        'Jan' =>  1, 'Feb' =>  2, 'Mar' =>  3, 'Apr' =>  4,
+        'May' =>  5, 'Jun' =>  6, 'Jul' =>  7, 'Aug' =>  8,
+        'Sep' =>  9, 'Oct' => 10, 'Nov' => 11, 'Dec' => 12
+    );
+
+$cond_date1_re = '(\d\d) ' . $cond_month_re . ' (\d\d\d\d)';
+$cond_date2_re = '(\d\d)-' . $cond_month_re . '-(\d\d)';
+$cond_date3_re = $cond_month_re . ' (\d\d| \d)';
+
+$cond_time_re = '([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9]|6[012])';
+    /* XXX RFC 2616 prohibits seconds beyond 59, but presumably they will occur
+     * as leap seconds sometimes. */
 
 /* cond_parse_http_date DATE
  * Parse the supplied HTTP-style DATE, returning the number of seconds since
  * the epoch that it represents, or null if it could not be parsed. */
 function cond_parse_http_date($date) {
-    /* strptime uses week and month day names in the current locale, so need
-     * to set it to 'C' and reset it on return. */
-    $lc = setlocale(LC_TIME, "C");
-    $r = null;
-                                    /* RFC1123 */
-    if (($d = strptime($date, '%a, %d %b %Y %H:%M:%S GMT'))
-                                    /* RFC850 */
-        || ($d = strptime($date, '%A, %d-%b-%y %H:%M:%S GMT'))
-                                    /* asctime(3) */
-        || ($d = strptime($date, '%a %b %e %H:%M:%S GMT')))
-        $r = gmmktime($d);
+    /* Unfortunately there is no strptime in PHP <5, so we must do this
+     * manually. */
+    $H = $M = $S = 0;
+    $Y = $m = $d = 0;
 
-    setlocale(LC_TIME, $lc);
-    return $r;
+    $ma = array();
+    global $cond_wkday_re, $cond_weekday_re, $cond_month_re, $cond_month_map,
+            $cond_date1_re, $cond_date2_re, $cond_date3_re, $cond_time_re;
+    if (preg_match("/^$cond_wkday_re, $cond_date1_re $cond_time_re GMT\$/", $date, $ma)) {
+        /* RFC 1123 */
+        $d = $ma[2];
+        $m = $cond_month_map[$ma[3]];
+        $Y = $ma[4];
+        $H = $ma[5];
+        $M = $ma[6];
+        $S = $ma[7];
+    } else if (preg_match("/^$cond_weekday_re, $cond_date2_re $cond_time_re GMT\$/", $date, $ma)) {
+        /* RFC 850 */
+        $d = $ma[2];
+        $m = $cond_month_map[$ma[3]];
+        $Y = $ma[4] + ($ma[4] < 50 ? 2000 : 1900); /* XXX */
+        $H = $ma[5];
+        $M = $ma[6];
+        $S = $ma[7];
+    } else if (preg_match("/^$cond_wkday_re $cond_date3_re $cond_time_re (\\d{4})\$/", $date, $ma)) {
+        /* asctime(3) */
+        $d = preg_replace('/ /', '', $ma[3]);
+        $m = $cond_month_map[$ma[2]];
+        $Y = $ma[7];
+        $H = $ma[4];
+        $M = $ma[5];
+        $S = $ma[6];
+    } else
+        return null;
+
+    return gmmktime($H, $M, $S, $m, $d, $Y);
 }
 
 /* cond_headers TIME [ETAG]
