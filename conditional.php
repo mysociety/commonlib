@@ -6,7 +6,7 @@
  * Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: conditional.php,v 1.4 2006-05-30 20:59:40 chris Exp $
+ * $Id: conditional.php,v 1.5 2006-05-30 21:14:44 matthew Exp $
  * 
  */
 
@@ -69,14 +69,20 @@ function cond_parse_http_date($date) {
     return gmmktime($H, $M, $S, $m, $d, $Y);
 }
 
+/* cond_quote_etag ETAG
+ * Return a quoted copy of ETAG suitable for including in an ETag: header. */
+function cond_quote_etag($etag) {
+    return '"' . preg_replace('/([\\"])/', '\\\\$1', $etag) . '"';
+}
+
 /* cond_headers TIME [ETAG]
  * Send Last-Modified: and ETag: headers. The ETAG is assumed to be a weak
  * one. */
 function cond_headers($time, $etag = null) {
     if (isset($time))
         header('Last-Modified: ' . gmstrftime('%a, %d %b %Y %H:%M:%S GMT', $time));
-    if (isset($etag)) {
-        header('ETag: W/"' . preg_replace('/[\\"]/', '\$1', $etag) . '"');
+    if (isset($etag))
+        header('ETag: W/' . cond_quote_etag($etag));
 }
 
 /* cond_304 TIME [ETAG]
@@ -111,7 +117,7 @@ function cond_maybe_respond($time, $etag = null) {
     
     if (isset($etag) && array_key_exists('HTTP_IF_NONE_MATCH', $_SERVER)) {
         $etags = preg_split('/\s*,\s*/', $_SERVER['HTTP_IF_NONE_MATCH']);
-        $q = 'W/"' . preg_replace('/[\\"]/', '\$1', $etag) . '"';
+        $q = 'W/' . cond_quote_etag($etag);
         foreach ($etags as $q2) {
             if ($q2 == $q) {
                 cond_304($time, $etag);
@@ -122,6 +128,5 @@ function cond_maybe_respond($time, $etag = null) {
 
     return false;
 }
-
 
 ?>
