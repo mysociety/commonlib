@@ -10,9 +10,11 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: rabx.php,v 1.17 2006-02-03 17:56:36 chris Exp $
+ * $Id: rabx.php,v 1.18 2006-05-30 12:39:42 chris Exp $
  * 
  */
+
+require_once('utility.php');
 
 /*
  * Errors and error codes.
@@ -296,6 +298,9 @@ class RABX_Client {
         $this->ch = curl_init();
         curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($this->ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+        curl_setopt($this->ch, CURLOPT_USERAGENT, 'PHP RABX client, version $Id: rabx.php,v 1.18 2006-05-30 12:39:42 chris Exp $');
+        if (array_key_exists('http_proxy', $_SERVER))
+            curl_setopt($this->ch, CURLOPT_PROXY, $_SERVER['http_proxy']);
         $use_post = FALSE;
     }
 
@@ -323,6 +328,9 @@ class RABX_Client {
         } else {
             curl_setopt($this->ch, CURLOPT_URL, $u);
             curl_setopt($this->ch, CURLOPT_HTTPGET, 1);
+            /* By default curl passes a "Pragma: no-cache" header. Turn it
+             * off. */
+            curl_setopt($this->ch, CURLOPT_HTTPHEADER, array("Pragma: "));
         }
 
         if (!($r = curl_exec($this->ch)))
