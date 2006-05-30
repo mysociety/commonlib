@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: RABX.pm,v 1.17 2006-02-10 04:06:24 francis Exp $
+# $Id: RABX.pm,v 1.18 2006-05-30 11:16:04 chris Exp $
 
 # References:
 #   Netstrings are documented here: http://cr.yp.to/proto/netstrings.txt
@@ -395,7 +395,7 @@ use HTTP::Request;
 use HTTP::Response;
 use Regexp::Common qw(URI);
 
-my $rcsid = ''; $rcsid .= '$Id: RABX.pm,v 1.17 2006-02-10 04:06:24 francis Exp $';
+my $rcsid = ''; $rcsid .= '$Id: RABX.pm,v 1.18 2006-05-30 11:16:04 chris Exp $';
 
 =back
 
@@ -540,16 +540,21 @@ Serve RABX methods from a CGI/FastCGI script.
 
 =over 4
 
-=item dispatch NAME FUNCTION [...]
+=item dispatch FUNCTION SPEC [...]
+
+Serve requests for each of the named FUNCTIONs. SPEC is either a reference to
+the function to be called, or a reference to a list of the function ref and a
+maximum cache age in seconds.
 
 =cut
 sub dispatch (%) { # XXX should take stream + environment hash
     my (%funcs) = @_;
     my $ret;
 
-
     binmode(STDIN);
     binmode(STDOUT);
+
+    my $maxage = 0;
 
     try {
         my $meth = $ENV{REQUEST_METHOD};
@@ -580,10 +585,13 @@ sub dispatch (%) { # XXX should take stream + environment hash
         throw RABX::Error(qq#no function "$func"#, RABX::Error::INTERFACE)
             if (!exists($funcs{$func}));
 
-        {
-            no strict 'refs';
-            $ret = &{$funcs{$func}}(@$args);
+        # Now actually call the function.
+        my $x = $funcs{$func};
+        if (ref($x) eq 'ARRAY') {
+            $maxage = $x->[1];
+            $x = $x->[0];
         }
+        $ret = $x->(@$args);
     } catch RABX::Error with {
         $ret = shift;
     } otherwise {
@@ -593,9 +601,9 @@ sub dispatch (%) { # XXX should take stream + environment hash
 
     my $retstr = RABX::return_string($ret);
     print "Content-Type: application/octet-stream\n",
-          "Content-Length: ",  length($retstr), "\n",
-#          "Cache-Control: max-age=86400\n",
-          "\n",
+          "Content-Length: ",  length($retstr), "\n";
+    print "Cache-Control: max-age=$maxage\n" if ($maxage);
+    print "\n",
           $retstr;
 }
 
