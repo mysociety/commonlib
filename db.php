@@ -18,60 +18,97 @@
 // Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 // Email: francis@mysociety.org. WWW: http://www.mysociety.org
 //
-// $Id: db.php,v 1.14 2006-03-15 11:35:44 chris Exp $
+// $Id: db.php,v 1.15 2006-05-31 17:47:52 chris Exp $
 
-require_once "DB.php";
-require_once "utility.php";
+require_once('error.php');
+
+/* db_subst QUERY [PARAM ...]
+ * Given an SQL QUERY containing zero or more "?"s, substitute quoted values of
+ * the PARAMs into the query and return the new text. If the only non-QUERY
+ * parameter is a single array, then values are taken from that array rather
+ * than from the function's parameters. */
+function db_subst($q) {
+    if (func_num_args() == 1)
+        return $q;
+    else if (func_num_args() == 2) {
+        $params = func_get_arg(1);
+        if (!is_array($params))
+            $params = array($params);
+    } else {
+        $params = func_get_args();
+        array_shift($params);
+    }
+    $ss = preg_split('/(\?)/', $q, -1, PREG_SPLIT_DELIM_CAPTURE);
+    $result = '';
+    foreach ($ss as $s) {
+        if ($s == '?') {
+            if (count($params) == 0)
+                err("not enough substitution parameters for query '$q'");
+            $v = array_shift($params);
+            if (is_null($v))
+                $result .= 'null';
+            else if (is_int($v) || is_float($v))
+                $result .= $v;
+            else
+                $result .= "'" . pg_escape_string($v) . "'";
+        } else
+            $result .= $s;
+    }
+
+    if (count($params) > 0)
+        err("too many substitution parameters for query '$q'");
+
+    return $result;
+}
 
 /* db_connect
  * Connect a global handle to the database. */
 function db_connect() {
-    global $pbdb;
-    $vars = array('hostspec'=>'HOST', 'port'=>'PORT', 'database'=>'NAME', 'username'=>'USER', 'password'=>'PASS');
-    $connstr = array('phptype'=>'pgsql');
-    if (defined('OPTION_DB_TYPE')) {
-        $connstr['phptype'] = OPTION_DB_TYPE;
-    }
+    global $db_h;
+    $vars = array('host' => 'HOST', 'port' => 'PORT', 'dbname' => 'NAME', 'user' => 'USER', 'password' => 'PASS');
+/*    if (defined('OPTION_DB_TYPE'))
+        $connstr['phptype'] = OPTION_DB_TYPE; */ /* what is this for? */
     $prefix = OPTION_PHP_MAINDB;
+
+    $connstr = '';
     foreach ($vars as $k => $v) {
-        if (defined('OPTION_' . $prefix . '_DB_' . $v)) {
-            $connstr[$k] = constant('OPTION_' . $prefix . '_DB_' . $v);
-        }
+        if (defined("OPTION_${prefix}_DB_$v"))
+            $connstr .= " $k='" .  constant("OPTION_${prefix}_DB_$v") . "'";
     }
-    $connstr['connect_timeout'] = 10;
+    $connstr .= "connect_timeout=10";
+
     /*  set 'persistent' => true to get persistent DB connections. 
      *  TODO: ensure
      *  - the connection hasn't died (I think it handles this)
      *  - that we can't have more PHP processes than the database server
      *  permits connections. */
     $persistent = false;
-    if (defined('OPTION_' . $prefix . '_DB_' . 'PERSISTENT')) {
-        $persistent = constant('OPTION_' . $prefix . '_DB_' . 'PERSISTENT') ? true : false;
-    }
-    $options = array( 'persistent' => $persistent );
-    $pbdb = DB::connect($connstr, $options);
-    if (DB::isError($pbdb)) {
-        die($pbdb->getMessage());
-    }
+    if (defined("OPTION_${prefix}_DB_PERSISTENT"))
+        $persistent = constant("OPTION_${prefix}_DB_PERSISTENT") ? true : false;
 
-    $pbdb->autoCommit(false);
+    if ($persistent)
+        $db_h = pg_pconnect($connstr);
+    else
+        $db_h = pg_connect($connstr);
+
+    if (!$db_h)
+        err("unable to connect to database: " . pg_lasterror());
 
     /* Since we are using persistent connections we might end up re-using a
      * connection which is in the middle of a transaction. So try to roll back
      * any open transaction on termination of the script. */
     register_shutdown_function('db_end');
 
+    pg_query($db_h, 'begin');
+
     /* Ensure that we have a site shared secret. */
-    $pbdb->query('begin');
-    $r = $pbdb->getOne('select secret from secret');
-    if (is_null($r)) {
-        $pbdb->transaction_opcount++;
-        if (DB_OK == $pbdb->query('insert into secret (secret) values (?)', array(bin2hex(random_bytes(32)))))
-            $pbdb->query('commit');
+    $r = pg_query('select secret from secret');
+    if (!pg_fetch_row($r)) {
+        if (pg_query($db_h, db_subst('insert into secret (secret) values (?)', bin2hex(random_bytes(32)))))
+            pg_query($db_h, 'commit');
         else
-            $pbdb->query('rollback');
-        $pbdb->transaction_opcount++;
-        $pbdb->query('begin');
+            pg_query($db_h, 'rollback');
+        pg_query('begin');
     }
 }
 
@@ -81,135 +118,113 @@ function db_secret() {
     return db_getOne('select secret from secret');
 }
 
-/* db_query QUERY PARAMETERS
- * Perform QUERY against the database. Values in the PARAMETERS array are
- * substituted for '?' in the QUERY. Returns a query object or dies on
- * failure. */
-function db_query($query, $params = array()) {
-    global $pbdb;
-    if (!is_array($params))
-        $params = array($params);
-    if (!isset($pbdb))
+/* db_query QUERY [PARAM ...]
+ * Perform QUERY against the database. Values of the PARAMs are substituted
+ * for '?' in the QUERY; if the single PARAM is an array, values from that are
+ * used instead. Returns a query object or dies on failure. */
+function db_query($query) {
+    global $db_h;
+    global $db_last_res;
+    if (!isset($db_h))
         db_connect();
-    $result = $pbdb->query($query, $params);
-    if (DB::isError($result)) {
-        die($result->getMessage().': "'.$result->getDebugInfo().'"; query was: ' . $query);
-    }
-    return $result;
+    /* ugly boilerplate to call through to db_subst */
+    $a = func_get_args();
+    $q = call_user_func_array('db_subst', $a);
+    if (!($db_last_res = pg_query($db_h, $q)))
+        err(pg_last_error($db_h) . " in query '$query'");
+    return $db_last_res;
 }
 
-/* db_getOne QUERY PARAMETERS
+/* db_getOne QUERY [PARAM ...]
  * Execute QUERY and return a single value of a single column. */
-function db_getOne($query, $params = array()) {
-    global $pbdb;
-    if (!is_array($params))
-        $params = array($params);
-    if (!isset($pbdb))
-        db_connect();
-    $result = $pbdb->getOne($query, $params);
-    if (DB::isError($result)) {
-        die($result->getMessage().': "'.$result->getDebugInfo().'"; query was: ' . $query);
-    }
-    return $result;
+function db_getOne($query) {
+    $a = func_get_args();
+    $r = call_user_func_array('db_query', $a);
+    if (!($row = pg_fetch_row($r)))
+        return null;
+    else
+        return $row[0];
 }
 
-/* db_getRow QUERY PARAMETERS
+/* db_getRow QUERY [PARAM ...]
  * Execute QUERY and return an associative array of the columns of the first
  * row returned. */
-function db_getRow($query, $params = array()) {
-    global $pbdb;
-    if (!is_array($params))
-        $params = array($params);
-    if (!isset($pbdb))
-        db_connect();
-    $result = $pbdb->getRow($query, $params, DB_FETCHMODE_ASSOC);
-    if (DB::isError($result)) {
-        die($result->getMessage().': "'.$result->getDebugInfo().'"; query was: ' . $query);
-    }
-    return $result;
+function db_getRow($query) {
+    $a = func_get_args();
+    $r = call_user_func_array('db_query', $a);
+    return pg_fetch_array($r);
 }
 
-/* db_getRow_list QUERY PARAMETERS
+/* db_getRow_list QUERY [PARAM ...]
  * Like db_getRow, but return an array not an associative array. */
-function db_getRow_list($query, $params = array()) {
-    global $pbdb;
-    if (!is_array($params))
-        $params = array($params);
-    if (!isset($pbdb))
-        db_connect();
-    $result = $pbdb->getRow($query, $params, DB_FETCHMODE_ORDERED);
-    if (DB::isError($result))
-        die($result->getMessage().': "'.$result->getDebugInfo().'"; query was: ' . $query);
-    return $result;
+function db_getRow_list($query) {
+/* XXX could probably use db_getRow anyway, as the associative array will also
+ * have the columns in order anyway. */
+    $a = func_get_args();
+    $r = call_user_func_array('db_query', $a);
+    return pg_fetch_row($r);
 }
 
-function db_getAll($query, $params = array()) {
-    global $pbdb;
-    if (!is_array($params))
-        $params = array($params);
-    if (!isset($pbdb))
-        db_connect();
-    $result = $pbdb->getAll($query, $params, DB_FETCHMODE_ASSOC);
-    if (DB::isError($result))
-        die($result->getMessage().': "'.$result->getDebugInfo().'"; query was: ' . $query);
-    return $result;
+/* db_getAll QUERY [PARAM ...]
+ * Do QUERY and return all results as an array of associative arrays of rows. */
+function db_getAll($query) {
+    $a = func_get_args();
+    $r = call_user_func_array('db_query', $a);
+    return pg_fetch_all($r);
 }
 
-/* db_fetch_array QUERY
- * Fetch values of the next row from QUERY as an associative array from column
+/* db_fetch_array RESULTS
+ * Fetch values of the next row from RESULTS as an associative array from column
  * name to value. */
-function db_fetch_array($q) {
-    return $q->fetchRow(DB_FETCHMODE_ASSOC);
+function db_fetch_array($r) {
+    return pg_fetch_array($r);
 }
 
 /* db_fetch_row QUERY
- * Fetch values of the next row from QUERY as an array. */
-function db_fetch_row($q) {
-    return $q->fetchRow(DB_FETCHMODE_ORDERED);
+ * Fetch values of the next row from RESULTS as an array. */
+function db_fetch_row($r) {
+    return pg_fetch_row($r);
 }
 
-/* db_num_rows QUERY
- * Return the number of rows returned by QUERY. */
-function db_num_rows($q) {
-    return $q->numRows();
+/* db_num_rows RESULTS
+ * Return the number of rows returned in RESULTS. */
+function db_num_rows($r) {
+    return pg_num_rows($r);
 }
 
 /* db_affected_rows QUERY
  * Return the number of rows affected by the most recent query. */
 function db_affected_rows() {
-    global $pbdb;
-    if (!isset($pbdb))
-        die("db_affected_rows called before any query made");
-    return $pbdb->affectedRows();
+    global $db_last_res;
+    global $db_h;
+    if (!isset($db_h))
+        err("db_affected_rows called before any query made");
+    return pg_affected_rows($db_last_res);
 }
 
 /* db_commit
  * Commit current transaction. */
 function db_commit () {
-    global $pbdb;
-    // PEAR DB ->commit() doesn't commit if it believes no updates/inserts
-    // were done. So any select with side effects wouldn't commit.
-    $pbdb->query('commit');
-    $pbdb->transaction_opcount = 1;
-    $pbdb->query('begin');
+    global $db_h;
+    pg_query($db_h, 'commit');
+    pg_query($db_h, 'begin');
 }
 
 /* db_rollback
  * Roll back current transaction. */
 function db_rollback () {
-    global $pbdb;
-    $pbdb->query('rollback');
-    $pbdb->transaction_opcount = 1;
-    $pbdb->query('begin');
+    global $db_h;
+    pg_query($db_h, 'rollback');
+    pg_query($db_h, 'begin');
 }
 
 /* db_end
  * Cleanup at end of session. */
 function db_end() {
-    global $pbdb;
-    if (isset($pbdb)) {
-        $pbdb->query('rollback');
-        $pbdb = null;
+    global $db_h;
+    if (isset($db_h)) {
+        pg_query($db_h, 'rollback');
+        $db_h = null;
     }
 }
 
