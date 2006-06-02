@@ -18,7 +18,7 @@
 // Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 // Email: francis@mysociety.org. WWW: http://www.mysociety.org
 //
-// $Id: db.php,v 1.15 2006-05-31 17:47:52 chris Exp $
+// $Id: db.php,v 1.16 2006-06-02 09:42:29 chris Exp $
 
 require_once('error.php');
 
@@ -116,6 +116,18 @@ function db_connect() {
  * Return the site shared secret. */
 function db_secret() {
     return db_getOne('select secret from secret');
+}
+
+/* db_query_literal QUERY
+ * Perform QUERY with no parameter substitution. */
+function db_query_literal($query) {
+    global $db_h;
+    global $db_last_res;
+    if (!isset($db_h))
+        db_connect();
+    if (!($db_last_res = pg_query($db_h, $q)))
+        err(pg_last_error($db_h) . "in literal query '$query'");
+    return $db_last_res;
 }
 
 /* db_query QUERY [PARAM ...]
