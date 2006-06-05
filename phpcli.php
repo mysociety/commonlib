@@ -7,7 +7,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: matthew@mysociety.org. WWW: http://www.mysociety.org/
  *
- * $Id: phpcli.php,v 1.1 2005-11-11 12:34:57 francis Exp $
+ * $Id: phpcli.php,v 1.2 2006-06-05 13:33:25 chris Exp $
  *
  */
 
@@ -44,10 +44,10 @@ if (PEAR::isError($options)) {
     exit(INVALID_OPTION);
 }
 
-function err($message) {
+/*function err($message) {
     $stderr = fopen('php://stderr', 'w');
     fwrite($stderr,$message);
     fclose($stderr); 
     exit(1);
-}
+}*/
 ?>
