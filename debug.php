@@ -6,7 +6,7 @@
  * Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: debug.php,v 1.1 2006-06-05 18:50:33 chris Exp $
+ * $Id: debug.php,v 1.2 2006-06-05 18:51:26 chris Exp $
  * 
  */
 
@@ -61,16 +61,16 @@ function debug ($header, $text="", $complex_variable=null) {
 			print "<p><span style=\"color:#039;\"><strong>$header</strong></span> $text";
             if (isset($complex_variable)) {
                 print "</p><p>";
-                vardump($complex_variable);
+                debug_vardump($complex_variable);
             }
             print "</p>\n";	
 		}
 	}
 }
 
-/* vardump VARIABLE
-* Dump VARIABLE to the page, properly escaped and wrapped in <pre> tags. */
-function vardump($blah) {
+/* debug_vardump VARIABLE
+ * Dump VARIABLE to the page, properly escaped and wrapped in <pre> tags. */
+function debug_vardump($blah) {
    /* Miserable. We need to encode entities in the output, which means messing
     * about with output buffering. */
    ob_start();
