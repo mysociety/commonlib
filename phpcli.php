@@ -1,15 +1,17 @@
 <?php
-
-/* phpcgi:
+/*
+ * phpcli.php:
  * To be included in all PHP CLI scripts, to sort out constants,
  * read command line arguments, and things
  *
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: matthew@mysociety.org. WWW: http://www.mysociety.org/
  *
- * $Id: phpcli.php,v 1.2 2006-06-05 13:33:25 chris Exp $
+ * $Id: phpcli.php,v 1.3 2006-06-05 13:38:23 chris Exp $
  *
  */
+
+require_once('error.php');
 
 # from http://www.sitepoint.com/print/php-command-line-1 adapted for FCGI
 if (version_compare(phpversion(), '4.3.0', '<') || php_sapi_name() == 'cgi' || php_sapi_name() == 'cgi-fcgi') {
@@ -44,10 +46,13 @@ if (PEAR::isError($options)) {
     exit(INVALID_OPTION);
 }
 
-/*function err($message) {
+/* error display to standard error */
+function err_display_stderr($message) {
     $stderr = fopen('php://stderr', 'w');
     fwrite($stderr,$message);
     fclose($stderr); 
-    exit(1);
-}*/
+}
+err_set_handler_display('err_display_stderr');
+err_set_handler_log(null);
+
 ?>
