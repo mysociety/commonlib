@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.74 2006-06-06 02:13:20 twfy-staging Exp $
+ * $Id: utility.php,v 1.75 2006-06-06 09:37:54 chris Exp $
  * 
  */
 
@@ -80,15 +80,6 @@ function canonicalise_partial_postcode($pc) {
         err('Unexpected not full or partial postcode');
     }
     return $pc;
-}
-
-/* getmicrotime
- * Return time since the epoch, including fractional seconds. */
-function getmicrotime() {
-    $mtime = microtime();
-    $mtime = explode(" ",$mtime);
-    $mtime = $mtime[1] + $mtime[0];
-    return $mtime;
 }
 
 /* strip_tags_tospaces TEXT
