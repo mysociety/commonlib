@@ -6,9 +6,18 @@
  * Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: debug.php,v 1.3 2006-06-05 18:52:59 chris Exp $
+ * $Id: debug.php,v 1.4 2006-06-06 09:39:41 chris Exp $
  * 
  */
+
+/* getmicrotime
+ * Return time since the epoch, including fractional seconds. */
+function getmicrotime() {
+    $mtime = microtime();
+    $mtime = explode(" ",$mtime);
+    $mtime = $mtime[1] + $mtime[0];
+    return $mtime;
+}
 
 /* debug HEADER TEXT [VARIABLE]
  * Print, to the page, a debugging variable, if a debug=... parameter is
