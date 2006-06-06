@@ -18,7 +18,7 @@
 // Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 // Email: francis@mysociety.org. WWW: http://www.mysociety.org
 //
-// $Id: db.php,v 1.16 2006-06-02 09:42:29 chris Exp $
+// $Id: db.php,v 1.17 2006-06-06 09:30:41 chris Exp $
 
 require_once('error.php');
 
@@ -47,6 +47,8 @@ function db_subst($q) {
             $v = array_shift($params);
             if (is_null($v))
                 $result .= 'null';
+            else if (is_bool($v))
+                $result .= $v ? 'true' : 'false';
             else if (is_int($v) || is_float($v))
                 $result .= $v;
             else
