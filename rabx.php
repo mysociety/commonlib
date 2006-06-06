@@ -10,11 +10,11 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: rabx.php,v 1.18 2006-05-30 12:39:42 chris Exp $
+ * $Id: rabx.php,v 1.19 2006-06-06 02:13:20 twfy-staging Exp $
  * 
  */
 
-require_once('utility.php');
+require_once('debug.php');
 
 /*
  * Errors and error codes.
@@ -298,7 +298,7 @@ class RABX_Client {
         $this->ch = curl_init();
         curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($this->ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
-        curl_setopt($this->ch, CURLOPT_USERAGENT, 'PHP RABX client, version $Id: rabx.php,v 1.18 2006-05-30 12:39:42 chris Exp $');
+        curl_setopt($this->ch, CURLOPT_USERAGENT, 'PHP RABX client, version $Id: rabx.php,v 1.19 2006-06-06 02:13:20 twfy-staging Exp $');
         if (array_key_exists('http_proxy', $_SERVER))
             curl_setopt($this->ch, CURLOPT_PROXY, $_SERVER['http_proxy']);
         $use_post = FALSE;
