@@ -18,7 +18,7 @@
 // Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 // Email: francis@mysociety.org. WWW: http://www.mysociety.org
 //
-// $Id: db.php,v 1.17 2006-06-06 09:30:41 chris Exp $
+// $Id: db.php,v 1.18 2006-06-08 13:11:21 chris Exp $
 
 require_once('error.php');
 
@@ -184,7 +184,9 @@ function db_getRow_list($query) {
 function db_getAll($query) {
     $a = func_get_args();
     $r = call_user_func_array('db_query', $a);
-    return pg_fetch_all($r);
+    $res = pg_fetch_all($r);
+    if ($res == false) $res = array();
+    return $res;
 }
 
 /* db_fetch_array RESULTS
