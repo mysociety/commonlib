@@ -18,7 +18,7 @@
 // Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 // Email: francis@mysociety.org. WWW: http://www.mysociety.org
 //
-// $Id: db.php,v 1.18 2006-06-08 13:11:21 chris Exp $
+// $Id: db.php,v 1.19 2006-06-08 13:12:09 chris Exp $
 
 require_once('error.php');
 
@@ -180,7 +180,9 @@ function db_getRow_list($query) {
 }
 
 /* db_getAll QUERY [PARAM ...]
- * Do QUERY and return all results as an array of associative arrays of rows. */
+ * Do QUERY and return all results as an array of associative arrays of rows.
+ * This returns the empty array if there are no results, or if an error
+ * occurs, so it cannot be used if you need to be able to detect an error. */
 function db_getAll($query) {
     $a = func_get_args();
     $r = call_user_func_array('db_query', $a);
