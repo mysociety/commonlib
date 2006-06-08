@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: error.php,v 1.11 2005-10-20 12:12:10 francis Exp $
+ * $Id: error.php,v 1.12 2006-06-08 10:15:31 matthew Exp $
  * 
  */
 
@@ -62,6 +62,8 @@ function err($err) {
     $i = 0;
     if (array_key_exists(1, $a))
         $i = 1;
+    if (!array_key_exists('file', $a[$i])) $a[$i]['file'] = '(unknown file)';
+    if (!array_key_exists('line', $a[$i])) $a[$i]['line'] = '(unknown line)';
     err_global_handler(E_USER_ERROR, $err, $a[$i]['file'], $a[$i]['line'],
                         /* XXX We can't obtain the calling context AFAIK. */
                         null);
