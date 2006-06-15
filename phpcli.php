@@ -7,11 +7,9 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: matthew@mysociety.org. WWW: http://www.mysociety.org/
  *
- * $Id: phpcli.php,v 1.3 2006-06-05 13:38:23 chris Exp $
+ * $Id: phpcli.php,v 1.4 2006-06-15 14:21:17 francis Exp $
  *
  */
-
-require_once('error.php');
 
 # from http://www.sitepoint.com/print/php-command-line-1 adapted for FCGI
 if (version_compare(phpversion(), '4.3.0', '<') || php_sapi_name() == 'cgi' || php_sapi_name() == 'cgi-fcgi') {
@@ -45,6 +43,8 @@ if (PEAR::isError($options)) {
     fwrite(STDERR, $options->getMessage()."\n");
     exit(INVALID_OPTION);
 }
+
+require_once('error.php');
 
 /* error display to standard error */
 function err_display_stderr($message) {
