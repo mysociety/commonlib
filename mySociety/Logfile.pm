@@ -6,7 +6,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Logfile.pm,v 1.3 2005-07-18 13:31:39 francis Exp $
+# $Id: Logfile.pm,v 1.4 2006-06-15 14:27:11 francis Exp $
 #
 
 package mySociety::Logfile::Error;
@@ -47,7 +47,7 @@ package mySociety::Logfile;
 sub maplen ($) {
     my ($size) = @_;
     use integer;
-    my $pagesize = POSIX::sysconf(POSIX::_SC_PAGESIZE);
+    my $pagesize = POSIX::sysconf(&POSIX::_SC_PAGESIZE);
     return (($size + $pagesize - 1) / $pagesize) * $pagesize;
 }
 
