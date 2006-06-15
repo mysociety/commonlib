@@ -18,7 +18,7 @@
 // Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 // Email: francis@mysociety.org. WWW: http://www.mysociety.org
 //
-// $Id: db.php,v 1.19 2006-06-08 13:12:09 chris Exp $
+// $Id: db.php,v 1.20 2006-06-15 13:45:01 matthew Exp $
 
 require_once('error.php');
 
@@ -127,7 +127,7 @@ function db_query_literal($query) {
     global $db_last_res;
     if (!isset($db_h))
         db_connect();
-    if (!($db_last_res = pg_query($db_h, $q)))
+    if (!($db_last_res = pg_query($db_h, $query)))
         err(pg_last_error($db_h) . "in literal query '$query'");
     return $db_last_res;
 }
