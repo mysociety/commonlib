@@ -18,7 +18,7 @@
 // Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 // Email: francis@mysociety.org. WWW: http://www.mysociety.org
 //
-// $Id: db.php,v 1.20 2006-06-15 13:45:01 matthew Exp $
+// $Id: db.php,v 1.21 2006-06-16 09:26:32 francis Exp $
 
 require_once('error.php');
 
@@ -166,7 +166,7 @@ function db_getOne($query) {
 function db_getRow($query) {
     $a = func_get_args();
     $r = call_user_func_array('db_query', $a);
-    return pg_fetch_array($r);
+    return db_fetch_array($r);
 }
 
 /* db_getRow_list QUERY [PARAM ...]
@@ -176,7 +176,7 @@ function db_getRow_list($query) {
  * have the columns in order anyway. */
     $a = func_get_args();
     $r = call_user_func_array('db_query', $a);
-    return pg_fetch_row($r);
+    return db_fetch_row($r);
 }
 
 /* db_getAll QUERY [PARAM ...]
@@ -195,13 +195,17 @@ function db_getAll($query) {
  * Fetch values of the next row from RESULTS as an associative array from column
  * name to value. */
 function db_fetch_array($r) {
-    return pg_fetch_array($r);
+    $res = pg_fetch_array($r);
+    if (!$res) $res = null;
+    return $res;
 }
 
 /* db_fetch_row QUERY
  * Fetch values of the next row from RESULTS as an array. */
 function db_fetch_row($r) {
-    return pg_fetch_row($r);
+    $res = pg_fetch_row($r);
+    if (!$res) $res = null;
+    return $res;
 }
 
 /* db_num_rows RESULTS
