@@ -3,10 +3,10 @@
  * htmlstring.php:
  * Experimental - not really ready yet.
  * 
- * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
+ * Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: htmlstring.php,v 1.2 2005-11-23 12:19:10 francis Exp $
+ * $Id: htmlstring.php,v 1.3 2006-06-19 16:40:31 francis Exp $
  * 
  */
 
