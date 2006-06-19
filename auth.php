@@ -7,7 +7,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: auth.php,v 1.5 2006-05-31 00:52:44 twfy-live Exp $
+ * $Id: auth.php,v 1.6 2006-06-19 17:47:03 francis Exp $
  * 
  */
 
@@ -44,7 +44,7 @@ function auth_token_store($scope, $data) {
     rabx_wire_wr($data, $ser);
     db_query('
             insert into token (scope, token, data, created)
-            values (?, ?, ?, pb_current_timestamp())', array($scope, $token, $ser));
+            values (?, ?, ?, ms_current_timestamp())', array($scope, $token, $ser));
     return $token;
 }
 

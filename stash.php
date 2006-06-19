@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: stash.php,v 1.5 2006-05-04 12:14:13 chris Exp $
+ * $Id: stash.php,v 1.6 2006-06-19 17:47:03 francis Exp $
  * 
  */
 
@@ -67,7 +67,7 @@ function stash_new_request($method, $url, $params, $extra = null) {
      * do this as two queries, one to produce the threshold time and another to
      * actually do the delete because PG isn't smart enough (in 7.3.x, anyway)
      * to use the index for the query if the RHS of the < is nonconstant. */
-    $t = db_getOne("select pb_current_timestamp() - '365 days'::interval");
+    $t = db_getOne("select ms_current_timestamp() - '365 days'::interval");
     db_query("delete from requeststash where whensaved < ?", $t);
 
     return $key;
