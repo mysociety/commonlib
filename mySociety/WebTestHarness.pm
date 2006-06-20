@@ -12,7 +12,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.34 2006-03-01 16:42:20 francis Exp $
+# $Id: WebTestHarness.pm,v 1.35 2006-06-20 14:14:25 francis Exp $
 #
 
 package mySociety::WebTestHarness;
@@ -38,13 +38,13 @@ our $mail_sleep_time = 10;
 ############################################################################
 # Constructor
 
-=item new DB_OPTION_PREFIX SCHEMA
+=item new
 
-Create a new test harness object.  PARAMS is a hash ref containing:
+Create a new test harness object.
 
 =cut
 sub new ($$) {
-    my ($class, $params) = @_;
+    my ($class) = @_;
     my $self = {};
 
     $self->{tempdir} = File::Temp::tempdir( CLEANUP => 0 );
