@@ -7,10 +7,13 @@
 # Reference:
 #   http://www.gps.gov.uk/additionalInfo/images/A_guide_to_coord.pdf
 #
-# Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
+# Copyright (c) 2005 UK Citizens Online Democracy.  This module is free
+# software; you can redistribute it and/or modify it under the same terms as
+# Perl itself.
+# 
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: HelmertTransform.pm,v 1.4 2005-06-15 12:02:45 chris Exp $
+# $Id: HelmertTransform.pm,v 1.5 2006-06-21 10:43:36 francis Exp $
 #
 
 package Geo::HelmertTransform;
@@ -293,7 +296,7 @@ http://www.affero.org/oagpl.html
 
 =head1 VERSION
 
-$Id: HelmertTransform.pm,v 1.4 2005-06-15 12:02:45 chris Exp $
+$Id: HelmertTransform.pm,v 1.5 2006-06-21 10:43:36 francis Exp $
 
 =cut
 

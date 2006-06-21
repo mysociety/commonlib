@@ -3,10 +3,13 @@
 # Geo/Distance.pm:
 # Great-circle distance on the Earth.
 #
-# Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
+# Copyright (c) 2005 UK Citizens Online Democracy.  This module is free
+# software; you can redistribute it and/or modify it under the same terms as
+# Perl itself.
+#
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Distance.pm,v 1.3 2006-02-27 17:08:55 chris Exp $
+# $Id: Distance.pm,v 1.4 2006-06-21 10:43:36 francis Exp $
 #
 
 package Geo::Distance;
@@ -80,7 +83,7 @@ http://www.affero.org/oagpl.html
 
 =head1 VERSION
 
-$Id: Distance.pm,v 1.3 2006-02-27 17:08:55 chris Exp $
+$Id: Distance.pm,v 1.4 2006-06-21 10:43:36 francis Exp $
 
 =cut
 
