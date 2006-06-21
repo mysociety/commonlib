@@ -13,7 +13,7 @@
 # 
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: HelmertTransform.pm,v 1.5 2006-06-21 10:43:36 francis Exp $
+# $Id: HelmertTransform.pm,v 1.6 2006-06-21 17:10:24 francis Exp $
 #
 
 package Geo::HelmertTransform;
@@ -291,12 +291,12 @@ Written by Chris Lightfoot, chris@mysociety.org
 
 Copyright (c) UK Citizens Online Democracy.
 
-Released under the terms of the Affero General Public License,
-http://www.affero.org/oagpl.html
+This module is free software; you can redistribute it and/or modify it under
+the same terms as Perl itself.
 
 =head1 VERSION
 
-$Id: HelmertTransform.pm,v 1.5 2006-06-21 10:43:36 francis Exp $
+$Id: HelmertTransform.pm,v 1.6 2006-06-21 17:10:24 francis Exp $
 
 =cut
 
