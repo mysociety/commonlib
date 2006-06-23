@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: person.php,v 1.13 2006-01-27 15:09:19 chris Exp $
+ * $Id: person.php,v 1.14 2006-06-23 12:40:20 francis Exp $
  * 
  */
 
@@ -244,6 +244,9 @@ function person_if_signed_on($norenew = false) {
  *      pledge.'
  *  'reason_email_subject' gives Subject: line of email, must be present
  *      when 'reason_email' is present.
+ *  'instantly_send_email' if present means the user is prompted as to whether
+ *      to log in by password or by email authentication, they are just sent the
+ *      email immediately
  * The rest of the DATA is passed through to the email template. 
  * 
  * EMAIL, if present, is the email address to log in with.  Otherwise, an email
