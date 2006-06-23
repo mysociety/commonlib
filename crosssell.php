@@ -6,7 +6,7 @@
  * Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: crosssell.php,v 1.9 2006-06-05 18:41:14 chris Exp $
+ * $Id: crosssell.php,v 1.10 2006-06-23 23:18:18 twfy-live Exp $
  * 
  */
 
@@ -23,7 +23,7 @@ function crosssell_display_hfymp_advert($user_email, $user_name, $postcode) {
     $auth_signature = auth_sign_with_shared_secret($user_email, OPTION_AUTH_SHARED_SECRET);
 
     // See if already signed up
-    $already_signed = file_get_contents(OPTION_HEARFROMYOURMP_BASE_URL.'/authed?email='.urlencode($user_email)."&sign=".urlencode($auth_signature));
+    $already_signed = @file_get_contents(OPTION_HEARFROMYOURMP_BASE_URL.'/authed?email='.urlencode($user_email)."&sign=".urlencode($auth_signature));
     if ($already_signed != 'not signed') 
         return false;
 
