@@ -18,7 +18,7 @@
 // Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 // Email: francis@mysociety.org. WWW: http://www.mysociety.org
 //
-// $Id: db.php,v 1.21 2006-06-16 09:26:32 francis Exp $
+// $Id: db.php,v 1.22 2006-06-29 13:36:31 francis Exp $
 
 require_once('error.php');
 
@@ -144,8 +144,14 @@ function db_query($query) {
     /* ugly boilerplate to call through to db_subst */
     $a = func_get_args();
     $q = call_user_func_array('db_subst', $a);
-    if (!($db_last_res = pg_query($db_h, $q)))
+    if (!($db_last_res = pg_query($db_h, $q))) {
+        // TODO: Unforunately, this never gets called, as a PostgreSQL error
+        // causes pg_query to raise a PHP warning, which our error checking
+        // code correctly counts as an error, during execution of the if
+        // statement above.  Not sure how best to fix this, as would be nice to
+        // print the query, like this line attempts to:
         err(pg_last_error($db_h) . " in query '$query'");
+    }
     return $db_last_res;
 }
 
