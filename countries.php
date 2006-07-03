@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: countries.php,v 1.12 2006-02-22 17:22:26 francis Exp $
+ * $Id: countries.php,v 1.13 2006-07-03 09:51:25 francis Exp $
  * 
  */
 
@@ -323,5 +323,16 @@ $countries_statecode_to_name = array(
         'WY' => 'Wyoming'
     )
 );
+
+/* countries_sort CODE_A CODE_B
+ * Takes two country codes, such as GB and CN. Returns -1, 0, or 1
+ * according to how their full names are alphabetically sorted.
+ * For use with PHP sort functions.
+ */
+function countries_sort($a, $b) {
+    global $countries_code_to_name;
+    return strcoll($countries_code_to_name[$a], $countries_code_to_name[$b]);
+}
+
 
 ?>
