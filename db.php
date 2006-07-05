@@ -18,7 +18,7 @@
 // Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 // Email: francis@mysociety.org. WWW: http://www.mysociety.org
 //
-// $Id: db.php,v 1.22 2006-06-29 13:36:31 francis Exp $
+// $Id: db.php,v 1.23 2006-07-05 11:00:03 francis Exp $
 
 require_once('error.php');
 
@@ -104,20 +104,28 @@ function db_connect() {
     pg_query($db_h, 'begin');
 
     /* Ensure that we have a site shared secret. */
+    global $db_secret_value;
     $r = pg_query('select secret from secret');
-    if (!pg_fetch_row($r)) {
-        if (pg_query($db_h, db_subst('insert into secret (secret) values (?)', bin2hex(random_bytes(32)))))
+    $secret_row = pg_fetch_row($r);
+    if (!$secret_row) {
+        $db_secret_value = bin2hex(random_bytes(32));
+        if (pg_query($db_h, db_subst('insert into secret (secret) values (?)', $db_secret_value)))
             pg_query($db_h, 'commit');
         else
             pg_query($db_h, 'rollback');
         pg_query('begin');
+    } else {
+        $db_secret_value = $secret_row[0];
     }
 }
 
 /* db_secret
  * Return the site shared secret. */
 function db_secret() {
-    return db_getOne('select secret from secret');
+    global $db_secret_value;
+    if (!$db_secret_value)
+        err("No secret, should have been set by db_connect");
+    return $db_secret_value;
 }
 
 /* db_query_literal QUERY
