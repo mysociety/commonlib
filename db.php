@@ -18,7 +18,7 @@
 // Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 // Email: francis@mysociety.org. WWW: http://www.mysociety.org
 //
-// $Id: db.php,v 1.24 2006-07-05 19:19:52 francis Exp $
+// $Id: db.php,v 1.25 2006-07-05 19:24:06 francis Exp $
 
 require_once('error.php');
 
@@ -124,7 +124,7 @@ function db_connect() {
 function db_secret() {
     global $db_secret_value;
     if (!$db_secret_value)
-        $db_secret_value = db_getOne('select secret from secret')
+        $db_secret_value = db_getOne('select secret from secret');
     return $db_secret_value;
 }
 
