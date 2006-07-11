@@ -18,7 +18,7 @@
 // Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 // Email: francis@mysociety.org. WWW: http://www.mysociety.org
 //
-// $Id: db.php,v 1.25 2006-07-05 19:24:06 francis Exp $
+// $Id: db.php,v 1.26 2006-07-11 09:55:21 francis Exp $
 
 require_once('error.php');
 
@@ -153,7 +153,7 @@ function db_query($query) {
     $a = func_get_args();
     $q = call_user_func_array('db_subst', $a);
     if (!($db_last_res = pg_query($db_h, $q))) {
-        // TODO: Unforunately, this never gets called, as a PostgreSQL error
+        // TODO: Unfortunately, this never gets called, as a PostgreSQL error
         // causes pg_query to raise a PHP warning, which our error checking
         // code correctly counts as an error, during execution of the if
         // statement above.  Not sure how best to fix this, as would be nice to
