@@ -8,7 +8,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # WWW: http://www.mysociety.org
 #
-# $Id: MaPit.pm,v 1.22 2006-03-09 16:17:41 francis Exp $
+# $Id: MaPit.pm,v 1.23 2006-07-13 15:48:07 francis Exp $
 
 package mySociety::MaPit;
 
@@ -93,6 +93,11 @@ sub get_voting_areas ($) {
 
     the ID of the area itself
 
+  * generation_low, generation_high, generation
+
+    the range of generations of the area database for which this area is to
+    be used and the current active generation.
+
 =cut
 sub get_voting_area_info ($) {
     configure() if !defined $rabx_client;
@@ -131,6 +136,8 @@ sub get_example_postcode ($) {
 }
 
 =item MaPit::get_voting_area_children ID
+
+  Return array of ids of areas whose parent areas are ID.
 
 =cut
 sub get_voting_area_children ($) {
@@ -172,7 +179,8 @@ sub get_location ($;$) {
 
 =item MaPit::admin_get_stats
 
-  Returns a hash of statistics about the database.
+  Returns a hash of statistics about the database. (Bit slow as count of
+  postcodes is very slow).
 
 =cut
 sub admin_get_stats () {
