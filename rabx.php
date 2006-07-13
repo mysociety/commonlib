@@ -10,7 +10,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: rabx.php,v 1.21 2006-07-13 11:18:36 matthew Exp $
+ * $Id: rabx.php,v 1.22 2006-07-13 11:24:41 matthew Exp $
  * 
  */
 
@@ -163,7 +163,7 @@ function rabx_wire_wr(&$x, &$buffer) {
             return TRUE;
         } elseif (is_bool($x)) {
             /* false bool in PHP is '' not 0 */
-            $buffer .= 'I1:' . $x ? '1' : '0';
+            $buffer .= 'I1:' . ($x ? '1' : '0') . ',';
             return TRUE;
         } elseif (is_int($x))
             $buffer .= 'I';
@@ -302,7 +302,7 @@ class RABX_Client {
         $this->ch = curl_init();
         curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($this->ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
-        curl_setopt($this->ch, CURLOPT_USERAGENT, 'PHP RABX client, version $Id: rabx.php,v 1.21 2006-07-13 11:18:36 matthew Exp $');
+        curl_setopt($this->ch, CURLOPT_USERAGENT, 'PHP RABX client, version $Id: rabx.php,v 1.22 2006-07-13 11:24:41 matthew Exp $');
         if (array_key_exists('http_proxy', $_SERVER))
             curl_setopt($this->ch, CURLOPT_PROXY, $_SERVER['http_proxy']);
         $use_post = FALSE;
