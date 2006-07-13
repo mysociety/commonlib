@@ -8,7 +8,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: mapit.php,v 1.38 2006-03-09 16:17:42 francis Exp $
+ * $Id: mapit.php,v 1.39 2006-07-13 15:48:07 francis Exp $
  *
  */
 
@@ -75,7 +75,12 @@ function mapit_get_voting_areas($postcode) {
 
   * area_id
 
-    the ID of the area itself */
+    the ID of the area itself
+
+  * generation_low, generation_high, generation
+
+    the range of generations of the area database for which this area is to
+    be used and the current active generation. */
 function mapit_get_voting_area_info($area) {
     global $mapit_client;
     $params = func_get_args();
@@ -114,7 +119,9 @@ function mapit_get_example_postcode($id) {
     return $result;
 }
 
-/* mapit_get_voting_area_children ID */
+/* mapit_get_voting_area_children ID
+
+  Return array of ids of areas whose parent areas are ID. */
 function mapit_get_voting_area_children($id) {
     global $mapit_client;
     $params = func_get_args();
@@ -156,7 +163,8 @@ function mapit_get_location($postcode, $partial = null) {
 
 /* mapit_admin_get_stats
 
-  Returns a hash of statistics about the database. */
+  Returns a hash of statistics about the database. (Bit slow as count of
+  postcodes is very slow). */
 function mapit_admin_get_stats() {
     global $mapit_client;
     $params = func_get_args();
