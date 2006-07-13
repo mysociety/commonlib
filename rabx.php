@@ -10,7 +10,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: rabx.php,v 1.20 2006-07-13 11:14:31 chris Exp $
+ * $Id: rabx.php,v 1.21 2006-07-13 11:18:36 matthew Exp $
  * 
  */
 
@@ -161,15 +161,15 @@ function rabx_wire_wr(&$x, &$buffer) {
         if (is_null($x)) {
             $buffer .= 'N';
             return TRUE;
-        } else if (is_bool($x)) {
+        } elseif (is_bool($x)) {
             /* false bool in PHP is '' not 0 */
             $buffer .= 'I1:' . $x ? '1' : '0';
             return TRUE;
-        } else if (is_int($x)))
+        } elseif (is_int($x))
             $buffer .= 'I';
-        else if (is_float($x))
+        elseif (is_float($x))
             $buffer .= 'R';
-        else if (is_string($x))
+        elseif (is_string($x))
             $buffer .= 'T';     /* XXX should check for UTF-8 */
         return rabx_netstring_wr($x, &$buffer);
     }
@@ -302,7 +302,7 @@ class RABX_Client {
         $this->ch = curl_init();
         curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($this->ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
-        curl_setopt($this->ch, CURLOPT_USERAGENT, 'PHP RABX client, version $Id: rabx.php,v 1.20 2006-07-13 11:14:31 chris Exp $');
+        curl_setopt($this->ch, CURLOPT_USERAGENT, 'PHP RABX client, version $Id: rabx.php,v 1.21 2006-07-13 11:18:36 matthew Exp $');
         if (array_key_exists('http_proxy', $_SERVER))
             curl_setopt($this->ch, CURLOPT_PROXY, $_SERVER['http_proxy']);
         $use_post = FALSE;
