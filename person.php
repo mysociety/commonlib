@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: person.php,v 1.14 2006-06-23 12:40:20 francis Exp $
+ * $Id: person.php,v 1.15 2006-07-14 16:01:23 matthew Exp $
  * 
  */
 
@@ -40,7 +40,7 @@ class Person {
     }
 
     /* id [ID]
-     * Get or set the person ID. */
+     * Get the person ID. */
     function id() {
         return $this->id;
     }
