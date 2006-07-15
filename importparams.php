@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: importparams.php,v 1.9 2006-01-07 18:34:26 matthew Exp $
+ * $Id: importparams.php,v 1.10 2006-07-15 20:50:51 matthew Exp $
  * 
  */
 
@@ -125,6 +125,7 @@ function importparams() {
 }
 
 function importparams_validate_postcode($pc) {
+    $pc = canonicalise_postcode($pc);
     if (validate_postcode($pc)) {
         return null;
     } else {
