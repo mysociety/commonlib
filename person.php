@@ -6,13 +6,25 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: person.php,v 1.15 2006-07-14 16:01:23 matthew Exp $
+ * $Id: person.php,v 1.16 2006-07-18 16:29:01 francis Exp $
  * 
  */
 
 require_once 'utility.php';
 require_once 'stash.php';
 require_once 'auth.php';
+
+/* person_cookie_domain
+ * Return the domain to use for cookies. This is computed from HTTP_HOST
+ * so we can have multiple domains in one vhost. */
+function person_cookie_domain() {
+    $httphost = $_SERVER['HTTP_HOST'];
+    if (preg_match("/[^.]+(\.com|\.owl|\.org||\.net|\.co\.uk|\.org\.uk)$/", $httphost, $matches)) {
+        return "." . $matches[0];
+    } else {
+        return '.' . OPTION_WEB_DOMAIN;
+    }
+}
 
 /* person_canonicalise_name NAME
  * Return NAME with all but alphabetic characters removed; this is used to
@@ -219,7 +231,7 @@ function person_if_signed_on($norenew = false) {
             if (!$norenew) {
                 /* Valid, so renew the cookie. */
                 $duration = person_cookie_token_duration($_COOKIE['pb_person_id']);
-                setcookie('pb_person_id', person_cookie_token($id, $duration), time() + $duration, '/', '.' . OPTION_WEB_DOMAIN, false);
+                setcookie('pb_person_id', person_cookie_token($id, $duration), time() + $duration, '/', person_cookie_domain(), false);
                 $person_signed_on = $P; /* save this here so we will renew the cookie on a later call to this function without NORENEW */
             }
             return $P;
@@ -300,7 +312,7 @@ function person_signon($template_data, $email = null, $name = null) {
 /* person_signoff
  * Log out anyone who is logged in */
 function person_signoff() {
-    setcookie('pb_person_id', false, null, '/', '.' . OPTION_WEB_DOMAIN, false);
+    setcookie('pb_person_id', false, null, '/', person_cookie_domain(), false);
 }
 
 /* person_make_signon_url DATA EMAIL METHOD URL PARAMETERS
