@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: validate.php,v 1.1 2006-06-06 02:13:20 twfy-staging Exp $
+ * $Id: validate.php,v 1.2 2006-07-18 08:13:52 francis Exp $
  * 
  */
 
@@ -30,7 +30,7 @@ function validate_email ($address) {
  * require spaces in the appropriate place. */
 function validate_postcode ($postcode) {
     // Our test postcode
-    if (preg_match("/^zz9\s*9zz$/i", $postcode))
+    if (preg_match("/^zz9\s*9z[zy]$/i", $postcode))
         return true; 
     
     // See http://www.govtalk.gov.uk/gdsc/html/noframes/PostCode-2-1-Release.htm
