@@ -6,7 +6,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Web.pm,v 1.1 2006-07-18 17:22:09 chris Exp $
+# $Id: Web.pm,v 1.2 2006-07-18 17:25:41 chris Exp $
 #
 
 package mySociety::Web;
@@ -150,6 +150,19 @@ sub ImportMulti ($%) {
         local $Exporter::ExportLevel = 1;
         import GIA::Web;
     }
+}
+
+=item header PARAMS
+
+Return an HTTP header, influenced by PARAMS as in CGI.pm.
+
+=cut
+sub header ($%) {
+    my ($self, %p) = @_;
+    if (!exists($p{"-type"})) {
+        $p{"-type"} = 'text/html; charset=utf-8';
+    }
+    return $self->q()->header(%p);
 }
 
 1;
