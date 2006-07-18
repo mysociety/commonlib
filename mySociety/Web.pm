@@ -6,7 +6,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Web.pm,v 1.2 2006-07-18 17:25:41 chris Exp $
+# $Id: Web.pm,v 1.3 2006-07-18 17:50:43 chris Exp $
 #
 
 package mySociety::Web;
@@ -150,6 +150,39 @@ sub ImportMulti ($%) {
         local $Exporter::ExportLevel = 1;
         import GIA::Web;
     }
+}
+
+sub cgi_escape ($) {
+    my $v = encode_utf8($_[0]);
+    $v =~ s/([^A-Za-z0-9])/sprintf('%%%02x', ord($1))/ge;
+    return $v;
+}
+
+=item NewURL [PARAM VALUE ...]
+
+Return a URL for reinvoking this script with changed parameters. Each PARAM
+gives the name of a parameter; the VALUE may be a scalar, a reference list to
+indicate that a multivalued parameter should be added; or undef to indicate
+that the parameter should be removed in the new URL.
+
+=cut
+sub NewURL ($%) {
+    my ($self, %p) = @_;
+    my $url = $self->url(-absolute => 1);
+    my @v = ();
+    foreach my $key ($q->param()) {
+        if (exists($p{$key})) {
+            next if (!defined($p{$key}));
+            my $v = $p{$key};
+            croak "can't use ref to " . ref($v) . " as param value"
+                if (ref($v) && ref($v) ne 'ARRAY');
+            $v = [$v] if (!ref($v));
+            push(@v, map { cgi_escape($key) . '=' cgi_escape($_) } @$v);
+        } else {
+            push(@v, map { cgi_escape($key) . '=' cgi_escape($_) } $q->param($key));
+        }
+    }
+    return "$url?" . join(';', @v);
 }
 
 =item header PARAMS
