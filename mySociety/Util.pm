@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Util.pm,v 1.50 2006-04-18 08:35:20 chris Exp $
+# $Id: Util.pm,v 1.51 2006-07-18 08:13:52 francis Exp $
 #
 
 package mySociety::Util::Error;
@@ -596,7 +596,7 @@ sub is_valid_postcode ($) {
     $pc =~ s#\s##g;
 
     # Our test postcode
-    return 1 if $pc eq 'ZZ99ZZ';
+    return 1 if $pc =~ m/^ZZ99Z[ZY]$/;
     
     # See http://www.govtalk.gov.uk/gdsc/html/noframes/PostCode-2-1-Release.htm
     my $in  = 'ABDEFGHJLNPQRSTUWXYZ';
