@@ -6,7 +6,7 @@
 # Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Person.pm,v 1.3 2006-07-19 14:03:51 chris Exp $
+# $Id: Person.pm,v 1.4 2006-07-19 17:38:41 chris Exp $
 #
 
 package mySociety::Person::Error;
@@ -267,6 +267,20 @@ Given a valid cookie TOKEN, return the duration for which it was issued.
 sub cookie_token_duration ($) {
     my $token = shift;
     return (split('/', $token))[2];
+}
+
+=item cookie Q
+
+Return a value for a Set-Cookie: header for this person in Q.
+
+=cut
+sub cookie ($$) {
+    my ($self, $q) = @_;
+    return $q->cookie(
+                -name => 'pb_person_id',
+                -value => cookie_token($self->id()),
+                -domain => cookie_domain($q)
+            );
 }
 
 =item new_if_signed_on Q
