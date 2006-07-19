@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: RABX.pm,v 1.19 2006-07-19 17:31:31 chris Exp $
+# $Id: RABX.pm,v 1.20 2006-07-19 17:33:01 chris Exp $
 
 # References:
 #   Netstrings are documented here: http://cr.yp.to/proto/netstrings.txt
@@ -409,6 +409,9 @@ Interpret DATA as RABX on-the-wire data, and return the parsed data.
 sub unserialise ($) {
     my $h = new IO::String($_[0]);
     return wire_rd($h);
+    # XXX for historical reasons the PHP version of this function also tries a
+    # PHP unserialize() if this fails; we don't bother here, which could
+    # introduce temporary incompatibilities.
 }
 
 package RABX::Client;
@@ -418,7 +421,7 @@ use HTTP::Request;
 use HTTP::Response;
 use Regexp::Common qw(URI);
 
-my $rcsid = ''; $rcsid .= '$Id: RABX.pm,v 1.19 2006-07-19 17:31:31 chris Exp $';
+my $rcsid = ''; $rcsid .= '$Id: RABX.pm,v 1.20 2006-07-19 17:33:01 chris Exp $';
 
 =back
 
