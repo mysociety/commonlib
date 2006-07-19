@@ -6,7 +6,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Web.pm,v 1.3 2006-07-18 17:50:43 chris Exp $
+# $Id: Web.pm,v 1.4 2006-07-19 10:20:01 chris Exp $
 #
 
 package mySociety::Web;
@@ -22,7 +22,7 @@ eval {
     $have_cgi_fast = 1;
 };
 
-use fields qw(q);
+use fields qw(q scratch);
 @GIA::Web::ISA = qw(Exporter); # for the Import* methods
 
 =item new [QUERY]
@@ -39,6 +39,7 @@ sub new ($;$) {
     }
     my $self = fields::new('GIA::Web');
     $self->{q} = $q;
+    $self->{scratch} = { };
     return bless($self, $class);
 }
 
@@ -46,6 +47,15 @@ sub new ($;$) {
 # Access to the underlying CGI (or whatever) object.
 sub q ($) {
     return $_[0]->{q};
+}
+
+=item scratch
+
+Return a reference to the internal scratchpad.
+
+=cut
+sub scratch ($) {
+    return $_[0]->{scratch};
 }
 
 # AUTOLOAD
