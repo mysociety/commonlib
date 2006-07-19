@@ -6,7 +6,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Web.pm,v 1.6 2006-07-19 16:21:44 chris Exp $
+# $Id: Web.pm,v 1.7 2006-07-19 16:23:56 chris Exp $
 #
 
 package mySociety::Web;
@@ -215,8 +215,9 @@ sub urlencode ($) {
 }
 
 sub start_form ($%) {
-    my ($q, %p) = @_;
-    if (!exists($p{accept_charset}
+    my ($self, %p) = @_;
+    $p{'-accept_charset'} = 'utf-8' if (!exists($p{'-accept_charset'}));
+    return $self->q()->start_form(%p);
 }
 
 1;
