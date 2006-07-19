@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: RABX.pm,v 1.18 2006-05-30 11:16:04 chris Exp $
+# $Id: RABX.pm,v 1.19 2006-07-19 17:31:31 chris Exp $
 
 # References:
 #   Netstrings are documented here: http://cr.yp.to/proto/netstrings.txt
@@ -388,6 +388,29 @@ sub return_string_parse ($) {
     }
 }
 
+=item serialise X
+
+Format X (reference or scalar) into a string, and return it.
+
+=cut
+sub serialise ($) {
+    my $x = shift;
+    my $buf = '';
+    my $h = new IO::String($buf);
+    wire_wr($x, $h);
+    return $buf;
+}
+
+=item unserialise DATA
+
+Interpret DATA as RABX on-the-wire data, and return the parsed data.
+
+=cut
+sub unserialise ($) {
+    my $h = new IO::String($_[0]);
+    return wire_rd($h);
+}
+
 package RABX::Client;
 
 use LWP::UserAgent;
@@ -395,7 +418,7 @@ use HTTP::Request;
 use HTTP::Response;
 use Regexp::Common qw(URI);
 
-my $rcsid = ''; $rcsid .= '$Id: RABX.pm,v 1.18 2006-05-30 11:16:04 chris Exp $';
+my $rcsid = ''; $rcsid .= '$Id: RABX.pm,v 1.19 2006-07-19 17:31:31 chris Exp $';
 
 =back
 
