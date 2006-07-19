@@ -10,7 +10,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: rabx.php,v 1.23 2006-07-19 17:19:57 chris Exp $
+ * $Id: rabx.php,v 1.24 2006-07-19 17:25:57 chris Exp $
  * 
  */
 
@@ -293,7 +293,16 @@ function rabx_serialise(&$x) {
  * RABX_Error on error. */
 function rabx_unserialise(&$x) {
     $offset = 0;
-    return rabx_wire_rd($x, $offset);
+    $r = rabx_wire_rd($x, $offset);
+    /* XXX hack! serialize/unserialize probably aren't safe, so we shouldn't
+     * use them; but for compatibility during transition, try calling
+     * unserialize on any data which don't parse properly here. But we should
+     * remove this as soon as there are no old serialize-format data sitting
+     * in tables. */
+    if (rabx_is_error($r) && $r2 = unserialize($x))
+        return $r2;
+    else
+        return $r;
 }
 
 /*
@@ -318,7 +327,7 @@ class RABX_Client {
         $this->ch = curl_init();
         curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($this->ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
-        curl_setopt($this->ch, CURLOPT_USERAGENT, 'PHP RABX client, version $Id: rabx.php,v 1.23 2006-07-19 17:19:57 chris Exp $');
+        curl_setopt($this->ch, CURLOPT_USERAGENT, 'PHP RABX client, version $Id: rabx.php,v 1.24 2006-07-19 17:25:57 chris Exp $');
         if (array_key_exists('http_proxy', $_SERVER))
             curl_setopt($this->ch, CURLOPT_PROXY, $_SERVER['http_proxy']);
         $use_post = FALSE;
