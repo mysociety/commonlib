@@ -6,7 +6,7 @@
 # Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Person.pm,v 1.2 2006-07-19 13:54:15 chris Exp $
+# $Id: Person.pm,v 1.3 2006-07-19 14:03:51 chris Exp $
 #
 
 package mySociety::Person::Error;
@@ -30,7 +30,7 @@ use fields qw(id email name password website numlogins);
 =item new ID | EMAIL
 
 Given a person ID or EMAIL address, construct a person object describing their
-account.
+account, returning undef if there is no existing account.
 
 =cut
 sub new ($$) {
@@ -53,13 +53,38 @@ sub new ($$) {
     
     return undef if (!$id);
 
-    my $self = dbh()->selectrow_hashref('
+    my $r = dbh()->selectrow_hashref('
                 select email, name, password, website, numlogins
                 from person where id = ?', {},
                 $id);
-    $self->
+                
+    my $self = fields:new($class);
+    foreach (keys %$r) {
+        $self->{$_} = $r->{$_};
+    }
 
-    return bless($self, $class);
+    return $self;
+}
+
+=item create EMAIL [NAME]
+
+Return a person object for EMAIL (with optional NAME), creating one if none
+exists.
+
+=cut
+sub create ($$;$) {
+    my ($class, $email, $name) = @_;
+    my $self = mySociety::Person->new($email);
+    return $self if ($self);
+
+    {
+    local dbh()->{RaiseError};
+    my $id = dbh()->selectrow_array("select nextval('global_id_seq')");
+    dbh()->do('insert into person (id, email, name) values (?, ?, ?)', {},
+                $id, $email, $name);
+    }
+
+    return mySociety::Person->new($email);
 }
 
 =item id
