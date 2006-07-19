@@ -10,7 +10,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: rabx.php,v 1.22 2006-07-13 11:24:41 matthew Exp $
+ * $Id: rabx.php,v 1.23 2006-07-19 17:19:57 chris Exp $
  * 
  */
 
@@ -280,6 +280,22 @@ function rabx_return_string_parse (&$string) {
     }
 }
 
+/* rabx_serialise DATA
+ * Return a serialised copy of DATA in the RABX format. */
+function rabx_serialise(&$x) {
+    $ser = '';
+    rabx_wire_wr($x, $ser);
+    return $ser;
+}
+
+/* rabx_unserialise DATA
+ * Parse DATA as RABX wire-format, and return the corresponding data, or a
+ * RABX_Error on error. */
+function rabx_unserialise(&$x) {
+    $offset = 0;
+    return rabx_wire_rd($x, $offset);
+}
+
 /*
  * Implementation of client.
  */
@@ -302,7 +318,7 @@ class RABX_Client {
         $this->ch = curl_init();
         curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($this->ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
-        curl_setopt($this->ch, CURLOPT_USERAGENT, 'PHP RABX client, version $Id: rabx.php,v 1.22 2006-07-13 11:24:41 matthew Exp $');
+        curl_setopt($this->ch, CURLOPT_USERAGENT, 'PHP RABX client, version $Id: rabx.php,v 1.23 2006-07-19 17:19:57 chris Exp $');
         if (array_key_exists('http_proxy', $_SERVER))
             curl_setopt($this->ch, CURLOPT_PROXY, $_SERVER['http_proxy']);
         $use_post = FALSE;
