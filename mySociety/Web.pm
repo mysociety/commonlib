@@ -6,7 +6,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Web.pm,v 1.5 2006-07-19 10:49:05 chris Exp $
+# $Id: Web.pm,v 1.6 2006-07-19 16:21:44 chris Exp $
 #
 
 package mySociety::Web;
@@ -23,11 +23,11 @@ eval {
 };
 
 use fields qw(q scratch);
-@GIA::Web::ISA = qw(Exporter); # for the Import* methods
+@mySociety::Web::ISA = qw(Exporter); # for the Import* methods
 
 =item new [QUERY]
 
-Construct a new GIA::Web object, optionally from an existing QUERY. Uses
+Construct a new mySociety::Web object, optionally from an existing QUERY. Uses
 CGI::Fast if available, or CGI otherwise.
 
 =cut
@@ -37,7 +37,8 @@ sub new ($;$) {
         $q = $have_cgi_fast ? new CGI::Fast() : new CGI();
         return undef if (!defined($q)); # reproduce CGI::Fast behaviour
     }
-    my $self = fields::new('GIA::Web');
+    $q->autoEscape(0);
+    my $self = fields::new('mySociety::Web');
     $self->{q} = $q;
     $self->{scratch} = { };
     return bless($self, $class);
@@ -61,10 +62,10 @@ sub scratch ($) {
 # AUTOLOAD
 # Is-a inheritance isn't safe for this kind of thing, so we use has-a.
 sub AUTOLOAD {
-    my $f = $GIA::Web::AUTOLOAD;
+    my $f = $mySociety::Web::AUTOLOAD;
     $f =~ s/^.*:://;
     eval "sub $f { my \$q = shift; return \$q->{q}->$f(\@_); }";
-    goto(&$GIA::Web::AUTOLOAD);
+    goto(&$mySociety::Web::AUTOLOAD);
 }
 
 =item Import WHAT PARAMS
@@ -76,9 +77,9 @@ PARAMS gives a hash of NAME => DEFAULT or NAME => [CHECK, DEFAULT]. If a
 parameter is not specified, it takes the given DEFAULT value. Optionally, a
 CHECK may be given to validate each parameter; a parameter which does not
 validate is assigned its DEFAULT value. CHECK may be either a regexp
-(qr/.../...) or a code reference, which will be passed the GIA::Web object and
-the named parameter; it should return true if the parameter is valid and false
-otherwise.
+(qr/.../...) or a code reference, which will be passed the mySociety::Web
+object and the named parameter; it should return true if the parameter is valid
+and false otherwise.
 
 This function may be called several times for one request.
 
@@ -114,14 +115,14 @@ sub Import ($$%) {
         {
             no strict 'refs';
             ${"q${what}_$name"} = $val;
-            push(@GIA::Web::EXPORT, "\$q${what}_$name");
+            push(@mySociety::Web::EXPORT, "\$q${what}_$name");
         }
     }
 
     {
         # Black magic.
         local $Exporter::ExportLevel = 1;
-        import GIA::Web;
+        import mySociety::Web;
     }
 }
 
@@ -151,14 +152,14 @@ sub ImportMulti ($%) {
         {
             no strict 'refs';
             @{"qp_$name"} = @val;
-            push(@GIA::Web::EXPORT, "\@qp_$name");
+            push(@mySociety::Web::EXPORT, "\@qp_$name");
         }
     }
 
     {
         # Black magic.
         local $Exporter::ExportLevel = 1;
-        import GIA::Web;
+        import mySociety::Web;
     }
 }
 
@@ -211,6 +212,11 @@ sub urlencode ($) {
     my $v = encode_utf8($_[0]);
     $v =~ s/([^A-Za-z0-9])/sprintf('%%%02x', ord($1))/ge;
     return $v;
+}
+
+sub start_form ($%) {
+    my ($q, %p) = @_;
+    if (!exists($p{accept_charset}
 }
 
 1;
