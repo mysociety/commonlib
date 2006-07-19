@@ -6,7 +6,7 @@
 # Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Person.pm,v 1.1 2006-07-19 12:08:37 chris Exp $
+# $Id: Person.pm,v 1.2 2006-07-19 13:54:15 chris Exp $
 #
 
 package mySociety::Person::Error;
@@ -51,7 +51,7 @@ sub new ($$) {
         croak "value passed to constructor must be ID or email address";
     }
     
-    throw mySociety::Person::Error("No such person '$i'") if (!$id);
+    return undef if (!$id);
 
     my $self = dbh()->selectrow_hashref('
                 select email, name, password, website, numlogins
