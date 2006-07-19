@@ -6,7 +6,7 @@
 # Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: RequestStash.pm,v 1.1 2006-07-19 13:49:31 chris Exp $
+# $Id: RequestStash.pm,v 1.2 2006-07-19 17:39:01 chris Exp $
 #
 
 package mySociety::RequestStash::Error;
@@ -94,18 +94,18 @@ sub stash ($;$$$) {
     return $key;
 }
 
-=item redirect Q KEY
+=item redirect Q KEY [COOKIE]
 
 =cut
-sub redirect ($$) {
-    my ($q, $key) = @_;
+sub redirect ($$;$) {
+    my ($q, $key, $cookie) = @_;
     my ($method, $url, $post_data) = dbh()->selectrow_array('
             select method, url, post_data from requeststash where key = ?', {},
             $key);
     if (!defined($method)) {
         throw mySociety::RequestStash::Error("If you got the email more than a year ago, then your request has probably expired.  Please try doing what you were doing from the beginning.");
     } elsif ($method eq 'GET') {
-        print $q->redirect($url);
+        print $q->redirect(-uri => $url, -cookie => $cookie);
     } else {
         # POST. Evil.
         my $h = new IO::String($post_data);
@@ -141,7 +141,10 @@ EOF
     </body>
 </html>
 EOF
-        print $q->header(-content_length => length($html)), $html;
+        print $q->header(
+                    -content_length => length($html),
+                    -cookie => $cookie
+                ), $html;
     }
 }
 
