@@ -6,7 +6,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Web.pm,v 1.4 2006-07-19 10:20:01 chris Exp $
+# $Id: Web.pm,v 1.5 2006-07-19 10:49:05 chris Exp $
 #
 
 package mySociety::Web;
@@ -162,12 +162,6 @@ sub ImportMulti ($%) {
     }
 }
 
-sub cgi_escape ($) {
-    my $v = encode_utf8($_[0]);
-    $v =~ s/([^A-Za-z0-9])/sprintf('%%%02x', ord($1))/ge;
-    return $v;
-}
-
 =item NewURL [PARAM VALUE ...]
 
 Return a URL for reinvoking this script with changed parameters. Each PARAM
@@ -187,9 +181,9 @@ sub NewURL ($%) {
             croak "can't use ref to " . ref($v) . " as param value"
                 if (ref($v) && ref($v) ne 'ARRAY');
             $v = [$v] if (!ref($v));
-            push(@v, map { cgi_escape($key) . '=' cgi_escape($_) } @$v);
+            push(@v, map { urlencode($key) . '=' . urlencode($_) } @$v);
         } else {
-            push(@v, map { cgi_escape($key) . '=' cgi_escape($_) } $q->param($key));
+            push(@v, map { urlencode($key) . '=' . urlencode($_) } $q->param($key));
         }
     }
     return "$url?" . join(';', @v);
@@ -206,6 +200,17 @@ sub header ($%) {
         $p{"-type"} = 'text/html; charset=utf-8';
     }
     return $self->q()->header(%p);
+}
+
+=item urlencode STRING
+
+Return a URL-encoded copy of STRING.
+
+=cut
+sub urlencode ($) {
+    my $v = encode_utf8($_[0]);
+    $v =~ s/([^A-Za-z0-9])/sprintf('%%%02x', ord($1))/ge;
+    return $v;
 }
 
 1;
