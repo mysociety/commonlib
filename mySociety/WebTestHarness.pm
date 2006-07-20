@@ -12,7 +12,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.35 2006-06-20 14:14:25 francis Exp $
+# $Id: WebTestHarness.pm,v 1.36 2006-07-20 09:30:43 francis Exp $
 #
 
 package mySociety::WebTestHarness;
@@ -237,9 +237,8 @@ or regular expression.
 sub browser_check_contents ($$) {
     my ($self, $check) = @_;
     if ($self->{useragent}->content !~ m/$check/) {
-        print $self->{useragent}->content;
-        print "\n\n";
-        die "URL " . $self->{useragent}->uri() . " does not contain '" . $check . "'";
+        $filename = $self->_browser_debug_content();
+        die "URL " . $self->{useragent}->uri() . " does not contain '" . $check . "', contents is in $filename";
     }
 }
 
@@ -252,9 +251,8 @@ string.
 sub browser_check_no_contents ($$) {
     my ($self, $check) = @_;
     if ($self->{useragent}->content =~ m/$check/) {
-        print $self->{useragent}->content;
-        print "\n\n";
-        die "URL " . $self->{useragent}->uri() . " unexpectedly contains '" . $check . "'";
+        $filename = $self->_browser_debug_content();
+        die "URL " . $self->{useragent}->uri() . " unexpectedly contains '" . $check . "', full contents is in $filename";
     }
 }
 
@@ -278,11 +276,18 @@ sub _browser_html_hook ($) {
 
     # If validator set and HTML then validate
     if ($self->{useragent}->is_html() && defined($self->{htmlvalidator})) {
-        my ($fh, $filename) = File::Temp::tempfile( DIR => $self->{tempdir}, SUFFIX => '.html');
-        print $fh $self->{useragent}->content();
-        close $fh;
+        $filename = $self->_browser_debug_content();
         system($self->{htmlvalidator}, $filename) and die "HTML $filename doesn't validate, URL " . $self->{useragent}->uri();
     }
+}
+
+# Print content to a file for debugging
+sub _browser_debug_content ($) {
+    my ($self) = @_;
+    my ($fh, $filename) = File::Temp::tempfile( DIR => $self->{tempdir}, SUFFIX => '.html');
+    print $fh $self->{useragent}->content();
+    close $fh;
+    return $filename;
 }
 
 ############################################################################
