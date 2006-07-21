@@ -6,7 +6,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Web.pm,v 1.8 2006-07-21 12:58:48 chris Exp $
+# $Id: Web.pm,v 1.9 2006-07-21 13:42:27 chris Exp $
 #
 
 package mySociety::Web;
@@ -15,12 +15,15 @@ use strict;
 
 use HTML::Entities;
 
-use CGI qw(-nosticky -no_xhtml);
+use Carp;
+use CGI qw(-nosticky);
 my $have_cgi_fast = 0;
 eval {
     use CGI::Fast;
     $have_cgi_fast = 1;
 };
+
+use HTML::Entities;
 
 use fields qw(q scratch);
 @mySociety::Web::ISA = qw(Exporter); # for the Import* methods
@@ -31,6 +34,11 @@ BEGIN {
     our @EXPORT_OK = qw(ent);
 }
 our @EXPORT_OK;
+
+sub ent ($) {
+    my $s = shift;
+    return encode_entities($s, '<>&');
+}
 
 =item new [QUERY]
 
@@ -44,7 +52,7 @@ sub new ($;$) {
         $q = $have_cgi_fast ? new CGI::Fast() : new CGI();
         return undef if (!defined($q)); # reproduce CGI::Fast behaviour
     }
-    $q->autoEscape(0);
+    $q->autoEscape(1);
     my $self = fields::new('mySociety::Web');
     $self->{q} = $q;
     $self->{scratch} = { };
@@ -91,18 +99,19 @@ and false otherwise.
 This function may be called several times for one request.
 
 =cut
+use Data::Dumper;
 sub Import ($$%) {
     my ($self, $what, %p) = @_;
     my $q = $self->q();
 
-    die "WHAT should be 'p' for parameters, or 'c' for cookies"
+    croak("WHAT should be 'p' for parameters, or 'c' for cookies")
         unless ($what =~ m#^[pc]$#);
     my $p = ($what eq 'p');
 
     while (my ($name, $x) = each(%p)) {
         my $val = $p ? $q->param($name) : $q->cookie($name);
         if (ref($x) eq 'ARRAY') {
-            die "PARAMS->{$_} should be a 2-element list" unless (@$x == 2);
+            croak("PARAMS->{$name} should be a 2-element list") unless (@$x == 2);
             my ($check, $dfl) = @$x;
             if (!defined($val)) {
                 $val = $dfl;
@@ -111,10 +120,10 @@ sub Import ($$%) {
             } elsif (ref($check) eq 'Regexp') {
                 $val = $dfl if ($val !~ $check);
             } else {
-                die "PARAMS->{$_}->[0] should be a code reference or regexp";
+                croak("PARAMS->{$name}->[0] should be a code reference or regexp");
             }
         } elsif (defined(ref($x))) {
-            die "PARAMS->{$_} is a reference to " . ref($x) . "; should be scalar or array";
+            croak("PARAMS->{$name} is a reference to " . ref($x) . "; should be scalar or array");
         } else {
             $val = $x if (!defined($val));
         }
@@ -153,7 +162,7 @@ sub ImportMulti ($%) {
         } elsif (ref($check) eq 'Regexp') {
             @val = grep($check, $q->param('name'));
         } else {
-            die "PARAMS->{$_} should be a code reference or regexp";
+            croak("PARAMS->{$_} should be a code reference or regexp");
         }
 
         {
