@@ -6,7 +6,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Web.pm,v 1.7 2006-07-19 16:23:56 chris Exp $
+# $Id: Web.pm,v 1.8 2006-07-21 12:58:48 chris Exp $
 #
 
 package mySociety::Web;
@@ -24,6 +24,13 @@ eval {
 
 use fields qw(q scratch);
 @mySociety::Web::ISA = qw(Exporter); # for the Import* methods
+
+BEGIN {
+    use Exporter ();
+    our @ISA = qw(Exporter);
+    our @EXPORT_OK = qw(ent);
+}
+our @EXPORT_OK;
 
 =item new [QUERY]
 
@@ -172,14 +179,14 @@ that the parameter should be removed in the new URL.
 
 =cut
 sub NewURL ($%) {
-    my ($self, %p) = @_;
-    my $url = $self->url(-absolute => 1);
+    my ($q, %p) = @_;
+    my $url = $q->url(-absolute => 1);
     my @v = ();
     foreach my $key ($q->param()) {
         if (exists($p{$key})) {
             next if (!defined($p{$key}));
             my $v = $p{$key};
-            croak "can't use ref to " . ref($v) . " as param value"
+            croak("can't use ref to " . ref($v) . " as param value")
                 if (ref($v) && ref($v) ne 'ARRAY');
             $v = [$v] if (!ref($v));
             push(@v, map { urlencode($key) . '=' . urlencode($_) } @$v);
