@@ -7,7 +7,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: matthew@mysociety.org. WWW: http://www.mysociety.org/
  *
- * $Id: phpcli.php,v 1.5 2006-06-19 11:44:37 dademcron Exp $
+ * $Id: phpcli.php,v 1.6 2006-07-24 00:42:09 dademcron Exp $
  *
  */
 
@@ -49,7 +49,7 @@ require_once('error.php');
 /* error display to standard error */
 function err_display_stderr($num, $str, $file, $line, $context) {
     $stderr = fopen('php://stderr', 'w');
-    fwrite($stderr,$str . "\n");
+    fwrite($stderr,"$file:$line\n$str\n");
     fclose($stderr); 
 }
 err_set_handler_display('err_display_stderr');
