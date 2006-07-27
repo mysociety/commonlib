@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: person.php,v 1.18 2006-07-27 11:14:54 francis Exp $
+ * $Id: person.php,v 1.19 2006-07-27 18:25:01 francis Exp $
  * 
  */
 
@@ -241,6 +241,23 @@ function person_if_signed_on($norenew = false) {
     return null;   
 }
 
+function person_already_signed_on($email, $name, $person_if_signed_on_function) {
+    if (!is_null($email) && !validate_email($email))
+        err("'$email' is not a valid email address");
+
+    if ($person_if_signed_on_function)
+        $P = $person_if_signed_on_function();
+    else
+        $P = person_if_signed_on();
+    if (!is_null($P) && (is_null($email) || $P->email() == $email)) {
+        if (!is_null($name) && !$P->matches_name($name))
+            $P->name($name);
+        return $P;
+    }
+
+    return null;
+}
+
 /* person_signon DATA [EMAIL] [NAME]
  * Return a record of a person, if necessary requiring them to sign on to an
  * existing account or to create a new one. 
@@ -277,18 +294,9 @@ function person_if_signed_on($norenew = false) {
  * instead of person_if_signed_on() directly. This is totally ugly, but will do.
  * */
 function person_signon($template_data, $email = null, $name = null, $person_if_signed_on_function = null) {
-    if (!is_null($email) && !validate_email($email))
-        err("'$email' is not a valid email address");
-
-    if ($person_if_signed_on_function)
-        $P = $person_if_signed_on_function();
-    else
-        $P = person_if_signed_on();
-    if (!is_null($P) && (is_null($email) || $P->email() == $email)) {
-        if (!is_null($name) && !$P->matches_name($name))
-            $P->name($name);
+    $P = person_already_signed_on($email, $name, $person_if_signed_on_function);
+    if ($P)
         return $P;
-    }
 
     /* Get rid of any previous cookie -- if user is logging in again under a
      * different email, we don't want to remember the old one. */
