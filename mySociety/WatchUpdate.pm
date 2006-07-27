@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WatchUpdate.pm,v 1.3 2005-02-23 12:27:45 chris Exp $
+# $Id: WatchUpdate.pm,v 1.4 2006-07-27 18:17:50 matthew Exp $
 #
 
 package mySociety::WatchUpdate;
@@ -83,6 +83,7 @@ have, re-exec the script.
 =cut
 sub reexec_if_changed ($) {
     my ($self) = @_;
+    # XXX: $0 is not correct here
     exec($0, @ARGV) if ($self->changed());
 }
 
