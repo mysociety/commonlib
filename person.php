@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: person.php,v 1.17 2006-07-19 17:28:39 chris Exp $
+ * $Id: person.php,v 1.18 2006-07-27 11:14:54 francis Exp $
  * 
  */
 
@@ -270,12 +270,20 @@ function person_if_signed_on($norenew = false) {
  * calling the $this->name() function later will give an error.  Instead call
  * $this->name_or_blank() or $this->has_name().  The intention here is that if
  * the action requires a name, you will have prompted for it in an earlier form
- * and included it in the call to this function. */
-function person_signon($template_data, $email = null, $name = null) {
+ * and included it in the call to this function. 
+ * 
+ * PERSON_IF_SIGNED_ON_FUNCTION, if present, is a function pointer to a wrapper
+ * for the function person_if_signed_on(). person_signon() will call that wrapper
+ * instead of person_if_signed_on() directly. This is totally ugly, but will do.
+ * */
+function person_signon($template_data, $email = null, $name = null, $person_if_signed_on_function = null) {
     if (!is_null($email) && !validate_email($email))
         err("'$email' is not a valid email address");
 
-    $P = person_if_signed_on();
+    if ($person_if_signed_on_function)
+        $P = $person_if_signed_on_function();
+    else
+        $P = person_if_signed_on();
     if (!is_null($P) && (is_null($email) || $P->email() == $email)) {
         if (!is_null($name) && !$P->matches_name($name))
             $P->name($name);
