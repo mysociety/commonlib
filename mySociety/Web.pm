@@ -6,7 +6,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Web.pm,v 1.10 2006-07-31 13:12:40 chris Exp $
+# $Id: Web.pm,v 1.12 2006-07-31 17:02:42 chris Exp $
 #
 
 package mySociety::Web;
@@ -24,6 +24,7 @@ eval {
 };
 
 use HTML::Entities;
+use HTTP::Date qw();
 
 use fields qw(q scratch);
 @mySociety::Web::ISA = qw(Exporter); # for the Import* methods
@@ -190,7 +191,6 @@ that the parameter should be removed in the new URL.
 sub NewURL ($%) {
     my ($q, %p) = @_;
     my @v = ();
-    my $q = $self->q();
     my $url = $q->url(-absolute => 1);
     foreach my $key ($q->param()) {
         if (exists($p{$key})) {
@@ -235,6 +235,70 @@ sub start_form ($%) {
     my ($self, %p) = @_;
     $p{'-accept_charset'} = 'utf-8' if (!exists($p{'-accept_charset'}));
     return $self->q()->start_form(%p);
+}
+
+# quote_etag ETAG
+# Return a properly-quoted version of ETAG.
+sub quote_etag ($) {
+    my $etag = shift;
+    $etag =~ s/([\\"])/\\$1/g;
+    return qq("$etag");
+}
+
+=item Cond304 [TIME] [ETAG]
+
+Send a 304 Not Modified response with the given TIME and ETAG (assumed weak).
+
+=cut
+sub Cond304 ($$;$) {
+    my mySociety::Web $self = shift;
+    my ($time, $etag) = @_;
+
+    croak "Must set at least one of TIME and ETAG"
+        unless (defined($time) || defined($etag));
+
+    print $q->header(
+                -status => '304 Not Modified',
+                (defined($time) ? -Last_Modified => HTTP::Date::time2str($time) : ()),
+                (defined($etag) ? -Etag => 'W/' . quote_etag($etag) : ());
+            );
+}
+
+=item Maybe304 [TIME] [ETAG]
+
+If the current request is GET or HEAD and has an If-Modified-Since: or
+If-None-Match: header, and if the given last-modified TIME or ETAG (assumed
+weak) match that header, then emit a 304 Not Modified response and return
+true; otherwise return false.
+
+=cut
+sub Maybe304 ($$;$) {
+    my mySociety::Web $self = shift;
+    my ($time, $etag) = @_;
+
+    croak "Must set at least one of TIME and ETAG"
+        unless (defined($time) || defined($etag));
+
+    my $q = $self->q();
+    return 0 if ($q->request_method() !~ /^(GET|HEAD)$/);
+
+    if (defined($time)
+        && (my $ims = $q->http('If-Modified-Since'))
+        && defined($ims = HTTP::Date::str2time($ims))
+        && $ims >= $time) {
+        $self->Cond304($time, $etag);
+        return 1;
+    } elsif (defined($etag) && (my $etags = $q->http('If-None-Match'))) {
+        my $q = 'W/' . quote_etag($etag);
+        foreach (split(/\s*,\s*/, $etags)) {
+            if ($_ eq $q) {
+                $self->Cond304($time, $etag);
+                return 1;
+            }
+        }
+    } else {
+        return 0;
+    }
 }
 
 1;
