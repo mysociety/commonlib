@@ -6,7 +6,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Web.pm,v 1.12 2006-07-31 17:02:42 chris Exp $
+# $Id: Web.pm,v 1.13 2006-07-31 18:38:16 chris Exp $
 #
 
 package mySociety::Web;
@@ -84,6 +84,29 @@ sub AUTOLOAD {
     goto(&$mySociety::Web::AUTOLOAD);
 }
 
+=item ParamValidate PARAMETER CHECK [DEFAULT]
+
+Return the value of the named PARAMETER, assuming it passes CHECK, or DEFAULT
+(or if none is given, undef) otherwise. CHECK is either a code ref which is
+passed the mySociety::Web object and the value of the parameter and should
+return 1 if it is valid; or a regexp.
+
+=cut
+sub ParamValidate ($$$;$) {
+    my mySociety::Web $self = shift;
+    my ($name, $check, $default) = @_;
+    my $val = $self->{q}->param($name);
+    return $default if (!defined($val));
+    if (ref($check) eq 'CODE') {
+        return $default unless (&$check($self, $val));
+    } elsif (ref($check) eq 'Regexp') {
+        return $default unless ($val =~ $check);
+    } else {
+        croak "CHECK must be a code ref or a regexp";
+    }
+    return $val;
+}
+
 =item Import WHAT PARAMS
 
 Import parameters (WHAT = 'p') or cookies (WHAT = 'c') from the query into the
@@ -99,8 +122,9 @@ and false otherwise.
 
 This function may be called several times for one request.
 
+I<This function is quite slow, so don't use it in a time-critical page.>
+
 =cut
-use Data::Dumper;
 sub Import ($$%) {
     my ($self, $what, %p) = @_;
     my $q = $self->q();
@@ -150,6 +174,8 @@ each specified parameter NAME is assigned to an array "@qp_NAME", which should
 be declared with our(...). PARAMS gives a hash of NAME => CHECK; each CHECK is
 applied to each instance of a multi-valued parameter, filtering the values
 supplied by the client.
+
+I<This function is quite slow, so don't use it in a time-critical page.>
 
 =cut
 sub ImportMulti ($%) {
@@ -257,10 +283,10 @@ sub Cond304 ($$;$) {
     croak "Must set at least one of TIME and ETAG"
         unless (defined($time) || defined($etag));
 
-    print $q->header(
+    print $self->q()->header(
                 -status => '304 Not Modified',
-                (defined($time) ? -Last_Modified => HTTP::Date::time2str($time) : ()),
-                (defined($etag) ? -Etag => 'W/' . quote_etag($etag) : ());
+                (defined($time) ? (-Last_Modified => HTTP::Date::time2str($time)) : ()),
+                (defined($etag) ? (-Etag => 'W/' . quote_etag($etag)) : ())
             );
 }
 
@@ -282,10 +308,11 @@ sub Maybe304 ($$;$) {
     my $q = $self->q();
     return 0 if ($q->request_method() !~ /^(GET|HEAD)$/);
 
+    my $ims;
     if (defined($time)
-        && (my $ims = $q->http('If-Modified-Since'))
+        && ($ims = $q->http('If-Modified-Since'))
         && defined($ims = HTTP::Date::str2time($ims))
-        && $ims >= $time) {
+        && $ims >= int($time)) {        # XXX in case it came from DB or Time::HiRes
         $self->Cond304($time, $etag);
         return 1;
     } elsif (defined($etag) && (my $etags = $q->http('If-None-Match'))) {
