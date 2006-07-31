@@ -6,7 +6,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Web.pm,v 1.11 2006-07-31 13:12:57 chris Exp $
+# $Id: Web.pm,v 1.10 2006-07-31 13:12:40 chris Exp $
 #
 
 package mySociety::Web;
@@ -190,6 +190,7 @@ that the parameter should be removed in the new URL.
 sub NewURL ($%) {
     my ($q, %p) = @_;
     my @v = ();
+    my $q = $self->q();
     my $url = $q->url(-absolute => 1);
     foreach my $key ($q->param()) {
         if (exists($p{$key})) {
