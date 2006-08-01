@@ -18,7 +18,7 @@
 // Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 // Email: francis@mysociety.org. WWW: http://www.mysociety.org
 //
-// $Id: db.php,v 1.26 2006-07-11 09:55:21 francis Exp $
+// $Id: db.php,v 1.27 2006-08-01 07:37:23 francis Exp $
 
 require_once('error.php');
 
@@ -152,6 +152,7 @@ function db_query($query) {
     /* ugly boilerplate to call through to db_subst */
     $a = func_get_args();
     $q = call_user_func_array('db_subst', $a);
+    #error_log($query);
     if (!($db_last_res = pg_query($db_h, $q))) {
         // TODO: Unfortunately, this never gets called, as a PostgreSQL error
         // causes pg_query to raise a PHP warning, which our error checking
