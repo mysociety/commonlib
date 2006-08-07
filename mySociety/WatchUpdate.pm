@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WatchUpdate.pm,v 1.4 2006-07-27 18:17:50 matthew Exp $
+# $Id: WatchUpdate.pm,v 1.5 2006-08-07 10:39:49 chris Exp $
 #
 
 package mySociety::WatchUpdate;
@@ -79,6 +79,8 @@ sub changed ($) {
 
 I<Instance method.> Check whether any file changes have taken place and, if they
 have, re-exec the script.
+
+NB this function does not work for scripts invoked from apache.
 
 =cut
 sub reexec_if_changed ($) {
