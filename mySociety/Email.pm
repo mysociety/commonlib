@@ -6,7 +6,7 @@
 # Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Email.pm,v 1.6 2006-08-09 12:49:28 chris Exp $
+# $Id: Email.pm,v 1.7 2006-08-09 13:09:44 chris Exp $
 #
 
 package mySociety::Email::Error;
@@ -125,9 +125,12 @@ sub do_template_substitution ($$) {
         $body =~ s#^Subject: ([^\n]*)\n\n##s;
     }
 
-    # Merge paragraphs into their own line.  Two blank lines separates a
+    # Merge paragraphs into their own line.  Two blank lines separate a
     # paragraph.
-    $body =~ s#(^|[^\n])[ \t]*\n[ \t]*($|[^\n])#$1 $2#g;
+
+    # regex means, "replace any line ending that is neither preceded (?<!\n)
+    # nor followed (?![ \t]*\n) by a blank line with a single space".
+    $body =~ s#(?<!\n)[ \t]*\n(?![ \t]*\n)# #gs;
 
     # Wrap text to 72-column lines.
     local($Text::Wrap::columns = 69);
