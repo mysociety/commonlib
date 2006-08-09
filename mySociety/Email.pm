@@ -6,7 +6,7 @@
 # Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Email.pm,v 1.2 2006-07-31 10:25:11 chris Exp $
+# $Id: Email.pm,v 1.3 2006-08-09 11:29:21 chris Exp $
 #
 
 package mySociety::Email::Error;
@@ -109,8 +109,9 @@ sub do_template_substitution ($$) {
 
 =item construct_email SPEC
 
-Construct a MIME::Entity object representing an email message according to
-SPEC, which is an associative array containing elements as follows:
+Construct an email message according to SPEC, which is an associative array
+containing elements as given below. Returns an on-the-wire email (though with
+"\n" line-endings).
 
 =over 4
 
@@ -258,7 +259,7 @@ sub construct_email ($) {
                     Data => $p->{_body_},
                     Type => 'text/plain; charset="utf-8"',
                     Encoding => 'quoted-printable'
-                );
+                )->stringify();
 }
 
 
