@@ -6,7 +6,7 @@
 # Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Email.pm,v 1.8 2006-08-09 14:09:04 chris Exp $
+# $Id: Email.pm,v 1.9 2006-08-09 14:24:02 chris Exp $
 #
 
 package mySociety::Email::Error;
@@ -74,7 +74,13 @@ sub format_mimewords ($) {
         # in a quoted-printable MIME-word, so we have to encode it as =20 or
         # whatever, so this is still going to be near-unreadable for users
         # whose MUAs suck at MIME.
-        $octets =~ s#(\s|[\x00-\x1f\x7f-\xff"\$%'():;<>@\[\]\\])#sprintf('=%02x', ord($1))#ge;
+        #
+        # We also encode characters which are ASCII but are not valid in
+        # atoms in RFC 2822 (see below in format_email_address), so that we
+        # avoid having to encode *and* quote a real name in an email address.
+        # Again this means we encode more characters than we need to, but
+        # that's life.
+        $octets =~ s#(\s|[\x00-\x1f\x7f-\xff"\$%'(),.:;<>@\[\]\\])#sprintf('=%02x', ord($1))#ge;
         $octets = "=?$encoding?Q?$octets?=";
         utf8::decode($octets);
         return $octets;
@@ -89,10 +95,34 @@ an email From:/To: header.
 =cut
 sub format_email_address ($$) {
     my ($name, $addr) = @_;
+
+    # 
+    # The "display-name" part of the mailbox is a "phrase", meaning one or more
+    # atoms or quoted-strings. Atoms consist of atext:
+    # 
+    # atext           =       ALPHA / DIGIT / ; Any character except controls,
+    #                         "!" / "#" /     ;  SP, and specials.
+    #                         "$" / "%" /     ;  Used for atoms
+    #                         "&" / "'" /
+    #                         "*" / "+" /
+    #                         "-" / "/" /
+    #                         "=" / "?" /
+    #                         "^" / "_" /
+    #                         "`" / "{" /
+    #                         "|" / "}" /
+    #                         "~"
+    #
+    
+    # First format name for any non-ASCII characters, if necessary.
     $name = format_mimewords($name);
-    $name =~ s/"/\\"/g;
-    $name =~ s/\\/\\\\/g;
-    $name = "\"$name\"";
+
+    # Now decide whether it is to be formatted as an atom or a quoted-string.
+    if ($name =~ /[^A-Za-z0-9!#\$%&'*+\-\/=?^_`{|}~]/) {
+        # Contains characters which aren't valid in atoms, so make a
+        # quoted-pair instead.
+        $name =~ s/["\\]/\\$1/g;
+        $name = qq("$name");
+    }
     return sprintf('%s <%s>', $name, $addr);
 }
 
