@@ -6,7 +6,7 @@
 # Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Email.pm,v 1.5 2006-08-09 12:12:12 chris Exp $
+# $Id: Email.pm,v 1.6 2006-08-09 12:49:28 chris Exp $
 #
 
 package mySociety::Email::Error;
@@ -25,8 +25,6 @@ use Error qw(:try);
 use MIME::QuotedPrint;
 use POSIX qw();
 use Text::Wrap qw();
-
-use mySociety::Util qw(random_bytes);
 
 =item encode_string STRING
 
@@ -134,6 +132,7 @@ sub do_template_substitution ($$) {
     # Wrap text to 72-column lines.
     local($Text::Wrap::columns = 69);
     local($Text::Wrap::huge = 'overflow');
+    local($Text::Wrap::unexpand = 0);
     my $wrapped = Text::Wrap::wrap('     ', '     ', $body);
     $wrapped =~ s/^\s+$//mg;
 
@@ -208,6 +207,7 @@ sub construct_email ($) {
         throw mySociety::Email::Error("Fields '_body_' and '_unwrapped_body_' both specified") if (exists($p->{_body_}));
         local($Text::Wrap::columns = 69);
         local($Text::Wrap::huge = 'overflow');
+        local($Text::Wrap::unexpand = 0);
         $p->{_body_} = Text::Wrap::wrap('     ', '     ', $p->{_unwrapped_body_});
         $p->{_body_} =~ s/^\s+$//mg;
         delete($p->{_unwrapped_body_});
