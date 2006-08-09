@@ -6,7 +6,7 @@
 # Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Email.pm,v 1.3 2006-08-09 11:29:21 chris Exp $
+# $Id: Email.pm,v 1.4 2006-08-09 12:10:44 chris Exp $
 #
 
 package mySociety::Email::Error;
@@ -19,13 +19,42 @@ package mySociety::Email;
 
 use strict;
 
+use Encode;
+use Encode::Byte;   # iso-8859-* etc.
 use Error qw(:try);
-use MIME::Entity;
-use MIME::Words;
+use MIME::QuotedPrint;
 use POSIX qw();
 use Text::Wrap qw();
 
 use mySociety::Util qw(random_bytes);
+
+=item encode_string STRING
+
+Attempt to encode STRING in the least challenging of a variety of possible
+encodings. Returns a list giving the IANA name for the selected encoding and a
+byte string of the encoded text.
+
+=cut
+sub encode_string ($) {
+    my $s = shift;
+    die "STRING is not valid ASCII/UTF-8" unless (utf8::valid($s));
+
+    foreach my $encoding (qw(
+                    us-ascii
+                    iso-8859-1
+                    iso-8859-15
+                    windows-1252
+                    utf-8
+                )) {
+        my $octets;
+        eval {
+            $octets = encode($encoding, $s, Encode::FB_CROAK);
+        };
+        return ($encoding, $octets) if ($octets);
+    }
+
+    die "Unable to encode STRING in any supported encoding (shouldn't happen)";
+}
 
 =item format_mimewords STRING
 
@@ -34,21 +63,24 @@ Return STRING, formatted for inclusion in an email header.
 =cut
 sub format_mimewords ($) {
     my ($text) = @_;
-    # This is unpleasant. Whitespace which separates two encoded-words is not
-    # significant, so we need to fold it in to one of them. Rather than having
-    # some complicated state-machine driven by words, just encode the whole
-    # line if it contains any non-ASCII characters. However, this is going to
-    # suck whatever happens, because we can't include a blank in a
-    # quoted-printable MIME-word, so we have to encode it as =20 or whatever,
-    # so this is still going to be near-unreadable for users whose MUAs suck
-    # at MIME.
-    utf8::encode($text); # turn to string of bytes
-    if ($text =~ m#[\x00-\x1f\x80-\xff]#) {
-        $text =~ s#(\s|[\x00-\x1f\x80-\xff])#sprintf('=%02x', ord($1))#ge;
-        $text = "=?UTF-8?Q?$text?="
+    
+    my ($encoding, $octets) = encode_string($text);
+    if ($encoding eq 'us-ascii') {
+        return $text;
+    } else {
+        # This is unpleasant. Whitespace which separates two encoded-words is
+        # not significant, so we need to fold it in to one of them. Rather than
+        # having some complicated state-machine driven by words, just encode
+        # the whole line if it contains any non-ASCII characters. However, this
+        # is going to suck whatever happens, because we can't include a blank
+        # in a quoted-printable MIME-word, so we have to encode it as =20 or
+        # whatever, so this is still going to be near-unreadable for users
+        # whose MUAs suck at MIME.
+        $octets =~ s#(\s|[\x00-\x1f\x80-\xff])#sprintf('=%02x', ord($1))#ge;
+        $octets = "=?$encoding?Q?$octets?=";
+        utf8::decode($octets);
+        return $octets;
     }
-    utf8::decode($text);
-    return $text;
 }
 
 =item format_email_address NAME ADDRESS
@@ -80,8 +112,9 @@ sub do_one_substitution ($$) {
 
 =item do_template_substitution TEMPLATE PARAMETERS
 
-Given the text of a TEMPLATE and a reference to a hash of PARAMETERS, return
-in list context the subject and body of the email.
+Given the text of a TEMPLATE and a reference to a hash of PARAMETERS, return in
+list context the subject and body of the email. This operates on and returns
+Unicode strings.
 
 =cut
 sub do_template_substitution ($$) {
@@ -247,19 +280,29 @@ sub construct_email ($) {
     $hdr{Date} ||= POSIX::strftime("%a, %d %h %Y %T %z", localtime(time()));
 
     foreach (keys(%$p)) {
-        $hdr{$_} = $p->{$_} if ($_ ne '_data_' && !exists($hdr{$_}));
+        $hdr{$_} = $p->{$_} if ($_ !~ /^_/ && !exists($hdr{$_}));
     }
 
-    # MIME::Entity->build() apparently expects *byte strings* as its data
-    # argument; otherwise some crazy conversion goes on and it emits encoded
-    # ISO-8859-1 data, rather than UTF-8.
-    utf8::encode($p->{_body_});
-    return MIME::Entity->build(
-                    %hdr,
-                    Data => $p->{_body_},
-                    Type => 'text/plain; charset="utf-8"',
-                    Encoding => 'quoted-printable'
-                )->stringify();
+    my ($enc, $bodytext) = encode_string($p->{_body_});
+    $hdr{'MIME-Version'} = '1.0';
+    $hdr{'Content-Type'} = "text/plain; charset=\"$enc\"";
+
+    my $encoded_body;
+    if ($enc eq 'us-ascii') {
+        $hdr{'Content-Transfer-Encoding'} = '7bit';
+        $encoded_body = $bodytext;
+    } else {
+        $hdr{'Content-Transfer-Encoding'} = 'quoted-printable';
+        $encoded_body = encode_qp($bodytext, "\n");
+    }
+
+    my $text = '';
+    foreach (keys %hdr) {
+        $text .= "$_: $hdr{$_}\n";
+    }
+
+    $text .= "\n" . $encoded_body . "\n\n";
+    return $text;
 }
 
 
