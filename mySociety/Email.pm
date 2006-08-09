@@ -6,7 +6,7 @@
 # Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Email.pm,v 1.7 2006-08-09 13:09:44 chris Exp $
+# $Id: Email.pm,v 1.8 2006-08-09 14:09:04 chris Exp $
 #
 
 package mySociety::Email::Error;
@@ -74,7 +74,7 @@ sub format_mimewords ($) {
         # in a quoted-printable MIME-word, so we have to encode it as =20 or
         # whatever, so this is still going to be near-unreadable for users
         # whose MUAs suck at MIME.
-        $octets =~ s#(\s|[\x00-\x1f\x80-\xff])#sprintf('=%02x', ord($1))#ge;
+        $octets =~ s#(\s|[\x00-\x1f\x7f-\xff"\$%'():;<>@\[\]\\])#sprintf('=%02x', ord($1))#ge;
         $octets = "=?$encoding?Q?$octets?=";
         utf8::decode($octets);
         return $octets;
