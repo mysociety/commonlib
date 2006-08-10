@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: person.php,v 1.19 2006-07-27 18:25:01 francis Exp $
+ * $Id: person.php,v 1.20 2006-08-10 07:42:59 matthew Exp $
  * 
  */
 
@@ -231,8 +231,9 @@ function person_if_signed_on($norenew = false) {
             $P = new Person($id);
             if (!$norenew) {
                 /* Valid, so renew the cookie. */
+		# XXX: This turns all session cookies into one-year ones!
                 $duration = person_cookie_token_duration($_COOKIE['pb_person_id']);
-                setcookie('pb_person_id', person_cookie_token($id, $duration), time() + $duration, '/', person_cookie_domain(), false);
+                setcookie('pb_person_id', person_cookie_token($id, $duration), time() + $duration, '/', person_cookie_domain());
                 $person_signed_on = $P; /* save this here so we will renew the cookie on a later call to this function without NORENEW */
             }
             return $P;
@@ -329,7 +330,9 @@ function person_signon($template_data, $email = null, $name = null, $person_if_s
 /* person_signoff
  * Log out anyone who is logged in */
 function person_signoff() {
-    setcookie('pb_person_id', false, null, '/', person_cookie_domain(), false);
+    setcookie('pb_person_id', '', 0, '/', person_cookie_domain());
+    # Remove old style cookies left around too
+    setcookie('pb_person_id', '', 0, '/', '.' . OPTION_WEB_DOMAIN);
 }
 
 /* person_make_signon_url DATA EMAIL METHOD URL PARAMETERS
