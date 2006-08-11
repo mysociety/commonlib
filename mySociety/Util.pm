@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Util.pm,v 1.51 2006-07-18 08:13:52 francis Exp $
+# $Id: Util.pm,v 1.52 2006-08-11 15:43:26 francis Exp $
 #
 
 package mySociety::Util::Error;
@@ -33,7 +33,7 @@ use Statistics::Distributions qw(fdistr);
 BEGIN {
     use Exporter ();
     our @ISA = qw(Exporter);
-    our @EXPORT_OK = qw(&open_log &print_log &random_bytes &ordinal &is_valid_email &is_valid_postcode &create_file_to_replace &describe_waitval &send_email);
+    our @EXPORT_OK = qw(&open_log &print_log &random_bytes &ordinal &is_valid_email &is_valid_postcode &create_file_to_replace &shell &describe_waitval &send_email);
 }
 our @EXPORT_OK;
 
@@ -757,6 +757,21 @@ sub create_file_to_replace ($) {
     }
     die $!;
 }
+
+=item shell COMMAND PARAMS...
+
+Execute given command using "system", and check for an error. If there
+is an error, die with useful diagnostics.
+
+=cut
+sub shell {
+    system(@_);
+    if ($?) {
+        throw Oops("in " . getcwd() . ": " . join(" ", @_) . ": "
+            . mySociety::Util::describe_waitval($?, "system"));
+    }
+}
+
 
 =item describe_waitval VALUE [FUNCTION]
 
