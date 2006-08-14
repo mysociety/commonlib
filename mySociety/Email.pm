@@ -6,7 +6,7 @@
 # Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Email.pm,v 1.9 2006-08-09 14:24:02 chris Exp $
+# $Id: Email.pm,v 1.10 2006-08-14 16:33:15 chris Exp $
 #
 
 package mySociety::Email::Error;
@@ -322,7 +322,11 @@ sub construct_email ($) {
 
     my $text = '';
     foreach (keys %hdr) {
-        $text .= "$_: $hdr{$_}\n";
+        # No caller should introduce a header with a linebreak in it, but just
+        # in case they do, strip them out.
+        my $h = $hdr{$_};
+        $h =~ s/\r?\n/ /gs;
+        $text .= "$_: $h\n";
     }
 
     $text .= "\n" . $encoded_body . "\n\n";
