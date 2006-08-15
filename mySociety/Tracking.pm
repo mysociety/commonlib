@@ -6,7 +6,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Tracking.pm,v 1.3 2006-08-15 12:05:26 chris Exp $
+# $Id: Tracking.pm,v 1.4 2006-08-15 13:06:23 chris Exp $
 #
 
 package mySociety::Tracking;
@@ -31,6 +31,7 @@ sub urlencode ($) {
 sub code ($$) {
     return '' if (!mySociety::Config::get('TRACKING', 0));
     my ($q, $extra) = @_;
+    return '' if (!defined($extra));
     my $salt = sprintf('%08x', rand(0xffffffff));
     my $url = $q->url(-path_info => 1);
     # XXX Can't use $q->query_string(), because that's reconstructed to include
