@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Util.pm,v 1.53 2006-08-18 22:24:18 chris Exp $
+# $Id: Util.pm,v 1.54 2006-08-18 22:48:25 chris Exp $
 #
 
 package mySociety::Util::Error;
@@ -174,8 +174,9 @@ sub pipe_via (@) {
             POSIX::dup($outh);
             POSIX::close($outh);
         }
-        exec($prog, @args);
-        exit(1);
+        { exec($prog, @args); }
+        print STDERR "$prog: execve: $!\n";
+        POSIX::_exit(255);
     }
 
     POSIX::close($rd) or die "close: $!";
