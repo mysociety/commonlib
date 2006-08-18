@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Util.pm,v 1.52 2006-08-11 15:43:26 francis Exp $
+# $Id: Util.pm,v 1.53 2006-08-18 22:24:18 chris Exp $
 #
 
 package mySociety::Util::Error;
@@ -767,8 +767,8 @@ is an error, die with useful diagnostics.
 sub shell {
     system(@_);
     if ($?) {
-        throw Oops("in " . getcwd() . ": " . join(" ", @_) . ": "
-            . mySociety::Util::describe_waitval($?, "system"));
+        die "in " . getcwd() . ": " . join(" ", @_) . ": "
+            . mySociety::Util::describe_waitval($?, "system");
     }
 }
 
