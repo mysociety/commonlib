@@ -8,7 +8,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: evel.php,v 1.31 2006-08-23 00:34:56 francis Exp $
+ * $Id: evel.php,v 1.32 2006-08-23 08:23:06 francis Exp $
  *
  */
 

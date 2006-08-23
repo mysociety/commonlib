@@ -8,7 +8,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: mapit.php,v 1.42 2006-08-23 00:34:56 francis Exp $
+ * $Id: mapit.php,v 1.43 2006-08-23 08:23:06 francis Exp $
  *
  */
 
@@ -96,7 +96,7 @@ function mapit_get_voting_areas_info($ary) {
     return $result;
 }
 
-/* mapit_get_voting_area_geometry AREA
+/* mapit_get_voting_area_geometry AREA [POLYGON_TYPE] [TOLERANCE]
 
   Return geometry information about the given voting area. Return value is
   a reference to a hash containing elements. Coordinates with names ending
@@ -105,11 +105,32 @@ function mapit_get_voting_areas_info($ary) {
 
   centre_e, centre_n, centre_lat, centre_lon - centre of bounding rectangle
   min_e, min_n, min_lat, min_lon - south-west corner of bounding rectangle
-  max_e, max_n, max_lat, max_lon - north-east corner of bounding rectangle */
-function mapit_get_voting_area_geometry($area) {
+  max_e, max_n, max_lat, max_lon - north-east corner of bounding rectangle
+  area - surface area of the polygon, in metres squared parts - number of
+  parts the polygon of the boundary has
+
+  If POLYGON_TYPE is present, then the hash also contains a member
+  'polygon'. This is an array of parts. Each part is a hash of the
+  following values:
+
+  sense - a positive value to include the part, negative to exclude (a
+  hole) points - an array of pairs of (eastings, northings) if POLYGON_TYPE
+  is 'ng", or (latitude, longitude) if POLYGON_TYPE is 'wgs84'.
+
+  XXX If TOLERANCE is present then the points are first pruned. Not yet
+  implemeneted. */
+function mapit_get_voting_area_geometry($area, $polygon_type = null, $tolerance = null) {
     global $mapit_client;
     $params = func_get_args();
     $result = $mapit_client->call('MaPit.get_voting_area_geometry', $params);
+    return $result;
+}
+
+/* mapit_get_voting_areas_geometry ARY */
+function mapit_get_voting_areas_geometry($ary) {
+    global $mapit_client;
+    $params = func_get_args();
+    $result = $mapit_client->call('MaPit.get_voting_areas_geometry', $params);
     return $result;
 }
 
