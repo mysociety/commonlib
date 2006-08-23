@@ -8,7 +8,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # WWW: http://www.mysociety.org
 #
-# $Id: MaPit.pm,v 1.26 2006-08-23 00:34:55 francis Exp $
+# $Id: MaPit.pm,v 1.27 2006-08-23 08:23:06 francis Exp $
 
 package mySociety::MaPit;
 
@@ -112,7 +112,7 @@ sub get_voting_areas_info ($) {
     return $rabx_client->call('MaPit.get_voting_areas_info', @_);
 }
 
-=item MaPit::get_voting_area_geometry AREA
+=item MaPit::get_voting_area_geometry AREA [POLYGON_TYPE] [TOLERANCE]
 
   Return geometry information about the given voting area. Return value is
   a reference to a hash containing elements. Coordinates with names ending
@@ -122,11 +122,32 @@ sub get_voting_areas_info ($) {
   centre_e, centre_n, centre_lat, centre_lon - centre of bounding rectangle
   min_e, min_n, min_lat, min_lon - south-west corner of bounding rectangle
   max_e, max_n, max_lat, max_lon - north-east corner of bounding rectangle
+  area - surface area of the polygon, in metres squared parts - number of
+  parts the polygon of the boundary has
+
+  If POLYGON_TYPE is present, then the hash also contains a member
+  'polygon'. This is an array of parts. Each part is a hash of the
+  following values:
+
+  sense - a positive value to include the part, negative to exclude (a
+  hole) points - an array of pairs of (eastings, northings) if POLYGON_TYPE
+  is 'ng", or (latitude, longitude) if POLYGON_TYPE is 'wgs84'.
+
+  XXX If TOLERANCE is present then the points are first pruned. Not yet
+  implemeneted.
 
 =cut
-sub get_voting_area_geometry ($) {
+sub get_voting_area_geometry ($;$$) {
     configure() if !defined $rabx_client;
     return $rabx_client->call('MaPit.get_voting_area_geometry', @_);
+}
+
+=item MaPit::get_voting_areas_geometry ARY
+
+=cut
+sub get_voting_areas_geometry ($) {
+    configure() if !defined $rabx_client;
+    return $rabx_client->call('MaPit.get_voting_areas_geometry', @_);
 }
 
 =item MaPit::get_areas_by_type TYPE [ALL]
