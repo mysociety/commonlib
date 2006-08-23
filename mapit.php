@@ -8,7 +8,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: mapit.php,v 1.41 2006-08-15 17:31:32 francis Exp $
+ * $Id: mapit.php,v 1.42 2006-08-23 00:34:56 francis Exp $
  *
  */
 
@@ -96,6 +96,23 @@ function mapit_get_voting_areas_info($ary) {
     return $result;
 }
 
+/* mapit_get_voting_area_geometry AREA
+
+  Return geometry information about the given voting area. Return value is
+  a reference to a hash containing elements. Coordinates with names ending
+  _e and _n are UK National Grid eastings and northings. Coordinates ending
+  _lat and _lon are WGS84 latitude and longitude.
+
+  centre_e, centre_n, centre_lat, centre_lon - centre of bounding rectangle
+  min_e, min_n, min_lat, min_lon - south-west corner of bounding rectangle
+  max_e, max_n, max_lat, max_lon - north-east corner of bounding rectangle */
+function mapit_get_voting_area_geometry($area) {
+    global $mapit_client;
+    $params = func_get_args();
+    $result = $mapit_client->call('MaPit.get_voting_area_geometry', $params);
+    return $result;
+}
+
 /* mapit_get_areas_by_type TYPE [ALL]
 
   Returns an array of ids of all the voting areas of type TYPE. TYPE is the
@@ -121,21 +138,7 @@ function mapit_get_example_postcode($id) {
 
 /* mapit_get_voting_area_children ID
 
-  Return array of ids of areas whose parent areas are ID. */
-function mapit_get_voting_area_children($id) {
-    global $mapit_client;
-    $params = func_get_args();
-    $result = $mapit_client->call('MaPit.get_voting_area_children', $params);
-    return $result;
-}
-
-/* mapit_get_location POSTCODE [PARTIAL]
-
-  Return the location of the given POSTCODE. The return value is a
-  reference to a hash containing elements. If PARTIAL is present set to 1,
-  will use only the first part of the postcode, and generate the mean
-  coordinate. If PARTIAL is set POSTCODE can optionally be just the first
-  part of the postcode.
+  Return array of ids of areas whose parent areas are ID.
 
   * coordsyst
 
@@ -154,10 +157,10 @@ function mapit_get_voting_area_children($id) {
 
     Latitude and longitude in the WGS84 coordinate system, expressed as
     decimal degrees, north- and east-positive. */
-function mapit_get_location($postcode, $partial = null) {
+function mapit_get_voting_area_children($id) {
     global $mapit_client;
     $params = func_get_args();
-    $result = $mapit_client->call('MaPit.get_location', $params);
+    $result = $mapit_client->call('MaPit.get_voting_area_children', $params);
     return $result;
 }
 
