@@ -8,7 +8,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # WWW: http://www.mysociety.org
 #
-# $Id: MaPit.pm,v 1.25 2006-08-15 17:31:31 francis Exp $
+# $Id: MaPit.pm,v 1.26 2006-08-23 00:34:55 francis Exp $
 
 package mySociety::MaPit;
 
@@ -112,6 +112,23 @@ sub get_voting_areas_info ($) {
     return $rabx_client->call('MaPit.get_voting_areas_info', @_);
 }
 
+=item MaPit::get_voting_area_geometry AREA
+
+  Return geometry information about the given voting area. Return value is
+  a reference to a hash containing elements. Coordinates with names ending
+  _e and _n are UK National Grid eastings and northings. Coordinates ending
+  _lat and _lon are WGS84 latitude and longitude.
+
+  centre_e, centre_n, centre_lat, centre_lon - centre of bounding rectangle
+  min_e, min_n, min_lat, min_lon - south-west corner of bounding rectangle
+  max_e, max_n, max_lat, max_lon - north-east corner of bounding rectangle
+
+=cut
+sub get_voting_area_geometry ($) {
+    configure() if !defined $rabx_client;
+    return $rabx_client->call('MaPit.get_voting_area_geometry', @_);
+}
+
 =item MaPit::get_areas_by_type TYPE [ALL]
 
   Returns an array of ids of all the voting areas of type TYPE. TYPE is the
@@ -139,20 +156,6 @@ sub get_example_postcode ($) {
 
   Return array of ids of areas whose parent areas are ID.
 
-=cut
-sub get_voting_area_children ($) {
-    configure() if !defined $rabx_client;
-    return $rabx_client->call('MaPit.get_voting_area_children', @_);
-}
-
-=item MaPit::get_location POSTCODE [PARTIAL]
-
-  Return the location of the given POSTCODE. The return value is a
-  reference to a hash containing elements. If PARTIAL is present set to 1,
-  will use only the first part of the postcode, and generate the mean
-  coordinate. If PARTIAL is set POSTCODE can optionally be just the first
-  part of the postcode.
-
   * coordsyst
 
   * easting
@@ -172,9 +175,9 @@ sub get_voting_area_children ($) {
     decimal degrees, north- and east-positive.
 
 =cut
-sub get_location ($;$) {
+sub get_voting_area_children ($) {
     configure() if !defined $rabx_client;
-    return $rabx_client->call('MaPit.get_location', @_);
+    return $rabx_client->call('MaPit.get_voting_area_children', @_);
 }
 
 =item MaPit::admin_get_stats

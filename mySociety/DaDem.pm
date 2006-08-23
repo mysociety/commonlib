@@ -8,7 +8,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # WWW: http://www.mysociety.org
 #
-# $Id: DaDem.pm,v 1.25 2006-08-15 17:31:31 francis Exp $
+# $Id: DaDem.pm,v 1.26 2006-08-23 00:34:55 francis Exp $
 
 package mySociety::DaDem;
 

@@ -6,12 +6,15 @@
 # Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: GeoUtil.pm,v 1.1 2006-08-22 17:58:14 francis Exp $
+# $Id: GeoUtil.pm,v 1.2 2006-08-23 00:34:55 francis Exp $
 #
 
 package mySociety::GeoUtil;
 
 use strict;
+
+use Geo::HelmertTransform;
+use Geography::NationalGrid;
 
 BEGIN {
     use Exporter ();
