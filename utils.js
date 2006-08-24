@@ -5,7 +5,7 @@
  * Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: utils.js,v 1.1 2006-08-24 11:11:15 francis Exp $
+ * $Id: utils.js,v 1.2 2006-08-24 12:51:14 matthew Exp $
  * 
  */
 
@@ -35,12 +35,14 @@ mySociety = {
         return xmlhttp;
     },
 
-    asyncRequest : function(method, url, func) {
-        xmlhttp = mySociety.getXMLHTTP();
+    asyncRequest : function(url, func) {
+        var xmlhttp = mySociety.getXMLHTTP();
         if (!xmlhttp) 
             return false;
-        xmlhttp.open(method, url, true);
-        xmlhttp.onreadystatechange = func;
+        xmlhttp.open('GET', url, true);
+        xmlhttp.onreadystatechange = function() {
+	    func(xmlhttp);
+	}
         xmlhttp.send(null);
         return xmlhttp;
     }
