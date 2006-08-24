@@ -8,7 +8,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # WWW: http://www.mysociety.org
 #
-# $Id: MaPit.pm,v 1.27 2006-08-23 08:23:06 francis Exp $
+# $Id: MaPit.pm,v 1.28 2006-08-24 15:54:17 francis Exp $
 
 package mySociety::MaPit;
 
@@ -106,6 +106,9 @@ sub get_voting_area_info ($) {
 
 =item MaPit::get_voting_areas_info ARY
 
+  As get_voting_area_info, only takes an array of ids, and returns an array
+  of hashes.
+
 =cut
 sub get_voting_areas_info ($) {
     configure() if !defined $rabx_client;
@@ -122,8 +125,9 @@ sub get_voting_areas_info ($) {
   centre_e, centre_n, centre_lat, centre_lon - centre of bounding rectangle
   min_e, min_n, min_lat, min_lon - south-west corner of bounding rectangle
   max_e, max_n, max_lat, max_lon - north-east corner of bounding rectangle
-  area - surface area of the polygon, in metres squared parts - number of
-  parts the polygon of the boundary has
+  area - approximate surface area of the constituency, in metres squared
+  (this is taken from the OS data, but roughly agrees with the polygon's
+  area) parts - number of parts the polygon of the boundary has
 
   If POLYGON_TYPE is present, then the hash also contains a member
   'polygon'. This is an array of parts. Each part is a hash of the
@@ -143,6 +147,9 @@ sub get_voting_area_geometry ($;$$) {
 }
 
 =item MaPit::get_voting_areas_geometry ARY
+
+  As get_voting_area_geometry, only takes an array of ids, and returns an
+  array of hashes.
 
 =cut
 sub get_voting_areas_geometry ($) {
@@ -177,6 +184,20 @@ sub get_example_postcode ($) {
 
   Return array of ids of areas whose parent areas are ID.
 
+=cut
+sub get_voting_area_children ($) {
+    configure() if !defined $rabx_client;
+    return $rabx_client->call('MaPit.get_voting_area_children', @_);
+}
+
+=item MaPit::get_location POSTCODE [PARTIAL]
+
+  Return the location of the given POSTCODE. The return value is a
+  reference to a hash containing elements. If PARTIAL is present set to 1,
+  will use only the first part of the postcode, and generate the mean
+  coordinate. If PARTIAL is set POSTCODE can optionally be just the first
+  part of the postcode.
+
   * coordsyst
 
   * easting
@@ -196,9 +217,9 @@ sub get_example_postcode ($) {
     decimal degrees, north- and east-positive.
 
 =cut
-sub get_voting_area_children ($) {
+sub get_location ($;$) {
     configure() if !defined $rabx_client;
-    return $rabx_client->call('MaPit.get_voting_area_children', @_);
+    return $rabx_client->call('MaPit.get_location', @_);
 }
 
 =item MaPit::admin_get_stats
