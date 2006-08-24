@@ -8,7 +8,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: mapit.php,v 1.43 2006-08-23 08:23:06 francis Exp $
+ * $Id: mapit.php,v 1.44 2006-08-24 15:54:17 francis Exp $
  *
  */
 
@@ -88,7 +88,10 @@ function mapit_get_voting_area_info($area) {
     return $result;
 }
 
-/* mapit_get_voting_areas_info ARY */
+/* mapit_get_voting_areas_info ARY
+
+  As get_voting_area_info, only takes an array of ids, and returns an array
+  of hashes. */
 function mapit_get_voting_areas_info($ary) {
     global $mapit_client;
     $params = func_get_args();
@@ -106,8 +109,9 @@ function mapit_get_voting_areas_info($ary) {
   centre_e, centre_n, centre_lat, centre_lon - centre of bounding rectangle
   min_e, min_n, min_lat, min_lon - south-west corner of bounding rectangle
   max_e, max_n, max_lat, max_lon - north-east corner of bounding rectangle
-  area - surface area of the polygon, in metres squared parts - number of
-  parts the polygon of the boundary has
+  area - approximate surface area of the constituency, in metres squared
+  (this is taken from the OS data, but roughly agrees with the polygon's
+  area) parts - number of parts the polygon of the boundary has
 
   If POLYGON_TYPE is present, then the hash also contains a member
   'polygon'. This is an array of parts. Each part is a hash of the
@@ -126,7 +130,10 @@ function mapit_get_voting_area_geometry($area, $polygon_type = null, $tolerance 
     return $result;
 }
 
-/* mapit_get_voting_areas_geometry ARY */
+/* mapit_get_voting_areas_geometry ARY
+
+  As get_voting_area_geometry, only takes an array of ids, and returns an
+  array of hashes. */
 function mapit_get_voting_areas_geometry($ary) {
     global $mapit_client;
     $params = func_get_args();
@@ -159,7 +166,21 @@ function mapit_get_example_postcode($id) {
 
 /* mapit_get_voting_area_children ID
 
-  Return array of ids of areas whose parent areas are ID.
+  Return array of ids of areas whose parent areas are ID. */
+function mapit_get_voting_area_children($id) {
+    global $mapit_client;
+    $params = func_get_args();
+    $result = $mapit_client->call('MaPit.get_voting_area_children', $params);
+    return $result;
+}
+
+/* mapit_get_location POSTCODE [PARTIAL]
+
+  Return the location of the given POSTCODE. The return value is a
+  reference to a hash containing elements. If PARTIAL is present set to 1,
+  will use only the first part of the postcode, and generate the mean
+  coordinate. If PARTIAL is set POSTCODE can optionally be just the first
+  part of the postcode.
 
   * coordsyst
 
@@ -178,10 +199,10 @@ function mapit_get_example_postcode($id) {
 
     Latitude and longitude in the WGS84 coordinate system, expressed as
     decimal degrees, north- and east-positive. */
-function mapit_get_voting_area_children($id) {
+function mapit_get_location($postcode, $partial = null) {
     global $mapit_client;
     $params = func_get_args();
-    $result = $mapit_client->call('MaPit.get_voting_area_children', $params);
+    $result = $mapit_client->call('MaPit.get_location', $params);
     return $result;
 }
 
