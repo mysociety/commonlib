@@ -9,7 +9,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: DBHandle.pm,v 1.15 2006-02-27 17:05:30 chris Exp $
+# $Id: DBHandle.pm,v 1.16 2006-08-25 13:13:23 chris Exp $
 #
 
 package mySociety::DBHandle::Error;
@@ -28,6 +28,7 @@ BEGIN {
     our @EXPORT_OK = qw(&dbh &new_dbh);
 }
 
+use Carp;
 use DBD::Pg;
 use DBI;
 use Error qw(:try);
@@ -85,18 +86,20 @@ A key whose value is not defined is treated as if it were not present.
 
 =cut
 sub configure (%) {
+warn "in configure in $$\n";
     my %conf = @_;
     my %allowed = map { $_ => 1 } qw(Host Port Name User Password OnFirstUse);
     foreach (keys %conf) {
         delete($conf{$_}) if (!defined($conf{$_}));
-        die "Unknown key '$_' passed to configure" if (!exists($allowed{$_}));
+        croak "Unknown key '$_' passed to configure" if (!exists($allowed{$_}));
     }
     foreach (qw(Name User)) {
-        die "Required key '$_' missing in configure" if (!exists($conf{$_}));
+        croak "Required key '$_' missing in configure" if (!exists($conf{$_}));
     }
     $conf{Password} ||= undef;
     %mySociety::DBHandle::conf = %conf;
     $mySociety::DBHandle::conf_ok = 1;
+warn "conf_ok in $$";
 }
 
 =item new_dbh
@@ -105,12 +108,13 @@ Return a new handle open on the database.
 
 =cut
 sub new_dbh () {
-    die "configure not yet called" unless ($mySociety::DBHandle::conf_ok);
+    croak "configure not yet called in $$" unless ($mySociety::DBHandle::conf_ok);
     my $connstr = 'dbi:Pg:dbname=' . $mySociety::DBHandle::conf{Name};
     $connstr .= ";host=$mySociety::DBHandle::conf{Host}"
         if (exists($mySociety::DBHandle::conf{Host}));
     $connstr .= ";port=$mySociety::DBHandle::conf{Port}"
         if (exists($mySociety::DBHandle::conf{Port}));
+    $connstr .= ";sslmode=allow";
     my $dbh = DBI->connect($connstr,
                         $mySociety::DBHandle::conf{User},
                         $mySociety::DBHandle::conf{Password}, {
