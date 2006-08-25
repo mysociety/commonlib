@@ -9,7 +9,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: DBHandle.pm,v 1.16 2006-08-25 13:13:23 chris Exp $
+# $Id: DBHandle.pm,v 1.17 2006-08-25 13:18:43 chris Exp $
 #
 
 package mySociety::DBHandle::Error;
@@ -86,7 +86,6 @@ A key whose value is not defined is treated as if it were not present.
 
 =cut
 sub configure (%) {
-warn "in configure in $$\n";
     my %conf = @_;
     my %allowed = map { $_ => 1 } qw(Host Port Name User Password OnFirstUse);
     foreach (keys %conf) {
@@ -99,7 +98,6 @@ warn "in configure in $$\n";
     $conf{Password} ||= undef;
     %mySociety::DBHandle::conf = %conf;
     $mySociety::DBHandle::conf_ok = 1;
-warn "conf_ok in $$";
 }
 
 =item new_dbh
