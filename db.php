@@ -2,23 +2,17 @@
 // db.php:
 // Interface to (PostgreSQL) database 
 //
-// This is a wrapper round PEAR's DB. Unfortunately, DB doesn't behave
-// in the same way as Perl's DBI. It 
-// - doesn't start a transaction automatically, unless you make a query
-//   it believes to be a modifying one
-// - doesn't commit at all unless you have done a query which it 
-//   believes to be a modifying one
-// Its test of "modifying query" is based on simple string search, so
-// it fails when you call a function with side effects via SELECT.
-//
-// So, we do our own query calls through to begin, commit and rollback.
-// This also means we have to maintain transaction_opcount ourselves,
-// so DB/pgsql.php doesn't do its own unnecessary extra "begin" calls.
+// This is a wrapper around PHP's native pg_* calls. Originally it wrapped the
+// PEAR DB calls, but this has been abandoned on performance grounds (because
+// the PEAR library is so large that parsing it on each page view gave a
+// significant performance hit). We do retain the ability to perform queries
+// with '?' as placeholder for bind variables, and emulate the previous
+// behaviour of always running statements in a transaction.
 //
 // Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 // Email: francis@mysociety.org. WWW: http://www.mysociety.org
 //
-// $Id: db.php,v 1.27 2006-08-01 07:37:23 francis Exp $
+// $Id: db.php,v 1.28 2006-08-25 13:16:41 chris Exp $
 
 require_once('error.php');
 
@@ -77,7 +71,7 @@ function db_connect() {
         if (defined("OPTION_${prefix}_DB_$v"))
             $connstr .= " $k='" .  constant("OPTION_${prefix}_DB_$v") . "'";
     }
-    $connstr .= "connect_timeout=10";
+    $connstr .= " connect_timeout=10 sslmode=allow";
 
     /*  set 'persistent' => true to get persistent DB connections. 
      *  TODO: ensure
