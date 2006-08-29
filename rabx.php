@@ -10,7 +10,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: rabx.php,v 1.24 2006-07-19 17:25:57 chris Exp $
+ * $Id: rabx.php,v 1.25 2006-08-29 10:44:10 francis Exp $
  * 
  */
 
@@ -320,14 +320,17 @@ class RABX_Client {
     var $ch, $url, $use_post = FALSE;
     var $lastt;
 
-    /* constructor URL
-     * Constructor; return a client that calls functions at the given URL. */
-    function RABX_Client($url) {
+    /* constructor URL [USERPWD]
+     * Constructor; return a client that calls functions at the given URL. 
+     * USERPWD is optional HTTP authentication information. It's a string
+     * formatted as "username:password". */
+    function RABX_Client($url, $userpwd = null) {
         $this->url = $url;
         $this->ch = curl_init();
+        $this->userpwd = $userpwd;
         curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($this->ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
-        curl_setopt($this->ch, CURLOPT_USERAGENT, 'PHP RABX client, version $Id: rabx.php,v 1.24 2006-07-19 17:25:57 chris Exp $');
+        curl_setopt($this->ch, CURLOPT_USERAGENT, 'PHP RABX client, version $Id: rabx.php,v 1.25 2006-08-29 10:44:10 francis Exp $');
         if (array_key_exists('http_proxy', $_SERVER))
             curl_setopt($this->ch, CURLOPT_PROXY, $_SERVER['http_proxy']);
         $use_post = FALSE;
@@ -360,6 +363,9 @@ class RABX_Client {
             /* By default curl passes a "Pragma: no-cache" header. Turn it
              * off. */
             curl_setopt($this->ch, CURLOPT_HTTPHEADER, array("Pragma: "));
+        }
+        if ($this->userpwd) {
+            curl_setopt($this->ch, CURLOPT_USERPWD, $this->userpwd);
         }
 
         if (!($r = curl_exec($this->ch)))

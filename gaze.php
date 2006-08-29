@@ -8,7 +8,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: gaze.php,v 1.27 2006-08-24 15:54:17 francis Exp $
+ * $Id: gaze.php,v 1.28 2006-08-29 10:44:10 francis Exp $
  *
  */
 
@@ -30,7 +30,8 @@ function gaze_check_error($data) {
         err($error_message);
 }
 
-$gaze_client = new RABX_Client(OPTION_GAZE_URL);
+$gaze_client = new RABX_Client(OPTION_GAZE_URL, 
+    defined('OPTION_GAZE_USERPWD') ? OPTION_GAZE_USERPWD : null);
 
 /* gaze_find_places COUNTRY STATE QUERY [MAXRESULTS [MINSCORE]]
 

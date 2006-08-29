@@ -8,7 +8,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: evel.php,v 1.33 2006-08-24 15:54:17 francis Exp $
+ * $Id: evel.php,v 1.34 2006-08-29 10:44:10 francis Exp $
  *
  */
 
@@ -30,7 +30,8 @@ function evel_check_error($data) {
         err($error_message);
 }
 
-$evel_client = new RABX_Client(OPTION_EVEL_URL);
+$evel_client = new RABX_Client(OPTION_EVEL_URL, 
+    defined('OPTION_EVEL_USERPWD') ? OPTION_EVEL_USERPWD : null);
 
 /* evel_construct_email SPEC
 
