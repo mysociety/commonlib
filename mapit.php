@@ -8,7 +8,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: mapit.php,v 1.45 2006-08-29 10:44:10 francis Exp $
+ * $Id: mapit.php,v 1.46 2006-08-30 23:21:23 francis Exp $
  *
  */
 
@@ -123,7 +123,13 @@ function mapit_get_voting_areas_info($ary) {
   is 'ng", or (latitude, longitude) if POLYGON_TYPE is 'wgs84'.
 
   XXX If TOLERANCE is present then the points are first pruned. Not yet
-  implemeneted. */
+  implemeneted.
+
+  If for some reason any of the values above are not known, they will not
+  be present in the array. For example, we currently only have data for
+  Westminster constituencies in Great Britain. Northern Ireland has a
+  separate Ordnance Survey, from whom we do not have the data. So for
+  Northern Ireland constituencies an empty hash will be returned. */
 function mapit_get_voting_area_geometry($area, $polygon_type = null, $tolerance = null) {
     global $mapit_client;
     $params = func_get_args();
