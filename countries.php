@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: countries.php,v 1.14 2006-08-30 17:23:32 matthew Exp $
+ * $Id: countries.php,v 1.15 2006-08-30 22:57:58 matthew Exp $
  * 
  */
 
@@ -1068,7 +1068,7 @@ function countries_sort($a, $b) {
 function countries_with_to($c) {
     global $countries_code_to_name, $countries_code_to_name_with_to_fr, $locale_current;
     if ($locale_current == 'fr' && array_key_exists($c, $countries_code_to_name_with_to_fr)) {
-        return $countries_code_to_name_with_to_fr[$c];
+        return $countries_code_to_name_with_to_fr[$c] . ' ' . $countries_code_to_name[$c];
     } else {
         return $countries_code_to_name[$c];
     }
@@ -1081,7 +1081,7 @@ function countries_with_to($c) {
 function countries_with_in($c) {
     global $countries_code_to_name, $countries_code_to_name_with_in_fr, $locale_current;
     if ($locale_current == 'fr' && array_key_exists($c, $countries_code_to_name_with_in_fr)) {
-        return $countries_code_to_name_with_in_fr[$c];
+        return $countries_code_to_name_with_in_fr[$c] . ' ' . $countries_code_to_name[$c];
     } else {
         return $countries_code_to_name[$c];
     }
@@ -1094,7 +1094,7 @@ function countries_with_in($c) {
 function countries_with_from($c) {
     global $countries_code_to_name, $countries_code_to_name_with_from_fr, $locale_current;
     if ($locale_current == 'fr' && array_key_exists($c, $countries_code_to_name_with_from_fr)) {
-        return $countries_code_to_name_with_from_fr[$c];
+        return $countries_code_to_name_with_from_fr[$c] . ' ' . $countries_code_to_name[$c];
     } else {
         return $countries_code_to_name[$c];
     }
