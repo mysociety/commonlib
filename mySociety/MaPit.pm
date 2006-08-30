@@ -8,7 +8,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # WWW: http://www.mysociety.org
 #
-# $Id: MaPit.pm,v 1.29 2006-08-29 10:44:10 francis Exp $
+# $Id: MaPit.pm,v 1.30 2006-08-30 23:21:22 francis Exp $
 
 package mySociety::MaPit;
 
@@ -139,6 +139,12 @@ sub get_voting_areas_info ($) {
 
   XXX If TOLERANCE is present then the points are first pruned. Not yet
   implemeneted.
+
+  If for some reason any of the values above are not known, they will not
+  be present in the array. For example, we currently only have data for
+  Westminster constituencies in Great Britain. Northern Ireland has a
+  separate Ordnance Survey, from whom we do not have the data. So for
+  Northern Ireland constituencies an empty hash will be returned.
 
 =cut
 sub get_voting_area_geometry ($;$$) {
