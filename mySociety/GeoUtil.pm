@@ -6,7 +6,7 @@
 # Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: GeoUtil.pm,v 1.3 2006-09-01 17:22:30 francis Exp $
+# $Id: GeoUtil.pm,v 1.4 2006-09-01 18:00:02 francis Exp $
 #
 
 package mySociety::GeoUtil;
@@ -92,4 +92,4 @@ sub wgs84_to_national_grid($$$) {
     return ($p->easting, $p->northing);
 }
 
-11;
+1;
