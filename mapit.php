@@ -8,7 +8,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: mapit.php,v 1.47 2006-09-01 11:43:41 francis Exp $
+ * $Id: mapit.php,v 1.48 2006-09-01 11:47:15 francis Exp $
  *
  */
 
@@ -134,11 +134,11 @@ function mapit_get_voting_area_geometry($area, $polygon_type = null) {
     return $result;
 }
 
-/* mapit_get_voting_areas_geometry ARY
+/* mapit_get_voting_areas_geometry ARY [POLYGON_TYPE]
 
   As get_voting_area_geometry, only takes an array of ids, and returns an
   array of hashes. */
-function mapit_get_voting_areas_geometry($ary) {
+function mapit_get_voting_areas_geometry($ary, $polygon_type = null) {
     global $mapit_client;
     $params = func_get_args();
     $result = $mapit_client->call('MaPit.get_voting_areas_geometry', $params);
