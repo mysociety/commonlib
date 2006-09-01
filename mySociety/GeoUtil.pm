@@ -6,7 +6,7 @@
 # Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: GeoUtil.pm,v 1.2 2006-08-23 00:34:55 francis Exp $
+# $Id: GeoUtil.pm,v 1.3 2006-09-01 17:22:30 francis Exp $
 #
 
 package mySociety::GeoUtil;
@@ -32,7 +32,6 @@ Northern Ireland.  The latitude and longitude are the return values.
 sub national_grid_to_wgs84($$$) {
     my ($easting, $northing, $coordsyst) = @_;
 
-    # Obtain lat/lon.
     our ($wgs84, $airy1830, $airy1830m);
     $wgs84      ||= Geo::HelmertTransform::datum("WGS84");
     $airy1830   ||= Geo::HelmertTransform::datum("Airy1830");
@@ -56,4 +55,41 @@ sub national_grid_to_wgs84($$$) {
     return Geo::HelmertTransform::convert_datum($d, $wgs84, $lat, $lon, 0); # 0 is altitude
 }
 
-1;
+=item wgs84_to_national_grid LATITUDE LONGITUDE COORDSYST
+
+Converts a coordinate in WGS84 LATITUDE and LONGITUDE to UK grid coordinate.
+COORDSYST can be either 'G' for Great Britain coordinate system, or 'I' for
+Northern Ireland.  The easting and northing are the return values.
+=cut
+sub wgs84_to_national_grid($$$) {
+    my ($lat, $lon, $coordsyst) = @_;
+
+    our ($wgs84, $airy1830, $airy1830m);
+    $wgs84      ||= Geo::HelmertTransform::datum("WGS84");
+    $airy1830   ||= Geo::HelmertTransform::datum("Airy1830");
+    $airy1830m  ||= Geo::HelmertTransform::datum("Airy1830Modified");
+
+    my ($easting, $northing, $d);
+
+    if ($coordsyst eq 'G') {
+        $d = $airy1830;
+    } elsif ($coordsyst eq 'I') {
+        $d = $airy1830m;
+    } else {
+        die "bad value '$coordsyst' for coordinate system in nationalgrid_to_wgs84";
+    }
+    my $height;
+    ($lat, $lon, $height) = Geo::HelmertTransform::convert_datum($wgs84, $d, $lat, $lon, 0); # 0 is altitude
+
+    my $p;
+    if ($coordsyst eq 'G') {
+        $p = new Geography::NationalGrid('GB', Latitude => $lat, Longitude => $lon);
+    } elsif ($coordsyst eq 'I') {
+        $p = new Geography::NationalGrid('IE', Latitude => $lat, Longitude => $lon);
+    } else {
+        die "bad value '$coordsyst' for coordinate system in nationalgrid_to_wgs84";
+    }
+    return ($p->easting, $p->northing);
+}
+
+11;
