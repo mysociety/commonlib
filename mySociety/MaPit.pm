@@ -8,7 +8,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # WWW: http://www.mysociety.org
 #
-# $Id: MaPit.pm,v 1.30 2006-08-30 23:21:22 francis Exp $
+# $Id: MaPit.pm,v 1.31 2006-09-01 11:43:41 francis Exp $
 
 package mySociety::MaPit;
 
@@ -115,7 +115,7 @@ sub get_voting_areas_info ($) {
     return $rabx_client->call('MaPit.get_voting_areas_info', @_);
 }
 
-=item MaPit::get_voting_area_geometry AREA [POLYGON_TYPE] [TOLERANCE]
+=item MaPit::get_voting_area_geometry AREA [POLYGON_TYPE]
 
   Return geometry information about the given voting area. Return value is
   a reference to a hash containing elements. Coordinates with names ending
@@ -137,9 +137,6 @@ sub get_voting_areas_info ($) {
   hole) points - an array of pairs of (eastings, northings) if POLYGON_TYPE
   is 'ng", or (latitude, longitude) if POLYGON_TYPE is 'wgs84'.
 
-  XXX If TOLERANCE is present then the points are first pruned. Not yet
-  implemeneted.
-
   If for some reason any of the values above are not known, they will not
   be present in the array. For example, we currently only have data for
   Westminster constituencies in Great Britain. Northern Ireland has a
@@ -147,7 +144,7 @@ sub get_voting_areas_info ($) {
   Northern Ireland constituencies an empty hash will be returned.
 
 =cut
-sub get_voting_area_geometry ($;$$) {
+sub get_voting_area_geometry ($;$) {
     configure() if !defined $rabx_client;
     return $rabx_client->call('MaPit.get_voting_area_geometry', @_);
 }
