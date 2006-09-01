@@ -8,7 +8,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # WWW: http://www.mysociety.org
 #
-# $Id: MaPit.pm,v 1.31 2006-09-01 11:43:41 francis Exp $
+# $Id: MaPit.pm,v 1.32 2006-09-01 11:47:15 francis Exp $
 
 package mySociety::MaPit;
 
@@ -149,13 +149,13 @@ sub get_voting_area_geometry ($;$) {
     return $rabx_client->call('MaPit.get_voting_area_geometry', @_);
 }
 
-=item MaPit::get_voting_areas_geometry ARY
+=item MaPit::get_voting_areas_geometry ARY [POLYGON_TYPE]
 
   As get_voting_area_geometry, only takes an array of ids, and returns an
   array of hashes.
 
 =cut
-sub get_voting_areas_geometry ($) {
+sub get_voting_areas_geometry ($;$) {
     configure() if !defined $rabx_client;
     return $rabx_client->call('MaPit.get_voting_areas_geometry', @_);
 }

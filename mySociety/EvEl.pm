@@ -8,7 +8,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # WWW: http://www.mysociety.org
 #
-# $Id: EvEl.pm,v 1.24 2006-09-01 11:43:41 francis Exp $
+# $Id: EvEl.pm,v 1.25 2006-09-01 11:47:15 francis Exp $
 
 package mySociety::EvEl;
 
