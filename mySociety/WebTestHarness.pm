@@ -12,7 +12,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.37 2006-09-04 11:09:14 francis Exp $
+# $Id: WebTestHarness.pm,v 1.38 2006-09-04 17:24:31 francis Exp $
 #
 
 package mySociety::WebTestHarness;
@@ -100,8 +100,8 @@ sub database_drop_reload ($$)
     $connstr .= "port=".$self->{dbport}.";" if ($self->{dbport});
     my $db_remake_db = DBI->connect($connstr, undef, $self->{dbpass}, {
                             RaiseError => 1, AutoCommit => 1, PrintError => 0, PrintWarn => 1, });
-    $db_remake_db->do("drop database " . $self->{dbname});
-    $db_remake_db->do("create database " . $self->{dbname});
+    $db_remake_db->do("drop database \"$self->{dbname}\"");
+    $db_remake_db->do("create database \"$self->{dbname}\"");
     $db_remake_db->disconnect();
 
     # ... load in schema
