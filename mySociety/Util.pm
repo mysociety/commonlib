@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Util.pm,v 1.54 2006-08-18 22:48:25 chris Exp $
+# $Id: Util.pm,v 1.55 2006-09-04 15:22:17 chris Exp $
 #
 
 package mySociety::Util::Error;
@@ -400,8 +400,11 @@ sub log_to_stderr (;$) {
 
 =item print_log PRIORITY TEXT
 
+=item printf_log PRIORITY FORMAT [ARGUMENT ...]
+
 Log TEXT to the system log (under PRIORITY) and to standard error. Designed for
-use from daemons etc; web scripts should just log to standard error.
+use from daemons etc; web scripts should just log to standard error. printf_log
+is the printf(3) analogue.
 
 =cut
 sub print_log ($$) {
@@ -421,6 +424,13 @@ sub print_log ($$) {
     # have not been able to open the log.
     STDERR->print("$tag: ", $str, "\n") if ($logtostderr || ($triedconnect && !$logopen));
     syslog($pri, '%s', $str) if ($logopen);
+}
+
+sub printf_log ($$@) {
+    my $pri = shift;
+    my $fmt = shift;
+    my $str = sprintf($fmt, @_);
+    print_log($pri, $str);
 }
 
 =item manage_child_processes SPEC [SIGNALS]
