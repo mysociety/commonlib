@@ -12,7 +12,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.36 2006-07-20 09:30:43 francis Exp $
+# $Id: WebTestHarness.pm,v 1.37 2006-09-04 11:09:14 francis Exp $
 #
 
 package mySociety::WebTestHarness;
@@ -79,7 +79,8 @@ sub database_connect($$) {
 =item database_drop_reload SCHEMA_FILE
 
 Drops the database, and reloads it from the given schema.  Checks the database
-has _testharness in its name to avoid clobbering something important.
+has -testharness or _testharness at the end of its name to avoid clobbering
+something important.
 
 If you get "NOTICE:  CREATE TABLE will create implicit sequence" messages
 and would like to supress them, edit /etc/postgresql/postgresql.conf, setting
@@ -91,7 +92,7 @@ sub database_drop_reload ($$)
     my ($self, $schema_file) = @_;
 
     # Drop and recreate database from schema
-    die "Database will be dropped, so for safety must have name starting '_testharness'" if ($self->{dbname} !~ m/_testharness$/);
+    die "Database will be dropped, so for safety must have name ending '_testharness' or '-testharness'" if ($self->{dbname} !~ m/[_-]testharness$/);
 
     # ... make connection with no database name and drop and remake database
     my $connstr = 'dbi:Pg:';
