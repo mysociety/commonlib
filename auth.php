@@ -7,11 +7,11 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: auth.php,v 1.6 2006-06-19 17:47:03 francis Exp $
+ * $Id: auth.php,v 1.7 2006-09-04 15:38:02 francis Exp $
  * 
  */
 
-include_once 'random.php';
+require_once 'random.php';
 
 /* auth_ab64_encode DATA
  * Return a "almost base64" encoding of DATA (a nearly six-bit encoding using

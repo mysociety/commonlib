@@ -12,9 +12,10 @@
 // Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 // Email: francis@mysociety.org. WWW: http://www.mysociety.org
 //
-// $Id: db.php,v 1.28 2006-08-25 13:16:41 chris Exp $
+// $Id: db.php,v 1.29 2006-09-04 15:38:02 francis Exp $
 
 require_once('error.php');
+require_once('random.php');
 
 /* db_subst QUERY [PARAM ...]
  * Given an SQL QUERY containing zero or more "?"s, substitute quoted values of

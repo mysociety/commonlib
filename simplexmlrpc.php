@@ -6,12 +6,12 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: simplexmlrpc.php,v 1.1 2004-10-18 08:48:07 francis Exp $
+ * $Id: simplexmlrpc.php,v 1.2 2006-09-04 15:38:02 francis Exp $
  * 
  */
 
 require_once('XML/RPC.php');
-include_once('utility.php');
+require_once('utility.php');
 
 $sxr_clients = array( );
 
