@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: countries.php,v 1.15 2006-08-30 22:57:58 matthew Exp $
+ * $Id: countries.php,v 1.16 2006-09-07 09:01:08 matthew Exp $
  * 
  */
 
@@ -566,7 +566,7 @@ $countries_code_to_name_with_from_fr = array(
     'ZM' => 'de la',
     'ZW' => 'du',
 );
-$countries_code_to_name_with_in_fr = array(
+$countries_code_to_name_with_to_fr = array(
     'AF' => 'en',
     'AX' => 'aux',
     'AL' => 'en',
