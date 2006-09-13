@@ -6,7 +6,7 @@
 # Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Email.pm,v 1.10 2006-08-14 16:33:15 chris Exp $
+# $Id: Email.pm,v 1.11 2006-09-13 22:52:52 chris Exp $
 #
 
 package mySociety::Email::Error;
@@ -238,10 +238,12 @@ sub construct_email ($) {
 
     if (exists($p->{_unwrapped_body_})) {
         throw mySociety::Email::Error("Fields '_body_' and '_unwrapped_body_' both specified") if (exists($p->{_body_}));
+        my $t = $p->{_unwrapped_body_};
+        $t =~ s/\r\n/\n/gs;
         local($Text::Wrap::columns = 69);
         local($Text::Wrap::huge = 'overflow');
         local($Text::Wrap::unexpand = 0);
-        $p->{_body_} = Text::Wrap::wrap('     ', '     ', $p->{_unwrapped_body_});
+        $p->{_body_} = Text::Wrap::wrap('     ', '     ', $t);
         $p->{_body_} =~ s/^\s+$//mg;
         delete($p->{_unwrapped_body_});
     }
