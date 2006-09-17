@@ -13,12 +13,14 @@
 # 
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: HelmertTransform.pm,v 1.6 2006-06-21 17:10:24 francis Exp $
+# $Id: HelmertTransform.pm,v 1.7 2006-09-17 17:57:39 chris Exp $
 #
 
 package Geo::HelmertTransform;
 
 use strict;
+
+$Geo::HelmertTransform::VERSION = '0.1';
 
 =head1 NAME
 
@@ -237,14 +239,14 @@ sub new ($%) {
     if (exists($p{Name})) {
         die "datum \"$p{Name}\" not known"
             if (!exists($known_datums{$p{Name}}));
-        my $d = $known_datums{$p{Name}};
+        my @d = @{$known_datums{$p{Name}}};
         my $s = fields::new($class);
         foreach (qw(a b tx ty tz)) {
-            $s->{$_} = shift(@$d);
+            $s->{$_} = shift(@d);
         }
-        $s->{s} = shift(@$d) / 1_000_000;               # ppm
+        $s->{s} = shift(@d) / 1_000_000;                # ppm
         foreach (qw(rx ry rz)) {
-            $s->{$_} = Geo::HelmertTransform::deg_to_rad(shift(@$d) / 3600.);  # seconds
+            $s->{$_} = Geo::HelmertTransform::deg_to_rad(shift(@d) / 3600.);  # seconds
         }
         $s->{is_wgs84} = ($p{Name} eq 'WGS84');
         return $s;
@@ -296,7 +298,7 @@ the same terms as Perl itself.
 
 =head1 VERSION
 
-$Id: HelmertTransform.pm,v 1.6 2006-06-21 17:10:24 francis Exp $
+$Id: HelmertTransform.pm,v 1.7 2006-09-17 17:57:39 chris Exp $
 
 =cut
 
