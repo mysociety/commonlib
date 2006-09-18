@@ -6,7 +6,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Logfile.pm,v 1.4 2006-06-15 14:27:11 francis Exp $
+# $Id: Logfile.pm,v 1.5 2006-09-18 16:08:12 francis Exp $
 #
 
 package mySociety::Logfile::Error;
@@ -81,10 +81,9 @@ sub new ($$) {
     my ($class, $file) = @_;
     my $self = { file => $file, fields => \@mySociety::Logfile::fields, mapping => undef, generation => 0 };
     try {
-        throw mySociety::Logfile::Error("$file: $!")
-            if (!($self->{fh} = new IO::File($file, O_RDONLY))
-                || !($self->{st} = stat($self->{fh}))
-                || !mmap($self->{mapping}, maplen($self->{st}->size()), PROT_READ, MAP_SHARED, $self->{fh}, 0));
+        throw mySociety::Logfile::Error("$file IO::File failed: $!") if !($self->{fh} = new IO::File($file, O_RDONLY));
+        throw mySociety::Logfile::Error("$file stat failed: $!") if !($self->{st} = stat($self->{fh}));
+        throw mySociety::Logfile::Error("$file mmap failed: $!") if !mmap($self->{mapping}, maplen($self->{st}->size()), PROT_READ, MAP_SHARED, $self->{fh}, 0);
         $self->{when} = Time::HiRes::time();
 
         # Determine line-ending type to use based on the contents of the first
