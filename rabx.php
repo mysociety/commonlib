@@ -10,7 +10,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: rabx.php,v 1.25 2006-08-29 10:44:10 francis Exp $
+ * $Id: rabx.php,v 1.26 2006-09-18 12:48:18 francis Exp $
  * 
  */
 
@@ -196,11 +196,10 @@ function rabx_wire_rd(&$buffer, &$pos) {
      * length. */
     if (rabx_is_error($x = rabx_netstring_rd(&$buffer, $pos)))
         return $x;
-
     if ($type == 'I') {
         if (!is_numeric($x))
             return rabx_error(RABX_ERROR_PROTOCOL, "integer value is not numeric at position $pos");
-        return intval($x);
+        return $x + 0; // cast like this instead of intval, so makes overflows into doubles
     } else if ($type == 'R') {
         if (!is_numeric($x))
             return rabx_error(RABX_ERROR_PROTOCOL, "real value is not numeric at position $pos");
@@ -330,7 +329,7 @@ class RABX_Client {
         $this->userpwd = $userpwd;
         curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($this->ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
-        curl_setopt($this->ch, CURLOPT_USERAGENT, 'PHP RABX client, version $Id: rabx.php,v 1.25 2006-08-29 10:44:10 francis Exp $');
+        curl_setopt($this->ch, CURLOPT_USERAGENT, 'PHP RABX client, version $Id: rabx.php,v 1.26 2006-09-18 12:48:18 francis Exp $');
         if (array_key_exists('http_proxy', $_SERVER))
             curl_setopt($this->ch, CURLOPT_PROXY, $_SERVER['http_proxy']);
         $use_post = FALSE;
