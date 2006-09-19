@@ -12,7 +12,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.41 2006-09-05 08:08:13 francis Exp $
+# $Id: WebTestHarness.pm,v 1.42 2006-09-19 09:29:39 francis Exp $
 #
 
 package mySociety::WebTestHarness;
@@ -118,6 +118,7 @@ sub database_load_schema ($$) {
     my ($self, $schema_file) = @_;
 
     $schema = read_file($schema_file);
+    dbh()->do("set client_min_messages to warning"); # So implicit index creation NOTICEs aren't displayed when loading SQL
     dbh()->do($schema);
     dbh()->commit();
 }
