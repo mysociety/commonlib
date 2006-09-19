@@ -6,7 +6,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Logfile.pm,v 1.6 2006-09-19 08:58:10 francis Exp $
+# $Id: Logfile.pm,v 1.7 2006-09-19 09:29:13 francis Exp $
 #
 
 package mySociety::Logfile::Error;
@@ -53,8 +53,8 @@ sub maplen ($) {
     # from Sys::Mmap(3pm), help for mmap: "The LENGTH argument can be zero in
     # which case a stat is done on FILEHANDLE and the size of the underlying
     # file is used instead." Which for some reason causes an "invalid argument"
-    # error from mmap in our case. Return 1 instead for zero length files.
-    return $maplen == 0 ? 1 : $maplen;
+    # error from mmap in our case. Return pagesize instead for zero length files.
+    return $maplen == 0 ? $pagesize : $maplen;
 }
 
 # _update
