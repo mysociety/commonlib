@@ -6,7 +6,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Logfile.pm,v 1.5 2006-09-18 16:08:12 francis Exp $
+# $Id: Logfile.pm,v 1.6 2006-09-19 08:58:10 francis Exp $
 #
 
 package mySociety::Logfile::Error;
@@ -48,7 +48,13 @@ sub maplen ($) {
     my ($size) = @_;
     use integer;
     my $pagesize = POSIX::sysconf(&POSIX::_SC_PAGESIZE);
-    return (($size + $pagesize - 1) / $pagesize) * $pagesize;
+    my $maplen = (($size + $pagesize - 1) / $pagesize) * $pagesize;
+
+    # from Sys::Mmap(3pm), help for mmap: "The LENGTH argument can be zero in
+    # which case a stat is done on FILEHANDLE and the size of the underlying
+    # file is used instead." Which for some reason causes an "invalid argument"
+    # error from mmap in our case. Return 1 instead for zero length files.
+    return $maplen == 0 ? 1 : $maplen;
 }
 
 # _update
@@ -83,7 +89,8 @@ sub new ($$) {
     try {
         throw mySociety::Logfile::Error("$file IO::File failed: $!") if !($self->{fh} = new IO::File($file, O_RDONLY));
         throw mySociety::Logfile::Error("$file stat failed: $!") if !($self->{st} = stat($self->{fh}));
-        throw mySociety::Logfile::Error("$file mmap failed: $!") if !mmap($self->{mapping}, maplen($self->{st}->size()), PROT_READ, MAP_SHARED, $self->{fh}, 0);
+        throw mySociety::Logfile::Error("$file mmap failed: $!") 
+            if !mmap($self->{mapping}, maplen($self->{st}->size()), PROT_READ, MAP_SHARED, $self->{fh}, 0);
         $self->{when} = Time::HiRes::time();
 
         # Determine line-ending type to use based on the contents of the first
