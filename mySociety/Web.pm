@@ -6,7 +6,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Web.pm,v 1.13 2006-07-31 18:38:16 chris Exp $
+# $Id: Web.pm,v 1.14 2006-09-21 18:09:20 matthew Exp $
 #
 
 package mySociety::Web;
@@ -32,7 +32,7 @@ use fields qw(q scratch);
 BEGIN {
     use Exporter ();
     our @ISA = qw(Exporter);
-    our @EXPORT_OK = qw(ent);
+    our @EXPORT_OK = qw(ent NewURL);
 }
 our @EXPORT_OK;
 
@@ -216,21 +216,24 @@ that the parameter should be removed in the new URL.
 =cut
 sub NewURL ($%) {
     my ($q, %p) = @_;
-    my @v = ();
-    my $url = $q->url(-absolute => 1);
-    foreach my $key ($q->param()) {
-        if (exists($p{$key})) {
-            next if (!defined($p{$key}));
-            my $v = $p{$key};
+    my $url = $q->url(-relative=>1);
+    my %params = map { $_ => $q->param($_) } $q->param();
+    foreach my $key (keys %p) {
+        $params{$key} = $p{$key};
+    }
+    if (keys %params) {
+        my @v = ();
+        foreach my $key (keys %params) {
+            next unless defined $params{$key};
+            my $v = $params{$key};
             croak("can't use ref to " . ref($v) . " as param value")
                 if (ref($v) && ref($v) ne 'ARRAY');
             $v = [$v] if (!ref($v));
             push(@v, map { urlencode($key) . '=' . urlencode($_) } @$v);
-        } else {
-            push(@v, map { urlencode($key) . '=' . urlencode($_) } $q->param($key));
         }
+        $url .= '?' . join(';', @v);
     }
-    return "$url?" . join(';', @v);
+    return $url;
 }
 
 =item header PARAMS
@@ -252,7 +255,8 @@ Return a URL-encoded copy of STRING.
 
 =cut
 sub urlencode ($) {
-    my $v = encode_utf8($_[0]);
+    my $v = $_[0];
+    utf8::encode($v);
     $v =~ s/([^A-Za-z0-9])/sprintf('%%%02x', ord($1))/ge;
     return $v;
 }
