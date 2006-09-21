@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Util.pm,v 1.56 2006-09-04 16:28:05 chris Exp $
+# $Id: Util.pm,v 1.57 2006-09-21 18:20:40 matthew Exp $
 #
 
 package mySociety::Util::Error;
@@ -732,7 +732,7 @@ sub create_accessor_methods () {
     my $caller = caller();
     foreach (keys %$h) {
         
-	next if (eval "exists($_)");
+        next if (eval "exists($_)");
         eval <<EOF;
 package $caller; 
 sub $_ (\$;\$) {
