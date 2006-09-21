@@ -12,7 +12,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.42 2006-09-19 09:29:39 francis Exp $
+# $Id: WebTestHarness.pm,v 1.43 2006-09-21 10:40:06 francis Exp $
 #
 
 package mySociety::WebTestHarness;
@@ -346,7 +346,8 @@ sub log_watcher_check($) {
 Prepares for incoming email.  PARAMS is a hash reference, containing:
 
 eveld_bin - The binary for eveld, which the email test code will run to send
-outgoing messages.  Optional.
+outgoing messages.  Optional (not needed if you run a daemon, but set
+EVEL_DAEMON_QUEUE_RUN_INTERVAL to a low value).
 
 eveld_multispawn - Number of times to spawn eveld_bin at once, to test for
 concurrency problems. Optional, default 1.
