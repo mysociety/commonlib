@@ -9,7 +9,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: DBHandle.pm,v 1.17 2006-08-25 13:18:43 chris Exp $
+# $Id: DBHandle.pm,v 1.18 2006-09-22 17:21:37 matthew Exp $
 #
 
 package mySociety::DBHandle::Error;
@@ -25,7 +25,7 @@ use strict;
 BEGIN {
     use Exporter ();
     our @ISA = qw(Exporter);
-    our @EXPORT_OK = qw(&dbh &new_dbh);
+    our @EXPORT_OK = qw(&dbh &new_dbh &select_all);
 }
 
 use Carp;
@@ -184,6 +184,11 @@ sub disconnect () {
 END {
     our $dbh;
     $dbh->disconnect() if (defined($dbh));
+}
+
+sub select_all {
+    my ($query, @bind_values) = @_;
+    dbh()->selectall_arrayref($query, { Slice => {} }, @bind_values);
 }
 
 1;
