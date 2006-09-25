@@ -6,7 +6,7 @@
 # Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: AuthToken.pm,v 1.1 2006-07-18 18:05:53 chris Exp $
+# $Id: AuthToken.pm,v 1.2 2006-09-25 22:59:07 matthew Exp $
 #
 
 package mySociety::AuthToken;
@@ -29,7 +29,7 @@ encoding is not invertible. Generated data match /^[0-9A-Za-z]+$/.
 
 =cut
 sub ab64_encode ($) {
-    my $t = encode_base64($_[0]);
+    my $t = encode_base64($_[0], '');
     $t =~ s#\+#a#g;
     $t =~ s#/#b#g;
     $t =~ s#=#c#g;
