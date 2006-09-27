@@ -8,7 +8,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # WWW: http://www.mysociety.org
 #
-# $Id: MaPit.pm,v 1.32 2006-09-01 11:47:15 francis Exp $
+# $Id: MaPit.pm,v 1.33 2006-09-27 10:13:06 matthew Exp $
 
 package mySociety::MaPit;
 
@@ -158,6 +158,44 @@ sub get_voting_area_geometry ($;$) {
 sub get_voting_areas_geometry ($;$) {
     configure() if !defined $rabx_client;
     return $rabx_client->call('MaPit.get_voting_areas_geometry', @_);
+}
+
+=item MaPit::get_voting_area_by_location LAT LON METHOD [TYPE]
+
+  Returns an array of voting areas which the given coordinate is in. This
+  only works for areas which have geometry information associated with
+  them. i.e. That get_voting_area_geometry will return data for.
+
+  METHOD can be 'box' to just use a bounding box test, or 'polygon' to also
+  do an exact point in polygon test. 'box' is quicker, but will return too
+  many results. 'polygon' should return at most one result for a type.
+
+  If TYPE is present, restricts to areas of that type. Currently TYPE must
+  be present.
+
+=cut
+sub get_voting_area_by_location ($$$;$) {
+    configure() if !defined $rabx_client;
+    return $rabx_client->call('MaPit.get_voting_area_by_location', @_);
+}
+
+=item MaPit::get_voting_area_by_location_en EASTING NORTHING METHOD [TYPE]
+
+  Returns an array of voting areas which the given coordinate is in. This
+  only works for areas which have geometry information associated with
+  them. i.e. That get_voting_area_geometry will return data for.
+
+  METHOD can be 'box' to just use a bounding box test, or 'polygon' to also
+  do an exact point in polygon test. 'box' is quicker, but will return too
+  many results. 'polygon' should return at most one result for a type.
+
+  If TYPE is present, restricts to areas of that type. Currently TYPE must
+  be present.
+
+=cut
+sub get_voting_area_by_location_en ($$$;$) {
+    configure() if !defined $rabx_client;
+    return $rabx_client->call('MaPit.get_voting_area_by_location_en', @_);
 }
 
 =item MaPit::get_areas_by_type TYPE [ALL]
