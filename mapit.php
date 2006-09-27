@@ -8,7 +8,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: mapit.php,v 1.48 2006-09-01 11:47:15 francis Exp $
+ * $Id: mapit.php,v 1.49 2006-09-27 10:13:07 matthew Exp $
  *
  */
 
@@ -142,6 +142,44 @@ function mapit_get_voting_areas_geometry($ary, $polygon_type = null) {
     global $mapit_client;
     $params = func_get_args();
     $result = $mapit_client->call('MaPit.get_voting_areas_geometry', $params);
+    return $result;
+}
+
+/* mapit_get_voting_area_by_location LAT LON METHOD [TYPE]
+
+  Returns an array of voting areas which the given coordinate is in. This
+  only works for areas which have geometry information associated with
+  them. i.e. That get_voting_area_geometry will return data for.
+
+  METHOD can be 'box' to just use a bounding box test, or 'polygon' to also
+  do an exact point in polygon test. 'box' is quicker, but will return too
+  many results. 'polygon' should return at most one result for a type.
+
+  If TYPE is present, restricts to areas of that type. Currently TYPE must
+  be present. */
+function mapit_get_voting_area_by_location($lat, $lon, $method, $type = null) {
+    global $mapit_client;
+    $params = func_get_args();
+    $result = $mapit_client->call('MaPit.get_voting_area_by_location', $params);
+    return $result;
+}
+
+/* mapit_get_voting_area_by_location_en EASTING NORTHING METHOD [TYPE]
+
+  Returns an array of voting areas which the given coordinate is in. This
+  only works for areas which have geometry information associated with
+  them. i.e. That get_voting_area_geometry will return data for.
+
+  METHOD can be 'box' to just use a bounding box test, or 'polygon' to also
+  do an exact point in polygon test. 'box' is quicker, but will return too
+  many results. 'polygon' should return at most one result for a type.
+
+  If TYPE is present, restricts to areas of that type. Currently TYPE must
+  be present. */
+function mapit_get_voting_area_by_location_en($easting, $northing, $method, $type = null) {
+    global $mapit_client;
+    $params = func_get_args();
+    $result = $mapit_client->call('MaPit.get_voting_area_by_location_en', $params);
     return $result;
 }
 
