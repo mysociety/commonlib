@@ -6,7 +6,7 @@
 # Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Email.pm,v 1.11 2006-09-13 22:52:52 chris Exp $
+# $Id: Email.pm,v 1.12 2006-09-28 12:41:48 matthew Exp $
 #
 
 package mySociety::Email::Error;
@@ -133,7 +133,7 @@ sub do_one_substitution ($$) {
     my ($p, $n) = @_;
     throw mySociety::Email::Error("Substitution parameter '$n' is not present")
         unless (exists($p->{$n}));
-    throw mySociety::Email::Error("Substitution parameter '$n' is not undefined")
+    throw mySociety::Email::Error("Substitution parameter '$n' is not defined")
         unless (defined($p->{$n}));
     return $p->{$n};
 }
