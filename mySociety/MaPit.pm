@@ -8,7 +8,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # WWW: http://www.mysociety.org
 #
-# $Id: MaPit.pm,v 1.33 2006-09-27 10:13:06 matthew Exp $
+# $Id: MaPit.pm,v 1.34 2006-09-28 10:06:41 francis Exp $
 
 package mySociety::MaPit;
 
@@ -170,8 +170,8 @@ sub get_voting_areas_geometry ($;$) {
   do an exact point in polygon test. 'box' is quicker, but will return too
   many results. 'polygon' should return at most one result for a type.
 
-  If TYPE is present, restricts to areas of that type. Currently TYPE must
-  be present.
+  If TYPE is present, restricts to areas of that type, such as WMC for
+  Westminster Constituencies only.
 
 =cut
 sub get_voting_area_by_location ($$$;$) {
@@ -181,16 +181,8 @@ sub get_voting_area_by_location ($$$;$) {
 
 =item MaPit::get_voting_area_by_location_en EASTING NORTHING METHOD [TYPE]
 
-  Returns an array of voting areas which the given coordinate is in. This
-  only works for areas which have geometry information associated with
-  them. i.e. That get_voting_area_geometry will return data for.
-
-  METHOD can be 'box' to just use a bounding box test, or 'polygon' to also
-  do an exact point in polygon test. 'box' is quicker, but will return too
-  many results. 'polygon' should return at most one result for a type.
-
-  If TYPE is present, restricts to areas of that type. Currently TYPE must
-  be present.
+  As get_voting_area_by_location only takes coordinates in EASTINGs and
+  NORTHINGs rather than latitude and longitude.
 
 =cut
 sub get_voting_area_by_location_en ($$$;$) {

@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: RABX.pm,v 1.20 2006-07-19 17:33:01 chris Exp $
+# $Id: RABX.pm,v 1.21 2006-09-28 10:06:41 francis Exp $
 
 # References:
 #   Netstrings are documented here: http://cr.yp.to/proto/netstrings.txt
@@ -419,9 +419,10 @@ package RABX::Client;
 use LWP::UserAgent;
 use HTTP::Request;
 use HTTP::Response;
+use Data::Dumper;
 use Regexp::Common qw(URI);
 
-my $rcsid = ''; $rcsid .= '$Id: RABX.pm,v 1.20 2006-07-19 17:33:01 chris Exp $';
+my $rcsid = ''; $rcsid .= '$Id: RABX.pm,v 1.21 2006-09-28 10:06:41 francis Exp $';
 
 =back
 
@@ -543,7 +544,8 @@ sub call ($$@) {
     if (!$resp->is_success()) {
         throw RABX::Error("HTTP error: " . $resp->status_line(), RABX::Error::TRANSPORT);
     } else {
-        return RABX::return_string_parse($resp->content());
+        my $parsed = RABX::return_string_parse($resp->content());
+        return $parsed;
     }
 }
 
