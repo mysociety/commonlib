@@ -12,7 +12,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.43 2006-09-21 10:40:06 francis Exp $
+# $Id: WebTestHarness.pm,v 1.44 2006-10-03 14:47:46 francis Exp $
 #
 
 package mySociety::WebTestHarness;
@@ -20,6 +20,7 @@ package mySociety::WebTestHarness;
 use File::Find;
 use File::Slurp;
 use File::Temp;
+use File::stat;
 use WWW::Mechanize;
 use Data::Dumper;
 use MIME::QuotedPrint;
@@ -304,9 +305,18 @@ Configures test harness to watch an HTTP error log file.
 sub log_watcher_setup ($$) {
     my ($self, $file) = @_;
 
+    # Make sure log file is non-zero (LogFile.pm requires this for mmap)
+    my $st = stat($file) or die ("$file: $!");
+    if ($st->size() == 0) {
+        open NON_ZERO, ">>", $file or die "Failed to open $file for writing, to make it not zero length.";
+        print NON_ZERO "WebTestHarness added line to make log non-zero length\n";
+        close NON_ZERO
+    
+    }
+
+    # Create logging object
     $self->{http_logobj} = new mySociety::Logfile($file);
     $self->{http_logoffset} = $self->{http_logobj}->lastline();
-
 }
 
 =item log_watcher_get_errors
@@ -447,7 +457,7 @@ sub email_get_containing($$) {
 
 =item email_check_none_left
 
-Throws an error if there are any emails left.
+Dies if there are any emails left.
 
 =cut
 

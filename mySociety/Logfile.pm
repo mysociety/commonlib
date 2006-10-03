@@ -6,7 +6,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Logfile.pm,v 1.8 2006-09-20 11:57:24 francis Exp $
+# $Id: Logfile.pm,v 1.9 2006-10-03 14:47:46 francis Exp $
 #
 
 package mySociety::Logfile::Error;
@@ -54,6 +54,10 @@ sub maplen ($) {
     # which case a stat is done on FILEHANDLE and the size of the underlying
     # file is used instead." Which for some reason causes an "invalid argument"
     # error from mmap in our case. 
+    # In contrast, dpkg's 1.13.8 changelog entry says:
+    # "Linux 2.6.12 changed the behaviour of mmap to fail and set EINVAL when
+    # given a zero length, rather than returning NULL.  This is POSIXly
+    # correct, so handle zero-length package control files (like available)."
     throw mySociety::Logfile::Error("Zero length log file not supported") if $maplen == 0;
     return $maplen == 0 ? $pagesize : $maplen;
 }
