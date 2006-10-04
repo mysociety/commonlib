@@ -12,7 +12,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.44 2006-10-03 14:47:46 francis Exp $
+# $Id: WebTestHarness.pm,v 1.45 2006-10-04 09:58:22 francis Exp $
 #
 
 package mySociety::WebTestHarness;
@@ -210,6 +210,16 @@ Acts as function in WWW::Mechanize.
 sub browser_uri {
     my $self = shift;
     return $self->{useragent}->uri(@_);
+}
+
+=item browser_base
+
+Acts as function in WWW::Mechanize.
+
+=cut
+sub browser_base {
+    my $self = shift;
+    return $self->{useragent}->base(@_);
 }
 
 =item browser_content
