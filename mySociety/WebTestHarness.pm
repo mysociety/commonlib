@@ -12,7 +12,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.46 2006-10-04 15:06:40 francis Exp $
+# $Id: WebTestHarness.pm,v 1.47 2006-10-05 10:27:29 francis Exp $
 #
 
 package mySociety::WebTestHarness;
@@ -303,6 +303,11 @@ sub _browser_html_hook ($) {
         $filename = $self->_browser_debug_content();
         system($self->{htmlvalidator}, $filename) and die "HTML $filename doesn't validate, URL " . $self->{useragent}->uri();
     }
+
+    # If log watcher, check the log file
+    if ($self->{http_logobj}) {
+        $self->log_watcher_check();
+    }
 }
 
 # Print content to a file for debugging
@@ -339,13 +344,26 @@ sub log_watcher_setup ($$) {
     $self->{http_logoffset} = $self->{http_logobj}->lastline();
 }
 
-=item log_watcher_get_errors
+=item log_watcher_self_test ERROR_URL ERROR_LOG_REGEXP
 
-Returns error text if there are new errors since last call, or empty string
-(which is false) otherwise.
+Verifies that errors can be detected by the web log error file watching
+code. Call this after calling log_watcher_setup. ERROR_URL is a URL
+on the site which deliberately causes an error to be written to the
+error log. ERROR_LOG_REGEXP is a regular expression which that error
+log message matches.
 
 =cut 
-sub log_watcher_get_errors ($) {
+sub log_watcher_self_test {
+    my ($self, $self_test_url, $regexp) = @_;
+    $self->log_watcher_check();
+    $self->{useragent}->get($self_test_url); # do the get without calling _browser_html_hook
+    my $errors = $self->_log_watcher_get_errors();
+    die "Unable to detect errors from PHP" if ($errors !~ m/$regexp/);
+}
+
+# Returns error text if there are new errors since last call, or empty string
+# (which is false) otherwise. 
+sub _log_watcher_get_errors ($) {
     my ($self) = @_;
     my $error = "";
     $self->{http_logobj}->_update();
@@ -361,10 +379,14 @@ sub log_watcher_get_errors ($) {
 "die"s if there have been any HTTP log file errors since last call to either
 this function or to log_watcher_get_errors.
 
+If log_watcher_setup was called, then this is called automatically for each
+page browsed. So you only need to call this at the end, or if something other
+than browsing the site via this class might cause web error logs to be written.
+
 =cut
 sub log_watcher_check($) {     
     my ($self) = @_;
-    my $errors = $self->log_watcher_get_errors();
+    my $errors = $self->_log_watcher_get_errors();
     die $errors if ($errors);
 }
 
