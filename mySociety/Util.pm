@@ -6,8 +6,11 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Util.pm,v 1.57 2006-09-21 18:20:40 matthew Exp $
+# $Id: Util.pm,v 1.58 2006-10-15 08:12:59 francis Exp $
 #
+
+# TODO: Separate out all the daemon and process launching functions
+# into their own file.
 
 package mySociety::Util::Error;
 
@@ -29,6 +32,7 @@ use Net::SMTP;
 use POSIX ();
 use Sys::Syslog;
 use Statistics::Distributions qw(fdistr);
+use Data::Dumper;
 
 BEGIN {
     use Exporter ();
@@ -767,6 +771,26 @@ sub create_file_to_replace ($) {
         return ($n, $h);
     }
     die $!;
+}
+
+=item kill_named_processes SIGNAL PGREP_PARAMS
+
+Sends signal SIGNAL to all processes which pgrep(1) matches. PGREP_PARAMS is
+the extra parameters for pgrep and will be passed to the shell, so must be
+escaped. Parameters to limit pgrep to processes owned by the owner of 
+the current process are added to the call to pgrep.
+
+e.g. kill_named_processes(SIGTERM, '"^ref-sign.cgi$"')
+
+=cut
+sub kill_named_processes ($$) {
+    my ($signal, $pgrep_params) = @_;
+    my $uuid = getuid();
+    die  "too dangerous to call kill_named_processes as root" if ($uuid == 0);
+    $_ = `pgrep -u $uuid $pgrep_params`;
+    my @pids = split;
+    #print Dumper(\@pids);
+    kill $signal, @pids;
 }
 
 =item shell COMMAND PARAMS...
