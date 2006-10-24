@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.76 2006-09-13 22:59:46 matthew Exp $
+ * $Id: utility.php,v 1.77 2006-10-24 09:31:53 matthew Exp $
  * 
  */
 
@@ -372,7 +372,7 @@ function prettify($s, $html = true) {
         $t = time();
         if (strftime('%Y%m%d', $s) == strftime('%Y%m%d', $t))
             $tt = "$tt " . _('today');
-        elseif (strftime('%U', $s) == strftime('%U', $t))
+        elseif (strftime('%U %Y', $s) == strftime('%U %Y', $t))
             $tt = "$tt, " . strftime('%A', $s);
         elseif (strftime('%Y', $s) == strftime('%Y', $t))
             $tt = "$tt, " . strftime('%A %e %B', $s);
