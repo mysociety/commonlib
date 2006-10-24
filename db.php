@@ -12,7 +12,7 @@
 // Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 // Email: francis@mysociety.org. WWW: http://www.mysociety.org
 //
-// $Id: db.php,v 1.29 2006-09-04 15:38:02 francis Exp $
+// $Id: db.php,v 1.30 2006-10-24 09:33:27 chris Exp $
 
 require_once('error.php');
 require_once('random.php');
@@ -157,6 +157,16 @@ function db_query($query) {
         err(pg_last_error($db_h) . " in query '$query'");
     }
     return $db_last_res;
+}
+
+/* db_do QUERY [PARAM ...]
+ * Perform QUERY (presumably an INSERT, UPDATE or DELETE) against the database.
+ * Values of the PARAMS are substituted as for db_query. Dies on failure or
+ * returns the number of rows affected on success. */
+function db_do($query) {
+    $a = func_get_args();
+    $r = call_user_func_array('db_query', $a);
+    return pg_affected_rows($r);
 }
 
 /* db_getOne QUERY [PARAM ...]
