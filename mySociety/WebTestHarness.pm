@@ -12,7 +12,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.47 2006-10-05 10:27:29 francis Exp $
+# $Id: WebTestHarness.pm,v 1.48 2006-10-24 11:03:51 francis Exp $
 #
 
 package mySociety::WebTestHarness;
@@ -202,6 +202,18 @@ sub browser_follow_link {
     return $_;
 }
 
+=item browser_back
+
+Acts as function in WWW::Mechanize, but intercepts HTML pages
+for validating and logging.
+
+=cut
+sub browser_back {
+    my $self = shift;
+    $_ = $self->{useragent}->back(@_) or die "browser_back failed";
+    $self->_browser_html_hook();
+    return $_;
+}
 =item browser_uri
 
 Acts as function in WWW::Mechanize.
