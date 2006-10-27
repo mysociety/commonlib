@@ -8,12 +8,12 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: votingarea.php,v 1.43 2006-04-28 20:42:11 francis Exp $
+ * $Id: votingarea.php,v 1.44 2006-10-27 11:10:36 francis Exp $
  * 
  */
 
 /* va_inside
- * For any  constant which refers to a voting area which is inside an
+ * For any constant which refers to a voting area which is inside an
  * administrative area, there is an entry in this array saying which type of
  * area it's inside. */
 $va_inside = array(
@@ -48,6 +48,72 @@ $va_inside = array(
 
         'EUR' => 'EUP'
     );
+
+/* $va_parent_types
+Types which are bodies, rather than constituencies/wards within them */
+$va_parent_types = array_unique(array_values($va_inside));
+
+/* $va_child_types
+Types which are constituencies/wards, rather than the bodies they are in */
+$va_child_types = array_keys($va_inside);
+
+/* $va_council_parent_types
+Types which are local councils, such as districts, counties,
+unitary authorities and boroughs. */
+$va_council_parent_types = array('DIS', 'LBO', 'MTD', 'UTA', 'LGD', 'CTY', 'COI');
+
+/* $va_council_child_types
+Types which are wards or electoral divisions in councils. */
+$va_council_child_types = array('DIW', 'LBW', 'MTW', 'UTE', 'UTW', 'LGE', 'CED', 'COP');
+
+/* $va_aliases
+Names for sets of representative types */
+$va_aliases = array(
+    /* Councillors of whatever sort */
+    'council' => $va_council_child_types,
+    /* MPs */
+    'westminstermp' => array('WMC'),
+    /* Devolved assembly members / MSPs */
+    'regionalmp' => array('SPC','SPE','WAC','WAE','LAC','LAE','NIE'),
+    /* MEPs */
+    'mep' => array('EUR')
+);
+
+/* $va_precise_names
+Names of each child type. */
+$va_precise_names = array(
+        'LBW' => 'London Borough Councillors',
+
+        'LAC' => 'London Assembly Constituency Members',
+        'LAE' => 'London Assembly Party List Members',
+
+        'CED' => 'County Councillors',
+
+        'DIW' => 'District Councillors',
+
+        'UTE' => 'Unitary Authority ED Councillors',
+        'UTW' => 'Unitary Authority Ward Councillors',
+
+        'LGE' => 'Local Government District Councillors',
+
+        'COP' => 'Councillors of the Isles',
+
+        'MTW' => 'Metropolitan District Councillors',
+
+        'SPE' => 'Scottish Parliament Party List Members',
+        'SPC' => 'Scottish Parliament Constituency Members',
+
+        'WAE' => 'Welsh Assembly Party List Members',
+        'WAC' => 'Welsh Assembly Constituency Members',
+
+        'NIE' => 'Northern Ireland Assembly Members',
+
+        'WMC' => 'Members of Parliament',
+        'HOC' => 'Members of the House of Lords',
+
+        'EUR' => 'Members of the European Parliament'
+    );
+
 
 /* va_display_order
  * Suggested "increasing power" display order for representatives. In cases
@@ -243,19 +309,6 @@ Assembly have been elected and you can contact them.
 "
     );
 
-/* $va_council_parent_types
-
-Types which are local councils, such as districts, counties,
-unitary authorities and boroughs. */
-
-$va_council_parent_types = array('DIS', 'LBO', 'MTD', 'UTA', 'LGD', 'CTY', 'COI');
-
-/* $va_council_child_types
-
-Types which are wards or electoral divisions in councils. */
-
-$va_council_child_types = array('DIW', 'LBW', 'MTW', 'UTE', 'UTW', 'LGE', 'CED', 'COP');
-
 /* va_is_fictional_area ID
  * Does ID refer to a test area (i.e., one invented for our own purposes)? */
 function va_is_fictional_area($id) {
@@ -267,5 +320,6 @@ function va_is_fictional_area($id) {
 
 /* Special area IDs (see perllib/mysociety/VotingArea.pm for more) */
 $HOC_AREA_ID = 900008;
+
 
 ?>
