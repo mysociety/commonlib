@@ -12,7 +12,7 @@
 // Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 // Email: francis@mysociety.org. WWW: http://www.mysociety.org
 //
-// $Id: db.php,v 1.30 2006-10-24 09:33:27 chris Exp $
+// $Id: db.php,v 1.31 2006-10-27 18:29:56 francis Exp $
 
 require_once('error.php');
 require_once('random.php');
@@ -268,6 +268,28 @@ function db_end() {
         pg_query($db_h, 'rollback');
         $db_h = null;
     }
+}
+
+/* db_get_locks
+ * Returns description of locks on the database. For debugging. 
+ * XXX this doesn't seem to work, some permissions issue? */
+function db_get_locks() {
+    $prefix = OPTION_PHP_MAINDB;
+    $dbname = "OPTION_${prefix}_DB_dbname";
+    $ret = "datname,relname,transaction,mode,granted,usename,substr,query_start,age,procpid\n";
+
+    $q = db_query('select pg_stat_activity.datname,pg_class.relname,pg_locks.transaction, pg_locks.mode, pg_locks.granted,pg_stat_activity.usename,substr(pg_stat_activity.current_query,1,30), pg_stat_activity.query_start, age(now(),pg_stat_activity.query_start) as "age", pg_stat_activity.procpid 
+    from pg_stat_activity,pg_locks 
+    left outer join pg_class on (pg_locks.relation = pg_class.oid)  
+    where pg_locks.pid=pg_stat_activity.procpid 
+    order by query_start'
+#and pg_stat_activity.datname = ? 
+#    , $dbname
+    );
+    while ($row = db_fetch_row($q)) {
+        $ret .= join(",", $row) . "\n";
+    }
+    return $ret;
 }
 
 ?>
