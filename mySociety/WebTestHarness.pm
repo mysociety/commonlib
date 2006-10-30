@@ -12,7 +12,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.49 2006-10-24 13:34:59 francis Exp $
+# $Id: WebTestHarness.pm,v 1.50 2006-10-30 12:55:10 francis Exp $
 #
 
 package mySociety::WebTestHarness;
@@ -102,7 +102,10 @@ sub database_drop_reload ($$)
     $connstr .= "dbname=template1;";
     my $db_remake_db = DBI->connect($connstr, $self->{dbuser}, $self->{dbpass}, {
                             RaiseError => 1, AutoCommit => 1, PrintError => 0, PrintWarn => 1, });
-    $db_remake_db->do("drop database \"$self->{dbname}\"");
+    my $c = $db_remake_db->selectrow_array("select count(*) from pg_database where datname = '$self->{dbname}'");
+    if ($c > 0) {
+        $db_remake_db->do("drop database \"$self->{dbname}\"");
+    }
     $db_remake_db->do("create database \"$self->{dbname}\"");
     $db_remake_db->disconnect();
 
