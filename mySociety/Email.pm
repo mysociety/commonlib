@@ -6,7 +6,7 @@
 # Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Email.pm,v 1.12 2006-09-28 12:41:48 matthew Exp $
+# $Id: Email.pm,v 1.13 2006-11-02 12:23:59 matthew Exp $
 #
 
 package mySociety::Email::Error;
@@ -154,6 +154,8 @@ sub do_template_substitution ($$) {
         $subject = $1;
         $body =~ s#^Subject: ([^\n]*)\n\n##s;
     }
+
+    $body  =~ s/\r\n/\n/gs;
 
     # Merge paragraphs into their own line.  Two blank lines separate a
     # paragraph.
