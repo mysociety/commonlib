@@ -13,7 +13,7 @@
 # 
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: HelmertTransform.pm,v 1.7 2006-09-17 17:57:39 chris Exp $
+# $Id: HelmertTransform.pm,v 1.8 2006-11-03 13:17:51 chris Exp $
 #
 
 package Geo::HelmertTransform;
@@ -30,14 +30,14 @@ Geo::HelmertTransform
 
     use Geo::HelmertTransform;
 
-    my ($lat, $lon, $height) = ...; # from OS map
+    my ($lat, $lon, $h) = ...; # from OS map
     my $airy1830 = Geo::HelmertTransform::datum('Airy1830');
     my $wgs84 = Geo::HelmertTransform::datum('WGS84');
 
-    ($lat, $lon, $height)
+    ($lat, $lon, $h)
         = Geo::HelmertTransform::convert_datum($airy1830, $wgs84,
                                                 $lat, $lon, $h);
-    
+
 
 =head1 DESCRIPTION
 
@@ -298,7 +298,7 @@ the same terms as Perl itself.
 
 =head1 VERSION
 
-$Id: HelmertTransform.pm,v 1.7 2006-09-17 17:57:39 chris Exp $
+$Id: HelmertTransform.pm,v 1.8 2006-11-03 13:17:51 chris Exp $
 
 =cut
 
