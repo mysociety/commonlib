@@ -13,14 +13,13 @@
 # 
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: HelmertTransform.pm,v 1.8 2006-11-03 13:17:51 chris Exp $
-#
 
 package Geo::HelmertTransform;
 
-use strict;
+my $rcsid = ''; $rcsid .= '$Id: HelmertTransform.pm,v 1.9 2006-11-03 13:49:03 chris Exp $';
+($Geo::HelmertTransform::VERSION) = ($rcsid =~ /^\$Id: [^\s]+,v (\d+\.\d+) /);
 
-$Geo::HelmertTransform::VERSION = '0.1';
+use strict;
 
 =head1 NAME
 
@@ -298,7 +297,7 @@ the same terms as Perl itself.
 
 =head1 VERSION
 
-$Id: HelmertTransform.pm,v 1.8 2006-11-03 13:17:51 chris Exp $
+$Id: HelmertTransform.pm,v 1.9 2006-11-03 13:49:03 chris Exp $
 
 =cut
 
