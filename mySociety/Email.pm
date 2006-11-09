@@ -6,7 +6,7 @@
 # Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Email.pm,v 1.13 2006-11-02 12:23:59 matthew Exp $
+# $Id: Email.pm,v 1.14 2006-11-09 10:12:42 matthew Exp $
 #
 
 package mySociety::Email::Error;
@@ -120,7 +120,7 @@ sub format_email_address ($$) {
     if ($name =~ /[^A-Za-z0-9!#\$%&'*+\-\/=?^_`{|}~]/) {
         # Contains characters which aren't valid in atoms, so make a
         # quoted-pair instead.
-        $name =~ s/["\\]/\\$1/g;
+        $name =~ s/(["\\])/\\$1/g;
         $name = qq("$name");
     }
     return sprintf('%s <%s>', $name, $addr);
