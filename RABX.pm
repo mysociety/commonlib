@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: RABX.pm,v 1.21 2006-09-28 10:06:41 francis Exp $
+# $Id: RABX.pm,v 1.22 2006-11-09 12:15:08 matthew Exp $
 
 # References:
 #   Netstrings are documented here: http://cr.yp.to/proto/netstrings.txt
@@ -59,10 +59,10 @@ sub new ($$$;$) {
     my ($class, $text, $value, $extra) = @_;
     my $self = new Error(-text => $text, -value => [$value, $extra]);
     if ($class eq 'RABX::Error') {
-        if ($value >= USER) {
+        if (defined($value) && $value >= USER) {
             return bless($self, 'RABX::Error::User');
         } else {
-            my $c = $code_to_name{$value & MASK};
+            my $c = defined($value) ? $code_to_name{$value & MASK} : undef;
             $c ||= "Unknown";
             return bless($self, "RABX::Error::$c");
         }
@@ -422,7 +422,7 @@ use HTTP::Response;
 use Data::Dumper;
 use Regexp::Common qw(URI);
 
-my $rcsid = ''; $rcsid .= '$Id: RABX.pm,v 1.21 2006-09-28 10:06:41 francis Exp $';
+my $rcsid = ''; $rcsid .= '$Id: RABX.pm,v 1.22 2006-11-09 12:15:08 matthew Exp $';
 
 =back
 
