@@ -12,9 +12,27 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.50 2006-10-30 12:55:10 francis Exp $
+# $Id: WebTestHarness.pm,v 1.51 2006-11-13 22:55:14 francis Exp $
 #
 
+# Overload of WWW::Mechanize
+package mySociety::WebTestHarness::Mechanize;
+use base 'WWW::Mechanize';
+use utf8;
+# ... now days, could use this hook to do validation instead of all the
+# browser_* functions, but in some ways those are clearer named as they are
+# from the calling code.
+sub update_html {
+    my ($self, $html) = @_;
+    #utf8::decode($html); # this doesn't help the "Parsing of undecoded UTF-8 will give garbage when decoding entities" warning, and breaks other things
+    #print "mySociety::WebTestHarness::Mechanize hook: ";
+    #print "is_utf8 "; print utf8::is_utf8($html); 
+    #print "valid "; print utf8::valid($html); 
+    #print "\n";
+    $self->WWW::Mechanize::update_html($html);
+}
+
+# Main package
 package mySociety::WebTestHarness;
 
 use File::Find;
@@ -39,6 +57,7 @@ our $mail_sleep_time = 10;
 ############################################################################
 # Constructor
 
+
 =item new
 
 Create a new test harness object.
@@ -49,7 +68,7 @@ sub new ($$) {
     my $self = {};
 
     $self->{tempdir} = File::Temp::tempdir( CLEANUP => 0 );
-    $self->{useragent} = new WWW::Mechanize(autocheck => 1);
+    $self->{useragent} = new mySociety::WebTestHarness::Mechanize(autocheck => 1);
 
     return bless($self, $class);
 }
@@ -340,15 +359,16 @@ sub browser_set_validator ($$) {
 sub _browser_html_hook ($) {
     my ($self) = @_;
 
+    # If log watcher, check the log file
+    if ($self->{http_logobj}) {
+        $self->log_watcher_check();
+    }
+
     # If validator set and HTML then validate
     if ($self->{useragent}->is_html() && defined($self->{htmlvalidator})) {
         $filename = $self->_browser_debug_content();
         system($self->{htmlvalidator}, $filename) and die "HTML $filename doesn't validate, URL " . $self->{useragent}->uri();
-    }
-
-    # If log watcher, check the log file
-    if ($self->{http_logobj}) {
-        $self->log_watcher_check();
+        unlink $filename;
     }
 }
 
