@@ -12,10 +12,18 @@
 // Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 // Email: francis@mysociety.org. WWW: http://www.mysociety.org
 //
-// $Id: db.php,v 1.31 2006-10-27 18:29:56 francis Exp $
+// $Id: db.php,v 1.32 2006-11-13 22:52:42 francis Exp $
 
 require_once('error.php');
 require_once('random.php');
+
+$db_log_queries = false; # set to true to log all queries to Apache error log
+function _db_pg_query($db_h, $q) {
+    global $db_log_queries;
+    if ($db_log_queries)
+        error_log($q);
+    return pg_query($db_h, $q);
+}
 
 /* db_subst QUERY [PARAM ...]
  * Given an SQL QUERY containing zero or more "?"s, substitute quoted values of
@@ -96,19 +104,19 @@ function db_connect() {
      * any open transaction on termination of the script. */
     register_shutdown_function('db_end');
 
-    pg_query($db_h, 'begin');
+    _db_pg_query($db_h, 'begin');
 
     /* Ensure that we have a site shared secret. */
     global $db_secret_value;
-    $r = pg_query('select secret from secret');
+    $r = _db_pg_query($db_h, 'select secret from secret');
     $secret_row = pg_fetch_row($r);
     if (!$secret_row) {
         $db_secret_value = bin2hex(random_bytes(32));
-        if (pg_query($db_h, db_subst('insert into secret (secret) values (?)', $db_secret_value)))
-            pg_query($db_h, 'commit');
+        if (_db_pg_query($db_h, db_subst('insert into secret (secret) values (?)', $db_secret_value)))
+            _db_pg_query($db_h, 'commit');
         else
-            pg_query($db_h, 'rollback');
-        pg_query('begin');
+            _db_pg_query($db_h, 'rollback');
+        _db_pg_query($db_h, 'begin');
     } else {
         $db_secret_value = $secret_row[0];
     }
@@ -130,7 +138,7 @@ function db_query_literal($query) {
     global $db_last_res;
     if (!isset($db_h))
         db_connect();
-    if (!($db_last_res = pg_query($db_h, $query)))
+    if (!($db_last_res = _db_pg_query($db_h, $query)))
         err(pg_last_error($db_h) . "in literal query '$query'");
     return $db_last_res;
 }
@@ -147,8 +155,8 @@ function db_query($query) {
     /* ugly boilerplate to call through to db_subst */
     $a = func_get_args();
     $q = call_user_func_array('db_subst', $a);
-    #error_log($query);
-    if (!($db_last_res = pg_query($db_h, $q))) {
+    global $db_log_queries;
+    if (!($db_last_res = _db_pg_query($db_h, $q))) {
         // TODO: Unfortunately, this never gets called, as a PostgreSQL error
         // causes pg_query to raise a PHP warning, which our error checking
         // code correctly counts as an error, during execution of the if
@@ -248,16 +256,16 @@ function db_affected_rows() {
  * Commit current transaction. */
 function db_commit () {
     global $db_h;
-    pg_query($db_h, 'commit');
-    pg_query($db_h, 'begin');
+    _db_pg_query($db_h, 'commit');
+    _db_pg_query($db_h, 'begin');
 }
 
 /* db_rollback
  * Roll back current transaction. */
 function db_rollback () {
     global $db_h;
-    pg_query($db_h, 'rollback');
-    pg_query($db_h, 'begin');
+    _db_pg_query($db_h, 'rollback');
+    _db_pg_query($db_h, 'begin');
 }
 
 /* db_end
@@ -265,7 +273,7 @@ function db_rollback () {
 function db_end() {
     global $db_h;
     if (isset($db_h)) {
-        pg_query($db_h, 'rollback');
+        _db_pg_query($db_h, 'rollback');
         $db_h = null;
     }
 }
