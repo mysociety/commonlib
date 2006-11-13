@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: person.php,v 1.20 2006-08-10 07:42:59 matthew Exp $
+ * $Id: person.php,v 1.21 2006-11-13 22:56:53 francis Exp $
  * 
  */
 
@@ -20,7 +20,9 @@ require_once 'auth.php';
  * so we can have multiple domains in one vhost. */
 function person_cookie_domain() {
     $httphost = $_SERVER['HTTP_HOST'];
-    if (preg_match("/[^.]+(\.com|\.owl|\.org||\.net|\.co\.uk|\.org\.uk)$/", $httphost, $matches)) {
+    # XXX there must be a better way of doing this. (Also, the .livesimply
+    # entry is for Francis's local test domain pledge.livesimply)
+    if (preg_match("/[^.]+(\.com|\.owl|\.org|\.net|\.co\.uk|\.org\.uk|\.livesimply)$/", $httphost, $matches)) {
         return "." . $matches[0];
     } else {
         return '.' . OPTION_WEB_DOMAIN;
