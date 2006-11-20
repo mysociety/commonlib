@@ -7,7 +7,7 @@
  * Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  * 
- * $Id: BaseN.php,v 1.1 2006-11-20 15:12:24 matthew Exp $
+ * $Id: BaseN.php,v 1.2 2006-11-20 16:41:00 matthew Exp $
  *
  */
 
@@ -49,23 +49,20 @@ function basen_encodefast($n, $message) {
     for ($i = 0; $i < $l; $i += 4) {
         $nin = ($l - $i > 4) ? 4 : $l - $i;
         $nout = $blocksize;
-        $val;
-        if ($nin == 4) {
-            $val = unpack('Nn', substr($message, $i, 4));
-	    $val = $val['n'];
-        } else {
-            $val = 0;
-            for ($j = 0; $j < $nin; ++$j) {
-                $val <<= 8;
-                $c = unpack('Cc', substr($message, $i + $j, 1));
-                $val += $c['c'];
-            }
-            $nout -= (4 - $nin);
+        # PHP doesn't, would you believe it, have unsigned ints, and in fact
+        # ignores unpack()ing with unsigned values. Genius.
+        $val = (float)0;
+        for ($j = 0; $j < $nin; ++$j) {
+            $val *= 256; # Shifting forces a cast to integer. Genius again.
+            $unpacked = unpack('Cc', substr($message, $i + $j, 1));
+            $val += $unpacked['c'];
         }
+        $nout -= (4 - $nin);
 
         $r = '';
         while ($val) {
-            $rem = $val % $n;
+            $rem = fmod($val, $n); # Of *course* % is integer only! Genius thrice.
+            if ($rem<0) $rem += $n;
             $val = floor($val / $n);
             $r .= substr($std_alpha, $rem, 1);
         }
@@ -107,7 +104,7 @@ function basen_decodefast($n, $message) {
             $val *= $n;
             $c = substr($message, $i + $j, 1);
             if (!array_key_exists($c, $std_alpha_key))
-	        return null;
+                return null;
             $val += $std_alpha_key[$c];
         }
 
