@@ -7,7 +7,7 @@
 # Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: BaseN.pm,v 1.1 2006-11-19 23:59:21 chris Exp $
+# $Id: BaseN.pm,v 1.2 2006-11-20 15:12:23 matthew Exp $
 #
 
 package mySociety::BaseN;
@@ -40,6 +40,7 @@ use strict;
 
 use Carp;
 use Math::BigInt lib => 'GMP';
+use POSIX qw(ceil);
 
 my $std_alpha = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
@@ -78,7 +79,7 @@ sub encode ($$;$) {
     # Number of output symbols to generate. Obviously each input symbol encodes
     # 8 bits, and each output symbol lg(N) bits; round up to get the number of
     # output symbols required.
-    my $noutput = int((length($message) * 8) / lg($n) + 1);
+    my $noutput = ceil((length($message) * 8) / lg($n));
     
     my $x = new Math::BigInt();
     for (my $i = 0; $i < length($message); ++$i) {
