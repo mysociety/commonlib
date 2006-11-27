@@ -6,7 +6,7 @@
  * Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: crosssell.php,v 1.10 2006-06-23 23:18:18 twfy-live Exp $
+ * $Id: crosssell.php,v 1.11 2006-11-27 23:01:43 matthew Exp $
  * 
  */
 
@@ -55,6 +55,7 @@ function crosssell_display_pb_local_pledges($postcode) {
     return true;
 }
 
+# XXX: Needs to say "Lord" when the WTT message was to a Lord!
 function crosssell_display_twfy_alerts_advert($this_site, $user_email, $postcode) {
     // Look up who the MP is
     $voting_areas = mapit_get_voting_areas($postcode);
