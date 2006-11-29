@@ -8,7 +8,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: mapit.php,v 1.50 2006-09-28 10:06:41 francis Exp $
+ * $Id: mapit.php,v 1.51 2006-11-29 18:55:44 matthew Exp $
  *
  */
 
@@ -30,8 +30,9 @@ function mapit_check_error($data) {
         err($error_message);
 }
 
-$mapit_client = new RABX_Client(OPTION_MAPIT_URL, 
-    defined('OPTION_MAPIT_USERPWD') ? OPTION_MAPIT_USERPWD : null);
+if (defined('OPTION_MAPIT_URL'))
+    $mapit_client = new RABX_Client(OPTION_MAPIT_URL, 
+        defined('OPTION_MAPIT_USERPWD') ? OPTION_MAPIT_USERPWD : null);
 
 define('MAPIT_BAD_POSTCODE', 2001);        /*    String is not in the correct format for a postcode.  */
 define('MAPIT_POSTCODE_NOT_FOUND', 2002);        /*    The postcode was not found in the database.  */
