@@ -8,7 +8,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # WWW: http://www.mysociety.org
 #
-# $Id: Gaze.pm,v 1.23 2006-09-28 10:06:41 francis Exp $
+# $Id: Gaze.pm,v 1.24 2006-12-01 16:28:24 matthew Exp $
 
 package mySociety::Gaze;
 
@@ -84,6 +84,17 @@ sub get_country_from_ip ($) {
     return $rabx_client->call('Gaze.get_country_from_ip', @_);
 }
 
+=item Gaze::get_coords_from_ip ADDRESS
+
+  Return (lat,lon) of the centre of the country for the given IP address,
+  or undef if none could be found.
+
+=cut
+sub get_coords_from_ip ($) {
+    configure() if !defined $rabx_client;
+    return $rabx_client->call('Gaze.get_coords_from_ip', @_);
+}
+
 =item Gaze::get_population_density LAT LON
 
   Return an estimate of the population density at (LAT, LON) in persons per
@@ -106,6 +117,22 @@ sub get_population_density ($$) {
 sub get_radius_containing_population ($$$;$) {
     configure() if !defined $rabx_client;
     return $rabx_client->call('Gaze.get_radius_containing_population', @_);
+}
+
+=item Gaze::get_places_near LAT LON [PARAMS]
+
+  Returns a reference to an associative array of all the places within a
+  given distance of a point expressed as LAT LON. PARAMS include: *
+  DISTANCE to include all results within DISTANCE km * POPULATION to
+  include all results within a circle containing at least POPULATION people
+  * MAXDISTANCE, can be supplied with POPULATION to bound the distance
+  returned * COUNTRY to bound results to one COUNTRY Throws exception on
+  error.
+
+=cut
+sub get_places_near ($$;$) {
+    configure() if !defined $rabx_client;
+    return $rabx_client->call('Gaze.get_places_near', @_);
 }
 
 
