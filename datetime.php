@@ -6,7 +6,7 @@
  * Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: datetime.php,v 1.3 2006-10-09 21:49:20 timsk Exp $
+ * $Id: datetime.php,v 1.4 2006-12-04 10:50:18 matthew Exp $
  * 
  */
 
@@ -25,6 +25,8 @@ function datetime_parse_local_date($date, $now, $language, $country) {
     if (!$date)
         return null;
 
+    $date = mb_strtolower($date, 'utf-8');
+
     if ($language == 'eo')
         $date = preg_replace('#((\b(de|la))|(?<=\d)-?a)\b#','',$date);
     if ($language == 'nl')
@@ -37,99 +39,78 @@ function datetime_parse_local_date($date, $now, $language, $country) {
 
     # Translate foreign words to English as strtotime() is English only
     $translate = array(
-    	# Spanish,Italian,Portuguese,Welsh,Russian,Esperanto,Ukranian,Dutch,German,French
-	'Sunday' => array('domingo', 'domenica', 'dydd sul', 
-        "\xd0\xb2\xd0\xbe\xd1\x81\xd0\xba\xd1\x80\xd0\xb5\xd1\x81\xd0\xb5\xd0\xbd\xd1\x8c\xd0\xb5",
-        "\xd0\xbd\xd0\xb5\xd0\xb4\xd1\x96\xd0\xbb\xd1\x96", 
-        "dima\xc4\x89o", 'zondag', 'dimanche'
-	),
-	'Monday' => array("lunes", "lunedi", "segunda-feira", "dydd llun",
-		"\xd0\xbf\xd0\xbe\xd0\xbd\xd0\xb5\xd0\xb4\xd0\xb5\xd0\xbb\xd1\x8c\xd0\xbd\xd0\xb8\xd0\xba",
-		"lundo", "\xd0\xbf\xd0\xbe\xd0\xbd\xd0\xb5\xd0\xb4\xd1\x96\xd0\xbb\xd0\xba\xd0\xb0",
-		"maandag", "Montag", 'lundi'
-	),
-	'Tuesday' => array("martes", "marted\xc3\xac", "terca-feira",
-		"\xd0\xb2\xd1\x82\xd0\xbe\xd1\x80\xd0\xbd\xd0\xb8\xd0\xba",
-		"\xd0\xb2\xd1\x96\xd0\xb2\xd1\x82\xd0\xbe\xd1\x80\xd0\xba\xd0\xb0",
-		"mardo", "dinsdag", 'dydd mawrth', "Dienstag", 'mardi'
-	),
-	'Wednesday' => array("mi\xc3\xa9rcoles", "mercoled\xc3\xac", 'quarta-feira', 'dydd mercher', 
-        "\xd1\x81\xd1\x80\xd0\xb5\xd0\xb4\xd0\xb0",
-        "\xd1\x81\xd0\xb5\xd1\x80\xd0\xb5\xd0\xb4\xd0\xb8\xd1", 
-        'merkredo', 'woensdag', "Mittwoch", 'mercredi'
-	),
-	'Thursday' => array('jueves', "gioved\xc3\xac", 'quinta-feira', 'dydd iau', 
-        "\xd1\x87\xd0\xb5\xd1\x82\xd0\xb2\xd0\xb5\xd1\x80\xd0\xb3", 
-        "\xd1\x87\xd0\xb5\xd1\x82\xd0\xb2\xd0\xb5\xd1\x80\xd0\xb3\xd0\xb0\xd1",
-	"\xc4\xb5a\xc5\xaddo",'donderdag', "Donnerstag", 'jeudi'
-	),
-	'Friday' => array('viernes', "venerd\xc3\xac", 'sexta-feira', 'dydd gwener', 
-        "\xd0\xbf\xd1\x8f\xd1\x82\xd0\xbd\xd0\xb8\xd1\x86\xd0\xb0",
-        "\xd0\xbf'\xd1\x8f\xd1\x82\xd0\xbd\xd0\xb8\xd1\x86\xd1\x96", 
-        'vendredo', 'vrijdag', "Freitag", 'vendredi'
-	),
-	'Saturday' => array("s\xc3\xa1bado", 'sabato', 'dydd sadwrn', 
-        "\xd1\x81\xd1\x83\xd0\xb1\xd0\xb1\xd0\xbe\xd1\x82\xd0\xb0",
-        "\xd1\x81\xd1\x83\xd0\xb1\xd0\xbe\xd1\x82\xd0\xb8",
-	'sabato', 'zaterdag', "Samstag", "Satertag", "Sonnabend", 'samedi'
-	),
-	'January' => array('enero', 'gennaio', 'janeiro', 'Ionawr', 
-        "\xd1\x8f\xd0\xbd\xd0\xb2\xd0\xb0\xd1\x80\xd1\x8f", "\xd1\x81\xd1\x96\xd1\x87\xd0\xbd\xd1\x8f", 
-        'januaro', 'januari', "Januar", "Jänner", 'janvier'
-	),
-	'February' => array('febrero', 'febbraio', 'fevereiro', 'Chwefror', 
-        "\xd1\x84\xd0\xb5\xd0\xb2\xd1\x80\xd0\xb0\xd0\xbb\xd1\x8f", "\xd0\xbb\xd1\x8e\xd1\x82\xd0\xbe\xd0\xb3\xd0\xbe", 
-	'februaro', 'februari', "Februar", "Feber", 'février'
-	),
-	'March' => array('marzo', "mar\xc3\xa7o", 'Mawrth', 
-        "\xd0\xbc\xd0\xb0\xd1\x80\xd1\x82\xd0\xb0", "\xd0\xb1\xd0\xb5\xd1\x80\xd0\xb5\xd0\xb7\xd0\xbd\xd1\x8f",
-	'marto', 'maart', "März", 'mars'
-	),
-	'April' => array('abril', 'aprile', 'Ebrill', 
-        "\xd0\xb0\xd0\xbf\xd1\x80\xd0\xb5\xd0\xbb\xd1\x8f",
-        "\xd0\xba\xd0\xb2\xd1\x96\xd1\x82\xd0\xbd\xd1\x8f", 
-        'aprilo', "April", 'avril'
-	),
-	'May' => array('mayo', 'maggio', 'maio', 'Mai', 
-        "\xd0\xbc\xd0\xb0\xd1\x8f", "\xd1\x82\xd1\x80\xd0\xb0\xd0\xb2\xd0\xbd\xd1\x8f", 
-	'majo', 'mei', 'mai'
-	),
-	'June' => array('junio', 'giugno', 'junho', 'Mehefin', 
-        "\xd0\xb8\xd1\x8e\xd0\xbd\xd1\x8f", "\xd0\xd1\x87\xd0\xb5\xd1\x80\xd0\xb2\xd0\xbd\xd1\x8f\xd1", 
-	'juni', "Juni", 'juin'
-	),
-	'July' => array('julio', 'luglio', 'julho', 'Gorffennaf', 
-        "\xd0\xb8\xd1\x8e\xd0\xbb\xd1\x8f", "\xd0\xbb\xd0\xb8\xd0\xbf\xd0\xbd\xd1\x8f",
-        'juli', "Juli", 'juillet'
-	),
-	'August' => array('agosto',  'Awst', 
-        "\xd0\xb0\xd0\xb2\xd0\xb3\xd1\x83\xd1\x81\xd1\x82\xd0\xb0", "\xd1\x81\xd0\xb5\xd1\x80\xd0\xbf\xd0\xbd\xd1\x8f", 
-        "a\xc5\xadgusto", 'augustus', "August", 'août'
-	),
-	'September' => array('septiembre', 'settembre', 'setembro', 'Medi', 
-        "\xd1\x81\xd0\xb5\xd0\xbd\xd1\x82\xd1\x8f\xd0\xb1\xd1\x80\xd1\x8f",
-        "\xd0\xb2\xd0\xb5\xd1\x80\xd0\xb5\xd1\x81\xd0\xbd\xd1\x8f", 
-	'septembro', "September", 'septembre'
-	),
-	'October' => array('octubre', 'ottobre', 'outubro', 'Hydref', 
-        "\xd0\xbe\xd0\xba\xd1\x82\xd1\x8f\xd0\xb1\xd1\x80\xd1\x8f", 
-        "\xd0\xb6\xd0\xbe\xd0\xb2\xd1\x82\xd0\xbd\xd1\x8f",
-	'oktobro', 'oktober', "Oktober", 'octobre'
-	),
-	'November' => array('noviembre', 'novembre', 'novembro', 'Tachwedd', 
-        "\xd0\xbd\xd0\xbe\xd1\x8f\xd0\xb1\xd1\x80\xd1\x8f", 
-        "\xd0\xbb\xd0\xb8\xd1\x81\xd1\x82\xd0\xbe\xd0\xbf\xd0\xb0\xd0\xb4\xd0\xb0", 
-        'novembro', "November", 'novembre'
-	),
-	'December' => array('diciembre', 'dicembre', 'dezembro', 'Rhagfyr', 
-        "\xd0\xb4\xd0\xb5\xd0\xba\xd0\xb0\xd0\xb1\xd1\x80\xd1\x8f",
-        "\xd0\xb3\xd1\x80\xd1\x83\xd0\xb4\xd0\xbd\xd1\x8f",
-	'decembro', "Dezember", 'décembre'
-	),
+        # Spanish,Italian,Portuguese,Welsh,Russian,Esperanto,Ukranian,Dutch,German,French
+        'Sunday' => array('domingo', 'domenica', 'dydd sul',
+            'воскресенье', 'неділя', 'dimaĉo', 'zondag', 'dimanche',
+        ),
+        'Monday' => array('lunes', 'lunedi', 'segunda-feira', 'dydd llun',
+            'понедельник', 'lundo', 'понеділок', 'maandag', 'montag', 'lundi',
+        ),
+        'Tuesday' => array('martes', 'martedì', 'terca-feira', 'вторник',
+            'вівторок', 'mardo', 'dinsdag', 'dydd mawrth', 'dienstag', 'mardi',
+        ),
+        'Wednesday' => array('miércoles', 'mercoledì', 'quarta-feira',
+            'dydd mercher', 'среда', 'середа', 'merkredo', 'woensdag',
+            'mittwoch', 'mercredi',
+        ),
+        'Thursday' => array('jueves', 'giovedì', 'quinta-feira',
+            'dydd iau', 'четверг', 'четвер', 'ĵaŭdo', 'donderdag',
+            'donnerstag', 'jeudi',
+        ),
+        'Friday' => array('viernes', 'venerdì', 'sexta-feira',
+            'dydd gwener', 'пятница', "п'ятниця", 'vendredo', 'vrijdag',
+            'freitag', 'vendredi',
+        ),
+        'Saturday' => array('sábado', 'sabato', 'dydd sadwrn', 'суббота',
+            'субота', 'sabato', 'zaterdag', 'samstag', 'satertag',
+            'sonnabend', 'samedi',
+        ),
+        'January' => array('enero', 'gennaio', 'janeiro', 'ionawr',
+            'января', 'січень', 'januaro', 'januari', 'januar', 'jänner',
+            'janvier',
+        ),        
+        'February' => array('febrero', 'febbraio', 'fevereiro',
+            'chwefror', 'февраля', 'лютий', 'februaro', 'februari',
+            'februar', 'feber', 'février',
+        ),
+        'March' => array('marzo', 'março', 'mawrth', 'марта',
+            'березень', 'marto', 'maart', 'märz', 'mars',
+        ),
+        'April' => array('abril', 'aprile', 'ebrill', 'апреля',
+            'квітень', 'aprilo', 'april', 'avril',
+        ),
+        'May' => array('mayo', 'maggio', 'maio', 'mai', 'мая', 'травень',
+            'majo', 'mei', 'mai',
+        ),
+        'June' => array('junio', 'giugno', 'junho', 'mehefin', 'июня',
+            'червень', 'juni', 'juni', 'juin',
+        ),
+        'July' => array('julio', 'luglio', 'julho', 'gorffennaf',
+            'июля', 'липень', 'juli', 'juli', 'juillet',
+        ),
+        'August' => array('agosto', 'awst', 'августа', 'серпень',
+            'aŭgusto', 'augustus', 'august', 'août',
+        ),
+        'September' => array('septiembre', 'settembre', 'setembro',
+            'medi', 'сентября', 'вересень', 'septembro', 'september',
+            'septembre',
+        ),
+        'October' => array('octubre', 'ottobre', 'outubro', 'hydref',
+            'октября', 'жовтень', 'oktobro', 'oktober', 'oktober',
+            'octobre',
+        ),
+        'November' => array('noviembre', 'novembre', 'novembro',
+            'tachwedd', 'ноября', 'листопад', 'novembro', 'november',
+            'novembre',
+        ),
+        'December' => array('diciembre', 'dicembre', 'dezembro',
+            'rhagfyr', 'декабря', 'грудень', 'decembro', 'dezember',
+            'décembre',
+        )
     );
     $search = array(); $replace = array();
     foreach ($translate as $english => $foreign) {
-        $search[] = '/\b(' . join('|', $foreign) . ')\b/i';
+        $search[] = '/(' . join('|', $foreign) . ')/';
         $replace[] = $english;
     }
     $date = preg_replace($search, $replace, $date);
@@ -139,8 +120,8 @@ function datetime_parse_local_date($date, $now, $language, $country) {
     $year = null;
     $month = null;
     if (preg_match('#(\d+)/(\d+)/(\d+)#',$date,$m)) {
-    	# XXX: Might be better to offer back ambiguous dates for clarification?
-    	if ($country == 'US') {
+            # XXX: Might be better to offer back ambiguous dates for clarification?
+            if ($country == 'US') {
             $day = $m[2]; $month = $m[1];
         } else {
             $day = $m[1]; $month = $m[2];
@@ -149,8 +130,8 @@ function datetime_parse_local_date($date, $now, $language, $country) {
         if ($year<100) 
             $year += 2000;
     } elseif (preg_match('#(\d+)/(\d+)#',$date,$m)) {
-    	if ($country == 'US') {
-        	$day = $m[2]; $month = $m[1];
+            if ($country == 'US') {
+                $day = $m[2]; $month = $m[1];
         } else {
             $day = $m[1]; $month = $m[2];
         }
