@@ -8,7 +8,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # WWW: http://www.mysociety.org
 #
-# $Id: NeWs.pm,v 1.1 2006-05-01 15:11:55 louise Exp $
+# $Id: NeWs.pm,v 1.2 2006-12-05 12:57:21 louise Exp $
 
 package mySociety::NeWs;
 
@@ -86,13 +86,38 @@ sub get_history ($) {
 
 =item NeWs::get_coverage ID
 
-  Given a newspaper ID, returns the coverage information related to that
-  newspaper
+  Given a newspaper ID, returns a reference to an array of hashes
+  containing the coverage information related to that newspaper
 
 =cut
 sub get_coverage ($) {
     configure() if !defined $rabx_client;
     return $rabx_client->call('NeWs.get_coverage', @_);
+}
+
+=item NeWs::get_locations LON LAT RADIUS
+
+  Given a longitude, latitude and radius, returns a reference to an array
+  of hashes containing information on locations within that radius from the
+  point defined by the latitude and longitude
+
+=cut
+sub get_locations ($$$) {
+    configure() if !defined $rabx_client;
+    return $rabx_client->call('NeWs.get_locations', @_);
+}
+
+=item NeWs::get_newspapers_by_location LON LAT RADIUS
+
+  Given a longitude, latitude and radius, returns a reference to an array
+  of hashes containing information on newspapers that have coverage of
+  locations within that radius from the point defined by the latitude and
+  longitude
+
+=cut
+sub get_newspapers_by_location ($$$) {
+    configure() if !defined $rabx_client;
+    return $rabx_client->call('NeWs.get_newspapers_by_location', @_);
 }
 
 
