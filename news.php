@@ -8,7 +8,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: news.php,v 1.3 2006-05-01 15:12:32 louise Exp $
+ * $Id: news.php,v 1.4 2006-12-05 12:58:10 louise Exp $
  *
  */
 
@@ -87,12 +87,37 @@ function news_get_history($id) {
 
 /* news_get_coverage ID
 
-  Given a newspaper ID, returns the coverage information related to that
-  newspaper */
+  Given a newspaper ID, returns a reference to an array of hashes
+  containing the coverage information related to that newspaper */
 function news_get_coverage($id) {
     global $news_client;
     $params = func_get_args();
     $result = $news_client->call('NeWs.get_coverage', $params);
+    return $result;
+}
+
+/* news_get_locations LON LAT RADIUS
+
+  Given a longitude, latitude and radius, returns a reference to an array
+  of hashes containing information on locations within that radius from the
+  point defined by the latitude and longitude */
+function news_get_locations($lon, $lat, $radius) {
+    global $news_client;
+    $params = func_get_args();
+    $result = $news_client->call('NeWs.get_locations', $params);
+    return $result;
+}
+
+/* news_get_newspapers_by_location LON LAT RADIUS
+
+  Given a longitude, latitude and radius, returns a reference to an array
+  of hashes containing information on newspapers that have coverage of
+  locations within that radius from the point defined by the latitude and
+  longitude */
+function news_get_newspapers_by_location($lon, $lat, $radius) {
+    global $news_client;
+    $params = func_get_args();
+    $result = $news_client->call('NeWs.get_newspapers_by_location', $params);
     return $result;
 }
 
