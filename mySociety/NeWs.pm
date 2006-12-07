@@ -8,7 +8,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # WWW: http://www.mysociety.org
 #
-# $Id: NeWs.pm,v 1.2 2006-12-05 12:57:21 louise Exp $
+# $Id: NeWs.pm,v 1.3 2006-12-07 15:48:51 louise Exp $
 
 package mySociety::NeWs;
 
@@ -53,8 +53,27 @@ sub get_newspapers () {
 
 =item NeWs::get_newspapers_by_name
 
-  Get a hash keyed on id of newspapers in the DB matching a partial name
-  string
+  Get a reference to an array of hashes of newspapers in the DB matching a
+  partial name string =cut 
+
+  sub NeWs::get_newspapers_by_name($){ my ($partial_name) = @_; $partial_name =
+  lc $partial_name; my @ret;
+
+      my $rows = dbh()->selectall_arrayref("select distinct id, name
+                                         from newspaper 
+                                         where isdeleted = false
+                                         and lower(name) like ?
+                                         order by name asc", {}, '%' . $partial_name . '%');
+        
+      foreach (@$rows){
+
+          my ($id, $name) = @$_;
+  	push( @ret, {'id' => $id,
+                       'name' => $name });
+      }
+
+      return \@ret;
+  }
 
 =cut
 sub get_newspapers_by_name () {
@@ -62,49 +81,60 @@ sub get_newspapers_by_name () {
     return $rabx_client->call('NeWs.get_newspapers_by_name', @_);
 }
 
-=item NeWs::publish_update ID EDITOR HASH
+=item NeWs::publish_newspaper_update ID EDITOR HASH
 
   Update the newspaper with the ID using the attribute values in the hash
   and assigning the update to the username EDITOR.
 
 =cut
-sub publish_update ($$$) {
+sub publish_newspaper_update ($$$) {
     configure() if !defined $rabx_client;
-    return $rabx_client->call('NeWs.publish_update', @_);
+    return $rabx_client->call('NeWs.publish_newspaper_update', @_);
 }
 
-=item NeWs::get_history ID
+=item NeWs::get_newspaper_history ID
 
   Given a newspaper ID, returns the history of edits to that newspaper's
   record in the database 
 
 =cut
-sub get_history ($) {
+sub get_newspaper_history ($) {
     configure() if !defined $rabx_client;
-    return $rabx_client->call('NeWs.get_history', @_);
+    return $rabx_client->call('NeWs.get_newspaper_history', @_);
 }
 
-=item NeWs::get_coverage ID
+=item NeWs::get_newspaper_coverage ID
 
   Given a newspaper ID, returns a reference to an array of hashes
   containing the coverage information related to that newspaper
 
 =cut
-sub get_coverage ($) {
+sub get_newspaper_coverage ($) {
     configure() if !defined $rabx_client;
-    return $rabx_client->call('NeWs.get_coverage', @_);
+    return $rabx_client->call('NeWs.get_newspaper_coverage', @_);
 }
 
-=item NeWs::get_locations LON LAT RADIUS
+=item NeWs::get_newspaper_journalists ID
+
+  Given a newspaper ID, returns a reference to an array of hashes
+  containing the journalist information associated with that newspaper
+
+=cut
+sub get_newspaper_journalists ($) {
+    configure() if !defined $rabx_client;
+    return $rabx_client->call('NeWs.get_newspaper_journalists', @_);
+}
+
+=item NeWs::get_locations_by_location LON LAT RADIUS
 
   Given a longitude, latitude and radius, returns a reference to an array
   of hashes containing information on locations within that radius from the
   point defined by the latitude and longitude
 
 =cut
-sub get_locations ($$$) {
+sub get_locations_by_location ($$$) {
     configure() if !defined $rabx_client;
-    return $rabx_client->call('NeWs.get_locations', @_);
+    return $rabx_client->call('NeWs.get_locations_by_location', @_);
 }
 
 =item NeWs::get_newspapers_by_location LON LAT RADIUS
@@ -118,6 +148,48 @@ sub get_locations ($$$) {
 sub get_newspapers_by_location ($$$) {
     configure() if !defined $rabx_client;
     return $rabx_client->call('NeWs.get_newspapers_by_location', @_);
+}
+
+=item NeWs::get_journalist ID
+
+  Given a journalist ID, return a hash of information about that journalist
+
+=cut
+sub get_journalist ($) {
+    configure() if !defined $rabx_client;
+    return $rabx_client->call('NeWs.get_journalist', @_);
+}
+
+=item NeWs::publish_journalist_update EDITOR HASH
+
+  Publish a journalist record created from the attributes in the HASH to
+  the newspaper indicated by ID This can either be a new record or an edit
+  to an existing record. The edit is attributed to EDITOR =cut
+
+  sub NeWs::publish_journalist_update($$){ my ($editor, $fields) = @_;
+
+      my $journalist = NeWs::Journalist->new($fields);
+      # records are not deleted using this API function
+      $journalist->{'isdeleted'} = 'f';
+      my $journalist_id = $journalist->publish($editor);
+      return $journalist->id(); 
+  }
+
+=cut
+sub publish_journalist_update ($$) {
+    configure() if !defined $rabx_client;
+    return $rabx_client->call('NeWs.publish_journalist_update', @_);
+}
+
+=item NeWs::get_journalist_history ID
+
+  Given a journalist ID, returns the history of edits to that journalist's
+  record in the database
+
+=cut
+sub get_journalist_history ($) {
+    configure() if !defined $rabx_client;
+    return $rabx_client->call('NeWs.get_journalist_history', @_);
 }
 
 
