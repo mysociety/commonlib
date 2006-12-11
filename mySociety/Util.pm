@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Util.pm,v 1.59 2006-12-11 16:31:04 francis Exp $
+# $Id: Util.pm,v 1.60 2006-12-11 16:38:14 francis Exp $
 #
 
 # TODO: Separate out all the daemon and process launching functions
@@ -946,7 +946,7 @@ Implementation of nl2br in PHP.
 sub nl2br {
     my ($ret) = @_;
     $ret =~ s/\r\n/\n/g;
-    $ret =~ s/\n/<br>\n/g;
+    $ret =~ s#\n#<br />\n#g;
     return $ret;
 }
 
