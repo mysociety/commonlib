@@ -6,7 +6,7 @@
  * Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: datetime.php,v 1.4 2006-12-04 10:50:18 matthew Exp $
+ * $Id: datetime.php,v 1.5 2006-12-12 14:40:26 francis Exp $
  * 
  */
 
@@ -110,7 +110,7 @@ function datetime_parse_local_date($date, $now, $language, $country) {
     );
     $search = array(); $replace = array();
     foreach ($translate as $english => $foreign) {
-        $search[] = '/(' . join('|', $foreign) . ')/';
+        $search[] = '/\b(' . join('|', $foreign) . ')\b/';
         $replace[] = $english;
     }
     $date = preg_replace($search, $replace, $date);
@@ -120,8 +120,8 @@ function datetime_parse_local_date($date, $now, $language, $country) {
     $year = null;
     $month = null;
     if (preg_match('#(\d+)/(\d+)/(\d+)#',$date,$m)) {
-            # XXX: Might be better to offer back ambiguous dates for clarification?
-            if ($country == 'US') {
+        # XXX: Might be better to offer back ambiguous dates for clarification?
+        if ($country == 'US') {
             $day = $m[2]; $month = $m[1];
         } else {
             $day = $m[1]; $month = $m[2];
@@ -130,7 +130,7 @@ function datetime_parse_local_date($date, $now, $language, $country) {
         if ($year<100) 
             $year += 2000;
     } elseif (preg_match('#(\d+)/(\d+)#',$date,$m)) {
-            if ($country == 'US') {
+        if ($country == 'US') {
                 $day = $m[2]; $month = $m[1];
         } else {
             $day = $m[1]; $month = $m[2];
