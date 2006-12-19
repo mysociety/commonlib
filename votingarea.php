@@ -8,7 +8,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: votingarea.php,v 1.44 2006-10-27 11:10:36 francis Exp $
+ * $Id: votingarea.php,v 1.45 2006-12-19 12:23:30 matthew Exp $
  * 
  */
 
@@ -232,30 +232,34 @@ $va_type_name = array(
 $va_responsibility_description = array(
     'DIS' =>
             "The District Council is responsible for
-            <strong>local services</strong>, including <strong>planning</strong>, <strong>council housing</strong>,
-            <strong>rubbish collection</strong>, and <strong>local roads</strong>.",
+            <strong>local services</strong>, including <strong>planning</strong>, <strong>council housing</strong>, and
+            <strong>rubbish collection</strong>.",
     'LBO' => "
 The Borough Council is responsible for <strong>local services</strong>,
 including <strong>planning</strong>, <strong>council housing</strong>,
-<strong>rubbish collection</strong>, and <strong>local roads</strong>.
+<strong>rubbish collection</strong>, <strong>local roads</strong>, and
+<strong>public paths</strong>.
 ",
     'LAS' => "
 The London Assembly <strong>examines</strong> the Mayor of London's
 activities, <strong>investigates</strong> issues of importance to Londoners,
 and <strong>makes proposals</strong> to the Mayor.  Areas covered include the
 Mayor's budget, <strong>culture</strong>, <strong>sport and tourism</strong>,
-<strong>health</strong>, <strong>planning</strong> and <strong>transport</strong>.
+<strong>health</strong>, <strong>planning</strong>, <strong>transport</strong>,
+and <strong>trunk roads</strong>.
 ",
     'MTD' =>
             "The Metropolitan District Council is
-            responsible for all aspects of <strong>local services and policy</strong>, including
-            <strong>planning</strong>, <strong>transport</strong>, <strong>education</strong>, 
-            <strong>social services</strong> and <strong>libraries</strong>.",
+responsible for all aspects of <strong>local services and policy</strong>, including
+<strong>planning</strong>, <strong>transport</strong>,
+<strong>roads</strong> (except trunk roads and motorways), public rights of way,
+<strong>education</strong>, <strong>social services</strong> and <strong>libraries</strong>.",
     'UTA' => 
             "The Unitary Authority is
-            responsible for all aspects of <strong>local services and policy</strong>, including
-            <strong>planning</strong>, <strong>transport</strong>, <strong>education</strong>, 
-            <strong>social services</strong> and <strong>libraries</strong>.",
+responsible for all aspects of <strong>local services and policy</strong>, including
+<strong>planning</strong>, <strong>transport</strong>,
+<strong>roads</strong> (except trunk roads and motorways), public rights of way,
+<strong>education</strong>, <strong>social services</strong> and <strong>libraries</strong>.",
     'COI' => "
 The Council of the Isles is responsible for <strong>education</strong>,
 <strong>housing</strong>, <strong>planning</strong>, <strong>water and
@@ -265,8 +269,10 @@ airport</strong>.
 ",
     'CTY' =>
             "The County Council is responsible for <strong>local
-            services</strong>, including <strong>education</strong>, <strong>social services</strong>, <strong>transport</strong> and
-            <strong>libraries</strong>.",
+services</strong>, including <strong>education</strong>, <strong>social services</strong>,
+<strong>transport</strong>, <strong>roads</strong>
+(except trunk roads and motorways), public rights of way, and
+<strong>libraries</strong>.",
     'LGD' =>
             "The Local Council is responsible for
             <strong>local services</strong>, including 
