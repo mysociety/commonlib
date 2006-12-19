@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin.php,v 1.37 2006-11-24 11:20:40 matthew Exp $
+ * $Id: admin.php,v 1.38 2006-12-19 15:03:35 francis Exp $
  * 
  */
 
@@ -14,8 +14,6 @@ require_once "utility.php";
 require_once "HTML/QuickForm.php";
 require_once "HTML/QuickForm/Rule.php";
 require_once "HTML/QuickForm/Renderer/Default.php";
-
-header("Content-Type: text/html; charset=utf-8");
 
 // Error display
 require_once "../../phplib/error.php";
@@ -36,14 +34,22 @@ function admin_page_display($site_name, $pages, $default = null) {
         } 
         // display
         ob_start();
-        $title = $page->navname . " - $maintitle";
-        admin_html_header($title);
-        print "<h1>$title</h1>";
+        if (isset($page->contenttype)) {
+            header($page->contenttype);
+        } else {
+            header("Content-Type: text/html; charset=utf-8");
+            $title = $page->navname . " - $maintitle";
+            admin_html_header($title);
+            print "<h1>$title</h1>";
+        }
         $self_link = "?page=$id";
         $page->self_link = $self_link;
         $page->display($self_link); # TODO remove this as parameter, use class member
-        admin_html_footer();
+        if (!isset($page->contenttype)) {
+            admin_html_footer();
+        }
     } else {
+        header("Content-Type: text/html; charset=utf-8");
         admin_html_header($maintitle);
         print '<h3>' . $site_name . '</h3>';
         if (!is_null($default)) {
