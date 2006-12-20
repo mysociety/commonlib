@@ -6,7 +6,7 @@
  * Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: urls.php,v 1.3 2006-05-04 12:19:43 chris Exp $
+ * $Id: urls.php,v 1.4 2006-12-20 14:00:48 matthew Exp $
  * 
  */
 
@@ -41,7 +41,7 @@ function url_invoked() {
  * this page was invoked is used. */
 function url_new($page, $retain) {
     if (!isset($page))
-        $page = invoked_url();
+        $page = url_invoked();
     $url = "$page";
 
     $params = array();
