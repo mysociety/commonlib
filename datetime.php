@@ -6,7 +6,7 @@
  * Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: datetime.php,v 1.5 2006-12-12 14:40:26 francis Exp $
+ * $Id: datetime.php,v 1.6 2006-12-20 11:52:02 matthew Exp $
  * 
  */
 
@@ -110,7 +110,7 @@ function datetime_parse_local_date($date, $now, $language, $country) {
     );
     $search = array(); $replace = array();
     foreach ($translate as $english => $foreign) {
-        $search[] = '/\b(' . join('|', $foreign) . ')\b/';
+        $search[] = '/(?:^|\s)(' . join('|', $foreign) . ')(?:\s|$)/';
         $replace[] = $english;
     }
     $date = preg_replace($search, $replace, $date);
