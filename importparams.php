@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: importparams.php,v 1.10 2006-07-15 20:50:51 matthew Exp $
+ * $Id: importparams.php,v 1.11 2007-01-03 18:58:38 matthew Exp $
  * 
  */
 
@@ -137,7 +137,7 @@ function importparams_validate_email($email) {
     if (validate_email($email)) {
         return null;
     } else {
-        return "Please enter a valid email address";
+        return _("Please enter a valid email address");
     }
 }
 
