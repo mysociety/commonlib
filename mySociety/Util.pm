@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Util.pm,v 1.61 2007-01-19 13:22:02 chris Exp $
+# $Id: Util.pm,v 1.62 2007-01-19 13:36:50 chris Exp $
 #
 
 # TODO: Separate out all the daemon and process launching functions
@@ -71,7 +71,7 @@ sub random_bytes ($;$) {
     if (!exists($random_f{$device})) {
         $random_f{$device} = new IO::File($device, O_RDONLY) or die "open $device: $!";
     }
-    $f = $random_f{$device};
+    my $f = $random_f{$device};
 
     my $l = '';
     while (length($l) < $count) {
