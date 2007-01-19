@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Util.pm,v 1.60 2006-12-11 16:38:14 francis Exp $
+# $Id: Util.pm,v 1.61 2007-01-19 13:22:02 chris Exp $
 #
 
 # TODO: Separate out all the daemon and process launching functions
@@ -53,29 +53,33 @@ Various useful functions for applications, without any organising principle.
 
 =over 4
 
-=item random_bytes NUMBER
+=item random_bytes NUMBER [PSEUDORANDOM]
 
-Return the given NUMBER of random bytes from /dev/random.
+Return the given NUMBER of random bytes from /dev/random (or, if PSEUDORANDOM
+is true, from /dev/urandom).
 
 =cut
-sub random_bytes ($) {
-    my ($count) = @_;
+sub random_bytes ($;$) {
+    my $count = shift;
+    my $pseudo = shift;
 
     no utf8;
 
-    our $f;
-    if (!$f) {
-        $f = new IO::File("/dev/random", O_RDONLY) or die "open /dev/random: $!";
+    our %random_f;
+    my $device = $pseudo ? '/dev/urandom' : '/dev/random';
+
+    if (!exists($random_f{$device})) {
+        $random_f{$device} = new IO::File($device, O_RDONLY) or die "open $device: $!";
     }
+    $f = $random_f{$device};
 
     my $l = '';
-
     while (length($l) < $count) {
         my $n = $f->sysread($l, $count - length($l), length($l));
         if (!defined($n)) {
-            die "read /dev/random: $!";
+            die "read $device: $!";
         } elsif (!$n) {
-            die "read /dev/random: EOF (shouldn't happen)";
+            die "read $device: EOF (shouldn't happen)";
         }
     }
 
