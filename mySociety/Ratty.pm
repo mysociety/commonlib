@@ -6,7 +6,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Ratty.pm,v 1.3 2005-01-31 19:14:34 chris Exp $
+# $Id: Ratty.pm,v 1.4 2007-01-25 15:08:47 louise Exp $
 #
 
 package mySociety::Ratty;
@@ -59,3 +59,19 @@ sub test ($$) {
 }
 
 1;
+
+=item admin_delete_rules SCOPE
+
+I<Instance method.> Deletes all rules in the specified SCOPE.
+
+=cut
+
+I<Instance method.> Deletes all rules in the specified SCOPE.
+
+=cut
+sub admin_delete_rules($){
+    my ($scope) = @_;
+    die "SCOPE must be supplied" unless (defined($scope));
+    configure() if (!defined($rabx_client));
+    return $rabx_client->call('Ratty.admin_delete_rules', $scope);
+}
