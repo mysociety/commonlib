@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Alert.pm,v 1.1 2007-01-26 01:01:24 matthew Exp $
+# $Id: Alert.pm,v 1.2 2007-01-26 14:19:42 matthew Exp $
 
 package mySociety::Alert::Error;
 
@@ -128,7 +128,7 @@ sub _send_aggregated_alert_email(%) {
     my $email = mySociety::Email::construct_email({
         _template_ => $template,
         _parameters_ => \%data,
-        From => [mySociety::Config::get('CONTACT_EMAIL'), 'Neighbourhood Fix-It'], # XXX
+        From => [mySociety::Config::get('CONTACT_EMAIL'), mySociety::Config::get('CONTACT_NAME')],
         To => $data{alert_email},
     });
 
@@ -146,15 +146,15 @@ sub _send_aggregated_alert_email(%) {
     }
 }
 
-sub generate_rss ($;@) {
-    my ($type, @params) = @_;
+sub generate_rss ($$;@) {
+    my ($type, $qs, @params) = @_;
     my $url = mySociety::Config::get('BASE_URL');
     my $q = dbh()->prepare('select * from alert_type where ref=?');
     $q->execute($type);
     my $alert_type = $q->fetchrow_hashref;
     throw mySociety::Alert::Error('Unknown alert type') unless $alert_type;
 
-    my $rss = new XML::RSS(version => '1', encoding => 'UTF-8');
+    my $rss = new XML::RSS(version => '0.91', encoding => 'UTF-8', stylesheet=>'/xsl.xsl');
 
     my $query = 'select * from ' . $alert_type->{item_table} . ' where '
         . ($alert_type->{head_table} ? $alert_type->{head_table}.'_id=? and ' : '')
@@ -189,19 +189,12 @@ sub generate_rss ($;@) {
     (my $link = $alert_type->{head_link}) =~ s/{{(.*?)}}/$row->{$1}/g;
     (my $desc = $alert_type->{head_description}) =~ s/{{(.*?)}}/$row->{$1}/g;
     $rss->channel(
-        title => $title, link => $url.$link, description  => $desc,
-#        dc => {
-#            creator    => $CONF{contact_email},
-#            language   => 'en-gb',
-#            ttl        =>  600
-#        },
-#        syn => {
-#            updatePeriod     => "hourly",
-#            updateFrequency  => "2",
-#            updateBase       => "1901-01-01T00:00+00:00",
-#        },
+        title => $title, link => "$url$link?$qs", description  => $desc,
+        language   => 'en-gb'
     );
 
     print CGI->header( -type => 'application/xml; charset=utf-8' );
-    print $rss->as_string;
+    my $out = $rss->as_string;
+    $out =~ s/<\/link>/<\/link>\n<uri>$ENV{SCRIPT_URI}<\/uri>/;
+    print $out;
 }
