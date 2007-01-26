@@ -12,7 +12,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.52 2006-12-08 17:27:13 francis Exp $
+# $Id: WebTestHarness.pm,v 1.53 2007-01-26 12:34:25 louise Exp $
 #
 
 # Overload of WWW::Mechanize
@@ -595,6 +595,7 @@ clicked on from even dodgy email clients.
 sub email_check_url($) {
     my ($self, $url) = @_;
     $url =~ m#^.*/[A-Za-z0-9/]*$# or die "URL contains bad characters for an email: $url";
+    $url =~ s/testharness//; 
     die "URL is too long for an email: $url" if length($url) > 65;
 }
 
