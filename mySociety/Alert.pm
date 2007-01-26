@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Alert.pm,v 1.2 2007-01-26 14:19:42 matthew Exp $
+# $Id: Alert.pm,v 1.3 2007-01-26 22:48:31 matthew Exp $
 
 package mySociety::Alert::Error;
 
@@ -29,6 +29,19 @@ use mySociety::Util;
 # Add a new alert
 sub create ($$;@) {
     my ($email, $alert_type, @params) = @_;
+    my $already = 0;
+    if (0==@params) {
+        ($already) = dbh()->selectrow_array('select id from alert where alert_type=? and email=? limit 1',
+            {}, $alert_type, $email);
+    } elsif (1==@params) {
+        ($already) = dbh()->selectrow_array('select id from alert where alert_type=? and email=? and parameter=? limit 1',
+            {}, $alert_type, $email, @params);
+    } elsif (2==@params) {
+        ($already) = dbh()->selectrow_array('select id from alert where alert_type=? and email=? and parameter=? and parameter2=? limit 1',
+            {}, $alert_type, $email, @params);
+    }
+    return $already if $already;
+
     my $id = dbh()->selectrow_array("select nextval('alert_id_seq');");
     if (0==@params) {
         dbh()->do('insert into alert (id, alert_type, email)
@@ -71,52 +84,52 @@ sub email_alerts () {
         my $ref = $alert_type->{ref};
         my $head_table = $alert_type->{head_table};
         my $item_table = $alert_type->{item_table};
-	my $query = 'select alert.id as alert_id, alert.email as alert_email, ';
-	if ($head_table) {
+        my $query = 'select alert.id as alert_id, alert.email as alert_email, ';
+        if ($head_table) {
             $query .= "
-		   $item_table.id as item_id, $item_table.name as item_name, $item_table.text as item_text,
-		   $head_table.*
-	    from alert
-	        inner join $item_table on alert.parameter = $item_table.${head_table}_id
-		inner join $head_table on alert.parameter = $head_table.id";
-	} elsif ($item_table =~ /nearby/) {
-	    # Okay, perhaps this idea doesn't work very well
-	    # But it should be possible to construct the local problem alert here
-	    # The RSS works
-	} else {
+                   $item_table.id as item_id, $item_table.name as item_name, $item_table.text as item_text,
+                   $head_table.*
+            from alert
+                inner join $item_table on alert.parameter = $item_table.${head_table}_id
+                inner join $head_table on alert.parameter = $head_table.id";
+        } elsif ($item_table =~ /nearby/) {
+            # Okay, perhaps this idea doesn't work very well
+            # But it should be possible to construct the local problem alert here
+            # The RSS works
+        } else {
             $query .= " $item_table.*,
-		   $item_table.id as item_id
-	    from alert, $item_table";
-	}
-	$query .= "
+                   $item_table.id as item_id
+            from alert, $item_table";
+        }
+        $query .= "
             where alert_type='$ref' and whendisabled is null and $item_table.created >= whensubscribed
-	     and (select whenqueued from alert_sent where alert_sent.alert_id = alert.id and alert_sent.parameter = $item_table.id) is null
-	    and $item_table.email <> alert.email and $alert_type->{item_where}
-	    order by alert.id, $item_table.created";
+             and (select whenqueued from alert_sent where alert_sent.alert_id = alert.id and alert_sent.parameter = $item_table.id) is null
+            and $item_table.email <> alert.email and $alert_type->{item_where}
+            order by alert.id, $item_table.created";
         $query = dbh()->prepare($query);
         $query->execute();
-	my $last_alert_id;
-	my %data = ( template => $alert_type->{template}, data => '' );
-	while (my $row = $query->fetchrow_hashref) {
-	    dbh()->do('insert into alert_sent (alert_id, parameter) values (?,?)', {}, $row->{alert_id}, $row->{item_id});
-	    if ($last_alert_id && $last_alert_id != $row->{alert_id}) {
-	        _send_aggregated_alert_email(%data);
-		%data = ( template => $alert_type->{template}, data => '' );
-	    }
-	    if ($row->{item_name}) {
-	        $data{problem_url} = $url . "/?id=" . $row->{id};
+        my $last_alert_id;
+        my %data = ( template => $alert_type->{template}, data => '' );
+        while (my $row = $query->fetchrow_hashref) {
+            dbh()->do('insert into alert_sent (alert_id, parameter) values (?,?)', {}, $row->{alert_id}, $row->{item_id});
+            if ($last_alert_id && $last_alert_id != $row->{alert_id}) {
+                _send_aggregated_alert_email(%data);
+                %data = ( template => $alert_type->{template}, data => '' );
+            }
+            if ($row->{item_name}) {
+                $data{problem_url} = $url . "/?id=" . $row->{id};
                 $data{data} .= $row->{item_name} . ' : ' . $row->{item_text} . "\n\n------\n\n";
-	    } else {
-	        $data{data} .= $url . "/?id=" . $row->{id} . "\n  $row->{title}\n\n";
-	    }
-	    if (!$data{alert_email}) {
-	        %data = (%data, %$row);
-	    }
-	    $last_alert_id = $row->{alert_id};
-	}
-	if ($last_alert_id) {
-	    _send_aggregated_alert_email(%data);
-	}
+            } else {
+                $data{data} .= $url . "/?id=" . $row->{id} . "\n  $row->{title}\n\n";
+            }
+            if (!$data{alert_email}) {
+                %data = (%data, %$row);
+            }
+            $last_alert_id = $row->{alert_id};
+        }
+        if ($last_alert_id) {
+            _send_aggregated_alert_email(%data);
+        }
     }
 }
 
@@ -142,7 +155,7 @@ sub _send_aggregated_alert_email(%) {
         dbh()->commit();
     } else {
         dbh()->rollback();
-	throw mySociety::Alert::Error('Failed to send alert!');
+        throw mySociety::Alert::Error('Failed to send alert!');
     }
 }
 
@@ -159,10 +172,10 @@ sub generate_rss ($$;@) {
     my $query = 'select * from ' . $alert_type->{item_table} . ' where '
         . ($alert_type->{head_table} ? $alert_type->{head_table}.'_id=? and ' : '')
         . $alert_type->{item_where} . ' order by '
-	. $alert_type->{item_order} . ' limit 10';
+        . $alert_type->{item_order} . ' limit 10';
     $q = dbh()->prepare($query);
     if ($query =~ /\?/) {
-	throw mySociety::Alert::Error('Missing parameter') unless @params;
+        throw mySociety::Alert::Error('Missing parameter') unless @params;
         $q->execute(@params);
     } else {
         $q->execute();
