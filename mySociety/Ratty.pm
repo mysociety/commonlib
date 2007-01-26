@@ -6,7 +6,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Ratty.pm,v 1.4 2007-01-25 15:08:47 louise Exp $
+# $Id: Ratty.pm,v 1.5 2007-01-26 10:20:20 louise Exp $
 #
 
 package mySociety::Ratty;
@@ -61,10 +61,6 @@ sub test ($$) {
 1;
 
 =item admin_delete_rules SCOPE
-
-I<Instance method.> Deletes all rules in the specified SCOPE.
-
-=cut
 
 I<Instance method.> Deletes all rules in the specified SCOPE.
 
