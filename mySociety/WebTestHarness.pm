@@ -12,7 +12,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.54 2007-01-29 19:46:06 louise Exp $
+# $Id: WebTestHarness.pm,v 1.55 2007-01-31 11:43:51 louise Exp $
 #
 
 # Overload of WWW::Mechanize
@@ -39,6 +39,7 @@ use File::Find;
 use File::Slurp;
 use File::Temp;
 use File::stat;
+use Fcntl;
 use WWW::Mechanize;
 use Data::Dumper;
 use MIME::QuotedPrint;
@@ -53,6 +54,8 @@ $SIG{__WARN__} = sub { cluck @_ };
 
 # How long have to wait to be sure a mail hasn't arrived
 our $mail_sleep_time = 20;
+# How long to wait for a fax to arrive
+our $fax_sleep_time = 5;
 
 ############################################################################
 # Constructor
@@ -599,6 +602,112 @@ sub email_check_url($) {
     die "URL is too long for an email: $url" if length($url) > 65;
 }
 
+############################################################################
+# Fax
+
+=item fax_setup
+
+Prepares a database table for incoming faxes.
+
+=cut
+sub fax_setup($) {
+    my ($self) = @_;
+    dbh()->do("create table testharness_fax (
+      id serial not null primary key,
+      pages integer not null,
+      sent_to text not null)");
+    dbh()->commit();
+}
+
+=item fax_get_sent_to FAX_NUMBER PAGES
+
+Returns the fax whose sent_to field matches the given FAX_NUMBER and whose
+number of pages is PAGES. It is an error if no matching faxes are found,
+or there is more than one match.
+
+=cut
+sub fax_get_sent_to($$$) {
+    my ($self, $fax_number, $pages) = @_;
+    my $faxes;
+    my $c = 0;
+    my $got = 0;
+
+    while ($got == 0) {
+        $faxes = dbh()->selectall_arrayref("select id from testharness_fax
+            where sent_to = ? and pages = ?", {}, $fax_number, $pages);
+        $got = scalar @$faxes;
+        die "$pages page fax sent to $fax_number not found even after $c sec wait" if ($got == 0 && $c > $fax_sleep_time);
+        die "Too many $pages page faxes found sent to $fax_number" if ($got > 1);
+        $c++;
+        sleep 1;
+    }
+    my ($id) = @{$faxes->[0]};
+
+    # Delete from incoming queue
+    dbh()->do("delete from testharness_fax where id = ?", {}, $id);
+    dbh()->commit();
+    return undef;
+}
+
+=item fax_check_none_left
+
+Dies if there are any faxes left.
+
+=cut
+
+sub fax_check_none_left($) {
+    my ($self) = @_;
+    my $faxes_left = dbh()->selectrow_array("select count(*) from testharness_fax");
+    die "$faxes_left unexpected faxes left" if $faxes_left > 0;
+}
+
+
+=item fax_incoming FAX_NUMBER PAGES PAGEFILES LOG_FAXDIR
+
+Call when a new fax arrives, and its details will be stored for access via
+fax_get_containing. If log_faxdir is set, the fax pages themselves will be
+stored as jpg files in the LOG_FAXDIR directory.
+
+=cut
+sub fax_incoming($$$$$) {
+    my ($self, $fax_number, $pages, $pagefiles, $log_faxdir) = @_;
+    if (defined($log_faxdir)){
+        mkdir($log_faxdir, 0755) if (!-d $log_faxdir) ;
+    }
+    dbh()->do("insert into testharness_fax (sent_to, pages) values (?, ?)", {}, $fax_number, $pages);
+    dbh()->commit();
+
+    # Save image files as jpgs to the logging directory
+    if (defined($log_faxdir)){
+
+        my $tempfile;
+        my $logfile;
+        my $pagenum = 1;
+        my ($p, $pid);
+
+        foreach $tempfile (@$pagefiles){
+            # Pipe the PBM temp file through the ppmtojpeg utility
+            $logfile = $log_faxdir . "/" . $fax_number . "_p" . $pagenum . '.jpg';
+            if (my $f = new IO::File($logfile, O_WRONLY | O_CREAT | O_TRUNC, 0644)){
+                ($p, $pid) = mySociety::Util::pipe_via("ppmtojpeg $tempfile", $f);
+                $f->close() or die "close: $logfile $!";;
+                $p->close() or die "close: $!";
+                waitpid($pid, 0);
+                if ($?) {
+                    # Something went wrong.
+                    if ($? & 127) {
+                        die "ppmtojpeg died with signal " . ($? & 127);
+                    } else {
+                        die "ppmtojpeg exited with status " . ($? >> 8);
+                    }
+                }
+            }else{
+                die "Couldn't create log file of fax page $logfile";
+            }
+        }
+
+    }
+}
 
 ############################################################################
 # PHP functions
