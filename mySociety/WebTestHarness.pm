@@ -12,7 +12,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.55 2007-01-31 11:43:51 louise Exp $
+# $Id: WebTestHarness.pm,v 1.56 2007-01-31 17:31:47 louise Exp $
 #
 
 # Overload of WWW::Mechanize
@@ -688,6 +688,7 @@ sub fax_incoming($$$$$) {
         foreach $tempfile (@$pagefiles){
             # Pipe the PBM temp file through the ppmtojpeg utility
             $logfile = $log_faxdir . "/" . $fax_number . "_p" . $pagenum . '.jpg';
+            ++$pagenum;
             if (my $f = new IO::File($logfile, O_WRONLY | O_CREAT | O_TRUNC, 0644)){
                 ($p, $pid) = mySociety::Util::pipe_via("ppmtojpeg $tempfile", $f);
                 $f->close() or die "close: $logfile $!";;
