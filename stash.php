@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: stash.php,v 1.6 2006-06-19 17:47:03 francis Exp $
+ * $Id: stash.php,v 1.7 2007-01-31 15:48:14 francis Exp $
  * 
  */
 
@@ -104,12 +104,15 @@ function stash_redirect($key) {
 /* stash_check_for_post_redirect
  * If we are in the middle of a POST redirect, stuffs the appropriate
  * data into $_POST. */
+$stash_in_stashpost = false;
 function stash_check_for_post_redirect() {
     /* Are we doing a POST redirect? */
     $key = get_http_var('stashpost');
     if (!$key) {
         return;
     }
+    global $stash_in_stashpost;
+    $stash_in_stashpost = true;
 
     /* Extract the post data */
     list($method, $url, $post_data) = db_getRow_list('select method, url, post_data from requeststash where key = ?', $key);
