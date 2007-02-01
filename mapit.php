@@ -8,7 +8,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: mapit.php,v 1.54 2007-02-01 18:09:25 matthew Exp $
+ * $Id: mapit.php,v 1.55 2007-02-01 18:15:45 francis Exp $
  *
  */
 
@@ -165,11 +165,11 @@ function mapit_get_voting_area_by_location($lat, $lon, $method, $type = null) {
     return $result;
 }
 
-/* mapit_get_voting_area_by_location_en EASTING NORTHING METHOD [TYPE(S)]
+/* mapit_get_voting_area_by_location_en EASTING NORTHING METHOD [TYPE_OR_TYPES]
 
   As get_voting_area_by_location only takes coordinates in EASTINGs and
   NORTHINGs rather than latitude and longitude. */
-function mapit_get_voting_area_by_location_en($easting, $northing, $method, $type = null) {
+function mapit_get_voting_area_by_location_en($easting, $northing, $method, $type_or_types = null) {
     global $mapit_client;
     $params = func_get_args();
     $result = $mapit_client->call('MaPit.get_voting_area_by_location_en', $params);
