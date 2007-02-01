@@ -8,7 +8,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # WWW: http://www.mysociety.org
 #
-# $Id: MaPit.pm,v 1.36 2007-02-01 18:15:45 francis Exp $
+# $Id: MaPit.pm,v 1.37 2007-02-01 18:22:50 francis Exp $
 
 package mySociety::MaPit;
 
