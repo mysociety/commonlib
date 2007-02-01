@@ -8,7 +8,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: news.php,v 1.5 2006-12-07 15:48:29 louise Exp $
+ * $Id: news.php,v 1.6 2007-02-01 17:32:14 francis Exp $
  *
  */
 
@@ -30,7 +30,9 @@ function news_check_error($data) {
         err($error_message);
 }
 
-$news_client = new RABX_Client(OPTION_NEWS_URL);
+if (defined('OPTION_NEWS_URL'))
+    $news_client = new RABX_Client(OPTION_NEWS_URL, 
+        defined('OPTION_NEWS_USERPWD') ? OPTION_NEWS_USERPWD : null);
 
 /* news_get_newspaper ID
 

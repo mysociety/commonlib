@@ -8,7 +8,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: gaze.php,v 1.33 2006-09-28 10:06:41 francis Exp $
+ * $Id: gaze.php,v 1.34 2007-02-01 17:32:14 francis Exp $
  *
  */
 
@@ -30,8 +30,9 @@ function gaze_check_error($data) {
         err($error_message);
 }
 
-$gaze_client = new RABX_Client(OPTION_GAZE_URL, 
-    defined('OPTION_GAZE_USERPWD') ? OPTION_GAZE_USERPWD : null);
+if (defined('OPTION_GAZE_URL'))
+    $gaze_client = new RABX_Client(OPTION_GAZE_URL, 
+        defined('OPTION_GAZE_USERPWD') ? OPTION_GAZE_USERPWD : null);
 
 /* gaze_find_places COUNTRY STATE QUERY [MAXRESULTS [MINSCORE]]
 
@@ -86,6 +87,17 @@ function gaze_get_country_from_ip($address) {
     return $result;
 }
 
+/* gaze_get_coords_from_ip ADDRESS
+
+  Return (lat,lon) of the centre of the country for the given IP address,
+  or undef if none could be found. */
+function gaze_get_coords_from_ip($address) {
+    global $gaze_client;
+    $params = func_get_args();
+    $result = $gaze_client->call('Gaze.get_coords_from_ip', $params);
+    return $result;
+}
+
 /* gaze_get_population_density LAT LON
 
   Return an estimate of the population density at (LAT, LON) in persons per
@@ -107,6 +119,21 @@ function gaze_get_radius_containing_population($lat, $lon, $number, $maximum = n
     global $gaze_client;
     $params = func_get_args();
     $result = $gaze_client->call('Gaze.get_radius_containing_population', $params);
+    return $result;
+}
+
+/* gaze_get_places_near LAT LON [PARAMS]
+
+  Returns a reference to an array of all the places within a given distance
+  of a point expressed as LAT LON. PARAMS include: * DISTANCE to include
+  all results within DISTANCE km * POPULATION to include all results within
+  a circle containing at least POPULATION people * MAXDISTANCE, can be
+  supplied with POPULATION to bound the distance returned * COUNTRY to
+  bound results to one COUNTRY Throws exception on error. */
+function gaze_get_places_near($lat, $lon, $params = null) {
+    global $gaze_client;
+    $params = func_get_args();
+    $result = $gaze_client->call('Gaze.get_places_near', $params);
     return $result;
 }
 

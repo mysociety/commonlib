@@ -8,7 +8,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: dadem.php,v 1.52 2006-09-28 10:06:41 francis Exp $
+ * $Id: dadem.php,v 1.53 2007-02-01 17:32:14 francis Exp $
  *
  */
 
@@ -30,8 +30,9 @@ function dadem_check_error($data) {
         err($error_message);
 }
 
-$dadem_client = new RABX_Client(OPTION_DADEM_URL, 
-    defined('OPTION_DADEM_USERPWD') ? OPTION_DADEM_USERPWD : null);
+if (defined('OPTION_DADEM_URL'))
+    $dadem_client = new RABX_Client(OPTION_DADEM_URL, 
+        defined('OPTION_DADEM_USERPWD') ? OPTION_DADEM_USERPWD : null);
 
 define('DADEM_UNKNOWN_AREA', 3001);        /*    Area ID refers to a non-existent area.  */
 define('DADEM_REP_NOT_FOUND', 3002);        /*    Representative ID refers to a non-existent representative.  */
