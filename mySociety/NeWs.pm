@@ -8,7 +8,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # WWW: http://www.mysociety.org
 #
-# $Id: NeWs.pm,v 1.4 2007-02-01 17:32:14 francis Exp $
+# $Id: NeWs.pm,v 1.5 2007-02-01 18:15:45 francis Exp $
 
 package mySociety::NeWs;
 
