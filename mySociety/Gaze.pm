@@ -8,7 +8,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # WWW: http://www.mysociety.org
 #
-# $Id: Gaze.pm,v 1.25 2006-12-01 16:35:29 matthew Exp $
+# $Id: Gaze.pm,v 1.26 2007-02-01 17:32:14 francis Exp $
 
 package mySociety::Gaze;
 
@@ -121,13 +121,12 @@ sub get_radius_containing_population ($$$;$) {
 
 =item Gaze::get_places_near LAT LON [PARAMS]
 
-  Returns a reference to an array of all the places within a
-  given distance of a point expressed as LAT LON. PARAMS include: *
-  DISTANCE to include all results within DISTANCE km * POPULATION to
-  include all results within a circle containing at least POPULATION people
-  * MAXDISTANCE, can be supplied with POPULATION to bound the distance
-  returned * COUNTRY to bound results to one COUNTRY Throws exception on
-  error.
+  Returns a reference to an array of all the places within a given distance
+  of a point expressed as LAT LON. PARAMS include: * DISTANCE to include
+  all results within DISTANCE km * POPULATION to include all results within
+  a circle containing at least POPULATION people * MAXDISTANCE, can be
+  supplied with POPULATION to bound the distance returned * COUNTRY to
+  bound results to one COUNTRY Throws exception on error.
 
 =cut
 sub get_places_near ($$;$) {

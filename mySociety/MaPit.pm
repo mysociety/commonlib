@@ -8,7 +8,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # WWW: http://www.mysociety.org
 #
-# $Id: MaPit.pm,v 1.34 2006-09-28 10:06:41 francis Exp $
+# $Id: MaPit.pm,v 1.35 2007-02-01 17:32:14 francis Exp $
 
 package mySociety::MaPit;
 
@@ -179,7 +179,7 @@ sub get_voting_area_by_location ($$$;$) {
     return $rabx_client->call('MaPit.get_voting_area_by_location', @_);
 }
 
-=item MaPit::get_voting_area_by_location_en EASTING NORTHING METHOD [TYPE]
+=item MaPit::get_voting_area_by_location_en EASTING NORTHING METHOD [TYPE(S)]
 
   As get_voting_area_by_location only takes coordinates in EASTINGs and
   NORTHINGs rather than latitude and longitude.
