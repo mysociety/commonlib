@@ -6,7 +6,7 @@
 # Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Email.pm,v 1.14 2006-11-09 10:12:42 matthew Exp $
+# $Id: Email.pm,v 1.15 2007-02-06 09:42:45 matthew Exp $
 #
 
 package mySociety::Email::Error;
@@ -215,6 +215,10 @@ Contents of the From: header, as an email address or an [address, name] pair.
 
 Contents of the Cc: header, as for To.
 
+=item Reply-To
+
+Contents of the Reply-To: header, as for To.
+
 =item Subject
 
 Contents of the Subject: header, as a UTF-8 string.
@@ -268,7 +272,7 @@ sub construct_email ($) {
     $hdr{Subject} = mySociety::Email::format_mimewords($p->{Subject});
 
     # To: and Cc: are address-lists.
-    foreach (qw(To Cc)) {
+    foreach (qw(To Cc Reply-To)) {
         next unless (exists($p->{$_}));
 
         if (ref($p->{$_}) eq '') {
