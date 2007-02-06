@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Alert.pm,v 1.4 2007-02-06 17:29:26 matthew Exp $
+# $Id: Alert.pm,v 1.5 2007-02-06 17:31:28 matthew Exp $
 
 package mySociety::Alert::Error;
 
@@ -23,6 +23,7 @@ use FindBin;
 use XML::RSS;
 
 use mySociety::AuthToken;
+use mySociety::Config;
 use mySociety::DBHandle qw(dbh);
 use mySociety::Email;
 use mySociety::Util;
