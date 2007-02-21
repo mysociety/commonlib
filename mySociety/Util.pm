@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Util.pm,v 1.62 2007-01-19 13:36:50 chris Exp $
+# $Id: Util.pm,v 1.63 2007-02-21 23:54:37 francis Exp $
 #
 
 # TODO: Separate out all the daemon and process launching functions
@@ -891,7 +891,7 @@ sub binomial_confidence_interval ($$) {
     my $mean = ($x / $N);
 
     if ($x == 0 || $x == $N) {
-        # One-sided; see note in http://m2.aol.com/johnp71/confint.html
+        # One-sided; see note in http://statpages.org/confint.html
         $alpha *= 2;
     }
 
