@@ -6,7 +6,7 @@
 # Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Email.pm,v 1.15 2007-02-06 09:42:45 matthew Exp $
+# $Id: Email.pm,v 1.16 2007-03-06 13:35:31 matthew Exp $
 #
 
 package mySociety::Email::Error;
@@ -297,13 +297,15 @@ sub construct_email ($) {
         }
     }
 
-    if (exists($p->{From})) {
-        if (ref($p->{From}) eq '') {
-            $hdr{From} = $p->{From}; # XXX check syntax?
-        } elsif (ref($p->{From}) ne 'ARRAY' || @{$p->{From}} != 2) {
-            throw mySociety::Email::Error("'From' field should be string or 2-element array");
+    foreach (qw(From Sender)) {
+        next unless (exists($p->{$_}));
+
+        if (ref($p->{$_}) eq '') {
+            $hdr{$_} = $p->{$_}; # XXX check syntax?
+        } elsif (ref($p->{$_}) ne 'ARRAY' || @{$p->{$_}} != 2) {
+            throw mySociety::Email::Error("'$_' field should be string or 2-element array");
         } else {
-            $hdr{From} = mySociety::Email::format_email_address($p->{From}->[1], $p->{From}->[0]);
+            $hdr{$_} = mySociety::Email::format_email_address($p->{$_}->[1], $p->{$_}->[0]);
         }
     }
 
