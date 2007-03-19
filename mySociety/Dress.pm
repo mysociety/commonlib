@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Dress.pm,v 1.2 2007-03-19 11:23:11 matthew Exp $
+# $Id: Dress.pm,v 1.3 2007-03-19 11:46:51 matthew Exp $
 
 package mySociety::Dress;
 
@@ -33,10 +33,10 @@ my $dbh = DBI->connect($connstr,
 sub find_nearest($$) {
     my ($easting, $northing) = @_;
     my ($id, $distance) = $dbh->selectrow_array("select * from address_find_nearest(?,?)", {}, $easting, $northing);
-    return '' unless $id;
+    return ('',0) unless $id;
     my ($address, $postcode) = $dbh->selectrow_array("select address,postcode from address where id=?", {}, $id);
     $address =~ s/\n/, /g;
-    return sprintf("%s, %s (distance from problem %.0fm)", $address, $postcode, $distance);
+    return ("$address, $postcode", $distance);
 }
 
 1;
