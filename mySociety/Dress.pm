@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Dress.pm,v 1.1 2007-03-19 10:03:25 matthew Exp $
+# $Id: Dress.pm,v 1.2 2007-03-19 11:23:11 matthew Exp $
 
 package mySociety::Dress;
 
@@ -36,7 +36,7 @@ sub find_nearest($$) {
     return '' unless $id;
     my ($address, $postcode) = $dbh->selectrow_array("select address,postcode from address where id=?", {}, $id);
     $address =~ s/\n/, /g;
-    return sprintf("%s, %s (distance %.2fm)", $address, $postcode, $distance);
+    return sprintf("%s, %s (distance from problem %.0fm)", $address, $postcode, $distance);
 }
 
 1;
