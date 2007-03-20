@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Parties.pm,v 1.14 2007-03-19 13:18:03 dademcron Exp $
+# $Id: Parties.pm,v 1.15 2007-03-20 00:08:18 dademcron Exp $
 #
 
 package mySociety::Parties;
@@ -60,6 +60,7 @@ display them with.
     "Lab" => "Labour",
     "Lab/Co-op" => "Labour / Co-operative",
     "Scottish Labour" => "Labour",
+    "Ind Lab" => "Independent Labour",
 
     "LDem" => "Liberal Democrat",
     "Dem" => "Liberal Democrat", # House of Lords
@@ -99,6 +100,8 @@ display them with.
     "Sinn Fein" => "Sinn Féin",
     "Sinn Féin" => "Sinn Féin",
     "Sinn F\x{e9}in" => "Sinn Féin",
+
+    "Solidarity Group" => "Solidarity Group", 
 
     "UK Independence Party" => "UK Independence",
     "UK Independence" => "UK Independence",
