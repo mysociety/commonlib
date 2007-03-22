@@ -1,6 +1,7 @@
 <?php
 header('Content-type: text/html; charset=utf-8');
 
+putenv('HOME=.'); # XXX
 $spellercss = 'spellerStyle.css';
 $word_win_src = 'wordWindow.js';
 $textinputs = $_POST['textinputs']; # array
