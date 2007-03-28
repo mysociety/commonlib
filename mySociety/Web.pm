@@ -6,7 +6,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Web.pm,v 1.14 2006-09-21 18:09:20 matthew Exp $
+# $Id: Web.pm,v 1.15 2007-03-28 14:23:00 matthew Exp $
 #
 
 package mySociety::Web;
@@ -38,7 +38,7 @@ our @EXPORT_OK;
 
 sub ent ($) {
     my $s = shift;
-    return encode_entities($s, '<>&');
+    return encode_entities($s, '<>&"');
 }
 
 =item new [QUERY]
