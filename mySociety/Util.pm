@@ -40,6 +40,10 @@ use mySociety::Sundries;
 use mySociety::SystemMisc;
 use mySociety::TempFiles;
 
+use constant EMAIL_SUCCESS => 0;
+use constant EMAIL_SOFT_ERROR => 1;
+use constant EMAIL_HARD_ERROR => 2;
+
 BEGIN {
     use Exporter ();
     our @ISA = qw(Exporter);
