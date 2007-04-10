@@ -10,6 +10,7 @@ use strict;
 
 use POSIX;
 use IO::Handle;
+use Sys::Syslog;
 
 BEGIN {
     use Exporter ();
