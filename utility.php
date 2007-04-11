@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.78 2007-04-03 08:25:10 francis Exp $
+ * $Id: utility.php,v 1.79 2007-04-11 19:36:09 matthew Exp $
  * 
  */
 
@@ -354,6 +354,8 @@ function prettify($s, $html = true) {
             return date('jS F Y', $e);
         } elseif ($locale_current == 'eo')
             return strftime('la %e-a de %B %Y', $e);
+	elseif ($locale_current == 'zh')
+            return strftime('%Y&#24180;%m&#26376;%d&#26085;', $e);
         return strftime('%e %B %Y', $e);
     }
     if (preg_match('#^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d:\d\d)$#',$s,$m)) {
@@ -368,6 +370,15 @@ function prettify($s, $html = true) {
     }
     if ($s>100000000) {
         # Assume it's an epoch
+        if ($locale_current == 'zh') {
+            $tt = strftime('%H:%M', $s);
+            $t = time();
+            if (strftime('%Y%m%d', $s) == strftime('%Y%m%d', $t))
+                $tt = "$tt " . _('today');
+            else
+                $tt = "$tt, " . strftime('%Y&#24180;%m&#26376;%d&#26085;', $s);
+            return $tt;
+	}
         $tt = strftime('%H:%M', $s);
         $t = time();
         if (strftime('%Y%m%d', $s) == strftime('%Y%m%d', $t))
