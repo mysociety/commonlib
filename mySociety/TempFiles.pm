@@ -9,6 +9,7 @@ use strict;
 
 use Fcntl;
 use IO::File;
+use File::stat;
 use POSIX ();
 
 BEGIN {
