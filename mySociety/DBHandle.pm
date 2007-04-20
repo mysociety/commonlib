@@ -9,7 +9,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: DBHandle.pm,v 1.18 2006-09-22 17:21:37 matthew Exp $
+# $Id: DBHandle.pm,v 1.19 2007-04-20 00:47:19 francis Exp $
 #
 
 package mySociety::DBHandle::Error;
@@ -106,7 +106,7 @@ Return a new handle open on the database.
 
 =cut
 sub new_dbh () {
-    croak "configure not yet called in $$" unless ($mySociety::DBHandle::conf_ok);
+    croak "configure not yet called in new_dbh (pid: $$)" unless ($mySociety::DBHandle::conf_ok);
     my $connstr = 'dbi:Pg:dbname=' . $mySociety::DBHandle::conf{Name};
     $connstr .= ";host=$mySociety::DBHandle::conf{Host}"
         if (exists($mySociety::DBHandle::conf{Host}));
