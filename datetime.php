@@ -6,7 +6,7 @@
  * Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: datetime.php,v 1.6 2006-12-20 11:52:02 matthew Exp $
+ * $Id: datetime.php,v 1.7 2007-04-30 10:05:17 matthew Exp $
  * 
  */
 
@@ -31,6 +31,10 @@ function datetime_parse_local_date($date, $now, $language, $country) {
         $date = preg_replace('#((\b(de|la))|(?<=\d)-?a)\b#','',$date);
     if ($language == 'nl')
         $date = preg_replace('#(?<=\d)e\b#','',$date);
+    if ($language == 'zh') {
+        $date = preg_replace("#\xe5\xb9\xb4|\xe6\x9c\x88#", '/', $date);
+        $date = preg_replace("#\xe6\x97\xa5#", '', $date);
+    }
 
     $date = preg_replace('#^(\d+)\.(\d+)\.(\d+)$#', '$1/$2/$3', $date);
 
@@ -119,7 +123,7 @@ function datetime_parse_local_date($date, $now, $language, $country) {
     $day = null;
     $year = null;
     $month = null;
-    if (preg_match('#(\d+)/(\d+)/(\d+)#',$date,$m)) {
+    if (preg_match('#^(\d{1,2})/(\d{1,2})/(\d{1,4})#',$date,$m)) {
         # XXX: Might be better to offer back ambiguous dates for clarification?
         if ($country == 'US') {
             $day = $m[2]; $month = $m[1];
@@ -129,6 +133,8 @@ function datetime_parse_local_date($date, $now, $language, $country) {
         $year = $m[3];
         if ($year<100) 
             $year += 2000;
+    } elseif (preg_match('#(\d{4})/(\d{1,2})/(\d{1,2})#',$date,$m)) {
+        $year = $m[1]; $day = $m[3]; $month = $m[2];
     } elseif (preg_match('#(\d+)/(\d+)#',$date,$m)) {
         if ($country == 'US') {
                 $day = $m[2]; $month = $m[1];
