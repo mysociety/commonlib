@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: countries.php,v 1.16 2006-09-07 09:01:08 matthew Exp $
+ * $Id: countries.php,v 1.17 2007-05-01 15:21:41 matthew Exp $
  * 
  */
 
@@ -103,6 +103,7 @@ $countries_code_to_name = array(
     "GR" => _("Greece"),
     "GL" => _("Greenland"),
     "GD" => _("Grenada"),
+    'GG' => _('Guernsey'),
     "GP" => _("Guadeloupe"),
     "GU" => _("Guam"),
     "GT" => _("Guatemala"),
@@ -121,7 +122,9 @@ $countries_code_to_name = array(
     "IQ" => _("Iraq"),
     "IE" => _("Ireland"),
     "IL" => _("Israel"),
+    'IM' => _('Isle of Man'),
     "IT" => _("Italy"),
+    'JE' => _('Jersey'),
     "JM" => _("Jamaica"),
     "JP" => _("Japan"),
     "JO" => _("Jordan"),
@@ -424,7 +427,7 @@ $countries_code_to_name_with_from_fr = array(
     'HM' => 'des',
     'HN' => 'du',
     'HK' => 'de',
-    'HU' => 'de la\'',
+    'HU' => 'd\'',
     'IS' => 'de l\'',
     'IN' => 'de l\'',
     'ID' => 'de l\'',
@@ -565,6 +568,9 @@ $countries_code_to_name_with_from_fr = array(
     'YE' => 'du',
     'ZM' => 'de la',
     'ZW' => 'du',
+    'GG' => 'de',
+    'IM' => 'de l\'',
+    'JE' => 'de',
 );
 $countries_code_to_name_with_to_fr = array(
     'AF' => 'en',
@@ -807,6 +813,9 @@ $countries_code_to_name_with_to_fr = array(
     'YE' => 'au',
     'ZM' => 'en',
     'ZW' => 'au',
+    'GG' => 'à',
+    'IM' => 'à l\'',
+    'JE' => 'à',
 );
 $countries_code_to_name_with_in_fr = array(
     'AF' => 'en',
@@ -1049,6 +1058,9 @@ $countries_code_to_name_with_in_fr = array(
     'YE' => 'au',
     'ZM' => 'en',
     'ZW' => 'au',
+    'GG' => 'à',
+    'IM' => 'à l\'',
+    'JE' => 'à',
 );
 
 /* countries_sort CODE_A CODE_B
