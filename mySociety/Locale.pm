@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Locale.pm,v 1.1 2007-05-01 15:02:52 matthew Exp $
+# $Id: Locale.pm,v 1.2 2007-05-01 15:06:33 matthew Exp $
 
 package mySociety::Locale;
 
@@ -64,7 +64,7 @@ sub change(;$) {
     $l = $lang if $l eq "";
     return if $l eq $current;
     my $os_locale = $langmap{$l}.'.UTF-8';
-    $ENV{LANGUAGE} = $os_locale; # clear this if set
+    delete $ENV{LANGUAGE}; # clear this if set
     $ENV{LANG} = $os_locale;
     my $ret = POSIX::setlocale(LC_ALL, $os_locale);
     die "setlocale failed for $os_locale" if $ret ne $os_locale;
