@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Alert.pm,v 1.6 2007-02-21 23:59:45 francis Exp $
+# $Id: Alert.pm,v 1.7 2007-05-04 00:04:07 matthew Exp $
 
 package mySociety::Alert::Error;
 
@@ -26,6 +26,7 @@ use mySociety::AuthToken;
 use mySociety::Config;
 use mySociety::DBHandle qw(dbh);
 use mySociety::Email;
+use mySociety::GeoUtil;
 use mySociety::Util;
 
 # Add a new alert
@@ -170,7 +171,8 @@ sub generate_rss ($$;@) {
     my $alert_type = $q->fetchrow_hashref;
     throw mySociety::Alert::Error('Unknown alert type') unless $alert_type;
 
-    my $rss = new XML::RSS(version => '0.91', encoding => 'UTF-8', stylesheet=>'/xsl.xsl');
+    my $rss = new XML::RSS(version => '2.0', encoding => 'UTF-8', stylesheet=>'/xsl.xsl');
+    $rss->add_module(prefix=>'georss', uri=>'http://www.georss.org/georss');
 
     my $query = 'select * from ' . $alert_type->{item_table} . ' where '
         . ($alert_type->{head_table} ? $alert_type->{head_table}.'_id=? and ' : '')
@@ -188,7 +190,16 @@ sub generate_rss ($$;@) {
         (my $title = $alert_type->{item_title}) =~ s/{{(.*?)}}/$row->{$1}/g;
         (my $link = $alert_type->{item_link}) =~ s/{{(.*?)}}/$row->{$1}/g;
         (my $desc = $alert_type->{item_description}) =~ s/{{(.*?)}}/$row->{$1}/g;
-        $rss->add_item( title => $title, link => $url.$link, description=> $desc );
+        my %item = (
+            title => $title,
+            link => $url . $link,
+            description => $desc
+        );
+        if ($row->{easting} && $row->{northing}) {
+            my ($lat,$lon) = mySociety::GeoUtil::national_grid_to_wgs84($row->{easting}, $row->{northing}, 'G');
+            $item{georss} = { point => "$lat $lon" };
+        }
+        $rss->add_item( %item );
     }
 
     my $row = {};
