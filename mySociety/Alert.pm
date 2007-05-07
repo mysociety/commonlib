@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Alert.pm,v 1.11 2007-05-07 11:11:36 matthew Exp $
+# $Id: Alert.pm,v 1.12 2007-05-07 18:49:14 matthew Exp $
 
 package mySociety::Alert::Error;
 
@@ -108,7 +108,7 @@ sub email_alerts () {
             where alert_type='$ref' and whendisabled is null and $item_table.created >= whensubscribed
              and (select whenqueued from alert_sent where alert_sent.alert_id = alert.id and alert_sent.parameter = $item_table.id) is null
             and $item_table.email <> alert.email and $alert_type->{item_where}
-            and confirmed = 1
+            and alert.confirmed = 1
             order by alert.id, $item_table.created";
         $query = dbh()->prepare($query);
         $query->execute();
