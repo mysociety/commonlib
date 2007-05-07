@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Alert.pm,v 1.9 2007-05-04 21:35:36 matthew Exp $
+# $Id: Alert.pm,v 1.10 2007-05-07 11:09:52 matthew Exp $
 
 package mySociety::Alert::Error;
 
@@ -108,6 +108,7 @@ sub email_alerts () {
             where alert_type='$ref' and whendisabled is null and $item_table.created >= whensubscribed
              and (select whenqueued from alert_sent where alert_sent.alert_id = alert.id and alert_sent.parameter = $item_table.id) is null
             and $item_table.email <> alert.email and $alert_type->{item_where}
+            and confirmed = 't'
             order by alert.id, $item_table.created";
         $query = dbh()->prepare($query);
         $query->execute();
@@ -121,7 +122,7 @@ sub email_alerts () {
             }
             if ($row->{item_text}) {
                 $data{problem_url} = $url . "/?id=" . $row->{id};
-		$data{data} .= $row->{item_name} . ' : ' if $row->{item_name};
+                $data{data} .= $row->{item_name} . ' : ' if $row->{item_name};
                 $data{data} .= $row->{item_text} . "\n\n------\n\n";
             } else {
                 $data{data} .= $url . "/?id=" . $row->{id} . "\n  $row->{title}\n\n";
@@ -160,7 +161,7 @@ sub _send_aggregated_alert_email(%) {
         dbh()->commit();
     } else {
         dbh()->rollback();
-        throw mySociety::Alert::Error('Failed to send alert!');
+        throw mySociety::Alert::Error("Failed to send alert $data{alert_id}!");
     }
 }
 
