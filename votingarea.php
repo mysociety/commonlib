@@ -8,7 +8,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: votingarea.php,v 1.45 2006-12-19 12:23:30 matthew Exp $
+ * $Id: votingarea.php,v 1.46 2007-05-08 12:49:29 matthew Exp $
  * 
  */
 
@@ -303,16 +303,12 @@ The National Assembly for Wales has a wide range of powers over areas including
 <strong>health</strong>, <strong>housing</strong> and <strong>the Welsh
 Language</strong>.
 ",
-    'NIA' => "
-The Northern Ireland Assembly is currently suspended, and at the moment the
-<a href=\"http://www.nics.gov.uk/gov.htm\">Northern Ireland government
-departments</a> are discharging its responsibilities. When the Assembly is
-sitting, it has full authority over \"transferred matters\", which include
-<strong>agriculture</strong>, <strong>education</strong>,
+    'NIA' => '
+The Northern Ireland Assembly has full authority over "transferred matters",
+which include <strong>agriculture</strong>, <strong>education</strong>,
 <strong>employment</strong>, the <strong>environment</strong> and
-<strong>health</strong>. Although the Assembly is suspended, members of the
-Assembly have been elected and you can contact them.
-"
+<strong>health</strong>.
+'
     );
 
 /* va_is_fictional_area ID
