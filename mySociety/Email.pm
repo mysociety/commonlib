@@ -6,7 +6,7 @@
 # Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Email.pm,v 1.17 2007-05-08 16:42:50 matthew Exp $
+# $Id: Email.pm,v 1.18 2007-05-08 19:08:57 matthew Exp $
 #
 
 package mySociety::Email::Error;
@@ -35,7 +35,8 @@ byte string of the encoded text.
 =cut
 sub encode_string ($) {
     my $s = shift;
-    die "STRING is not valid UTF-8" unless utf8::decode($s);
+    utf8::decode($s) unless utf8::is_utf8($s);
+    die "STRING is not valid UTF-8" unless utf8::is_utf8($s);
 
     foreach my $encoding (qw(
                     us-ascii
