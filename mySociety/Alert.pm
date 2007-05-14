@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Alert.pm,v 1.12 2007-05-07 18:49:14 matthew Exp $
+# $Id: Alert.pm,v 1.13 2007-05-14 22:12:36 matthew Exp $
 
 package mySociety::Alert::Error;
 
@@ -110,6 +110,9 @@ sub email_alerts () {
             and $item_table.email <> alert.email and $alert_type->{item_where}
             and alert.confirmed = 1
             order by alert.id, $item_table.created";
+        if ($query =~ /\?/) {
+            $query =~ s/\?/alert.parameter/;
+        }
         $query = dbh()->prepare($query);
         $query->execute();
         my $last_alert_id;
