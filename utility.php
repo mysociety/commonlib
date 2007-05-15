@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.79 2007-04-11 19:36:09 matthew Exp $
+ * $Id: utility.php,v 1.80 2007-05-15 19:45:07 francis Exp $
  * 
  */
 
@@ -304,7 +304,7 @@ function ms_make_clickable($ret, $params = array()) {
     $ret = preg_replace("#(\s)www\.([a-z0-9\-]+)((?:\.[a-z0-9\-\~]+)+)((?:/[^ <>{}()\n\r]*[^., <>{}()\n\r])?)#i", 
                 "$1<a href='http://www.$2$3$4'" . ($nofollow ? " rel='nofollow'" : "") . ">www.$2$3$4</a>", $ret);
     if ($contract)
-        $ret = preg_replace("#(<a href='[^']*'(?: rel='nofollow')?>)([^<]{40})[^<]*?</a>#", '$1$2...</a>', $ret);
+        $ret = preg_replace("#(<a href='[^']*'(?: rel='nofollow')?>)([^<]{40})[^<]{3,}</a>#", '$1$2...</a>', $ret);
     $ret = preg_replace("#(\s)([a-z0-9\-_.]+)@([^,< \n\r]*[^.,< \n\r])#i", "$1<a href=\"mailto:$2@$3\">$2@$3</a>", $ret);
     $ret = trim($ret);
     return $ret;
