@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Alert.pm,v 1.13 2007-05-14 22:12:36 matthew Exp $
+# $Id: Alert.pm,v 1.14 2007-05-15 18:42:15 matthew Exp $
 
 package mySociety::Alert::Error;
 
@@ -28,6 +28,7 @@ use mySociety::DBHandle qw(dbh);
 use mySociety::Email;
 use mySociety::GeoUtil;
 use mySociety::Util;
+use mySociety::Web qw(ent);
 
 # Add a new alert
 sub create ($$;@) {
@@ -176,7 +177,9 @@ sub generate_rss ($$;@) {
     my $alert_type = $q->fetchrow_hashref;
     throw mySociety::Alert::Error('Unknown alert type') unless $alert_type;
 
-    my $rss = new XML::RSS(version => '2.0', encoding => 'UTF-8', stylesheet=>'/xsl.xsl');
+    # Do our own encoding
+    my $rss = new XML::RSS( version => '2.0', encoding => 'UTF-8',
+        stylesheet=>'/xsl.xsl', encode_output => undef );
     $rss->add_module(prefix=>'georss', uri=>'http://www.georss.org/georss');
 
     my $query = 'select * from ' . $alert_type->{item_table} . ' where '
@@ -196,10 +199,15 @@ sub generate_rss ($$;@) {
         (my $link = $alert_type->{item_link}) =~ s/{{(.*?)}}/$row->{$1}/g;
         (my $desc = $alert_type->{item_description}) =~ s/{{(.*?)}}/$row->{$1}/g;
         my %item = (
-            title => $title,
+            title => ent($title),
             link => $url . $link,
-            description => $desc
+            guid => $url . $link,
+            description => ent(ent($desc)) # Yes, double-encoded, really.
         );
+        # XXX: Not-very-generic extensions
+        if ($row->{photo}) {
+            $item{description} .= ent("\n<br><img src=\"$url/photo?id=$row->{id}\">");
+        }
         if ($row->{easting} && $row->{northing}) {
             my ($lat,$lon) = mySociety::GeoUtil::national_grid_to_wgs84($row->{easting}, $row->{northing}, 'G');
             $item{georss} = { point => "$lat $lon" };
@@ -221,12 +229,11 @@ sub generate_rss ($$;@) {
     (my $link = $alert_type->{head_link}) =~ s/{{(.*?)}}/$row->{$1}/g;
     (my $desc = $alert_type->{head_description}) =~ s/{{(.*?)}}/$row->{$1}/g;
     $rss->channel(
-        title => $title, link => "$url$link?$qs", description  => $desc,
+        title => ent($title), link => "$url$link?$qs", description  => ent($desc),
         language   => 'en-gb'
     );
 
     print CGI->header( -type => 'application/xml; charset=utf-8' );
     my $out = $rss->as_string;
-    $out =~ s/<\/link>/<\/link>\n<uri>$ENV{SCRIPT_URI}<\/uri>/;
     print $out;
 }
