@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Locale.pm,v 1.3 2007-05-01 15:32:56 matthew Exp $
+# $Id: Locale.pm,v 1.4 2007-05-16 10:55:46 matthew Exp $
 
 package mySociety::Locale;
 
@@ -41,7 +41,7 @@ sub negotiate_language($;$) {
         my ($code, $verbose, $locale) = split /,/, $opt_lang;
         $langs{$code} = $verbose;
         $langmap{$code} = $locale;
-	push @$variants, [$code, undef, undef, undef, undef, $code, undef];
+        push @$variants, [$code, undef, undef, undef, undef, $code, undef];
     }
     if ($override_language && $langs{$override_language}) {
         $lang = $override_language;
