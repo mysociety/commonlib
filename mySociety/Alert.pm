@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Alert.pm,v 1.17 2007-05-18 18:58:21 matthew Exp $
+# $Id: Alert.pm,v 1.18 2007-05-18 19:04:59 matthew Exp $
 
 package mySociety::Alert::Error;
 
@@ -233,7 +233,7 @@ sub generate_rss ($$;@) {
         language   => 'en-gb'
     );
 
-    print CGI->header( -type => 'application/xml' );
+    print CGI->header( -type => 'application/xml; charset=utf-8' );
     my $out = $rss->as_string;
     print $out;
 }
