@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: person.php,v 1.22 2007-05-28 10:49:19 francis Exp $
+ * $Id: person.php,v 1.23 2007-05-28 22:38:04 francis Exp $
  * 
  */
 
@@ -43,7 +43,7 @@ class Person {
      * their account. */
     function Person($id) {
         if (preg_match('/@/', $id))
-            $this->id = db_getOne('select id from person where email = ? for update', $email);
+            $this->id = db_getOne('select id from person where lower(email = ?) for update', strtolower($email));
         else if (preg_match('/^[1-9]\d*$/', $id))
             $this->id = db_getOne('select id from person where id = ? for update', $id);
         else
@@ -252,7 +252,7 @@ function person_already_signed_on($email, $name, $person_if_signed_on_function) 
         $P = $person_if_signed_on_function();
     else
         $P = person_if_signed_on();
-    if (!is_null($P) && (is_null($email) || $P->email() == $email)) {
+    if (!is_null($P) && (is_null($email) || strtolower($P->email()) == strtolower($email))) {
         if (!is_null($name) && !$P->matches_name($name))
             $P->name($name);
         return $P;
@@ -362,7 +362,7 @@ function person_make_signon_url($data, $email, $method, $url, $params, $url_base
  * Return a person object for the account with the given EMAIL address, if one
  * exists, or null otherwise. */
 function person_get($email) {
-    $id = db_getOne('select id from person where email = ? for update', $email);
+    $id = db_getOne('select id from person where lower(email) = ? for update', strtolower($email));
     if (is_null($id))
         return null;
     else
@@ -376,8 +376,7 @@ function person_get($email) {
 function person_get_or_create($email, $name = null) {
     if (is_null($email))
         err('EMAIL null in person_get_or_create');
-        /* XXX case-insensitivity of email addresses? */
-    $id = db_getOne('select id from person where email = ?', $email);
+    $id = db_getOne('select id from person where lower(email) = ?', strtolower($email));
     if (is_null($id)) {
         db_query('lock table person in share mode');    /* Guard against double-insert. */
         $id = db_getOne("select nextval('person_id_seq')");
