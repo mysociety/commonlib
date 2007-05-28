@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: stash.php,v 1.7 2007-01-31 15:48:14 francis Exp $
+ * $Id: stash.php,v 1.8 2007-05-28 10:49:19 francis Exp $
  * 
  */
 
@@ -15,26 +15,28 @@ require_once 'utility.php';
 
 require_once 'db.php';
 
-/* stash_request [EXTRA]
+/* stash_request [EXTRA] [EMAIL]
  * Stash details of the request (i.e., method, URL, and any URL-encoded form
  * parameters in the content) in the database, and return a key for the stashed
- * data. EXTRA is an optional extra string stored with the stashed request. */
-function stash_request($extra = null) {
+ * data. EXTRA is an optional extra string stored with the stashed request. 
+ * EMAIL is also stored, and can be used to substitute for another email in
+ * stash_redirect if they change email on te login screen. */
+function stash_request($extra = null, $email = null) {
     $url = url_invoked();
     if (!is_null($_SERVER['QUERY_STRING']))
         $url .= "?${_SERVER['QUERY_STRING']}";
     $v = null;
     if ($_SERVER['REQUEST_METHOD'] == 'POST')
         $v = $_POST;
-    return stash_new_request($_SERVER['REQUEST_METHOD'], $url, $v, $extra);
+    return stash_new_request($_SERVER['REQUEST_METHOD'], $url, $v, $extra, $email);
 }
 
-/* stash_new_request METHOD URL PARAMS [EXTRA]
+/* stash_new_request METHOD URL PARAMS [EXTRA] [EMAIL]
  * Return a stash key for a new METHOD request to URL with the given PARAMS.
  * If METHOD is "GET", and PARAMS is not null, then any query part of URL will
  * be reconstructed from the variables.  This function lets you create a stash
  * which represents that request, rather than the current one. */
-function stash_new_request($method, $url, $params, $extra = null) {
+function stash_new_request($method, $url, $params, $extra = null, $email = null) {
     $key = bin2hex(random_bytes(8));
     if ($method == 'GET' || $method == 'HEAD') {
         if (!is_null($params)) {
@@ -50,16 +52,16 @@ function stash_new_request($method, $url, $params, $extra = null) {
             }
         }
         db_query('
-                insert into requeststash (key, method, url, extra)
-                values (?, ?, ?, ?)',
-                array($key, 'GET', $url, $extra));
+                insert into requeststash (key, method, url, extra, email)
+                values (?, ?, ?, ?, ?)',
+                array($key, 'GET', $url, $extra, $email));
     } else if ($method == 'POST') {
         $ser = '';
         rabx_wire_wr($params, $ser);
         db_query('
-                insert into requeststash (key, method, url, post_data, extra)
-                values (?, ?, ?, ?, ?)',
-                array($key, 'POST', $url, $ser, $extra));
+                insert into requeststash (key, method, url, post_data, extra, email)
+                values (?, ?, ?, ?, ?, ?)',
+                array($key, 'POST', $url, $ser, $extra, $email));
     } else
         err("Cannot stash request for method '$method'");
 
@@ -73,12 +75,33 @@ function stash_new_request($method, $url, $params, $extra = null) {
     return $key;
 }
 
-/* stash_redirect KEY
+/* stash_redirect KEY [EMAIL FUNCTION]
  * Redirect the user (either by means of an HTTP redirect, for a GET request,
  * or by constructing a form, for a POST request) into the context of the
- * stashed request identified by KEY. */
-function stash_redirect($key) {
-    list($method, $url, $post_data) = db_getRow_list('select method, url, post_data from requeststash where key = ?', $key);
+ * stashed request identified by KEY. If EMAIL is present, then any email
+ * address in the original stashed request (as set with the EMAIL parameter
+ * to stash_request) is replaced with EMAIL using FUNCTION. */
+function stash_redirect($key, $email = NULL, $function = NULL) {
+    list($method, $url, $post_data, $old_email) = db_getRow_list('select method, url, post_data, email from requeststash where key = ?', $key);
+
+    if ($email && $old_email) {
+        // For if they changed email address on login screen
+        $post_data = pg_unescape_bytea($post_data);
+        $pos = 0;
+        $params = rabx_wire_rd(&$post_data, &$pos);
+        if (rabx_is_error($params))
+            err("Bad serialised POST data in stash_redirect('$key')");
+        $params = call_user_func($function, $params, $old_email, $email); 
+        $new_post_data = '';
+        rabx_wire_wr($params, $new_post_data);
+
+        if ($post_data != $new_post_data) {
+            $post_data = $new_post_data;
+            db_query('update requeststash set post_data = ? where key = ?', $post_data, $key);
+            db_commit(); # XXX sure this won't do any harm?
+        }
+    }
+
     if (is_null($method))
         err(_("If you got the email more than a year ago, then your request has probably expired.  Please try doing what you were doing from the beginning."));
     if (headers_sent())

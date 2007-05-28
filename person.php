@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: person.php,v 1.21 2006-11-13 22:56:53 francis Exp $
+ * $Id: person.php,v 1.22 2007-05-28 10:49:19 francis Exp $
  * 
  */
 
@@ -315,7 +315,7 @@ function person_signon($template_data, $email = null, $name = null, $person_if_s
         $send_email_part = '';
     /* No or invalid cookie. We will need to redirect the user via another
      * page, either to log in or to prove their email address. */
-    $st = stash_request(rabx_serialise($template_data));
+    $st = stash_request(rabx_serialise($template_data), $email);
     db_commit();
     if ($email)
         $email_part = "&email=" . urlencode($email);
