@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: person.php,v 1.23 2007-05-28 22:38:04 francis Exp $
+ * $Id: person.php,v 1.24 2007-05-29 18:09:16 matthew Exp $
  * 
  */
 
@@ -43,7 +43,7 @@ class Person {
      * their account. */
     function Person($id) {
         if (preg_match('/@/', $id))
-            $this->id = db_getOne('select id from person where lower(email = ?) for update', strtolower($email));
+            $this->id = db_getOne('select id from person where lower(email) = ? for update', strtolower($email));
         else if (preg_match('/^[1-9]\d*$/', $id))
             $this->id = db_getOne('select id from person where id = ? for update', $id);
         else
