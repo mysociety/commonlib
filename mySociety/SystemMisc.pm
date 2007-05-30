@@ -132,6 +132,8 @@ sub printf_log ($$@) {
     print_log($pri, $str);
 }
 
+# XXX remove this function, no longer used in E Petitions. Too complicated
+# for me to get it to work reliably. Used elsewhere?
 =item manage_child_processes SPEC [SIGNALS]
 
 Manage a set of child processes according to the SPEC. SPEC is a reference to
