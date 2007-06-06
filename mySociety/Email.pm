@@ -6,7 +6,7 @@
 # Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Email.pm,v 1.20 2007-06-06 13:36:03 matthew Exp $
+# $Id: Email.pm,v 1.21 2007-06-06 22:05:41 matthew Exp $
 #
 
 package mySociety::Email::Error;
@@ -23,6 +23,7 @@ use Encode;
 use Encode::Byte;   # iso-8859-* etc.
 use Error qw(:try);
 use MIME::QuotedPrint;
+use MIME::Base64;
 use POSIX qw();
 use Text::Wrap qw();
 
@@ -56,39 +57,71 @@ sub encode_string ($) {
     die "Unable to encode STRING in any supported encoding (shouldn't happen)";
 }
 
+my $qpchars = '\x00-\x1f\x7f-\xff?_="(),.:;<>@[\\]';
+
 =item format_mimewords STRING EMAIL
 
 Return STRING, formatted for inclusion in an email header.
 Set EMAIL if being used in a mailbox header, e.g. From or To.
 
+With help from http://mail.nl.linux.org/linux-utf8/2002-01/msg00242.html
+
 =cut
 sub format_mimewords ($;$) {
     my ($text, $email) = @_;
     
-    my ($encoding, $octets) = encode_string($text);
-    if ($encoding eq 'us-ascii') {
+    my ($charset, $octets) = encode_string($text);
+    if ($charset eq 'us-ascii') {
         return $text;
     } else {
-        # This is unpleasant. Whitespace which separates two encoded-words is
-        # not significant, so we need to fold it in to one of them. Rather than
-        # having some complicated state-machine driven by words, just encode
-        # the whole line if it contains any non-ASCII characters.
-        if ($email) {
-            # Restricted list for phrase replacements, makes sure they're
-            # more restricted than atoms? (RFC 2047, section 5(3) )
-            $octets =~ s#([\x00-\x1f\x7f-\xff?_="\#\$%&'(),.:;<>@[\\\]^`{|}~])#sprintf('=%02X', ord($1))#ge;
-        } else {
-            # Encode anything that's not in an RFC 2822 atom. RFC 2047 is
-            # unclear here - it says encoded words should be parsed as atoms,
-            # but also says encoded words can contain any printable ASCII
-            # except "?" and " " (plus "_", "=" for Q-encoding)
-            $octets =~ s#([\x00-\x1f\x7f-\xff?_="(),.:;<>@[\\\]])#sprintf('=%02X', ord($1))#ge;
-        }
-        $octets =~ s/\s/_/g;
-        $octets = "=?$encoding?Q?$octets?=";
-        # XXX Quoted strings more than 75 bytes long need to be split up,
-        # but *not* in the middle of wide characters! :-/
-        utf8::decode($octets);
+        my $encoding = length($octets) > 3*(eval "\$octets =~ tr/$qpchars//") ? 'Q' : 'B';
+        my $max = $encoding eq 'B'
+            ? int((75-7-length($charset))/4)*3-4 # Exclude delimiters, 4:3 always
+            : int((75-7-length($charset))/3)-4;  # Exclude delimiters, 3:1 worst case
+
+        my ($last_token, $last_word_encoded, $token) = ('', 0);
+        $octets =~ s{(\S+|\s+)}{
+            $token = $1;
+            if ($token =~ /\s+/) {
+                $last_token = $token;
+            } else {
+                if ($token !~ /[\x00-\x1f\x7f-\xff]/) {
+                    $last_word_encoded = 0;
+                    $last_token = $token;
+                } else {
+                    my $tok = $last_token =~ /\s+/ && $last_word_encoded ? $last_token.$token : $token;
+                    $tok =~ s{(.{1,$max}[\x80-\xBF]{0,4})}{
+                        my $text = $1;
+                        if ($encoding eq 'Q') {
+                            if ($email) {
+                                # Restricted list for phrase replacements, makes sure they're
+                                # more restricted than atoms? (RFC 2047, section 5(3) )
+                                $text =~ s#([$qpchars\#\$%&'^`{|}~])#sprintf('=%02X', ord($1))#ge;
+                            } else {
+                                # Encode anything that's not in an RFC 2822 atom. RFC 2047 is
+                                # unclear here - it says encoded words should be parsed as atoms,
+                                # but also says encoded words can contain any printable ASCII
+                                # except "?" and " " (plus "_", "=" for Q-encoding)
+                                $text =~ s#([$qpchars])#sprintf('=%02X', ord($1))#ge;
+                            }
+                            $text =~ s/\s/_/g;
+                        } else {
+                            $text = encode_base64($text, '');
+                        }
+                        "=?$charset?$encoding?$text?= ";
+                    }seg;
+                    $tok = substr($tok, 0, -1);
+                    $last_word_encoded = 1;
+                    $last_token = $token;
+                    $tok;
+                }
+            }
+        }seg;
+        local($Text::Wrap::columns = 75);
+        local($Text::Wrap::huge = 'overflow');
+        local($Text::Wrap::unexpand = 0);
+        $octets = Text::Wrap::wrap('', ' ', $octets);
+        $octets =~ s/\?= =\?$charset\?$encoding\?//g;
         return $octets;
     }
 }
@@ -341,7 +374,7 @@ sub construct_email ($) {
         # No caller should introduce a header with a linebreak in it, but just
         # in case they do, strip them out.
         my $h = $hdr{$_};
-        $h =~ s/\r?\n/ /gs;
+        $_ eq 'Subject' ? $h =~ s/(\r?\n)(?! )/$1 /gs : $h =~ s/\r?\n/ /gs;
         $text .= "$_: $h\n";
     }
 
