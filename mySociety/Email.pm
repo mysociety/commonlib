@@ -6,7 +6,7 @@
 # Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Email.pm,v 1.19 2007-05-08 19:12:48 matthew Exp $
+# $Id: Email.pm,v 1.20 2007-06-06 13:36:03 matthew Exp $
 #
 
 package mySociety::Email::Error;
@@ -56,13 +56,14 @@ sub encode_string ($) {
     die "Unable to encode STRING in any supported encoding (shouldn't happen)";
 }
 
-=item format_mimewords STRING
+=item format_mimewords STRING EMAIL
 
 Return STRING, formatted for inclusion in an email header.
+Set EMAIL if being used in a mailbox header, e.g. From or To.
 
 =cut
-sub format_mimewords ($) {
-    my ($text) = @_;
+sub format_mimewords ($;$) {
+    my ($text, $email) = @_;
     
     my ($encoding, $octets) = encode_string($text);
     if ($encoding eq 'us-ascii') {
@@ -71,19 +72,22 @@ sub format_mimewords ($) {
         # This is unpleasant. Whitespace which separates two encoded-words is
         # not significant, so we need to fold it in to one of them. Rather than
         # having some complicated state-machine driven by words, just encode
-        # the whole line if it contains any non-ASCII characters. However, this
-        # is going to suck whatever happens, because we can't include a blank
-        # in a quoted-printable MIME-word, so we have to encode it as =20 or
-        # whatever, so this is still going to be near-unreadable for users
-        # whose MUAs suck at MIME.
-        #
-        # We also encode characters which are ASCII but are not valid in
-        # atoms in RFC 2822 (see below in format_email_address), so that we
-        # avoid having to encode *and* quote a real name in an email address.
-        # Again this means we encode more characters than we need to, but
-        # that's life.
-        $octets =~ s#(\s|[\x00-\x1f\x7f-\xff"\$%'(),.:;<>@\[\]\\])#sprintf('=%02x', ord($1))#ge;
+        # the whole line if it contains any non-ASCII characters.
+        if ($email) {
+            # Restricted list for phrase replacements, makes sure they're
+            # more restricted than atoms? (RFC 2047, section 5(3) )
+            $octets =~ s#([\x00-\x1f\x7f-\xff?_="\#\$%&'(),.:;<>@[\\\]^`{|}~])#sprintf('=%02X', ord($1))#ge;
+        } else {
+            # Encode anything that's not in an RFC 2822 atom. RFC 2047 is
+            # unclear here - it says encoded words should be parsed as atoms,
+            # but also says encoded words can contain any printable ASCII
+            # except "?" and " " (plus "_", "=" for Q-encoding)
+            $octets =~ s#([\x00-\x1f\x7f-\xff?_="(),.:;<>@[\\\]])#sprintf('=%02X', ord($1))#ge;
+        }
+        $octets =~ s/\s/_/g;
         $octets = "=?$encoding?Q?$octets?=";
+        # XXX Quoted strings more than 75 bytes long need to be split up,
+        # but *not* in the middle of wide characters! :-/
         utf8::decode($octets);
         return $octets;
     }
@@ -116,7 +120,7 @@ sub format_email_address ($$) {
     #
     
     # First format name for any non-ASCII characters, if necessary.
-    $name = format_mimewords($name);
+    $name = format_mimewords($name, 1);
 
     # Now decide whether it is to be formatted as an atom or a quoted-string.
     if ($name =~ /[^A-Za-z0-9!#\$%&'*+\-\/=?^_`{|}~]/) {
@@ -280,7 +284,7 @@ sub construct_email ($) {
         if (ref($p->{$_}) eq '') {
             # Interpret as a literal string in UTF-8, so all we need to do is
             # escape it.
-            $hdr{$_} = mySociety::Email::format_mimewords($p->{$_});
+            $hdr{$_} = mySociety::Email::format_mimewords($p->{$_}, 1);
         } elsif (ref($p->{$_}) eq 'ARRAY') {
             # Array of addresses or [address, name] pairs.
             my @a = ( );
