@@ -6,7 +6,7 @@
 # Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: GeoUtil.pm,v 1.4 2006-09-01 18:00:02 francis Exp $
+# $Id: GeoUtil.pm,v 1.5 2007-06-17 08:22:06 matthew Exp $
 #
 
 package mySociety::GeoUtil;
@@ -83,7 +83,7 @@ sub wgs84_to_national_grid($$$) {
 
     my $p;
     if ($coordsyst eq 'G') {
-        $p = new Geography::NationalGrid('GB', Latitude => $lat, Longitude => $lon);
+        $p = new Geography::NationalGrid('GB', Latitude => $lat, Longitude => $lon, DefaultResolution=>1);
     } elsif ($coordsyst eq 'I') {
         $p = new Geography::NationalGrid('IE', Latitude => $lat, Longitude => $lon);
     } else {
