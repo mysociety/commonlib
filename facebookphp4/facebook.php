@@ -131,12 +131,12 @@ class Facebook {
     return $this->require_add();
   }
 
-  function require_add() {
+  function require_add($return_url) {
     if ($user = $this->get_loggedin_user()) {
       if ($this->api_client->users_isAppAdded())
         return $user;
     }
-    $this->redirect($this->get_add_url());
+    $this->redirect($this->get_add_url($return_url));
   }
 
   function require_frame() {
