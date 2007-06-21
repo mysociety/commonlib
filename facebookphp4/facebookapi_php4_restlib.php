@@ -201,6 +201,9 @@ function toggleDisplay(id, type) {
    * @return array of friends
    */
   function friends_get() {
+    if (array_key_exists('fb_sig_friends', $_POST)) {
+        return split(",", $_POST['fb_sig_friends']);
+    }
     return $this->call_method('facebook.friends.get', array());
   }
   
@@ -340,6 +343,9 @@ function toggleDisplay(id, type) {
    * @return boolean 
    */
   function users_isAppAdded(){
+    if (array_key_exists('fb_sig_added', $_POST)) {
+        return $_POST['fb_sig_added'];
+    }
     return $this->call_method('facebook.users.isAppAdded', array());
   }
 
