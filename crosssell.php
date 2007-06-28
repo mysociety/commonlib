@@ -6,7 +6,7 @@
  * Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: crosssell.php,v 1.12 2007-06-07 09:09:45 matthew Exp $
+ * $Id: crosssell.php,v 1.13 2007-06-28 16:26:47 matthew Exp $
  * 
  */
 
@@ -18,6 +18,7 @@
 require_once 'auth.php';
 require_once 'mapit.php';
 require_once 'dadem.php';
+require_once 'debug.php';
 
 function crosssell_display_hfymp_advert($user_email, $user_name, $postcode) {
     $auth_signature = auth_sign_with_shared_secret($user_email, OPTION_AUTH_SHARED_SECRET);
@@ -81,9 +82,20 @@ function crosssell_display_twfy_alerts_advert($this_site, $user_email, $postcode
 
     $auth_signature = auth_sign_with_shared_secret($user_email, OPTION_AUTH_SHARED_SECRET);
     // See if already signed up
-    #$already_signed = file_get_contents('http://www.theyworkforyou.com/alert/authed.php?pid='.$person_id.'&email='.urlencode($user_email)."&sign=".urlencode($auth_signature));
-    #if ($already_signed != 'not signed')
-    #    return false;
+    $fp = fsockopen('www.theyworkforyou.com', 80, $errno, $errstr, 5);
+    if (!$fp)
+        return false;
+    stream_set_blocking($fp, 0);
+    stream_set_timeout($fp, 5);
+    $sockstart = getmicrotime();
+    fputs($fp, 'GET /alert/authed.php?pid='.$person_id.'&email='.urlencode($user_email)."&sign=".urlencode($auth_signature)." HTTP/1.0\r\nHost: www.theyworkforyou.com\r\n\r\n");
+    $already_signed = '';
+    while (!feof($fp) and (getmicrotime() < $sockstart + 5)) {
+        $already_signed .= fgets($fp, 1024);
+    }
+    fclose($fp);
+    if ($already_signed != 'not signed')
+        return false;
 ?>
 
 <h2 style="border-top: solid 3px #9999ff; font-weight: normal; padding-top: 1em; font-size: 150%">Seeing as you're interested in your MP, would you also like to be emailed when they say something in parliament?</h2>
