@@ -6,13 +6,14 @@
 # Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: AuthToken.pm,v 1.2 2006-09-25 22:59:07 matthew Exp $
+# $Id: AuthToken.pm,v 1.3 2007-07-09 17:40:29 matthew Exp $
 #
 
 package mySociety::AuthToken;
 
 use strict;
 
+use Digest::SHA1 qw(sha1_hex);
 use IO::String;
 use MIME::Base64 qw(encode_base64);
 
@@ -93,6 +94,27 @@ sub destroy ($$) {
             $scope, $token);
 }
 
-# shared secret stuff.
+# sign_with_shared_secret ITEM SECRET
+# Signs a string ITEM, using a shared secret string SECRET.  Returns the
+# SIGNATURE. Pass the ITEM and SIGNATURE into verify_with_shared_secret
+# to check it.
+sub sign_with_shared_secret ($$) {
+    my ($item, $secret) = @_;
+    my $salt = unpack("H*", random_bytes(8));
+    my $sha = sha1_hex("$salt-$secret-$item");
+    return "$sha-$salt";
+}
+
+# verify_with_shared_secret ITEM SECRET SIGNATURE
+# Verifies that the ITEM has been correctly signed with SIGNATURE.  The signer
+# must also have had SECRET and will have called sign_with_shared_secret
+# to make the SIGNATURE.
+sub verify_with_shared_secret ($$$) {
+    my ($item, $secret, $signature) = @_;
+    return 0 unless $signature =~ /^([0-9a-f]+)-([0-9a-f]+)$/;
+    my ($sha, $salt) = ($1, $2);
+    return 1 if sha1_hex("$salt-$secret-$item") eq $sha;
+    return 0;
+}
 
 1;
