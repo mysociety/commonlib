@@ -257,9 +257,9 @@ function toggleDisplay(id, type) {
    * Sends an email notification to the specified user.
    * @return string url which you should send the logged in user to to finalize the message.
    */
-  function notifications_send($to_ids, $markup, $no_email) {
+  function notifications_send($to_ids, $notification, $email) {
     return $this->call_method('facebook.notifications.send',
-                              array('to_ids' => $to_ids, 'markup' => $markup, 'no_email' => $no_email));
+                              array('to_ids' => $to_ids, 'notification' => $notification, 'email' => $email));
   }
 
   /**
