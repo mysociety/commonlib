@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: person.php,v 1.24 2007-05-29 18:09:16 matthew Exp $
+ * $Id: person.php,v 1.25 2007-07-18 10:38:37 francis Exp $
  * 
  */
 
@@ -22,7 +22,7 @@ function person_cookie_domain() {
     $httphost = $_SERVER['HTTP_HOST'];
     # XXX there must be a better way of doing this. (Also, the .livesimply
     # entry is for Francis's local test domain pledge.livesimply)
-    if (preg_match("/[^.]+(\.com|\.owl|\.org|\.net|\.co\.uk|\.org\.uk|\.livesimply)$/", $httphost, $matches)) {
+    if (preg_match("/[^.]+(\.com|\.cat|\.org|\.net|\.co\.uk|\.org\.uk|\.livesimply)$/", $httphost, $matches)) {
         return "." . $matches[0];
     } else {
         return '.' . OPTION_WEB_DOMAIN;
