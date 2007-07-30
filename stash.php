@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: stash.php,v 1.8 2007-05-28 10:49:19 francis Exp $
+ * $Id: stash.php,v 1.9 2007-07-30 16:49:04 matthew Exp $
  * 
  */
 
@@ -98,7 +98,7 @@ function stash_redirect($key, $email = NULL, $function = NULL) {
         if ($post_data != $new_post_data) {
             $post_data = $new_post_data;
             db_query('update requeststash set post_data = ? where key = ?', $post_data, $key);
-            db_commit(); # XXX sure this won't do any harm?
+            db_commit();
         }
     }
 
@@ -112,12 +112,8 @@ function stash_redirect($key, $email = NULL, $function = NULL) {
         exit();
     } else { // POST
         /* add token on end so can pull out POST params after redirect */
-        if (strstr($url, "?")) {
-            $url .= "&";
-        } else {
-            $url .= "?";
-        }
-        $url .= "stashpost=" . $key;
+        $url .= strstr($url, "?") ? '&' : '?';
+        $url .= "stashpost=$key";
         header("Location: $url");
         #print "Going to $url";
         exit();
