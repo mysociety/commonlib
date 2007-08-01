@@ -8,7 +8,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: votingarea.php,v 1.46 2007-05-08 12:49:29 matthew Exp $
+ * $Id: votingarea.php,v 1.47 2007-08-01 12:28:26 matthew Exp $
  * 
  */
 
@@ -285,7 +285,7 @@ services</strong>, including <strong>education</strong>, <strong>social services
             <strong>making laws in the UK and for overall scrutiny of all aspects of
             government</strong>.",
     'EUP' => "
-They <strong>scrutinise European laws</strong> and the <strong>budget of the
+They <strong>scrutinise proposed European laws</strong> and the <strong>budget of the
 European Union</strong>, and provide <strong>oversight of its other
 decision-making bodies</strong>.
 ",
