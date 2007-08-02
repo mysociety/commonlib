@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Alert.pm,v 1.21 2007-06-16 20:05:52 matthew Exp $
+# $Id: Alert.pm,v 1.22 2007-08-02 11:45:08 matthew Exp $
 
 package mySociety::Alert::Error;
 
@@ -26,8 +26,8 @@ use mySociety::AuthToken;
 use mySociety::Config;
 use mySociety::DBHandle qw(dbh);
 use mySociety::Email;
+use mySociety::EmailUtil;
 use mySociety::GeoUtil;
-use mySociety::Util;
 use mySociety::Web qw(ent);
 
 # Add a new alert
@@ -158,10 +158,10 @@ sub _send_aggregated_alert_email(%) {
     if (mySociety::Config::get('STAGING_SITE')) {
         $result = 0;
     } else {
-        $result = mySociety::Util::send_email($email, mySociety::Config::get('CONTACT_EMAIL'),
+        $result = mySociety::EmailUtil::send_email($email, mySociety::Config::get('CONTACT_EMAIL'),
             $data{alert_email}, mySociety::Config::get('CONTACT_EMAIL'));
     }
-    if ($result == mySociety::Util::EMAIL_SUCCESS) {
+    if ($result == mySociety::EmailUtil::EMAIL_SUCCESS) {
         dbh()->commit();
     } else {
         dbh()->rollback();

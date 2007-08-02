@@ -6,7 +6,7 @@
 # Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: AuthToken.pm,v 1.3 2007-07-09 17:40:29 matthew Exp $
+# $Id: AuthToken.pm,v 1.4 2007-08-02 11:45:08 matthew Exp $
 #
 
 package mySociety::AuthToken;
@@ -18,7 +18,7 @@ use IO::String;
 use MIME::Base64 qw(encode_base64);
 
 use mySociety::DBHandle qw(dbh);
-use mySociety::Util qw(random_bytes);
+use mySociety::Random qw(random_bytes);
 
 use RABX;
 

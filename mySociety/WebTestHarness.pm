@@ -12,7 +12,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.57 2007-07-19 17:13:12 francis Exp $
+# $Id: WebTestHarness.pm,v 1.58 2007-08-02 11:45:08 matthew Exp $
 #
 
 # Overload of WWW::Mechanize
@@ -46,6 +46,7 @@ use MIME::QuotedPrint;
 
 use mySociety::Logfile;
 use mySociety::DBHandle qw(dbh);
+use mySociety::TempFiles;
 
 # Enable stack backtraces upon "die"
 use Carp qw(confess cluck verbose);
@@ -690,7 +691,7 @@ sub fax_incoming($$$$$) {
             $logfile = $log_faxdir . "/" . $fax_number . "_p" . $pagenum . '.jpg';
             ++$pagenum;
             if (my $f = new IO::File($logfile, O_WRONLY | O_CREAT | O_TRUNC, 0644)){
-                ($p, $pid) = mySociety::Util::pipe_via("ppmtojpeg $tempfile", $f);
+                ($p, $pid) = mySociety::TempFiles::pipe_via("ppmtojpeg $tempfile", $f);
                 $f->close() or die "close: $logfile $!";;
                 $p->close() or die "close: $!";
                 waitpid($pid, 0);

@@ -6,7 +6,7 @@
 # Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Person.pm,v 1.4 2006-07-19 17:38:41 chris Exp $
+# $Id: Person.pm,v 1.5 2007-08-02 11:45:08 matthew Exp $
 #
 
 package mySociety::Person::Error;
@@ -22,7 +22,9 @@ use Error qw(:try);
 
 use mySociety::Config;
 use mySociety::DBHandle qw(dbh);
-use mySociety::Util qw(random_bytes is_valid_email);
+use mySociety::EmailUtil qw(is_valid_email);
+use mySociety::Random qw(random_bytes);
+use mySociety::Sundries;
 use mySociety::Web;
 
 use fields qw(id email name password website numlogins);
@@ -184,7 +186,7 @@ sub website_or_blank ($) {
 }
 
 # other accessors
-mySociety::Util::create_accessor_methods();
+mySociety::Sundries::create_accessor_methods();
 
 sub secret () {
     return scalar(dbh()->selectrow_array('select secret from secret'));

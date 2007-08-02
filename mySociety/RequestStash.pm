@@ -6,7 +6,7 @@
 # Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: RequestStash.pm,v 1.2 2006-07-19 17:39:01 chris Exp $
+# $Id: RequestStash.pm,v 1.3 2007-08-02 11:45:08 matthew Exp $
 #
 
 package mySociety::RequestStash::Error;
@@ -24,7 +24,7 @@ use IO::String;
 use RABX;
 
 use mySociety::DBHandle qw(dbh);
-use mySociety::Util qw(random_bytes);
+use mySociety::Random qw(random_bytes);
 use mySociety::Web qw(ent urlencode);
 
 =item stash Q [EXTRA]
