@@ -12,7 +12,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.58 2007-08-02 11:45:08 matthew Exp $
+# $Id: WebTestHarness.pm,v 1.59 2007-08-10 03:02:03 matthew Exp $
 #
 
 # Overload of WWW::Mechanize
@@ -54,7 +54,7 @@ $SIG{__DIE__} = sub { confess @_ };
 $SIG{__WARN__} = sub { cluck @_ };
 
 # How long have to wait to be sure a mail hasn't arrived
-our $mail_sleep_time = 45;
+our $mail_sleep_time = 300; # !
 # How long to wait for a fax to arrive
 our $fax_sleep_time = 5;
 
@@ -572,9 +572,13 @@ Dies if there are any emails left.
 sub email_check_none_left($) {
     my ($self) = @_;
     $self->email_run_eveld();
-    sleep $mail_sleep_time;
-    my $emails_left = dbh()->selectrow_array("select count(*) from testharness_mail");
-    die "$emails_left unexpected emails left" if $emails_left > 0;
+    my $t = time();
+    while ($t > time() - $mail_sleep_time) {
+        my $emails_left = dbh()->selectrow_array("select count(*) from testharness_mail");
+        return if $emails_left == 0;
+        sleep 2;
+    }
+    die "$emails_left unexpected emails left";
 }
 
 =item email_incoming MAIL_BODY
