@@ -12,23 +12,18 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.60 2007-08-10 17:17:06 matthew Exp $
+# $Id: WebTestHarness.pm,v 1.61 2007-08-13 15:39:59 matthew Exp $
 #
 
 # Overload of WWW::Mechanize
 package mySociety::WebTestHarness::Mechanize;
 use base 'WWW::Mechanize';
-use utf8;
+
 # ... now days, could use this hook to do validation instead of all the
 # browser_* functions, but in some ways those are clearer named as they are
 # from the calling code.
 sub update_html {
     my ($self, $html) = @_;
-    #utf8::decode($html); # this doesn't help the "Parsing of undecoded UTF-8 will give garbage when decoding entities" warning, and breaks other things
-    #print "mySociety::WebTestHarness::Mechanize hook: ";
-    #print "is_utf8 "; print utf8::is_utf8($html); 
-    #print "valid "; print utf8::valid($html); 
-    #print "\n";
     $self->WWW::Mechanize::update_html($html);
 }
 
