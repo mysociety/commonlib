@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.81 2007-05-17 13:30:39 matthew Exp $
+ * $Id: utility.php,v 1.82 2007-08-14 16:48:27 matthew Exp $
  * 
  */
 
@@ -106,7 +106,9 @@ function trim_characters ($text, $start, $length) {
 
     // Split long strings up so they don't go too long.
     // Mainly for URLs which are displayed, but aren't links when trimmed.
-    $text = preg_replace("/(\S{60})/", "\$1 ", $text);
+    # http://bugs.php.net/bug.php?id=42298 for why I'm having to repeat
+    # \S 60 times...
+    $text = rtrim(preg_replace('/' . str_repeat('\S', 60) . '/u', '$0 ', $text));
 
     // Otherwise the word boundary matching goes odd...
     $text = preg_replace("/[\n\r]/", " ", $text);
@@ -125,7 +127,7 @@ function trim_characters ($text, $start, $length) {
     }
 
     // Trim end.
-    if (strlen($text) > $length) {
+    if (mb_strlen($text) > $length) {
 
         // Allow space for ellipsis.
         $text = mb_substr($text, 0, $length - 3, 'utf-8'); 
