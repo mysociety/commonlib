@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Alert.pm,v 1.23 2007-08-15 12:57:14 matthew Exp $
+# $Id: Alert.pm,v 1.24 2007-08-15 13:34:44 matthew Exp $
 
 package mySociety::Alert::Error;
 
@@ -196,6 +196,8 @@ sub generate_rss ($$;@) {
     }
 
     while (my $row = $q->fetchrow_hashref) {
+        # XXX: How to do this properly? name might be null in comment table, hence needing this
+        $row->{name} ||= 'anonymous';
         (my $title = $alert_type->{item_title}) =~ s/{{(.*?)}}/$row->{$1}/g;
         (my $link = $alert_type->{item_link}) =~ s/{{(.*?)}}/$row->{$1}/g;
         (my $desc = $alert_type->{item_description}) =~ s/{{(.*?)}}/$row->{$1}/g;
