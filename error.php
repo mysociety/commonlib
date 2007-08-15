@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: error.php,v 1.13 2006-07-11 15:18:52 francis Exp $
+ * $Id: error.php,v 1.14 2007-08-15 12:51:01 matthew Exp $
  * 
  */
 
@@ -54,7 +54,7 @@ if (ini_get("register_globals")) {
 
 /* err ERROR
  * Report the given ERROR and abort. */
-function err($err) {
+function err($str, $num = E_USER_ERROR) {
     /* We can't just call trigger_error, because that will always report this
      * function as the location where the error occured. So use debug_backtrace
      * to construct the relevant information. */
@@ -64,7 +64,7 @@ function err($err) {
         $i = 1;
     if (!array_key_exists('file', $a[$i])) $a[$i]['file'] = '(unknown file)';
     if (!array_key_exists('line', $a[$i])) $a[$i]['line'] = '(unknown line)';
-    err_global_handler(E_USER_ERROR, $err, $a[$i]['file'], $a[$i]['line'],
+    err_global_handler($num, $str, $a[$i]['file'], $a[$i]['line'],
                         /* XXX We can't obtain the calling context AFAIK. */
                         null);
     exit(1); /* NOTREACHED */
@@ -127,7 +127,7 @@ function err_global_handler($num, $str, $file, $line, $context) {
     // PHP5.1RC* a bit overzealous about strict errors, even if not set to display:
     if (version_compare(phpversion(), "5.0") >= 0 && $num == E_STRICT) { return; }
 
-    if (isset($err_handler_log))
+    if (isset($err_handler_log) && $num != E_USER_NOTICE)
         $err_handler_log($num, $str, $file, $line, $context);
     if (isset($err_handler_display))
         $err_handler_display($num, $str, $file, $line, $context);
