@@ -8,7 +8,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # WWW: http://www.mysociety.org
 #
-# $Id: DaDem.pm,v 1.37 2007-02-01 18:22:50 francis Exp $
+# $Id: DaDem.pm,v 1.38 2007-08-16 16:03:27 matthew Exp $
 
 package mySociety::DaDem;
 
@@ -54,7 +54,7 @@ use constant AREA_WITHOUT_REPS => 3003;
 
 =item PERSON_NOT_FOUND 3004
 
-  Preson ID refers to a non-existent person.
+  Person ID refers to a non-existent person.
 
 =cut
 use constant PERSON_NOT_FOUND => 3004;
@@ -265,7 +265,7 @@ sub get_representatives_history ($) {
     return $rabx_client->call('DaDem.get_representatives_history', @_);
 }
 
-=item DaDem::admin_edit_representative ID DETAILS EDITOR NOTE
+=item DaDem::admin_edit_representative ID DETAILS EDITOR NOTE [FAILING]
 
   Alters data for a representative, updating the override table
   representative_edited. ID contains the representative id, or undefined to
@@ -275,11 +275,12 @@ sub get_representatives_history ($) {
   Every value has to be present - or else values are reset to their initial
   ones when import first happened. Any modification counts as an
   undeletion. EDITOR is the name of the person who edited the data. NOTE is
-  any explanation of why / where from. Returns ID, or if ID was undefined
-  the new id.
+  any explanation of why / where from. FAILING is so we can mark
+  councillors as failing, when we can't currently do other editing. Returns
+  ID, or if ID was undefined the new id.
 
 =cut
-sub admin_edit_representative ($$$$) {
+sub admin_edit_representative ($$$$;$) {
     configure() if !defined $rabx_client;
     return $rabx_client->call('DaDem.admin_edit_representative', @_);
 }
