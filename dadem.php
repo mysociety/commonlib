@@ -8,7 +8,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: dadem.php,v 1.55 2007-02-01 18:22:50 francis Exp $
+ * $Id: dadem.php,v 1.56 2007-08-16 16:03:27 matthew Exp $
  *
  */
 
@@ -37,7 +37,7 @@ if (defined('OPTION_DADEM_URL'))
 define('DADEM_UNKNOWN_AREA', 3001);        /*    Area ID refers to a non-existent area.  */
 define('DADEM_REP_NOT_FOUND', 3002);        /*    Representative ID refers to a non-existent representative.  */
 define('DADEM_AREA_WITHOUT_REPS', 3003);        /*    Area ID refers to an area for which no representatives are returned.  */
-define('DADEM_PERSON_NOT_FOUND', 3004);        /*    Preson ID refers to a non-existent person.  */
+define('DADEM_PERSON_NOT_FOUND', 3004);        /*    Person ID refers to a non-existent person.  */
 define('DADEM_CONTACT_FAX', 101);        /*    Means of contacting representative is fax.  */
 define('DADEM_CONTACT_EMAIL', 102);        /*    Means of contacting representative is email.  */
 
@@ -233,7 +233,7 @@ function dadem_get_representatives_history($id) {
     return $result;
 }
 
-/* dadem_admin_edit_representative ID DETAILS EDITOR NOTE
+/* dadem_admin_edit_representative ID DETAILS EDITOR NOTE [FAILING]
 
   Alters data for a representative, updating the override table
   representative_edited. ID contains the representative id, or undefined to
@@ -243,9 +243,10 @@ function dadem_get_representatives_history($id) {
   Every value has to be present - or else values are reset to their initial
   ones when import first happened. Any modification counts as an
   undeletion. EDITOR is the name of the person who edited the data. NOTE is
-  any explanation of why / where from. Returns ID, or if ID was undefined
-  the new id. */
-function dadem_admin_edit_representative($id, $details, $editor, $note) {
+  any explanation of why / where from. FAILING is so we can mark
+  councillors as failing, when we can't currently do other editing. Returns
+  ID, or if ID was undefined the new id. */
+function dadem_admin_edit_representative($id, $details, $editor, $note, $failing = null) {
     global $dadem_client;
     $params = func_get_args();
     $result = $dadem_client->call('DaDem.admin_edit_representative', $params);
