@@ -12,7 +12,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.61 2007-08-13 15:39:59 matthew Exp $
+# $Id: WebTestHarness.pm,v 1.62 2007-08-17 09:31:23 matthew Exp $
 #
 
 # Overload of WWW::Mechanize
@@ -49,7 +49,7 @@ $SIG{__DIE__} = sub { confess @_ };
 $SIG{__WARN__} = sub { cluck @_ };
 
 # How long have to wait to be sure a mail hasn't arrived
-our $mail_sleep_time = 30;
+our $mail_sleep_time = 60;
 # How long to wait for a fax to arrive
 our $fax_sleep_time = 5;
 
