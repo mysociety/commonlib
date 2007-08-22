@@ -8,7 +8,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: dadem.php,v 1.56 2007-08-16 16:03:27 matthew Exp $
+ * $Id: dadem.php,v 1.57 2007-08-22 14:31:49 matthew Exp $
  *
  */
 
@@ -233,7 +233,7 @@ function dadem_get_representatives_history($id) {
     return $result;
 }
 
-/* dadem_admin_edit_representative ID DETAILS EDITOR NOTE [FAILING]
+/* dadem_admin_edit_representative ID DETAILS EDITOR NOTE
 
   Alters data for a representative, updating the override table
   representative_edited. ID contains the representative id, or undefined to
@@ -243,10 +243,9 @@ function dadem_get_representatives_history($id) {
   Every value has to be present - or else values are reset to their initial
   ones when import first happened. Any modification counts as an
   undeletion. EDITOR is the name of the person who edited the data. NOTE is
-  any explanation of why / where from. FAILING is so we can mark
-  councillors as failing, when we can't currently do other editing. Returns
-  ID, or if ID was undefined the new id. */
-function dadem_admin_edit_representative($id, $details, $editor, $note, $failing = null) {
+  any explanation of why / where from. Returns ID, or if ID was undefined
+  the new id. */
+function dadem_admin_edit_representative($id, $details, $editor, $note) {
     global $dadem_client;
     $params = func_get_args();
     $result = $dadem_client->call('DaDem.admin_edit_representative', $params);
