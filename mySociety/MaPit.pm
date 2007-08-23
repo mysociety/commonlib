@@ -8,7 +8,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # WWW: http://www.mysociety.org
 #
-# $Id: MaPit.pm,v 1.37 2007-02-01 18:22:50 francis Exp $
+# $Id: MaPit.pm,v 1.38 2007-08-23 11:17:30 matthew Exp $
 
 package mySociety::MaPit;
 
@@ -115,6 +115,18 @@ sub get_voting_areas_info ($) {
     return $rabx_client->call('MaPit.get_voting_areas_info', @_);
 }
 
+=item MaPit::get_voting_area_by_name NAME [TYPE]
+
+  Given NAME, return the area IDs associated, or undef if none found. If
+  TYPE is specified (scalar or array ref), only return areas of those
+  type(s).
+
+=cut
+sub get_voting_area_by_name ($;$) {
+    configure() if !defined $rabx_client;
+    return $rabx_client->call('MaPit.get_voting_area_by_name', @_);
+}
+
 =item MaPit::get_voting_area_geometry AREA [POLYGON_TYPE]
 
   Return geometry information about the given voting area. Return value is
@@ -215,7 +227,9 @@ sub get_example_postcode ($) {
 
 =item MaPit::get_voting_area_children ID
 
-  Return array of ids of areas whose parent areas are ID.
+  Return array of ids of areas whose parent areas are ID. Only returns
+  those which are in generation. XXX expand this later with an ALL optional
+  parameter as get_areas_by_type
 
 =cut
 sub get_voting_area_children ($) {
