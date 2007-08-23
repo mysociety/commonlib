@@ -8,7 +8,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: mapit.php,v 1.56 2007-02-01 18:22:50 francis Exp $
+ * $Id: mapit.php,v 1.57 2007-08-23 11:17:30 matthew Exp $
  *
  */
 
@@ -98,6 +98,18 @@ function mapit_get_voting_areas_info($ary) {
     global $mapit_client;
     $params = func_get_args();
     $result = $mapit_client->call('MaPit.get_voting_areas_info', $params);
+    return $result;
+}
+
+/* mapit_get_voting_area_by_name NAME [TYPE]
+
+  Given NAME, return the area IDs associated, or undef if none found. If
+  TYPE is specified (scalar or array ref), only return areas of those
+  type(s). */
+function mapit_get_voting_area_by_name($name, $type = null) {
+    global $mapit_client;
+    $params = func_get_args();
+    $result = $mapit_client->call('MaPit.get_voting_area_by_name', $params);
     return $result;
 }
 
@@ -201,7 +213,9 @@ function mapit_get_example_postcode($id) {
 
 /* mapit_get_voting_area_children ID
 
-  Return array of ids of areas whose parent areas are ID. */
+  Return array of ids of areas whose parent areas are ID. Only returns
+  those which are in generation. XXX expand this later with an ALL optional
+  parameter as get_areas_by_type */
 function mapit_get_voting_area_children($id) {
     global $mapit_client;
     $params = func_get_args();
