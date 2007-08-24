@@ -8,7 +8,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # WWW: http://www.mysociety.org
 #
-# $Id: MaPit.pm,v 1.38 2007-08-23 11:17:30 matthew Exp $
+# $Id: MaPit.pm,v 1.39 2007-08-24 12:27:31 matthew Exp $
 
 package mySociety::MaPit;
 
@@ -117,9 +117,9 @@ sub get_voting_areas_info ($) {
 
 =item MaPit::get_voting_area_by_name NAME [TYPE]
 
-  Given NAME, return the area IDs associated, or undef if none found. If
-  TYPE is specified (scalar or array ref), only return areas of those
-  type(s).
+  Given NAME, return the area IDs that begin with that name, or undef if
+  none found. If TYPE is specified (scalar or array ref), only return areas
+  of those type(s).
 
 =cut
 sub get_voting_area_by_name ($;$) {
@@ -172,11 +172,12 @@ sub get_voting_areas_geometry ($;$) {
     return $rabx_client->call('MaPit.get_voting_areas_geometry', @_);
 }
 
-=item MaPit::get_voting_area_by_location LAT LON METHOD [TYPE]
+=item MaPit::get_voting_areas_by_location COORDINATE METHOD [TYPE(S)]
 
-  Returns an array of voting areas which the given coordinate is in. This
-  only works for areas which have geometry information associated with
-  them. i.e. That get_voting_area_geometry will return data for.
+  Returns a hash of voting areas and types which the given COORDINATE
+  (either easting and northing, or latitude and longitude) is in. This only
+  works for areas which have geometry information associated with them.
+  i.e. that get_voting_area_geometry will return data for.
 
   METHOD can be 'box' to just use a bounding box test, or 'polygon' to also
   do an exact point in polygon test. 'box' is quicker, but will return too
@@ -186,20 +187,9 @@ sub get_voting_areas_geometry ($;$) {
   Westminster Constituencies only.
 
 =cut
-sub get_voting_area_by_location ($$$;$) {
+sub get_voting_areas_by_location ($$;$) {
     configure() if !defined $rabx_client;
-    return $rabx_client->call('MaPit.get_voting_area_by_location', @_);
-}
-
-=item MaPit::get_voting_area_by_location_en EASTING NORTHING METHOD [TYPE_OR_TYPES]
-
-  As get_voting_area_by_location only takes coordinates in EASTINGs and
-  NORTHINGs rather than latitude and longitude.
-
-=cut
-sub get_voting_area_by_location_en ($$$;$) {
-    configure() if !defined $rabx_client;
-    return $rabx_client->call('MaPit.get_voting_area_by_location_en', @_);
+    return $rabx_client->call('MaPit.get_voting_areas_by_location', @_);
 }
 
 =item MaPit::get_areas_by_type TYPE [ALL]
