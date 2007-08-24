@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Alert.pm,v 1.24 2007-08-15 13:34:44 matthew Exp $
+# $Id: Alert.pm,v 1.25 2007-08-24 22:35:51 matthew Exp $
 
 package mySociety::Alert::Error;
 
@@ -232,7 +232,7 @@ sub generate_rss ($$;@) {
     (my $link = $alert_type->{head_link}) =~ s/{{(.*?)}}/$row->{$1}/g;
     (my $desc = $alert_type->{head_description}) =~ s/{{(.*?)}}/$row->{$1}/g;
     $rss->channel(
-        title => ent($title), link => "$url$link?$qs", description  => ent($desc),
+        title => ent($title), link => "$url$link$qs", description  => ent($desc),
         language   => 'en-gb'
     );
 
