@@ -8,7 +8,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: mapit.php,v 1.57 2007-08-23 11:17:30 matthew Exp $
+ * $Id: mapit.php,v 1.58 2007-08-24 12:27:31 matthew Exp $
  *
  */
 
@@ -103,9 +103,9 @@ function mapit_get_voting_areas_info($ary) {
 
 /* mapit_get_voting_area_by_name NAME [TYPE]
 
-  Given NAME, return the area IDs associated, or undef if none found. If
-  TYPE is specified (scalar or array ref), only return areas of those
-  type(s). */
+  Given NAME, return the area IDs that begin with that name, or undef if
+  none found. If TYPE is specified (scalar or array ref), only return areas
+  of those type(s). */
 function mapit_get_voting_area_by_name($name, $type = null) {
     global $mapit_client;
     $params = func_get_args();
@@ -158,11 +158,12 @@ function mapit_get_voting_areas_geometry($ary, $polygon_type = null) {
     return $result;
 }
 
-/* mapit_get_voting_area_by_location LAT LON METHOD [TYPE]
+/* mapit_get_voting_areas_by_location COORDINATE METHOD [TYPE(S)]
 
-  Returns an array of voting areas which the given coordinate is in. This
-  only works for areas which have geometry information associated with
-  them. i.e. That get_voting_area_geometry will return data for.
+  Returns a hash of voting areas and types which the given COORDINATE
+  (either easting and northing, or latitude and longitude) is in. This only
+  works for areas which have geometry information associated with them.
+  i.e. that get_voting_area_geometry will return data for.
 
   METHOD can be 'box' to just use a bounding box test, or 'polygon' to also
   do an exact point in polygon test. 'box' is quicker, but will return too
@@ -170,21 +171,10 @@ function mapit_get_voting_areas_geometry($ary, $polygon_type = null) {
 
   If TYPE is present, restricts to areas of that type, such as WMC for
   Westminster Constituencies only. */
-function mapit_get_voting_area_by_location($lat, $lon, $method, $type = null) {
+function mapit_get_voting_areas_by_location($coordinate, $method, $types = null) {
     global $mapit_client;
     $params = func_get_args();
-    $result = $mapit_client->call('MaPit.get_voting_area_by_location', $params);
-    return $result;
-}
-
-/* mapit_get_voting_area_by_location_en EASTING NORTHING METHOD [TYPE_OR_TYPES]
-
-  As get_voting_area_by_location only takes coordinates in EASTINGs and
-  NORTHINGs rather than latitude and longitude. */
-function mapit_get_voting_area_by_location_en($easting, $northing, $method, $type_or_types = null) {
-    global $mapit_client;
-    $params = func_get_args();
-    $result = $mapit_client->call('MaPit.get_voting_area_by_location_en', $params);
+    $result = $mapit_client->call('MaPit.get_voting_areas_by_location', $params);
     return $result;
 }
 
