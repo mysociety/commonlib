@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Alert.pm,v 1.25 2007-08-24 22:35:51 matthew Exp $
+# $Id: Alert.pm,v 1.26 2007-08-25 00:17:31 matthew Exp $
 
 package mySociety::Alert::Error;
 
@@ -169,8 +169,9 @@ sub _send_aggregated_alert_email(%) {
     }
 }
 
-sub generate_rss ($$;@) {
-    my ($type, $qs, @params) = @_;
+sub generate_rss ($$;$$) {
+    my ($type, $qs, $db_params, $title_params) = @_;
+    my @params = @$db_params;
     my $url = mySociety::Config::get('BASE_URL');
     my $q = dbh()->prepare('select * from alert_type where ref=?');
     $q->execute($type);
@@ -227,6 +228,9 @@ sub generate_rss ($$;@) {
             $q->execute();
         }
         $row = $q->fetchrow_hashref;
+    }
+    foreach (keys %$title_params) {
+        $row->{$_} = $title_params->{$_};
     }
     (my $title = $alert_type->{head_title}) =~ s/{{(.*?)}}/$row->{$1}/g;
     (my $link = $alert_type->{head_link}) =~ s/{{(.*?)}}/$row->{$1}/g;
