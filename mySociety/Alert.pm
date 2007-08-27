@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Alert.pm,v 1.27 2007-08-25 10:55:12 matthew Exp $
+# $Id: Alert.pm,v 1.28 2007-08-27 11:40:39 matthew Exp $
 
 package mySociety::Alert::Error;
 
@@ -28,6 +28,7 @@ use mySociety::DBHandle qw(dbh);
 use mySociety::Email;
 use mySociety::EmailUtil;
 use mySociety::GeoUtil;
+use mySociety::Sundries qw(ordinal);
 use mySociety::Web qw(ent);
 
 # Add a new alert
@@ -171,7 +172,7 @@ sub _send_aggregated_alert_email(%) {
 
 sub generate_rss ($$;$$) {
     my ($type, $qs, $db_params, $title_params) = @_;
-    my @params = @$db_params;
+    $db_params ||= [];
     my $url = mySociety::Config::get('BASE_URL');
     my $q = dbh()->prepare('select * from alert_type where ref=?');
     $q->execute($type);
@@ -190,15 +191,20 @@ sub generate_rss ($$;$$) {
     $query .= ' limit 10' unless $type =~ /^all/;
     $q = dbh()->prepare($query);
     if ($query =~ /\?/) {
-        throw mySociety::Alert::Error('Missing parameter') unless @params;
-        $q->execute(@params);
+        throw mySociety::Alert::Error('Missing parameter') unless @$db_params;
+        $q->execute(@$db_params);
     } else {
         $q->execute();
     }
 
+    my @months = ('', 'January','February','March','April','May','June',
+        'July','August','September','October','November','December');
     while (my $row = $q->fetchrow_hashref) {
         # XXX: How to do this properly? name might be null in comment table, hence needing this
         $row->{name} ||= 'anonymous';
+        # And we want pretty dates... :-/
+        $row->{confirmed} =~ s/^\d\d\d\d-(\d\d)-(\d\d) .*/ordinal($2+0).' '.$months[$1]/e;
+
         (my $title = $alert_type->{item_title}) =~ s/{{(.*?)}}/$row->{$1}/g;
         (my $link = $alert_type->{item_link}) =~ s/{{(.*?)}}/$row->{$1}/g;
         (my $desc = $alert_type->{item_description}) =~ s/{{(.*?)}}/$row->{$1}/g;
@@ -223,7 +229,7 @@ sub generate_rss ($$;$$) {
     if ($alert_type->{head_sql_query}) {
         $q = dbh()->prepare($alert_type->{head_sql_query});
         if ($alert_type->{head_sql_query} =~ /\?/) {
-            $q->execute(@params);
+            $q->execute(@$db_params);
         } else {
             $q->execute();
         }
