@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Alert.pm,v 1.29 2007-08-27 20:29:34 matthew Exp $
+# $Id: Alert.pm,v 1.30 2007-08-27 20:50:43 matthew Exp $
 
 package mySociety::Alert::Error;
 
@@ -203,7 +203,7 @@ sub generate_rss ($$;$$) {
         # XXX: How to do this properly? name might be null in comment table, hence needing this
         $row->{name} ||= 'anonymous';
         # And we want pretty dates... :-/
-        $row->{confirmed} =~ s/^\d\d\d\d-(\d\d)-(\d\d) .*/ordinal($2+0).' '.$months[$1]/e;
+        $row->{confirmed} =~ s/^\d\d\d\d-(\d\d)-(\d\d) .*/ordinal($2+0).' '.$months[$1]/e if $row->{confirmed};
 
         (my $title = $alert_type->{item_title}) =~ s/{{(.*?)}}/$row->{$1}/g;
         (my $link = $alert_type->{item_link}) =~ s/{{(.*?)}}/$row->{$1}/g;
