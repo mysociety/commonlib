@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Alert.pm,v 1.32 2007-09-11 15:29:42 matthew Exp $
+# $Id: Alert.pm,v 1.33 2007-09-11 15:45:26 matthew Exp $
 
 package mySociety::Alert::Error;
 
@@ -90,7 +90,8 @@ sub email_alerts () {
         my $ref = $alert_type->{ref};
         my $head_table = $alert_type->{head_table};
         my $item_table = $alert_type->{item_table};
-        my $query = 'select alert.id as alert_id, alert.email as alert_email, alert.parameter as alert_parameter, ';
+        my $query = 'select alert.id as alert_id, alert.email as alert_email,
+            alert.parameter as alert_parameter, alert.parameter2 as alert_parameter2, ';
         if ($head_table) {
             $query .= "
                    $item_table.id as item_id, $item_table.name as item_name, $item_table.text as item_text,
@@ -135,9 +136,13 @@ sub email_alerts () {
             }
             if (!$data{alert_email}) {
                 %data = (%data, %$row);
-                if ($ref eq 'area_problems') {
+                if ($ref eq 'area_problems' || $ref eq 'council_problems' || $ref eq 'ward_problems') {
                     my $va_info = mySociety::MaPit::get_voting_area_info($row->{alert_parameter});
                     $data{area_name} = $va_info->{name};
+                }
+                if ($ref eq 'ward_problems') {
+                    my $va_info = mySociety::MaPit::get_voting_area_info($row->{alert_parameter2});
+                    $data{ward_name} = $va_info->{name};
                 }
             }
             $last_alert_id = $row->{alert_id};
