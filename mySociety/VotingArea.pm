@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: VotingArea.pm,v 1.30 2006-04-28 20:42:11 francis Exp $
+# $Id: VotingArea.pm,v 1.31 2007-09-12 17:38:10 matthew Exp $
 #
 
 package mySociety::VotingArea;
@@ -238,7 +238,7 @@ Whether the place needs "the" or similar before its name when used as a noun.
 =cut
 
 %mySociety::VotingArea::general_prep = (
-        LBO =>  "the",
+        LBO =>  "",
 
         LAS =>  "the",
 
