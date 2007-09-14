@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Alert.pm,v 1.34 2007-09-14 12:58:02 matthew Exp $
+# $Id: Alert.pm,v 1.35 2007-09-14 13:57:51 matthew Exp $
 
 package mySociety::Alert::Error;
 
@@ -22,11 +22,13 @@ use File::Slurp;
 use FindBin;
 use XML::RSS;
 
+use Page;
 use mySociety::AuthToken;
 use mySociety::Config;
 use mySociety::DBHandle qw(dbh);
 use mySociety::Email;
 use mySociety::EmailUtil;
+use mySociety::Gaze;
 use mySociety::GeoUtil;
 use mySociety::MaPit;
 use mySociety::Sundries qw(ordinal);
@@ -153,23 +155,28 @@ sub email_alerts () {
     $query = dbh()->prepare($query);
     $query->execute();
     while (my $alert = $query->fetchrow_hashref) {
-        my %data = ( template => 'alert-problem', data => '' );
+        my $x = $alert->{parameter};
+        my $y = $alert->{parameter2};
+        my $e = Page::tile_to_os($x);
+        my $n = Page::tile_to_os($y);
+        my ($lat, $lon) = mySociety::GeoUtil::national_grid_to_wgs84($e, $n, 'G');
+        my $d = mySociety::Gaze::get_radius_containing_population($lat, $lon, 200000);
+        $d = int($d*10+0.5)/10;
+
+        my %data = ( template => 'alert-problem-nearby', data => '', alert_id => $alert->{id}, alert_email => $alert->{email} );
         my $q = "select * from problem_find_nearby(?, ?, ?) as nearby, problem
             where nearby.problem_id = problem.id and problem.state in ('confirmed', 'fixed')
             and problem.created >= ?
             and (select whenqueued from alert_sent where alert_sent.alert_id = ? and alert_sent.parameter = problem.id) is null
             and problem.email <> ?
             order by created desc";
-        $q = dbh()->prepare($q, $alert->{parameter}, $alert->{parameter2}, 5, $alert->{whensubscribed}, $alert->{id}, $alert->{email});
-        $q->execute();
+        $q = dbh()->prepare($q);
+        $q->execute($e, $n, $d, $alert->{whensubscribed}, $alert->{id}, $alert->{email});
         while (my $row = $q->fetchrow_hashref) {
             dbh()->do('insert into alert_sent (alert_id, parameter) values (?,?)', {}, $alert->{id}, $row->{id});
             $data{data} .= $url . "/?id=" . $row->{id} . " - $row->{title}\n\n";
-            if (!$data{alert_email}) {
-                %data = (%data, %$row);
-            }
         }
-        _send_aggregated_alert_email(%data);
+        _send_aggregated_alert_email(%data) if $data{data};
     }
 }
 
