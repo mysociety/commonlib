@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Alert.pm,v 1.33 2007-09-11 15:45:26 matthew Exp $
+# $Id: Alert.pm,v 1.34 2007-09-14 12:58:02 matthew Exp $
 
 package mySociety::Alert::Error;
 
@@ -99,10 +99,6 @@ sub email_alerts () {
             from alert
                 inner join $item_table on alert.parameter = $item_table.${head_table}_id
                 inner join $head_table on alert.parameter = $head_table.id";
-        } elsif ($item_table =~ /nearby/) {
-            # Okay, perhaps this idea doesn't work very well
-            # But it should be possible to construct the local problem alert here
-            # The RSS works
         } else {
             $query .= " $item_table.*,
                    $item_table.id as item_id
@@ -150,6 +146,30 @@ sub email_alerts () {
         if ($last_alert_id) {
             _send_aggregated_alert_email(%data);
         }
+    }
+
+    # Nearby done separately as the table contains the parameters
+    my $query = "select * from alert where alert_type='local_problems' and whendisabled is null and confirmed=1 order by id";
+    $query = dbh()->prepare($query);
+    $query->execute();
+    while (my $alert = $query->fetchrow_hashref) {
+        my %data = ( template => 'alert-problem', data => '' );
+        my $q = "select * from problem_find_nearby(?, ?, ?) as nearby, problem
+            where nearby.problem_id = problem.id and problem.state in ('confirmed', 'fixed')
+            and problem.created >= ?
+            and (select whenqueued from alert_sent where alert_sent.alert_id = ? and alert_sent.parameter = problem.id) is null
+            and problem.email <> ?
+            order by created desc";
+        $q = dbh()->prepare($q, $alert->{parameter}, $alert->{parameter2}, 5, $alert->{whensubscribed}, $alert->{id}, $alert->{email});
+        $q->execute();
+        while (my $row = $q->fetchrow_hashref) {
+            dbh()->do('insert into alert_sent (alert_id, parameter) values (?,?)', {}, $alert->{id}, $row->{id});
+            $data{data} .= $url . "/?id=" . $row->{id} . " - $row->{title}\n\n";
+            if (!$data{alert_email}) {
+                %data = (%data, %$row);
+            }
+        }
+        _send_aggregated_alert_email(%data);
     }
 }
 
