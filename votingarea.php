@@ -8,7 +8,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: votingarea.php,v 1.47 2007-08-01 12:28:26 matthew Exp $
+ * $Id: votingarea.php,v 1.48 2007-09-18 12:58:29 matthew Exp $
  * 
  */
 
@@ -175,56 +175,168 @@ $va_salaried = array(
 // If you update this, also update in perllib/mySociety/VotingArea.pm
 $va_type_name = array(
         'LBO' =>  "London Borough",
-        'LBW' =>  "Ward",
+        'LBW' =>  "ward",
 
         'GLA' =>  "Greater London Authority",
 
         'LAS' =>  "London Assembly",
-        'LAC' =>  "Constituency",
+        'LAC' =>  "constituency",
         'LAE' =>  "Electoral Region",
 
         'CTY' =>  "County",
         'CED' =>  "Electoral Division",
 
         'DIS' =>  "District",
-        'DIW' =>  "Ward",
+        'DIW' =>  "ward",
 
         'LGD' =>  "Local Council",
         'LGE' =>  "Electoral Area",
 
         'UTA' =>  "Unitary Authority",
         'UTE' =>  "Electoral Division",
-        'UTW' =>  "Ward",
+        'UTW' =>  "ward",
 
         'MTD' =>  "Metropolitan District",
-        'MTW' =>  "Ward",
+        'MTW' =>  "ward",
 
         'COI' =>  "Council of the Isles",
-        'COP' =>  "Parish",
+        'COP' =>  "parish",
 
         'SPA' =>  "Scottish Parliament",
         'SPE' =>  "Electoral Region",
-        'SPC' =>  "Constituency",
+        'SPC' =>  "constituency",
 
         'WAS' =>  "National Assembly for Wales",
         'WAE' =>  "Electoral Region",
-        'WAC' =>  "Constituency",
+        'WAC' =>  "constituency",
 
         'NIA' =>  "Northern Ireland Assembly",
-        'NIE' =>  "Constituency", # These are the same as the Westminster
+        'NIE' =>  "constituency", # These are the same as the Westminster
                                 # constituencies but return several members
                                 # using a proportional system. It looks like
                                 # most people just refer to them as
                                 # "constituencies".
         
         'WMP' =>  "House of Commons",
-        'WMC' =>  "Constituency",
+        'WMC' =>  "constituency",
         'HOL' =>  "House of Lords",
-        'HOC' =>  "Constituency",
+        'HOC' =>  "constituency",
 
         'EUP' =>  "European Parliament",
-        'EUR' =>  "Region",
+        'EUR' =>  "region",
     );
+
+$va_rep_name = array(
+    'LBW' => 'councillor',
+    'GLA' => 'Mayor', # "of London"?
+    'LAC' => 'London Ascembly Member',
+    'LAE' => 'London Assembly Member',
+    'CED' => 'county councillor',
+    'DIW' => 'district councillor',
+    'LGE' => 'councillor',
+    'UTE' => 'councillor',
+    'UTW' => 'councillor',
+    'MTW' => 'councillor',
+    'COP' => 'councillor',
+    'SPE' => 'MSP',
+    'SPC' => 'MSP',
+    'WAE' => 'AM',
+    'WAC' => 'AM',
+    'NIE' => 'MLA',
+    'WMC' => 'MP',
+    'HOC' => 'Lord',
+    'EUR' => 'MEP',
+);
+
+$va_rep_name_long = array(
+    'LBW' => 'councillor',
+    'GLA' => 'Mayor', # "of London"?
+    'LAC' => 'London Assembly Member',
+    'LAE' => 'London Assembly Member',
+    'CED' => 'county councillor',
+    'DIW' => 'district councillor',
+    'LGE' => 'councillor',
+    'UTE' => 'councillor',
+    'UTW' => 'councillor',
+    'MTW' => 'councillor',
+    'COP' => 'councillor',
+    'SPE' => 'Member of the Scottish Parliament',
+    'SPC' => 'Member of the Scottish Parliament',
+    'WAE' => 'Assembly Member',
+    'WAC' => 'Assembly Member',
+    'NIE' => 'Member of the Legislative Assembly',
+    'WMC' => 'Member of Parliament',
+    'HOC' => 'Member of Parliament',
+    'EUR' => 'Member of the European Parliament'
+);
+
+$va_rep_name_plural = array(
+    'LBW' => 'councillors',
+    'GLA' => 'Mayors', # "of London"?
+    'LAC' => 'London Assembly Members',
+    'LAE' => 'London Assembly Members',
+    'CED' => 'county councillors',
+    'DIW' => 'district councillors',
+    'UTE' => 'councillors',
+    'UTW' => 'councillors',
+    'LGE' => 'councillors',
+    'MTW' => 'councillors',
+    'COP' => 'councillors',
+    'SPE' => 'MSPs',
+    'SPC' => 'MSPs',
+    'WAE' => 'AMs',
+    'WAC' => 'AMs',
+    'NIE' => 'MLAs',
+    'WMC' => 'MPs',
+    'HOC' => 'Lords',
+    'EUR' => 'MEPs'
+);
+
+$va_rep_name_long_plural = array(
+    'LBW' => 'councillors',
+    'GLA' => 'Mayors', # "of London"?
+    'LAC' => 'London Assembly Members',
+    'LAE' => 'London Assembly Members',
+    'CED' => 'county councillors',
+    'DIW' => 'district councillors',
+    'UTE' => 'councillors',
+    'UTW' => 'councillors',
+    'LGE' => 'councillors',
+    'MTW' => 'councillors',
+    'COP' => 'councillors',
+    'SPE' => 'Members of the Scottish Parliament',
+    'SPC' => 'Members of the Scottish Parliament',
+    'WAE' => 'Assembly Members',
+    'WAC' => 'Assembly Members',
+    'NIE' => 'Members of the Legislative Assembly',
+    'WMC' => 'Members of Parliament',
+    'HOC' => 'Members of Parliament',
+    'EUR' => 'Members of the European Parliament'
+);
+
+$va_rep_suffix = array(
+    'LAC' => 'AM',
+    'LAE' => 'AM',
+    'SPE' => 'MSP',
+    'SPC' => 'MSP',
+    'WAE' => 'AM',
+    'WAC' => 'AM',
+    'NIE' => 'MLA',
+    'WMC' => 'MP',
+    'EUR' => 'MEP'
+);
+
+$va_rep_prefix = array(
+    'LBW' => 'Cllr',
+    'GLA' => 'Mayor', # "of London"?
+    'CED' => 'Cllr',
+    'DIW' => 'Cllr',
+    'UTE' => 'Cllr',
+    'UTW' => 'Cllr',
+    'LGE' => 'Cllr',
+    'MTW' => 'Cllr',
+    'COP' => 'Cllr',
+);
 
 /* va_responsibility_description
  * Responsibilities of each elected body. XXX should copy these out of
@@ -323,5 +435,3 @@ function va_is_fictional_area($id) {
 /* Special area IDs (see perllib/mysociety/VotingArea.pm for more) */
 $HOC_AREA_ID = 900008;
 
-
-?>
