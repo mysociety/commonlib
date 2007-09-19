@@ -6,7 +6,7 @@
  * Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: conditional.php,v 1.5 2006-05-30 21:14:44 matthew Exp $
+ * $Id: conditional.php,v 1.6 2007-09-19 17:32:43 matthew Exp $
  * 
  */
 
@@ -106,23 +106,43 @@ function cond_maybe_respond($time, $etag = null) {
         && $_SERVER['REQUEST_METHOD'] != 'HEAD')
         return false;
 
-    /* Look for an if-last-modified header */
-    if (isset($time) && array_key_exists('HTTP_IF_MODIFIED_SINCE', $_SERVER)) {
-        $t = cond_parse_http_date($_SERVER['HTTP_IF_MODIFIED_SINCE']);
-        if (isset($t) && $t >= $time) {
+    $check_etag = (isset($etag) && array_key_exists('HTTP_IF_NONE_MATCH', $_SERVER));
+    $check_ims  = (isset($time) && array_key_exists('HTTP_IF_MODIFIED_SINCE', $_SERVER));
+
+    if ($check_etag && $check_ims) {
+        if (cond_if_modified_since($time) && cond_if_none_match($etag)) {
+	    cond_304($time, $etag);
+	    return true;
+	}
+    } elseif ($check_etag) {
+        if (cond_if_none_match($etag)) {
+	    cond_304($time, $etag);
+	    return true;
+	}
+    } elseif ($check_ims) {
+        if (cond_if_modified_since($time)) {
             cond_304($time, $etag);
             return true;
         }
     }
     
-    if (isset($etag) && array_key_exists('HTTP_IF_NONE_MATCH', $_SERVER)) {
-        $etags = preg_split('/\s*,\s*/', $_SERVER['HTTP_IF_NONE_MATCH']);
-        $q = 'W/' . cond_quote_etag($etag);
-        foreach ($etags as $q2) {
-            if ($q2 == $q) {
-                cond_304($time, $etag);
-                return true;
-            }
+    return false;
+}
+
+function cond_if_modified_since($time) {
+    $t = cond_parse_http_date($_SERVER['HTTP_IF_MODIFIED_SINCE']);
+    if (isset($t) && $t >= $time)
+        return true;
+    return false;
+}
+
+function cond_if_none_match($etag) {
+    if ($_SERVER['HTTP_IF_NONE_MATCH'] == '*') return true;
+    $etags = preg_split('/\s*,\s*/', $_SERVER['HTTP_IF_NONE_MATCH']);
+    $q = 'W/' . cond_quote_etag($etag);
+    foreach ($etags as $q2) {
+        if ($q2 == $q) {
+            return true;
         }
     }
 
