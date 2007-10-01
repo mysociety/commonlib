@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.82 2007-08-14 16:48:27 matthew Exp $
+ * $Id: utility.php,v 1.83 2007-10-01 15:55:02 francis Exp $
  * 
  */
 
@@ -397,7 +397,6 @@ function prettify($s, $html = true) {
         return prettify_num($s);
     return $s;
 }
-
 function prettify_num($s) {
     if (ctype_digit($s)) {
         $locale_info = localeconv();
@@ -408,6 +407,21 @@ function prettify_num($s) {
 
 function spoonerise($s) {
     return preg_replace('#^(.)(.*? )(.)#', '$3$2$1', $s);
+}
+
+# Convert a user-entered string into an array of Web 2.0 compatible "tags" (or
+# "keywords", as they used to be called)
+# XXX function not properly complete, maybe. I'm keeping all punctuation except
+# for commas which are turned into space separators. There is no flickr-like
+# double quoting - but then, delicious doesn't do that at all. Blimey, it's
+# almost like there is no RFC for this!
+function make_web20_tags($tags) {
+    $tags = strtolower($tags); 
+    $tags = preg_replace('/,/',' ', $tags);
+    $tags = preg_replace('/\s+/',' ', $tags);
+    $tags = trim($tags);
+    $tag_array = split(" ", $tags);
+    return $tag_array;
 }
 
 /*
