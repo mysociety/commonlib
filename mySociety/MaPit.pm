@@ -8,7 +8,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # WWW: http://www.mysociety.org
 #
-# $Id: MaPit.pm,v 1.39 2007-08-24 12:27:31 matthew Exp $
+# $Id: MaPit.pm,v 1.40 2007-10-06 09:26:17 matthew Exp $
 
 package mySociety::MaPit;
 
@@ -117,9 +117,9 @@ sub get_voting_areas_info ($) {
 
 =item MaPit::get_voting_area_by_name NAME [TYPE]
 
-  Given NAME, return the area IDs that begin with that name, or undef if
-  none found. If TYPE is specified (scalar or array ref), only return areas
-  of those type(s).
+  Given NAME, return the area IDs (and other info) that begin with that
+  name, or undef if none found. If TYPE is specified (scalar or array ref),
+  only return areas of those type(s).
 
 =cut
 sub get_voting_area_by_name ($;$) {
@@ -172,7 +172,7 @@ sub get_voting_areas_geometry ($;$) {
     return $rabx_client->call('MaPit.get_voting_areas_geometry', @_);
 }
 
-=item MaPit::get_voting_areas_by_location COORDINATE METHOD [TYPE(S)]
+=item MaPit::get_voting_areas_by_location COORDINATE METHOD [TYPE(S)] [GENERATION]
 
   Returns a hash of voting areas and types which the given COORDINATE
   (either easting and northing, or latitude and longitude) is in. This only
@@ -187,7 +187,7 @@ sub get_voting_areas_geometry ($;$) {
   Westminster Constituencies only.
 
 =cut
-sub get_voting_areas_by_location ($$;$) {
+sub get_voting_areas_by_location ($$;$$) {
     configure() if !defined $rabx_client;
     return $rabx_client->call('MaPit.get_voting_areas_by_location', @_);
 }
