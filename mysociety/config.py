@@ -5,7 +5,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: config.py,v 1.4 2005-03-24 14:28:04 francis Exp $
+# $Id: config.py,v 1.5 2007-10-15 13:48:47 francis Exp $
 #
 
 """
@@ -41,8 +41,8 @@ def read_config(f):
     """read_config(FILE) ->
 
        Read configuration from FILE, which should be the name of a PHP config
-       file.  This is parsed by PHP, and any defines with names beginning
-       "OPTION_" are extracted as config values.
+       file.  This is parsed by PHP, and any defines are extracted as config
+       values. "OPTION_" is removed from any names beginning with that.
     """
 
     # We need to find the PHP binary.
@@ -68,16 +68,15 @@ def read_config(f):
 
     print >>child.tochild, """
 <?php
+$b = get_defined_constants();
 require(getenv("MYSOCIETY_CONFIG_FILE_PATH"));
-$a = get_defined_constants();
+$a = array_diff_assoc(get_defined_constants(), $b);
 print "start_of_options\n";
 foreach ($a as $k => $v) {
-    if (preg_match("/^OPTION_/", $k)) {
-        print substr($k, 7); /* strip off "OPTION_" */
-        print "\0";
-        print $v;
-        print "\0";
-    }
+    print preg_replace("/^OPTION_/", "", $k); /* strip off "OPTION_" if there */
+    print "\0";
+    print $v;
+    print "\0";
 }
 ?>"""
     child.tochild.close()
