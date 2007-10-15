@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Config.pm,v 1.15 2005-07-18 13:31:39 francis Exp $
+# $Id: Config.pm,v 1.16 2007-10-15 13:48:54 francis Exp $
 #
 
 package mySociety::Config;
@@ -58,8 +58,9 @@ sub find_php () {
 =item read_config FILE [DEFAULTS]
 
 Read configuration from FILE, which should be the name of a PHP config file.
-This is parsed by PHP, and any defines with names beginning "OPTION_" are
-extracted as config values. If specified, values from DEFAULTS are merged.
+This is parsed by PHP, and any defines are extracted as config values.
+"OPTION_" is removed from any names beginning with that. If specified, values
+from DEFAULTS are merged.
 
 =cut
 my $php_path;
@@ -110,16 +111,15 @@ sub read_config ($;$) {
 
     $inw->print(<<'EOF');
 <?php
+$b = get_defined_constants();
 require(getenv("MYSOCIETY_CONFIG_FILE_PATH"));
-$a = get_defined_constants();
+$a = array_diff_assoc(get_defined_constants(), $b);
 print "start_of_options\n";
 foreach ($a as $k => $v) {
-    if (preg_match("/^OPTION_/", $k)) {
-        print substr($k, 7); /* strip off "OPTION_" */
-        print "\0";
-        print $v;
-        print "\0";
-    }
+    print preg_replace("/^OPTION_/", "", $k); /* strip off "OPTION_" if there */
+    print "\0";
+    print $v;
+    print "\0";
 }
 ?>
 EOF
