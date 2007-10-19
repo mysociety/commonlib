@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: error.php,v 1.14 2007-08-15 12:51:01 matthew Exp $
+ * $Id: error.php,v 1.15 2007-10-19 16:02:37 francis Exp $
  * 
  */
 
@@ -122,10 +122,11 @@ function err_global_handler($num, $str, $file, $line, $context) {
     global $err_handler_log;
     global $err_handler_display;
     global $err_handling_error;
-    $err_handling_error = true;
 
     // PHP5.1RC* a bit overzealous about strict errors, even if not set to display:
     if (version_compare(phpversion(), "5.0") >= 0 && $num == E_STRICT) { return; }
+
+    $err_handling_error = true;
 
     if (isset($err_handler_log) && $num != E_USER_NOTICE)
         $err_handler_log($num, $str, $file, $line, $context);
