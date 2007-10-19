@@ -6,7 +6,7 @@
  * Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: crosssell.php,v 1.13 2007-06-28 16:26:47 matthew Exp $
+ * $Id: crosssell.php,v 1.14 2007-10-19 12:14:53 matthew Exp $
  * 
  */
 
@@ -30,9 +30,14 @@ function crosssell_display_hfymp_advert($user_email, $user_name, $postcode) {
 
     // If not, display advert
 ?>
+<form action="<?=OPTION_HEARFROMYOURMP_BASE_URL?>" method="post">
+<input type="hidden" name="name" value="<?=htmlspecialchars($user_name)?>">
+<input type="hidden" name="email" value="<?=htmlspecialchars($user_email)?>">
+<input type="hidden" name="pc" value="<?=htmlspecialchars($postcode)?>">
+<input type="hidden" name="sign" value="<?=htmlspecialchars($auth_signature)?>">
 <h2 style="padding: 1em; font-size: 200%" align="center">
-Meanwhile... Start a
-<a href="<?=OPTION_HEARFROMYOURMP_BASE_URL?>/?name=<?=urlencode($user_name)?>&email=<?=urlencode($user_email)?>&pc=<?=urlencode($postcode)?>&sign=<?=urlencode($auth_signature)?>">long term relationship</a><br> with your MP
+Meanwhile...<br>
+<input style="font-size:100%" type="submit" value="Start a long term relationship"><br> with your MP
 </h2>
 <?
     return true;
