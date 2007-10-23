@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: countries.php,v 1.17 2007-05-01 15:21:41 matthew Exp $
+ * $Id: countries.php,v 1.18 2007-10-23 15:14:40 matthew Exp $
  * 
  */
 
@@ -326,6 +326,13 @@ $countries_statecode_to_name = array(
         'WY' => 'Wyoming'
     )
 );
+$countries_name_to_statecode = array();
+foreach ($countries_statecode_to_name as $country => $states) {
+    $countries_name_to_statecode[$country] = array();
+    foreach ($states as $code => $state) {
+        $countries_name_to_statecode[$country][strtolower($state)] = $code;
+    }
+}
 
 $countries_code_to_name_with_from_fr = array(
     'AF' => 'de l\'',
