@@ -5,7 +5,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: config.py,v 1.5 2007-10-15 13:48:47 francis Exp $
+# $Id: config.py,v 1.6 2007-10-24 10:12:10 francis Exp $
 #
 
 """
@@ -111,7 +111,7 @@ foreach ($a as $k => $v) {
         raise Exception, "%s: %s: bad option output from subprocess" % (php_path, f)
 
     config = {}
-    for i in range(len(vals) / 2):
+    for i in range(len(vals) // 2):
         config[vals[i*2]] = vals[i*2+1]
     config["CONFIG_FILE_NAME"] = f
     return config
