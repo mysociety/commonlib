@@ -4,7 +4,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: config.rb,v 1.2 2007-10-24 11:39:39 francis Exp $
+# $Id: config.rb,v 1.3 2007-10-24 19:13:07 francis Exp $
 
 module MySociety
     module Config
@@ -78,7 +78,6 @@ module MySociety
                 line = true
                 while line
                     line = child.readline()
-                    print "line:" + line
                     if line == "start_of_options\n"
                         break
                     else
