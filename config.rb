@@ -4,7 +4,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: config.rb,v 1.1 2007-10-17 01:16:03 francis Exp $
+# $Id: config.rb,v 1.2 2007-10-24 11:39:39 francis Exp $
 
 module MySociety
     module Config
@@ -111,11 +111,15 @@ module MySociety
             return config
         end
 
-        # set_file FILENAME
+        # set_file FILENAME [IGNORE_MISSING_FILE]
         # Sets the default configuration file, used by mySociety::Config.get.
+        # IGNORE_MISSING_FILE if set means will not error if the file is missing,
+        # but instead return default values.
         attr :main_config_filename
-        def Config.set_file(filename)
+        attr :ignore_missing_file
+        def Config.set_file(filename, ignore_missing_file = false)
             @main_config_filename = filename
+            @ignore_missing_file = ignore_missing_file
         end
 
         # load_default
@@ -126,6 +130,13 @@ module MySociety
             filename = @main_config_filename
             if not filename
                 raise "Please call MySociety::Config.set_file to specify config file" 
+            end
+            if not File.exists?(filename)
+                if @ignore_missing_file
+                    return {"CONFIG_FILE_NAME" => filename + " (missing file)"}
+                else
+                    raise "File missing '" + filename + "'"
+                end
             end
 
             if @cached_configs.nil?
@@ -152,6 +163,20 @@ module MySociety
             else
                 raise "No value for '#{key}' in '#{config['CONFIG_FILE_NAME']}', and no default specified" 
             end
+        end
+
+        # getbool KEY [DEFAULT]
+        # Returns the constants for the give KEY, defaulting to DEFAULT,
+        # and casts it from 1 / 0 to true or false. This is needed as, unlike
+        # PHP, Perl and Python for which the config format was initially used,
+        # Ruby treats 0 as true.
+        def Config.getbool (key, default = nil)
+            if default == false
+                default = 0
+            elsif default == true
+                default = 1
+            end
+            return get(key, default).to_i > 0
         end
     end
 end
