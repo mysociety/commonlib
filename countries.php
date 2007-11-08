@@ -6,11 +6,11 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: countries.php,v 1.18 2007-10-23 15:14:40 matthew Exp $
+ * $Id: countries.php,v 1.19 2007-11-08 22:12:42 matthew Exp $
  * 
  */
 
-/* $countries_name_to_code
+/* $countries_code_to_name
  * ISO 3166-1 alpha-2 country names and two letter codes, taken from
  * http://en.wikipedia.org/wiki/ISO_3166-1_alpha-2. */
 $countries_code_to_name = array(
@@ -266,7 +266,7 @@ foreach ($countries_code_to_name as $countries_code => $countries_name) {
     if (array_key_exists($countries_name, $countries_name_to_code)) {
         die("Name $countries_name exists twice in countries_code_to_name");
     }
-    $countries_name_to_code[$countries_name] = $countries_code;
+    $countries_name_to_code[strtolower($countries_name)] = $countries_code;
 }
 
 /* $countries_statecode_to_name
