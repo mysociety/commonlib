@@ -6,7 +6,7 @@
  * Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: crosssell.php,v 1.15 2007-10-26 10:59:58 twfy-live Exp $
+ * $Id: crosssell.php,v 1.16 2007-11-19 14:07:48 matthew Exp $
  * 
  */
 
@@ -19,6 +19,24 @@ require_once 'auth.php';
 require_once 'mapit.php';
 require_once 'dadem.php';
 require_once 'debug.php';
+
+/* At present, this advert will always display if picked */
+function crosssell_display_gny_advert() {
+?>
+
+<h2 style="font-size: 200%" align="center">
+Are you a member of a local email list or other local online community?
+</h2>
+
+<p style="font-size: 150%;">
+If so, please help the charity that runs this site by giving us two
+minutes of your time to <a href="http://www.groupsnearyou.com/add/about/">add
+the group to our new site GroupsNearYou</a>.
+</p>
+
+<?
+    return true;
+}
 
 function crosssell_display_hfymp_advert($user_email, $user_name, $postcode) {
     if (!defined('OPTION_AUTH_SHARED_SECRET') || !defined('OPTION_HEARFROMYOURMP_BASE_URL'))
@@ -81,7 +99,7 @@ function crosssell_display_twfy_alerts_advert($this_site, $user_email, $postcode
     dadem_check_error($rep_info);
 
     if (!array_key_exists('parlparse_person_id', $rep_info)) {
-    	return false;
+        return false;
     }
     $person_id = str_replace("uk.org.publicwhip/person/", "", $rep_info['parlparse_person_id']);
     if (!$person_id) {
@@ -128,6 +146,9 @@ can unsubscribe at any time.
 // Choose appropriate advert and display it.
 // $this_site is stop a site advertising itself.
 function crosssell_display_advert($this_site, $user_email, $user_name, $postcode) {
+    if ($this_site != 'gny' && $this_site == 'wtt') # Only WTT at the moment, will always show.
+        if (crosssell_display_gny_advert())
+            return 'gny';
     if ($this_site != "hfymp") 
         if (crosssell_display_hfymp_advert($user_email, $user_name, $postcode))
             return 'hfymp';
