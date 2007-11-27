@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email:angie@mysociety.org; WWW: http://www.mysociety.org/
 #
-my $rcsid = ''; $rcsid .= '$Id: SMS.pm,v 1.1 2007-11-22 16:12:49 angie Exp $';
+my $rcsid = ''; $rcsid .= '$Id: SMS.pm,v 1.2 2007-11-27 15:34:44 angie Exp $';
 
 package mySociety::SMS;
 
@@ -83,50 +83,27 @@ Verify that TEXT is representable in IA5.
     }
 }
 
+
+
 sub send {
       my ($class, %values) = @_;
-      
-      # values can be set through the has or via method eg $sms->to. 
-      # but should make sure the internal class values are updated if set in % values. 
-      # this is so tests like encode_message still work
-      
+            
       my $to = $values{'to'} || $_[0]->{_to} || '';
       $_[0]->{_to} = $to;
       
-      my $message = $values{'message'} || $_[0]->{_smsmessage} || '';
-      $_[0]->{_smsmessage} = $message;
-      
-    
-        # Now we need to send the message. Only messages which are
-        # representable in IA5 can be sent.
-        unless ($class->check_ia5($message)) {
-              return 0;          
-        }
-        $class->encode_message;
+    unless ($_[0]->{_smsmessage} && $_[0]->{_to}) {return 0;}
+
+        my %p = (
+            strMethod => 'sendSMS',
+            strShortcode => '60022',        # XXX
+            strMobile => $_[0]->{_to},
+            intTransactionID => '999',
+            intPremium => '0',     # XXX
+            strMessage => $_[0]->{_smsmessage},
+        );
         
-        my @tos = split ',', $to;
-        foreach my $sendto (@tos) {
-            # Assemble parameters for message.
-            #
-            #   strMethod               sendSMS
-            #   strShortcode            sending short code
-            #   strMobile               recipient
-            #   strMessage              IA5 octets of message
-            #   intTransactionID        our reference
-            #   intPremium              cost of premium SMS
-            #
-            $sendto =~ s/^\+//;
-            my %p = (
-                    strMethod => 'sendSMS',
-                    strShortcode => '60022',        # XXX
-                    strMobile => $sendto,
-                    intTransactionID => '999',
-                    intPremium => '0'     # XXX
-                );
-            $p{strMessage} = $_[0]->{_smsmessage};
-            my $result = $class->do_post_request("outgoing SMS alert", \%p);
-        }
-        return 1;
+        my $result = $class->do_post_request("outgoing SMS alert", \%p);
+    return 1;
 }
 
 
@@ -172,10 +149,6 @@ sub do_post_request {
     return $_[0]->{_request_error};
 }
 
-sub encode_message {
-    $_[0]->{_smsmessage} =~ s/([^@\$ !"#%'()*+,-.\/0-9:;=?A-Z_])/sprintf('&#x%04x;', ord($1))/gei;
-}
-
 
 sub error {return $_[0]->{_error};}
 sub request_error {return $_[0]->{_request_error};}
@@ -183,13 +156,21 @@ sub request_content {return $_[0]->{_request_content};}
 
 sub to {
     my ($class, $to) = @_;
-    if ($to) {$_[0]->{_to} = $to;}
+    if ($to) {
+        $_[0]->{_to} = $to;
+        $_[0]->{_to} =~ s/^\+//;
+    }
     return $_[0]->{_to};
 }
 
 sub message {
     my ($class, $smsmessage) = @_;
-    if ($smsmessage) {$_[0]->{_smsmessage} = $smsmessage;}
+    if ($smsmessage) {
+        if ($class->check_ia5($smsmessage)) {
+            $smsmessage =~ s/([^@\$ !"#%'()*+,-.\/0-9:;=?A-Z_])/sprintf('&#x%04x;', ord($1))/gei;
+            $_[0]->{_smsmessage} = $smsmessage;
+        }
+    }
     return $_[0]->{_smsmessage};
 }
 

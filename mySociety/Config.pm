@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Config.pm,v 1.16 2007-10-15 13:48:54 francis Exp $
+# $Id: Config.pm,v 1.17 2007-11-27 15:34:44 angie Exp $
 #
 
 package mySociety::Config;
@@ -222,6 +222,34 @@ sub get ($;$) {
     } else {
         die "No value for '$key' in '" . $config->{'CONFIG_FILE_NAME'} .  "', and no default specified";
     }
+}
+
+sub get_list {
+    my (%searches) = @_;
+    # example of usage get_list('startswith' => 'SMS');
+    # returns a ref to a hash of config values
+    my $config = load_default();
+    my $regexp = '';
+
+    if ($searches{'startswith'}) {
+        $regexp = qr/^$searches{'startswith'}/;
+    }
+    if ($searches{'endswith'}) {
+        $regexp = qr/$searches{'endswith'}$/;
+    }
+    
+    if ($regexp) {
+        my $conf_subset = {};
+        foreach my $key (keys %$config) {
+            if ($key =~ $regexp) {
+                $conf_subset->{$key} = $config->{$key};
+            }
+        }
+        return $conf_subset;
+    } else {
+        return $config;
+    }
+    return {};
 }
 
 1;
