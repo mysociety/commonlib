@@ -4,7 +4,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: deployfns,v 1.16 2006-03-02 15:02:33 francis Exp $
+# $Id: deployfns,v 1.17 2007-12-13 03:24:22 francis Exp $
 #
 
 # Warnings and errors
@@ -23,7 +23,20 @@ warn () {
 read_conf () {
     # XXX use of mktemp here not safe; should make a temporary directory
     CONF_SOURCE=`mktemp /tmp/ms-deploy-configsource.XXXXXX`
-    cat $1 | grep define | egrep -v "^\/\/" | egrep -v "^ \*" | sed "s/define('\(.*\)', '\(.*\)'.*/\1=\"\2\"/" | egrep -v "define|mySociety::Config" >$CONF_SOURCE
+    export MYSOCIETY_CONFIG_FILE_PATH=$1
+    cat << END | php >$CONF_SOURCE
+<?php
+\$b = get_defined_constants();
+require(getenv("MYSOCIETY_CONFIG_FILE_PATH"));
+\$a = array_diff_assoc(get_defined_constants(), \$b);
+foreach (\$a as \$k => \$v) {
+    print preg_replace("/^OPTION_/", "", \$k); /* strip off "OPTION_" if there */
+    print "=";
+    print "\"\$v\"";
+    print "\n";
+}
+?>
+END
     . $CONF_SOURCE
     rm $CONF_SOURCE
 }
