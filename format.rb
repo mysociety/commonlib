@@ -4,14 +4,14 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: format.rb,v 1.2 2007-12-13 12:30:41 francis Exp $
+# $Id: format.rb,v 1.3 2007-12-14 00:42:00 francis Exp $
 
 module MySociety
     module Format
 
         # Word wrap the body of a text email.
         def Format.wrap_email_body(body, line_width = 69, indent = "     ")
-            body.gsub!(/\r\n/, '\n') # forms post with \r\n by default
+            body.gsub!(/\r\n/, "\n") # forms post with \r\n by default
             paras = body.split(/\n\n/)
 
             result = ''
