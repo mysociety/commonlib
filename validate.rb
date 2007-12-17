@@ -4,12 +4,12 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: validate.rb,v 1.1 2007-08-31 17:56:02 francis Exp $
+# $Id: validate.rb,v 1.2 2007-12-17 18:30:59 francis Exp $
 
 module MySociety
     module Validate
 
-        def Validate.is_valid_email(addr)
+        def Validate.email_match_regexp
             # This is derived from the grammar in RFC2822.
             # mailbox = local-part "@" domain
             # local-part = dot-string | quoted-string
@@ -36,7 +36,11 @@ module MySociety
             sub_domain = '[A-Za-z0-9][A-Za-z0-9-]*'
             domain = "#{sub_domain}(\\s*\\.\\s*#{sub_domain})*"
 
-            is_valid_address_re = Regexp.new("^#{local_part}\\s*@\\s*#{domain}\$")
+            return "#{local_part}\\s*@\\s*#{domain}"
+        end
+
+        def Validate.is_valid_email(addr)
+            is_valid_address_re = Regexp.new("^#{Validate.email_match_regexp}\$")
 
             return addr =~ is_valid_address_re
         end
