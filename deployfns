@@ -4,7 +4,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: deployfns,v 1.17 2007-12-13 03:24:22 francis Exp $
+# $Id: deployfns,v 1.18 2007-12-19 12:15:25 francis Exp $
 #
 
 # Warnings and errors
@@ -30,7 +30,7 @@ read_conf () {
 require(getenv("MYSOCIETY_CONFIG_FILE_PATH"));
 \$a = array_diff_assoc(get_defined_constants(), \$b);
 foreach (\$a as \$k => \$v) {
-    print preg_replace("/^OPTION_/", "", \$k); /* strip off "OPTION_" if there */
+    print \$k;
     print "=";
     print "\"\$v\"";
     print "\n";
