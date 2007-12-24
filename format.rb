@@ -4,7 +4,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: format.rb,v 1.5 2007-12-23 13:44:19 francis Exp $
+# $Id: format.rb,v 1.6 2007-12-24 17:30:02 francis Exp $
 
 module MySociety
     module Format
@@ -40,6 +40,16 @@ module MySociety
             ret = ret.gsub(/(\s)([a-z0-9\-_.]+)@([^,< \n\r]*[^.,< \n\r])/i, "\\1<a href=\"mailto:\\2@\\3\">\\2@\\3</a>")
             ret = ret.strip
             return ret
+        end
+
+        # Differs from the Rails view helper pluralize, by not including the
+        # number in the case of the singular.
+        def Format.fancy_pluralize(num, singular, plural)
+            if num == 1
+                return singular
+            else
+                return num.to_s + " " + plural
+            end
         end
     end
 end
