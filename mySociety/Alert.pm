@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Alert.pm,v 1.37 2007-10-22 18:00:04 matthew Exp $
+# $Id: Alert.pm,v 1.38 2008-01-03 15:00:24 matthew Exp $
 
 package mySociety::Alert::Error;
 
@@ -197,6 +197,7 @@ sub _send_aggregated_alert_email(%) {
     my $result;
     if (mySociety::Config::get('STAGING_SITE')) {
         $result = 1; # SOFT_ERROR
+	print $email;
     } else {
         $result = mySociety::EmailUtil::send_email($email, mySociety::Config::get('CONTACT_EMAIL'),
             $data{alert_email});
