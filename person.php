@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: person.php,v 1.26 2007-08-13 12:35:47 matthew Exp $
+ * $Id: person.php,v 1.27 2008-01-03 10:58:48 matthew Exp $
  * 
  */
 
@@ -44,7 +44,7 @@ class Person {
     function Person($id) {
         if (preg_match('/@/', $id))
             $this->id = db_getOne('select id from person where lower(email) = ? for update', strtolower($email));
-        else if (preg_match('/^[1-9]\d*$/', $id))
+        elseif (preg_match('/^[1-9]\d*$/', $id))
             $this->id = db_getOne('select id from person where id = ? for update', $id);
         else
             err('value passed to person constructor must be person ID or email address');
@@ -146,7 +146,7 @@ class Person {
         $c = db_getOne('select password from person where id = ?', $this->id);
         if (is_null($c))
             return false;
-        else if (crypt($p, $c) != $c)
+        elseif (crypt($p, $c) != $c)
             return false;
         else
             return true;
@@ -244,7 +244,7 @@ function person_if_signed_on($norenew = false) {
     return null;   
 }
 
-function person_already_signed_on($email, $name, $person_if_signed_on_function) {
+function person_already_signed_on($email, $name, $person_if_signed_on_function = null) {
     if (!is_null($email) && !validate_email($email))
         err("'$email' is not a valid email address");
 
