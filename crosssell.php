@@ -6,7 +6,7 @@
  * Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: crosssell.php,v 1.16 2007-11-19 14:07:48 matthew Exp $
+ * $Id: crosssell.php,v 1.17 2008-01-11 17:51:15 matthew Exp $
  * 
  */
 
@@ -144,7 +144,7 @@ can unsubscribe at any time.
 }
 
 // Choose appropriate advert and display it.
-// $this_site is stop a site advertising itself.
+// $this_site is to stop a site advertising itself.
 function crosssell_display_advert($this_site, $user_email, $user_name, $postcode) {
     if ($this_site != 'gny' && $this_site == 'wtt') # Only WTT at the moment, will always show.
         if (crosssell_display_gny_advert())

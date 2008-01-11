@@ -8,7 +8,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org
  *
- * $Id: votingarea.php,v 1.48 2007-09-18 12:58:29 matthew Exp $
+ * $Id: votingarea.php,v 1.49 2008-01-11 17:51:15 matthew Exp $
  * 
  */
 
@@ -353,9 +353,7 @@ including <strong>planning</strong>, <strong>council housing</strong>,
 <strong>public paths</strong>.
 ",
     'LAS' => "
-The London Assembly <strong>examines</strong> the Mayor of London's
-activities, <strong>investigates</strong> issues of importance to Londoners,
-and <strong>makes proposals</strong> to the Mayor.  Areas covered include the
+Areas covered include the
 Mayor's budget, <strong>culture</strong>, <strong>sport and tourism</strong>,
 <strong>health</strong>, <strong>planning</strong>, <strong>transport</strong>,
 and <strong>trunk roads</strong>.

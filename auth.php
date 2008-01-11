@@ -7,22 +7,20 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: auth.php,v 1.7 2006-09-04 15:38:02 francis Exp $
+ * $Id: auth.php,v 1.8 2008-01-11 17:51:15 matthew Exp $
  * 
  */
 
 require_once 'random.php';
+require_once 'BaseN.php';
 
 /* auth_ab64_encode DATA
- * Return a "almost base64" encoding of DATA (a nearly six-bit encoding using
- * email-client-friendly characters; specifically the encoded data match
- * /^[0-9A-Za-z]+$/). 
- * TODO: Change this to proper base62_encode :) */
+ * Return an encoding of DATA, using email-client-friendly characters;
+ * specifically the encoded data match /^[0-9A-Za-z]+$/) excluding O0I1l. 
+ */
 function auth_ab64_encode($i) {
-    $t = base64_encode($i);
-    $t = str_replace("+", "a", &$t);
-    $t = str_replace("/", "b", &$t);
-    $t = str_replace("=", "c", &$t);
+    $t = basen_encode_fast(57, $i);
+    $t = str_replace(array('O','0','1', 'I', 'l'), array('5','6','7','8','9'), $t);
     return $t;
 }
 

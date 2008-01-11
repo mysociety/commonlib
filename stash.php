@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: stash.php,v 1.10 2007-08-15 16:50:51 matthew Exp $
+ * $Id: stash.php,v 1.11 2008-01-11 17:51:15 matthew Exp $
  * 
  */
 
@@ -143,7 +143,7 @@ function stash_check_for_post_redirect() {
     $pos = 0;
     $stashed_POST = rabx_wire_rd(&$post_data, &$pos);
     if (rabx_is_error($stashed_POST))
-        err("Bad serialised POST data in stash_redirect('$key')");
+        err("Bad serialised POST data in stash_check_for_post_redirect('$key')");
 
     /* Fix $_POST to make this look like one */
     $_POST = $stashed_POST;
