@@ -6,7 +6,7 @@
 # Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: AuthToken.pm,v 1.4 2007-08-02 11:45:08 matthew Exp $
+# $Id: AuthToken.pm,v 1.5 2008-01-11 18:20:33 matthew Exp $
 #
 
 package mySociety::AuthToken;
@@ -19,21 +19,19 @@ use MIME::Base64 qw(encode_base64);
 
 use mySociety::DBHandle qw(dbh);
 use mySociety::Random qw(random_bytes);
+use mySociety::BaseN;
 
 use RABX;
 
 =item ab64_encode DATA
 
-Return an "almost base64" encoding of DATA (like base64 but not using any
-characters which email clients like to split up in URLs). Note that this
-encoding is not invertible. Generated data match /^[0-9A-Za-z]+$/.
+Return a base57 encoding of DATA (like base64 but not using . or / or
+some easy-to-confuse letters, O 0 I 1 l.
 
 =cut
 sub ab64_encode ($) {
-    my $t = encode_base64($_[0], '');
-    $t =~ s#\+#a#g;
-    $t =~ s#/#b#g;
-    $t =~ s#=#c#g;
+    my $t = mySociety::BaseN::encodefast(57, $_[0]);
+    $t =~ tr#O01Il#56789#;
     return $t;
 }
 
