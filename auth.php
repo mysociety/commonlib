@@ -7,7 +7,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: auth.php,v 1.8 2008-01-11 17:51:15 matthew Exp $
+ * $Id: auth.php,v 1.9 2008-01-11 18:05:38 matthew Exp $
  * 
  */
 
@@ -19,7 +19,7 @@ require_once 'BaseN.php';
  * specifically the encoded data match /^[0-9A-Za-z]+$/) excluding O0I1l. 
  */
 function auth_ab64_encode($i) {
-    $t = basen_encode_fast(57, $i);
+    $t = basen_encodefast(57, $i);
     $t = str_replace(array('O','0','1', 'I', 'l'), array('5','6','7','8','9'), $t);
     return $t;
 }
