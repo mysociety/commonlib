@@ -6,7 +6,7 @@
 # Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Email.pm,v 1.21 2007-06-06 22:05:41 matthew Exp $
+# $Id: Email.pm,v 1.22 2008-01-14 23:28:24 matthew Exp $
 #
 
 package mySociety::Email::Error;
@@ -59,6 +59,17 @@ sub encode_string ($) {
 
 my $qpchars = '\x00-\x1f\x7f-\xff?_="(),.:;<>@[\\]';
 
+sub encode_quoted_string($) {
+    my $text = shift;
+    if ($text =~ /[^A-Za-z0-9!#\$%&'*+\-\/=?^_`{|}~]/) {
+        # Contains characters which aren't valid in atoms, so make a
+        # quoted-pair instead.
+        $text =~ s/(["\\])/\\$1/g;
+        $text = qq("$text");
+    }
+    return $text;
+}
+
 =item format_mimewords STRING EMAIL
 
 Return STRING, formatted for inclusion in an email header.
@@ -72,6 +83,7 @@ sub format_mimewords ($;$) {
     
     my ($charset, $octets) = encode_string($text);
     if ($charset eq 'us-ascii') {
+        $text = encode_quoted_string($text) if $email;
         return $text;
     } else {
         my $encoding = length($octets) > 3*(eval "\$octets =~ tr/$qpchars//") ? 'Q' : 'B';
@@ -87,6 +99,7 @@ sub format_mimewords ($;$) {
             } else {
                 if ($token !~ /[\x00-\x1f\x7f-\xff]/) {
                     $last_word_encoded = 0;
+		    $token = encode_quoted_string($token) if $email;
                     $last_token = $token;
                 } else {
                     my $tok = $last_token =~ /\s+/ && $last_word_encoded ? $last_token.$token : $token;
@@ -135,33 +148,8 @@ an email From:/To: header.
 sub format_email_address ($$) {
     my ($name, $addr) = @_;
 
-    # 
-    # The "display-name" part of the mailbox is a "phrase", meaning one or more
-    # atoms or quoted-strings. Atoms consist of atext:
-    # 
-    # atext           =       ALPHA / DIGIT / ; Any character except controls,
-    #                         "!" / "#" /     ;  SP, and specials.
-    #                         "$" / "%" /     ;  Used for atoms
-    #                         "&" / "'" /
-    #                         "*" / "+" /
-    #                         "-" / "/" /
-    #                         "=" / "?" /
-    #                         "^" / "_" /
-    #                         "`" / "{" /
-    #                         "|" / "}" /
-    #                         "~"
-    #
-    
     # First format name for any non-ASCII characters, if necessary.
     $name = format_mimewords($name, 1);
-
-    # Now decide whether it is to be formatted as an atom or a quoted-string.
-    if ($name =~ /[^A-Za-z0-9!#\$%&'*+\-\/=?^_`{|}~]/) {
-        # Contains characters which aren't valid in atoms, so make a
-        # quoted-pair instead.
-        $name =~ s/(["\\])/\\$1/g;
-        $name = qq("$name");
-    }
     return sprintf('%s <%s>', $name, $addr);
 }
 
