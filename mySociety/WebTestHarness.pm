@@ -12,7 +12,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.62 2007-08-17 09:31:23 matthew Exp $
+# $Id: WebTestHarness.pm,v 1.63 2008-01-16 19:30:16 matthew Exp $
 #
 
 # Overload of WWW::Mechanize
@@ -139,7 +139,7 @@ Loads schema file into main database.
 sub database_load_schema ($$) {
     my ($self, $schema_file) = @_;
 
-    $schema = read_file($schema_file);
+    my $schema = read_file($schema_file);
     dbh()->do("set client_min_messages to warning"); # So implicit index creation NOTICEs aren't displayed when loading SQL
     dbh()->do($schema);
     dbh()->commit();
