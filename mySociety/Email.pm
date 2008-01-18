@@ -6,7 +6,7 @@
 # Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Email.pm,v 1.22 2008-01-14 23:28:24 matthew Exp $
+# $Id: Email.pm,v 1.23 2008-01-18 15:37:00 matthew Exp $
 #
 
 package mySociety::Email::Error;
@@ -305,7 +305,7 @@ sub construct_email ($) {
         if (ref($p->{$_}) eq '') {
             # Interpret as a literal string in UTF-8, so all we need to do is
             # escape it.
-            $hdr{$_} = mySociety::Email::format_mimewords($p->{$_}, 1);
+            $hdr{$_} = mySociety::Email::format_mimewords($p->{$_});
         } elsif (ref($p->{$_}) eq 'ARRAY') {
             # Array of addresses or [address, name] pairs.
             my @a = ( );
