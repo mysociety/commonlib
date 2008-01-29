@@ -6,55 +6,132 @@
  * Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: crosssell.php,v 1.17 2008-01-11 17:51:15 matthew Exp $
+ * $Id: crosssell.php,v 1.18 2008-01-29 16:44:59 matthew Exp $
  * 
  */
 
 // Config parameters site needs set to call these functions:
 // OPTION_AUTH_SHARED_SECRET
-// OPTION_HEARFROMYOURMP_BASE_URL
 // MaPit and DaDem
 
 require_once 'auth.php';
 require_once 'mapit.php';
 require_once 'dadem.php';
-require_once 'debug.php';
+require_once 'debug.php'; # for getmicrotime()
 
-/* At present, this advert will always display if picked */
-function crosssell_display_gny_advert() {
-?>
+# Global
+$crosssell_voting_areas = array();
 
-<h2 style="font-size: 200%" align="center">
-Are you a member of a local email list or other local online community?
-</h2>
+// Choose appropriate advert and display it.
+// $this_site is to stop a site advertising itself.
+function crosssell_display_advert($this_site, $email = '', $name = '', $postcode = '', $adverts = array()) {
 
-<p style="font-size: 150%;">
-If so, please help the charity that runs this site by giving us two
-minutes of your time to <a href="http://www.groupsnearyou.com/add/about/">add
-the group to our new site GroupsNearYou</a>.
-</p>
+    # Always try and display a HearFromYourCouncillor Cheltenham advert if possible
+    if ($this_site != 'hfyc')
+        if ($ad = crosssell_display_hfyc_cheltenham_advert($email, $name, $postcode))
+            return $ad;
 
-<?
+    # If we've been sent an array of adverts, pick one at random to display
+    while (count($adverts)) {
+        $rand = rand(0, count($adverts)-1);
+        list ($advert_site, $advert_text) = $adverts[$rand];
+        if (call_user_func('crosssell_display_random_' . $advert_site . '_advert', $email, $name, $postcode, $advert_text, $this_site))
+            return $advert_site . $rand;
+        # Failed to show an advert for $advert_site, remove all other $advert_site adverts from the selection
+        $new_adverts = array();
+        foreach ($adverts as $advert) {
+            if ($advert_site != $advert[0])
+                $new_adverts[] = $advert;
+        }
+        $adverts = $new_adverts;
+    }
+
+    if ($this_site != 'hfymp') 
+        if (crosssell_display_hfymp_advert($email, $name, $postcode))
+            return 'hfymp';
+    if ($this_site != 'twfy') {
+        if (crosssell_display_twfy_alerts_advert($this_site, $email, $postcode))
+            return 'twfy';
+    } else {
+        return 'other-twfy-alert-type';
+    }
+    if ($this_site != 'pb') {
+        crosssell_display_pb_advert();
+        return 'pb';
+    }
+    return '';
+}
+
+/* Random adverts, text supplied by caller */
+
+/* This advert will always display if picked */
+function crosssell_display_random_fms_advert($email, $name, $postcode, $text, $this_site) {
+    echo '<div id="advert_thin" style="text-align:center; font-size:150%">',
+        $text, '</div>';
     return true;
 }
 
-function crosssell_display_hfymp_advert($user_email, $user_name, $postcode) {
-    if (!defined('OPTION_AUTH_SHARED_SECRET') || !defined('OPTION_HEARFROMYOURMP_BASE_URL'))
-        return false;
+/* This advert will always display if picked */
+function crosssell_display_random_gny_advert($email, $name, $postcode, $text, $this_site) {
+    echo '<div id="advert_thin">', $text, '</div>';
+    return true;
+}
 
-    $auth_signature = auth_sign_with_shared_secret($user_email, OPTION_AUTH_SHARED_SECRET);
+function crosssell_display_random_hfymp_advert($email, $name, $postcode, $text, $this_site) {
+    $auth_signature = crosssell_check_hfymp($email);
+    if (!$auth_signature) return false;
 
-    // See if already signed up
-    $already_signed = @file_get_contents(OPTION_HEARFROMYOURMP_BASE_URL.'/authed?email='.urlencode($user_email)."&sign=".urlencode($auth_signature));
-    if ($already_signed != 'not signed') 
-        return false;
+    $text = str_replace('[form]', '
+<form action="http://www.hearfromyourmp.com/" method="post">
+<input type="hidden" name="name" value="' . htmlspecialchars($name) . '">
+<input type="hidden" name="email" value="' . htmlspecialchars($email) . '">
+<input type="hidden" name="postcode" value="' . htmlspecialchars($postcode) . '">
+<input type="hidden" name="sign" value="' . htmlspecialchars($auth_signature) . '">
+<h2><input style="font-size:100%" type="submit" value="', $text);
+    $text = str_replace('[/form]', '"></h2>', $text);
 
-    // If not, display advert
+    echo '<div style="text-align:center">', $text, '</div>';
+    return true;
+}
+
+function crosssell_display_random_twfy_alerts_advert($email, $name, $postcode, $text, $this_site) {
+    $check = crosssell_check_twfy($email, $postcode);
+    if (is_bool($check)) return false;
+    list($person_id, $auth_signature) = $check;
+
+    $text = str_replace('[form]', '
+<form action="http://www.theyworkforyou.com/alert/" method="post">
+    <strong>Your email:</strong> <input type="text" name="email" value="' . $email . '" maxlength="100" size="30">
+    <input type="hidden" name="pid" value="' . $person_id . '">
+    <input type="hidden" name="submitted" value="true">
+    <input type="hidden" name="sign" value="' . $auth_signature . '">
+    <input type="hidden" name="site" value="' . $this_site . '">
+    <input type="submit" value="', $text);
+    $text = str_replace('[/form]', '"></form>', $text);
+    $text = str_replace('[button]', '
+<form action="http://www.theyworkforyou.com/alert/" method="post">
+    <input type="hidden" name="email" value="' . $email . '">
+    <input type="hidden" name="pid" value="' . $person_id . '">
+    <input type="hidden" name="sign" value="' . $auth_signature . '">
+    <input type="hidden" name="site" value="' . $this_site . '">
+    <input style="font-size:150%" type="submit" value="', $text);
+    $text = str_replace('[/button]', '"></p>', $text);
+
+    echo '<div id="advert_thin" style="text-align:center">', $text, '</div>';
+    return true;
+}
+
+/* Okay, now the static adverts, not being shown at random */
+
+function crosssell_display_hfymp_advert($email, $name, $postcode) {
+    $auth_signature = crosssell_check_hfymp($email);
+    if (!$auth_signature) return false;
+
 ?>
-<form action="<?=OPTION_HEARFROMYOURMP_BASE_URL?>" method="post">
-<input type="hidden" name="name" value="<?=htmlspecialchars($user_name)?>">
-<input type="hidden" name="email" value="<?=htmlspecialchars($user_email)?>">
-<input type="hidden" name="pc" value="<?=htmlspecialchars($postcode)?>">
+<form action="http://www.hearfromyourmp.com/" method="post">
+<input type="hidden" name="name" value="<?=htmlspecialchars($name)?>">
+<input type="hidden" name="email" value="<?=htmlspecialchars($email)?>">
+<input type="hidden" name="postcode" value="<?=htmlspecialchars($postcode)?>">
 <input type="hidden" name="sign" value="<?=htmlspecialchars($auth_signature)?>">
 <h2 style="padding: 1em; font-size: 200%" align="center">
 Meanwhile...<br>
@@ -64,73 +141,68 @@ Meanwhile...<br>
     return true;
 }
 
-function crosssell_display_pb_local_pledges($postcode) {
-    $local_pledges = file_get_contents('http://www.pledgebank.com/rss?postcode=' . urlencode($postcode));
-    preg_match_all('#<link>(.*?)</link>\s+<description>(.*?)</description>#', $local_pledges, $m, PREG_SET_ORDER);
-    $local_num = count($m) - 1;
-    if ($local_num > 5) $local_num = 5;
-    if ($local_num) {
-        print '<div id="pledges"><h2>Recent pledges local to ' . canonicalise_postcode($postcode) . '</h2>';
-        print '<p style="margin-top:0; text-align:right; font-size: 89%">These are pledges near you made by users of <a href="http://www.pledgebank.com/">PledgeBank</a>, another mySociety site. We thought you might be interested. N.B. mySociety does not endorse specific pledges.</p> <ul>';
-        for ($p=1; $p<=$local_num; ++$p) {
-            print '<li><a href="' . $m[$p][1] . '">' . $m[$p][2] . '</a>';
-        }
-        print '</ul><p align="center"><a href="http://www.pledgebank.com/alert?postcode='.$postcode.'">Get emails about local pledges</a></p></div>';
-    } else {
+function crosssell_display_hfyc_cheltenham_advert($email, $name, $postcode) {
+    if (!defined('OPTION_AUTH_SHARED_SECRET') || !$postcode)
         return false;
+
+    global $crosssell_voting_areas;
+    if (!$crosssell_voting_areas)
+        $crosssell_voting_areas = mapit_get_voting_areas($postcode);
+    if (!isset($crosssell_voting_areas['DIS']) || $crosssell_voting_areas['DIS'] != 2326)
+        return false;
+
+    $auth_signature = auth_sign_with_shared_secret($email, OPTION_AUTH_SHARED_SECRET);
+
+    // See if already signed up
+    $already_signed = crosssell_fetch_page('cheltenham.hearfromyourcouncillor.com', '/authed?email='.urlencode($email)."&sign=".urlencode($auth_signature));
+    if ($already_signed != 'not signed') 
+        return false;
+
+    // If not, display one of two adverts
+    $rand = rand(0, 1);
+?>
+<form action="http://cheltenham.hearfromyourcouncillor.com/" method="post">
+<input type="hidden" name="name" value="<?=htmlspecialchars($name)?>">
+<input type="hidden" name="email" value="<?=htmlspecialchars($email)?>">
+<input type="hidden" name="postcode" value="<?=htmlspecialchars($postcode)?>">
+<input type="hidden" name="sign" value="<?=htmlspecialchars($auth_signature)?>">
+
+<div id="advert_thin">
+<?
+
+    if ($rand == 0) {
+        echo "<h2>Cool! You live in Cheltenham!</h2> <p>We've got an exciting new free
+        service that works exclusively for people in Cheltenham. Please sign
+        up to help the charity that runs WriteToThem, and to get a sneak
+        preview of our new service.</p>";
+    } else {
+        echo "<h2>Get to know your councillors.</h2>
+        <p>Local councillors are really important, but hardly anyone knows them.
+        Use our new free service to build a low-effort, long term relationship
+        with your councillor.</p>";
     }
-    return true;
+    ?>
+<p align="center">
+<input type="submit" value="Sign up to HearFromYourCouncillor">
+</p>
+</div>
+<?
+    return "cheltenhamhfyc$rand";
 }
 
 # XXX: Needs to say "Lord" when the WTT message was to a Lord!
-function crosssell_display_twfy_alerts_advert($this_site, $user_email, $postcode) {
-    // Look up who the MP is
-    $voting_areas = mapit_get_voting_areas($postcode);
-    mapit_check_error($voting_areas);
-    if (!array_key_exists('WMC', $voting_areas)) {
-        return false;
-    }
-    $reps = dadem_get_representatives($voting_areas['WMC']);
-    dadem_check_error($reps);
-    if (count($reps) != 1) {
-        return false;
-    }
-    $rep_info = dadem_get_representative_info($reps[0]);
-    dadem_check_error($rep_info);
-
-    if (!array_key_exists('parlparse_person_id', $rep_info)) {
-        return false;
-    }
-    $person_id = str_replace("uk.org.publicwhip/person/", "", $rep_info['parlparse_person_id']);
-    if (!$person_id) {
-        return false;
-    }
-
-    $auth_signature = auth_sign_with_shared_secret($user_email, OPTION_AUTH_SHARED_SECRET);
-    // See if already signed up
-    $fp = fsockopen('www.theyworkforyou.com', 80, $errno, $errstr, 5);
-    if (!$fp)
-        return false;
-    stream_set_blocking($fp, 0);
-    stream_set_timeout($fp, 5);
-    $sockstart = getmicrotime();
-    fputs($fp, 'GET /alert/authed.php?pid='.$person_id.'&email='.urlencode($user_email)."&sign=".urlencode($auth_signature)." HTTP/1.0\r\nHost: www.theyworkforyou.com\r\n\r\n");
-    $already_signed = '';
-    while (!feof($fp) and (getmicrotime() < $sockstart + 5)) {
-        $already_signed .= fgets($fp, 1024);
-    }
-    fclose($fp);
-    if ($already_signed != 'not signed')
-        return false;
+function crosssell_display_twfy_alerts_advert($this_site, $email, $postcode) {
+    $check = crosssell_check_twfy($email, $postcode);
+    if (is_bool($check)) return false;
+    list($person_id, $auth_signature) = $check;
 ?>
 
 <h2 style="border-top: solid 3px #9999ff; font-weight: normal; padding-top: 1em; font-size: 150%">Seeing as you're interested in your MP, would you also like to be emailed when they say something in parliament?</h2>
 <form style="text-align: center" action="http://www.theyworkforyou.com/alert/">
-    <strong>Your email:</strong> <input type="text" name="email" value="<?=$user_email ?>" maxlength="100" size="30">
+    <strong>Your email:</strong> <input type="text" name="email" value="<?=$email ?>" maxlength="100" size="30">
     <input type="hidden" name="pid" value="<?=$person_id?>">            
     <input type="submit" value="Sign me up!">
     <input type="hidden" name="submitted" value="true">
-    <input type="hidden" name="pg" value="alert">
     <input type="hidden" name="sign" value="<?=$auth_signature?>">
     <input type="hidden" name="site" value="<?=$this_site?>">
 </form>
@@ -143,31 +215,83 @@ can unsubscribe at any time.
     return true;
 }
 
-// Choose appropriate advert and display it.
-// $this_site is to stop a site advertising itself.
-function crosssell_display_advert($this_site, $user_email, $user_name, $postcode) {
-    if ($this_site != 'gny' && $this_site == 'wtt') # Only WTT at the moment, will always show.
-        if (crosssell_display_gny_advert())
-            return 'gny';
-    if ($this_site != "hfymp") 
-        if (crosssell_display_hfymp_advert($user_email, $user_name, $postcode))
-            return 'hfymp';
-    if ($this_site != "twfy") {
-        if (crosssell_display_twfy_alerts_advert($this_site, $user_email, $postcode))
-            return 'twfy';
-    } else {
-        return 'other-twfy-alert-type';
-    }
-    /* if ($this_site != "pb")
-        if (crosssell_display_pb_local_pledges($postcode))
-            return; */
-    if ($this_site != "pb") {
+function crosssell_display_pb_advert() {
 ?>
 <h2 style="padding: 1em; font-size: 200%" align="center">
 Have you ever wanted to <a href="http://www.pledgebank.com">change the world</a> but stopped short because no-one would help?</h2>
 <?
-        return 'pb';
-    }
-    return '';
 }
 
+/* Checking functions for sites, to see if you're already signed up or whatever */
+
+function crosssell_check_hfymp($email) {
+    if (!defined('OPTION_AUTH_SHARED_SECRET'))
+        return false;
+
+    $auth_signature = auth_sign_with_shared_secret($email, OPTION_AUTH_SHARED_SECRET);
+
+    // See if already signed up
+    $already_signed = crosssell_fetch_page('www.hearfromyourmp.com', '/authed?email='.urlencode($email).'&sign='.urlencode($auth_signature));
+    if ($already_signed != 'not signed') 
+        return false;
+
+    return $auth_signature;
+}
+
+function crosssell_check_twfy($email, $postcode) {
+    if (!defined('OPTION_AUTH_SHARED_SECRET') || !$postcode)
+        return false;
+
+    // Look up who the MP is
+    global $crosssell_voting_areas;
+    if (!$crosssell_voting_areas)
+        $crosssell_voting_areas = mapit_get_voting_areas($postcode);
+    mapit_check_error($crosssell_voting_areas);
+    if (!array_key_exists('WMC', $crosssell_voting_areas)) {
+        return false;
+    }
+    $reps = dadem_get_representatives($crosssell_voting_areas['WMC']);
+    dadem_check_error($reps);
+    if (count($reps) != 1) {
+        return false;
+    }
+    $rep_info = dadem_get_representative_info($reps[0]);
+    dadem_check_error($rep_info);
+
+    if (!array_key_exists('parlparse_person_id', $rep_info)) {
+        return false;
+    }
+    $person_id = str_replace('uk.org.publicwhip/person/', '', $rep_info['parlparse_person_id']);
+    if (!$person_id) {
+        return false;
+    }
+
+    $auth_signature = auth_sign_with_shared_secret($email, OPTION_AUTH_SHARED_SECRET);
+    // See if already signed up
+    $already_signed = crosssell_fetch_page('www.theyworkforyou.com', '/alert/authed.php?pid='.$person_id.'&email='.urlencode($email).'&sign='.urlencode($auth_signature));
+    if ($already_signed != 'not signed')
+        return false;
+
+    return array($person_id, $auth_signature);
+}
+
+function crosssell_fetch_page($host, $url) {
+    $fp = fsockopen($host, 80, $errno, $errstr, 5);
+    if (!$fp)
+        return false;
+    stream_set_blocking($fp, 0);
+    stream_set_timeout($fp, 5);
+    $sockstart = getmicrotime();
+    fputs($fp, "GET $url HTTP/1.0\r\nHost: $host\r\n\r\n");
+    $response = '';
+    $body = false;
+    while (!feof($fp) and (getmicrotime() < $sockstart + 5)) {
+        $s = fgets($fp, 1024);
+        if ($body)
+            $response .= $s;
+        if ($s == "\r\n")
+            $body = true;
+    }
+    fclose($fp);
+    return $response;
+}
