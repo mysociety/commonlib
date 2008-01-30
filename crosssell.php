@@ -6,7 +6,7 @@
  * Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: crosssell.php,v 1.18 2008-01-29 16:44:59 matthew Exp $
+ * $Id: crosssell.php,v 1.19 2008-01-30 18:27:47 matthew Exp $
  * 
  */
 
@@ -186,6 +186,7 @@ function crosssell_display_hfyc_cheltenham_advert($email, $name, $postcode) {
 <input type="submit" value="Sign up to HearFromYourCouncillor">
 </p>
 </div>
+</form>
 <?
     return "cheltenhamhfyc$rand";
 }
