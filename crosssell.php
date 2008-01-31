@@ -6,7 +6,7 @@
  * Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: crosssell.php,v 1.19 2008-01-30 18:27:47 matthew Exp $
+ * $Id: crosssell.php,v 1.20 2008-01-31 11:56:05 twfy-live Exp $
  * 
  */
 
@@ -35,6 +35,8 @@ function crosssell_display_advert($this_site, $email = '', $name = '', $postcode
     while (count($adverts)) {
         $rand = rand(0, count($adverts)-1);
         list ($advert_site, $advert_text) = $adverts[$rand];
+	if ($this_site == 'twfy' && $advert_site == 'twfy_alerts')
+		return 'other-twfy-alert-type';
         if (call_user_func('crosssell_display_random_' . $advert_site . '_advert', $email, $name, $postcode, $advert_text, $this_site))
             return $advert_site . $rand;
         # Failed to show an advert for $advert_site, remove all other $advert_site adverts from the selection
