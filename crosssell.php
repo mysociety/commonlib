@@ -6,7 +6,7 @@
  * Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: crosssell.php,v 1.21 2008-02-01 10:46:10 matthew Exp $
+ * $Id: crosssell.php,v 1.22 2008-02-01 10:51:24 matthew Exp $
  * 
  */
 
@@ -43,7 +43,7 @@ function crosssell_display_advert($this_site, $email = '', $name = '', $postcode
             return $advert_site . $rand;
         # Failed to show an advert for $advert_site, remove all other $advert_site adverts from the selection
         foreach ($adverts as $k => $advert) {
-            if ($advert_site != $advert[0])
+            if ($advert_site == $advert[0])
                 unset($adverts[$k]);
         }
     }
