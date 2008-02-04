@@ -6,7 +6,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Web.pm,v 1.16 2007-05-02 10:31:42 matthew Exp $
+# $Id: Web.pm,v 1.17 2008-02-04 22:50:30 matthew Exp $
 #
 
 package mySociety::Web;
@@ -19,7 +19,7 @@ use Carp;
 use CGI qw(-nosticky);
 my $have_cgi_fast = 0;
 eval {
-    use CGI::Fast;
+    use mySociety::CGIFast;
     $have_cgi_fast = 1;
 };
 
@@ -44,14 +44,14 @@ sub ent ($) {
 =item new [QUERY]
 
 Construct a new mySociety::Web object, optionally from an existing QUERY. Uses
-CGI::Fast if available, or CGI otherwise.
+mySociety::CGIFast if available, or CGI otherwise.
 
 =cut
 sub new ($;$) {
     my ($class, $q) = @_;
     if (!defined($q)) {
-        $q = $have_cgi_fast ? new CGI::Fast() : new CGI();
-        return undef if (!defined($q)); # reproduce CGI::Fast behaviour
+        $q = $have_cgi_fast ? new mySociety::CGIFast() : new CGI();
+        return undef if (!defined($q)); # reproduce mySociety::CGIFast behaviour
     }
     $q->autoEscape(1);
     my $self = fields::new('mySociety::Web');
