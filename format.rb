@@ -4,7 +4,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: format.rb,v 1.6 2007-12-24 17:30:02 francis Exp $
+# $Id: format.rb,v 1.7 2008-02-16 02:36:17 francis Exp $
 
 module MySociety
     module Format
@@ -38,6 +38,17 @@ module MySociety
                 ret = ret.gsub(/(<a href='[^']*'(?: rel='nofollow')?>)([^<]{40})[^<]{3,}<\/a>/, '\\1\\2...</a>')
             end
             ret = ret.gsub(/(\s)([a-z0-9\-_.]+)@([^,< \n\r]*[^.,< \n\r])/i, "\\1<a href=\"mailto:\\2@\\3\">\\2@\\3</a>")
+            ret = ret.strip
+            return ret
+        end
+
+        # Simplify bracketed URLs like: www.liverpool.gov.uk <http://www.liverpool.gov.uk> 
+        # (so that the URL appears only once, and so that the escaping of the < > doesn't
+        # get &gt; contaminated into the linked URL)
+        def Format.simplify_angle_bracketed_urls(text)
+            ret = ' ' + text + ' '
+            #ret = ret.gsub(/(www\.[^\s<>{}()])\s+\<(https?):\/\//i, "\\1")
+            ret = ret.gsub(/(www\.[^\s<>{}()]+)\s+<http:\/\/\1>/i, "\\1")
             ret = ret.strip
             return ret
         end
