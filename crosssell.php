@@ -6,7 +6,7 @@
  * Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: crosssell.php,v 1.23 2008-02-07 17:53:52 matthew Exp $
+ * $Id: crosssell.php,v 1.24 2008-02-25 13:30:26 matthew Exp $
  * 
  */
 
@@ -199,9 +199,14 @@ function crosssell_display_twfy_alerts_advert($this_site, $email, $postcode) {
     $check = crosssell_check_twfy($email, $postcode);
     if (is_bool($check)) return false;
     list($person_id, $auth_signature) = $check;
+    if ($this_site == 'hfyc') {
+        $heading = 'Would you like to be emailed when your MP says something in parliament?';
+    } else {
+        $heading = 'Seeing as you\'re interested in your MP, would you also like to be emailed when they say something in parliament?';
+    }
 ?>
 
-<h2 style="border-top: solid 3px #9999ff; font-weight: normal; padding-top: 1em; font-size: 150%">Seeing as you're interested in your MP, would you also like to be emailed when they say something in parliament?</h2>
+<h2 style="border-top: solid 3px #9999ff; font-weight: normal; padding-top: 1em; font-size: 150%"><?=$heading ?></h2>
 <form style="text-align: center" action="http://www.theyworkforyou.com/alert/">
     <strong>Your email:</strong> <input type="text" name="email" value="<?=$email ?>" maxlength="100" size="30">
     <input type="hidden" name="pid" value="<?=$person_id?>">            
