@@ -4,7 +4,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: format.rb,v 1.9 2008-02-27 12:20:21 francis Exp $
+# $Id: format.rb,v 1.10 2008-02-27 13:59:54 francis Exp $
 
 module MySociety
     module Format
@@ -66,8 +66,8 @@ module MySociety
         # Simplified a name to something usable in a URL
         def Format.simplify_url_part(text)
             text = text.downcase # this also clones the string, if we use downcase! we modify the original
-            text.gsub!(/ /, "-")
-            text.gsub!(/[^a-z0-9_-]/, "")
+            text.gsub!(/(\s|-|_)+/, "_")
+            text.gsub!(/[^a-z0-9_]/, "")
             text
         end
 
