@@ -4,7 +4,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: format.rb,v 1.8 2008-02-27 12:04:12 francis Exp $
+# $Id: format.rb,v 1.9 2008-02-27 12:20:21 francis Exp $
 
 module MySociety
     module Format
@@ -63,9 +63,7 @@ module MySociety
             end
         end
 
-        # Simplified links to our objects
-        # XXX See controllers/user_controller.rb controllers/body_controller.rb for inverse
-        # This function is included into helpers/application_helper.rb
+        # Simplified a name to something usable in a URL
         def Format.simplify_url_part(text)
             text = text.downcase # this also clones the string, if we use downcase! we modify the original
             text.gsub!(/ /, "-")
