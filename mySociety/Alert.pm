@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Alert.pm,v 1.38 2008-01-03 15:00:24 matthew Exp $
+# $Id: Alert.pm,v 1.39 2008-03-04 13:57:10 matthew Exp $
 
 package mySociety::Alert::Error;
 
@@ -228,7 +228,7 @@ sub generate_rss ($$;$$) {
         . ($alert_type->{head_table} ? $alert_type->{head_table}.'_id=? and ' : '')
         . $alert_type->{item_where} . ' order by '
         . $alert_type->{item_order};
-    $query .= ' limit 10' unless $type =~ /^all/;
+    $query .= ' limit 20' unless $type =~ /^all/;
     $q = dbh()->prepare($query);
     if ($query =~ /\?/) {
         throw mySociety::Alert::Error('Missing parameter') unless @$db_params;
