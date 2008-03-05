@@ -5,7 +5,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: config.py,v 1.6 2007-10-24 10:12:10 francis Exp $
+# $Id: config.py,v 1.7 2008-03-05 14:25:54 francis Exp $
 #
 
 """
@@ -27,14 +27,16 @@ def find_php():
 
        Try to locate the PHP binary in various sensible places.
     """
-    path = os.getenv("PATH") or '/bin:/usr/bin';
-    paths = path.split(':')
-    for dir in path.split(':') + \
+    path = os.getenv("PATH") or '/bin:/usr/bin'
+    paths = path.split(os.pathsep)
+    for dir in path.split(os.pathsep) + \
         ['/usr/local/bin', '/usr/bin', '/software/bin', '/opt/bin', '/opt/php/bin']:
         for name in ['php4', 'php', 'php4-cgi', 'php-cgi']:
+            if os.name=='nt':
+                name += '.exe'
             if os.path.isfile('%s/%s' % (dir, name)):
                 return '%s/%s' % (dir,name)
-    raise Exception, "unable to locate PHP binary, needed to read config file";
+    raise Exception, "unable to locate PHP binary, needed to read config file"
 
 php_path = None
 def read_config(f):
