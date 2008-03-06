@@ -5,7 +5,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: config.py,v 1.7 2008-03-05 14:25:54 francis Exp $
+# $Id: config.py,v 1.8 2008-03-06 20:22:28 francis Exp $
 #
 
 """
@@ -19,7 +19,7 @@ Example use:
 """
 
 import os
-import popen2
+import subprocess
 import re
 
 def find_php():
@@ -64,11 +64,13 @@ def read_config(f):
         store_environ[k] = os.environ[k]
         del os.environ[k]
     os.environ['MYSOCIETY_CONFIG_FILE_PATH'] = f
-    child = popen2.Popen3([php_path,], False) # don't capture stderr
+    child = subprocess.Popen([php_path],
+                             stdin=subprocess.PIPE,
+                             stdout=subprocess.PIPE) # don't capture stderr
     for k,v in store_environ.iteritems():
         os.environ[k] = v
 
-    print >>child.tochild, """
+    print >>child.stdin, """
 <?php
 $b = get_defined_constants();
 require(getenv("MYSOCIETY_CONFIG_FILE_PATH"));
@@ -81,26 +83,26 @@ foreach ($a as $k => $v) {
     print "\0";
 }
 ?>"""
-    child.tochild.close()
+    child.stdin.close()
 
     # skip any header material
     line = True
     while line:
-        line = child.fromchild.readline()
+        line = child.stdout.readline()
         if line == "start_of_options\n":
             break
     else:
         raise Exception, "%s: %s: failed to read options" % (php_path, f)
 
     # read remainder
-    buf = ''.join(child.fromchild.readlines())
-    child.fromchild.close()
+    buf = ''.join(child.stdout.readlines())
+    child.stdout.close()
 
     # check that php exited successfully
     status = child.wait()
-    if os.WIFSIGNALED(status):
+    if hasattr(os, 'WIFSIGNALED') and os.WIFSIGNALED(status):
         raise Exception, "%s: %s: killed by signal %d" % (php_path, f, os.WTERMSIG(status))
-    elif os.WEXITSTATUS(status) != 0:
+    elif hasattr(os, 'WEXITSTATUS') and os.WEXITSTATUS(status) != 0:
         raise Exception, "%s: %s: exited with failure status %d" % (php_path, f, os.WEXITSTATUS(status))
     
     # parse out config values
