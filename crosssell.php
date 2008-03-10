@@ -6,7 +6,7 @@
  * Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: crosssell.php,v 1.25 2008-03-10 17:42:31 matthew Exp $
+ * $Id: crosssell.php,v 1.26 2008-03-10 17:49:34 matthew Exp $
  * 
  */
 
@@ -95,7 +95,7 @@ function crosssell_display_random_hfymp_advert($email, $name, $postcode, $text, 
 
     $text = str_replace('[form]', '
 <form action="http://www.hearfromyourmp.com/" method="post">
-<strong>Your email:</strong> <input type="text" name="email" value="' . htmlspecialchars($email) . '" maxlength="100" size="30">
+<p><strong>Your email:</strong> <input type="text" name="email" value="' . htmlspecialchars($email) . '" maxlength="100" size="30">
 <input type="hidden" name="name" value="' . htmlspecialchars($name) . '">
 <input type="hidden" name="postcode" value="' . htmlspecialchars($postcode) . '">
 <input type="hidden" name="sign" value="' . htmlspecialchars($auth_signature) . '">
