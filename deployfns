@@ -4,7 +4,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: deployfns,v 1.18 2007-12-19 12:15:25 francis Exp $
+# $Id: deployfns,v 1.19 2008-03-10 16:32:02 francis Exp $
 #
 
 # Warnings and errors
@@ -24,7 +24,7 @@ read_conf () {
     # XXX use of mktemp here not safe; should make a temporary directory
     CONF_SOURCE=`mktemp /tmp/ms-deploy-configsource.XXXXXX`
     export MYSOCIETY_CONFIG_FILE_PATH=$1
-    cat << END | php >$CONF_SOURCE
+    cat << END | php >$CONF_SOURCE || die "shlib/deployfns read_conf: error calling PHP to load config file $1"
 <?php
 \$b = get_defined_constants();
 require(getenv("MYSOCIETY_CONFIG_FILE_PATH"));
