@@ -6,7 +6,7 @@
  * Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: crosssell.php,v 1.24 2008-02-25 13:30:26 matthew Exp $
+ * $Id: crosssell.php,v 1.25 2008-03-10 17:42:31 matthew Exp $
  * 
  */
 
@@ -84,14 +84,23 @@ function crosssell_display_random_hfymp_advert($email, $name, $postcode, $text, 
     $auth_signature = crosssell_check_hfymp($email);
     if (!$auth_signature) return false;
 
-    $text = str_replace('[form]', '
+    $text = str_replace('[button]', '
 <form action="http://www.hearfromyourmp.com/" method="post">
 <input type="hidden" name="name" value="' . htmlspecialchars($name) . '">
 <input type="hidden" name="email" value="' . htmlspecialchars($email) . '">
 <input type="hidden" name="postcode" value="' . htmlspecialchars($postcode) . '">
 <input type="hidden" name="sign" value="' . htmlspecialchars($auth_signature) . '">
 <h2><input style="font-size:100%" type="submit" value="', $text);
-    $text = str_replace('[/form]', '"></h2>', $text);
+    $text = str_replace('[/button]', '"></h2></form>', $text);
+
+    $text = str_replace('[form]', '
+<form action="http://www.hearfromyourmp.com/" method="post">
+<strong>Your email:</strong> <input type="text" name="email" value="' . htmlspecialchars($email) . '" maxlength="100" size="30">
+<input type="hidden" name="name" value="' . htmlspecialchars($name) . '">
+<input type="hidden" name="postcode" value="' . htmlspecialchars($postcode) . '">
+<input type="hidden" name="sign" value="' . htmlspecialchars($auth_signature) . '">
+<input type="submit" value="', $text);
+    $text = str_replace('[/form]', '"></form>', $text);
 
     echo '<div style="text-align:center">', $text, '</div>';
     return true;
