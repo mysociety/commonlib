@@ -6,7 +6,7 @@
 # Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Email.pm,v 1.23 2008-01-18 15:37:00 matthew Exp $
+# $Id: Email.pm,v 1.24 2008-03-13 11:57:02 matthew Exp $
 #
 
 package mySociety::Email::Error;
@@ -99,7 +99,7 @@ sub format_mimewords ($;$) {
             } else {
                 if ($token !~ /[\x00-\x1f\x7f-\xff]/) {
                     $last_word_encoded = 0;
-		    $token = encode_quoted_string($token) if $email;
+                    $token = encode_quoted_string($token) if $email;
                     $last_token = $token;
                 } else {
                     my $tok = $last_token =~ /\s+/ && $last_word_encoded ? $last_token.$token : $token;
@@ -292,7 +292,12 @@ sub construct_email ($) {
         $p->{Subject} = $subject if (defined($subject));
     }
 
-    throw mySociety::Email::Error("missing field 'Subject' in MESSAGE") if (!exists($p->{Subject}));
+    if (!exists($p->{Subject})) {
+        # XXX Try to find out what's causing this very occasionally
+        (my $error = $p->{_body_}) =~ s/\n/ | /g;
+        $error = "missing field 'Subject' in MESSAGE - $error";
+        throw mySociety::Email::Error($error);
+    }
     throw mySociety::Email::Error("missing field 'From' in MESSAGE") if (!exists($p->{From}));
 
     my %hdr;
