@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: validate.php,v 1.2 2006-07-18 08:13:52 francis Exp $
+ * $Id: validate.php,v 1.3 2008-03-14 13:52:15 matthew Exp $
  * 
  */
 
@@ -39,16 +39,17 @@ function validate_postcode ($postcode) {
     $sec = 'ABCDEFGHJKLMNOPQRSTUVWXY';
     $thd = 'ABCDEFGHJKSTUW';
     $fth = 'ABEHMNPRVWXY';
+    $num0 = '123456789'; # Technically allowed in spec, but none exist
     $num = '0123456789';
     $nom = '0123456789';
     $gap = '\s\.';	
 
-    if (preg_match("/^[$fst][$num][$gap]*[$nom][$in][$in]$/i", $postcode) ||
-        preg_match("/^[$fst][$num][$num][$gap]*[$nom][$in][$in]$/i", $postcode) ||
+    if (preg_match("/^[$fst][$num0][$gap]*[$nom][$in][$in]$/i", $postcode) ||
+        preg_match("/^[$fst][$num0][$num][$gap]*[$nom][$in][$in]$/i", $postcode) ||
         preg_match("/^[$fst][$sec][$num][$gap]*[$nom][$in][$in]$/i", $postcode) ||
-        preg_match("/^[$fst][$sec][$num][$num][$gap]*[$nom][$in][$in]$/i", $postcode) ||
-        preg_match("/^[$fst][$num][$thd][$gap]*[$nom][$in][$in]$/i", $postcode) ||
-        preg_match("/^[$fst][$sec][$num][$fth][$gap]*[$nom][$in][$in]$/i", $postcode)) {
+        preg_match("/^[$fst][$sec][$num0][$num][$gap]*[$nom][$in][$in]$/i", $postcode) ||
+        preg_match("/^[$fst][$num0][$thd][$gap]*[$nom][$in][$in]$/i", $postcode) ||
+        preg_match("/^[$fst][$sec][$num0][$fth][$gap]*[$nom][$in][$in]$/i", $postcode)) {
         return true;
     } else {
         return false;
@@ -67,14 +68,15 @@ function validate_partial_postcode ($postcode) {
     $sec = 'ABCDEFGHJKLMNOPQRSTUVWXY';
     $thd = 'ABCDEFGHJKSTUW';
     $fth = 'ABEHMNPRVWXY';
+    $num0 = '123456789'; # Technically allowed in spec, but none exist
     $num = '0123456789';
 
-    if (preg_match("/^[$fst][$num]$/i", $postcode) ||
-        preg_match("/^[$fst][$num][$num]$/i", $postcode) ||
+    if (preg_match("/^[$fst][$num0]$/i", $postcode) ||
+        preg_match("/^[$fst][$num0][$num]$/i", $postcode) ||
         preg_match("/^[$fst][$sec][$num]$/i", $postcode) ||
-        preg_match("/^[$fst][$sec][$num][$num]$/i", $postcode) ||
-        preg_match("/^[$fst][$num][$thd]$/i", $postcode) ||
-        preg_match("/^[$fst][$sec][$num][$fth]$/i", $postcode)) {
+        preg_match("/^[$fst][$sec][$num0][$num]$/i", $postcode) ||
+        preg_match("/^[$fst][$num0][$thd]$/i", $postcode) ||
+        preg_match("/^[$fst][$sec][$num0][$fth]$/i", $postcode)) {
         return true;
     } else {
         return false;
