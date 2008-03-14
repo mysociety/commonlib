@@ -47,12 +47,12 @@ sub is_valid_postcode ($) {
     my $thd = 'ABCDEFGHJKSTUW';
     my $fth = 'ABEHMNPRVWXY';
 
-    return 1 if (  $pc =~ m#^[$fst]\d\d[$in][$in]$#
-                || $pc =~ m#^[$fst]\d\d\d[$in][$in]$#
+    return 1 if (  $pc =~ m#^[$fst][1-9]\d[$in][$in]$#
+                || $pc =~ m#^[$fst][1-9]\d\d[$in][$in]$#
                 || $pc =~ m#^[$fst][$sec]\d\d[$in][$in]$#
-                || $pc =~ m#^[$fst][$sec]\d\d\d[$in][$in]$#
-                || $pc =~ m#^[$fst]\d[$thd]\d[$in][$in]$#
-                || $pc =~ m#^[$fst][$sec]\d[$fth]\d[$in][$in]$#);
+                || $pc =~ m#^[$fst][$sec][1-9]\d\d[$in][$in]$#
+                || $pc =~ m#^[$fst][1-9][$thd]\d[$in][$in]$#
+                || $pc =~ m#^[$fst][$sec][1-9][$fth]\d[$in][$in]$#);
     return 0;
 }
 
@@ -75,12 +75,12 @@ sub is_valid_partial_postcode ($) {
     my $thd = 'ABCDEFGHJKSTUW';
     my $fth = 'ABEHMNPRVWXY';
   
-    return 1 if ($pc =~ m#^[$fst]\d$#
-                || $pc =~ m#^[$fst]\d\d$#
+    return 1 if ($pc =~ m#^[$fst][1-9]$#
+                || $pc =~ m#^[$fst][1-9]\d$#
                 || $pc =~ m#^[$fst][$sec]\d$#
-                || $pc =~ m#^[$fst][$sec]\d\d$#
-                || $pc =~ m#^[$fst]\d[$thd]$#
-                || $pc =~ m#^[$fst][$sec]\d[$fth]$#);
+                || $pc =~ m#^[$fst][$sec][1-9]\d$#
+                || $pc =~ m#^[$fst][1-9][$thd]$#
+                || $pc =~ m#^[$fst][$sec][1-9][$fth]$#);
     return 0;
 }
 
