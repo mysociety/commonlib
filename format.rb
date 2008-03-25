@@ -4,7 +4,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: format.rb,v 1.11 2008-02-27 14:13:25 francis Exp $
+# $Id: format.rb,v 1.12 2008-03-25 17:25:08 francis Exp $
 
 module MySociety
     module Format
@@ -64,11 +64,24 @@ module MySociety
         end
 
         # Simplified a name to something usable in a URL
-        def Format.simplify_url_part(text)
+        def Format.simplify_url_part(text, max_len = nil)
             text = text.downcase # this also clones the string, if we use downcase! we modify the original
             text.gsub!(/(\s|-|_)/, "_")
             text.gsub!(/[^a-z0-9_]/, "")
             text.gsub!(/_+/, "_")
+
+            # If required, trim down to size
+            if not max_len.nil?
+                if text.size > max_len
+                    text = text[0..(max_len-1)]
+                end
+                # removing trailing _
+                text.gsub!(/_*$/, "")
+            end
+            if text.size < 1
+                text = 'user' # just do user1, user2 etc.
+            end
+
             text
         end
 
