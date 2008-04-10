@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Config.pm,v 1.17 2007-11-27 15:34:44 angie Exp $
+# $Id: Config.pm,v 1.18 2008-04-10 15:41:40 francis Exp $
 #
 
 package mySociety::Config;
@@ -66,6 +66,10 @@ from DEFAULTS are merged.
 my $php_path;
 sub read_config ($;$) {
     my ($f, $defaults) = @_;
+
+    if (! -r $f) {
+        die "$f: read permissions not OK for config file";
+    }
 
     my $old_SIGCHLD = $SIG{CHLD};
     $SIG{CHLD} = sub { };
