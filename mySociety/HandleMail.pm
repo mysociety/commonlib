@@ -6,7 +6,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 
-my $rcsid = ''; $rcsid .= '$Id: HandleMail.pm,v 1.1 2008-04-11 22:33:16 matthew Exp $';
+my $rcsid = ''; $rcsid .= '$Id: HandleMail.pm,v 1.2 2008-04-12 11:27:52 matthew Exp $';
 
 package mySociety::HandleMail;
 
@@ -85,6 +85,16 @@ sub get_bounce_from {
     exit 0 unless defined $a; # Couldn't parse From header
     
     return $a;
+}
+
+# Checks and returns the user part of the address given, ignoring the prefix
+sub get_token {
+    my ($a, $prefix, $domain) = @_;
+    exit(0) if ($a->user() !~ m#^\Q$prefix\E# or lc($a->host()) ne lc($domain));
+    # NB we make no assumptions about the contens of the token.
+    my ($token) = ($a->user() =~ m#^\Q$prefix\E(.*)#);
+    #print "token $token\n";
+    return $token;
 }
 
 # parse_dsn_bounce TEXT
