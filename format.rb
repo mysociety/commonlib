@@ -4,7 +4,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: format.rb,v 1.12 2008-03-25 17:25:08 francis Exp $
+# $Id: format.rb,v 1.13 2008-04-14 08:50:13 francis Exp $
 
 module MySociety
     module Format
@@ -17,7 +17,8 @@ module MySociety
             result = ''
             for para in paras
                 para.gsub!(/\s+/, ' ')
-                para.gsub!(/(.{1,#{line_width}})(\s+|$)/, "#{indent}\\1\n")
+                # the [^\s]* and \\2 parts are to make sure we don't break up long URLs etc.
+                para.gsub!(/(.{1,#{line_width}})(?:\s+|([^\s]*)$)/, "#{indent}\\1\\2\n")
                 para.strip!
                 result = result + indent + para + "\n\n"
             end
