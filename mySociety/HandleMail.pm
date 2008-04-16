@@ -6,7 +6,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 
-my $rcsid = ''; $rcsid .= '$Id: HandleMail.pm,v 1.2 2008-04-12 11:27:52 matthew Exp $';
+my $rcsid = ''; $rcsid .= '$Id: HandleMail.pm,v 1.3 2008-04-16 09:35:45 matthew Exp $';
 
 package mySociety::HandleMail;
 
@@ -39,7 +39,7 @@ sub get_message {
     }
     exit 75 if STDIN->error(); # Failed to read it; should defer.
 
-    my $m = new Mail::Internet(\@lines); # or [@lines]?
+    my $m = new Mail::Internet([@lines]);
     exit 0 unless defined $m; # Unable to parse message; should drop.
 
     my $return_path;
