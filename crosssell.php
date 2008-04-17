@@ -6,7 +6,7 @@
  * Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: crosssell.php,v 1.27 2008-04-17 12:58:53 matthew Exp $
+ * $Id: crosssell.php,v 1.28 2008-04-17 13:51:31 matthew Exp $
  * 
  */
 
@@ -276,7 +276,12 @@ function crosssell_check_hfymp($email) {
     return $auth_signature;
 }
 
+$crosssell_check_twfy_checked = null;
 function crosssell_check_twfy($email, $postcode) {
+    global $crosssell_check_twfy_checked;
+    if (!is_null($crosssell_check_twfy_checked))
+        return $crosssell_check_twfy_checked;
+
     if (!defined('OPTION_AUTH_SHARED_SECRET') || !$postcode)
         return false;
 
@@ -286,31 +291,38 @@ function crosssell_check_twfy($email, $postcode) {
         $crosssell_voting_areas = mapit_get_voting_areas($postcode);
     mapit_check_error($crosssell_voting_areas);
     if (!array_key_exists('WMC', $crosssell_voting_areas)) {
+        $crosssell_check_twfy_checked = false;
         return false;
     }
     $reps = dadem_get_representatives($crosssell_voting_areas['WMC']);
     dadem_check_error($reps);
     if (count($reps) != 1) {
+        $crosssell_check_twfy_checked = false;
         return false;
     }
     $rep_info = dadem_get_representative_info($reps[0]);
     dadem_check_error($rep_info);
 
     if (!array_key_exists('parlparse_person_id', $rep_info)) {
+        $crosssell_check_twfy_checked = false;
         return false;
     }
     $person_id = str_replace('uk.org.publicwhip/person/', '', $rep_info['parlparse_person_id']);
     if (!$person_id) {
+        $crosssell_check_twfy_checked = false;
         return false;
     }
 
     $auth_signature = auth_sign_with_shared_secret($email, OPTION_AUTH_SHARED_SECRET);
     // See if already signed up
     $already_signed = crosssell_fetch_page('www.theyworkforyou.com', '/alert/authed.php?pid='.$person_id.'&email='.urlencode($email).'&sign='.urlencode($auth_signature));
-    if ($already_signed != 'not signed')
+    if ($already_signed != 'not signed') {
+        $crosssell_check_twfy_checked = false;
         return false;
+    }
 
-    return array($person_id, $auth_signature);
+    $crosssell_check_twfy_checked = array($person_id, $auth_signature);
+    return $crosssell_check_twfy_checked;
 }
 
 function crosssell_fetch_page($host, $url) {
