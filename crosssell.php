@@ -6,7 +6,7 @@
  * Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: crosssell.php,v 1.26 2008-03-10 17:49:34 matthew Exp $
+ * $Id: crosssell.php,v 1.27 2008-04-17 12:58:53 matthew Exp $
  * 
  */
 
@@ -55,8 +55,12 @@ function crosssell_display_advert($this_site, $email = '', $name = '', $postcode
     if ($this_site != 'twfy') {
         if (crosssell_display_twfy_alerts_advert($this_site, $email, $postcode))
             return 'twfy';
-    } else {
-        return 'other-twfy-alert-type';
+#    } else {
+#        return 'other-twfy-alert-type';
+    }
+    if ($this_site != 'fms') { # Always happens, as FMS uses Perl
+        crosssell_display_fms_advert();
+        return 'fms';
     }
     if ($this_site != 'pb') {
         crosssell_display_pb_advert();
@@ -240,9 +244,22 @@ Have you ever wanted to <a href="http://www.pledgebank.com">change the world</a>
 <?
 }
 
+function crosssell_display_fms_advert() {
+?>
+<div id="advert_thin" style="text-align:center; font-size:150%">
+<p>Got a local problem like potholes or flytipping in your street?<br><a href="http://www.fixmystreet.com/">Report it at FixMyStreet</a></p>
+</div>
+<?
+}
+
 /* Checking functions for sites, to see if you're already signed up or whatever */
 
+$crosssell_check_hfymp_checked = null;
 function crosssell_check_hfymp($email) {
+    global $crosssell_check_hfymp_checked;
+    if (!is_null($crosssell_check_hfymp_checked))
+        return $crosssell_check_hfymp_checked;
+
     if (!defined('OPTION_AUTH_SHARED_SECRET'))
         return false;
 
@@ -250,9 +267,12 @@ function crosssell_check_hfymp($email) {
 
     // See if already signed up
     $already_signed = crosssell_fetch_page('www.hearfromyourmp.com', '/authed?email='.urlencode($email).'&sign='.urlencode($auth_signature));
-    if ($already_signed != 'not signed') 
+    if ($already_signed != 'not signed') {
+        $crosssell_check_hfymp_checked = false;
         return false;
+    }
 
+    $crosssell_check_hfymp_checked = $auth_signature;
     return $auth_signature;
 }
 
