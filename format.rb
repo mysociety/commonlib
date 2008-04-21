@@ -4,7 +4,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: format.rb,v 1.13 2008-04-14 08:50:13 francis Exp $
+# $Id: format.rb,v 1.14 2008-04-21 16:18:02 francis Exp $
 
 module MySociety
     module Format
@@ -70,6 +70,8 @@ module MySociety
             text.gsub!(/(\s|-|_)/, "_")
             text.gsub!(/[^a-z0-9_]/, "")
             text.gsub!(/_+/, "_")
+            text.gsub!(/^_*/, "")
+            text.gsub!(/_*$/, "")
 
             # If required, trim down to size
             if not max_len.nil?
