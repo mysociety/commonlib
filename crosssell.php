@@ -6,7 +6,7 @@
  * Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: crosssell.php,v 1.29 2008-04-24 12:48:27 matthew Exp $
+ * $Id: crosssell.php,v 1.30 2008-04-24 14:07:19 matthew Exp $
  * 
  */
 
@@ -62,7 +62,7 @@ XXX Nothing using this fallback, and we currently want WTT fallback to
 */
 #    } else {
 #        return 'other-twfy-alert-type';
-    }
+    #}
     if ($this_site != 'fms') { # Always happens, as FMS uses Perl
         crosssell_display_fms_advert();
         return 'fms';
