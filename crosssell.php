@@ -6,7 +6,7 @@
  * Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: crosssell.php,v 1.28 2008-04-17 13:51:31 matthew Exp $
+ * $Id: crosssell.php,v 1.29 2008-04-24 12:48:27 matthew Exp $
  * 
  */
 
@@ -52,9 +52,14 @@ function crosssell_display_advert($this_site, $email = '', $name = '', $postcode
     if ($this_site != 'hfymp') 
         if (crosssell_display_hfymp_advert($email, $name, $postcode))
             return 'hfymp';
+/*
+XXX Nothing using this fallback, and we currently want WTT fallback to
+    be FMS
+
     if ($this_site != 'twfy') {
         if (crosssell_display_twfy_alerts_advert($this_site, $email, $postcode))
             return 'twfy';
+*/
 #    } else {
 #        return 'other-twfy-alert-type';
     }
