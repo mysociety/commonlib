@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Parties.pm,v 1.15 2007-03-20 00:08:18 dademcron Exp $
+# $Id: Parties.pm,v 1.16 2008-05-05 10:27:43 matthew Exp $
 #
 
 package mySociety::Parties;
@@ -34,6 +34,8 @@ display them with.
 
     "Bp" => "Bishop", # House of Lords
     "Bishop" => "Bishop",
+
+    'BNP' => 'BNP',
 
     "Conservative" => "Conservative",
     "Con" => "Conservative",
