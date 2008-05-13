@@ -84,4 +84,17 @@ sub is_valid_partial_postcode ($) {
     return 0;
 }
 
+=item canonicalise_postcode POSTCODE
+
+Convert UK postcode to a unique form.  That is, remove all spaces and
+capitalise it.  Then put back in a space in the right place.
+
+=cut
+sub canonicalise_postcode($) {
+    my $pc = uc($_[0]);
+    $pc =~ s#\s##g;
+    $pc =~ s#(\d[A-Z]{2})# $1#;
+    return $pc;
+}
+
 1;
