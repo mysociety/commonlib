@@ -4,7 +4,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: format.rb,v 1.14 2008-04-21 16:18:02 francis Exp $
+# $Id: format.rb,v 1.15 2008-05-29 20:06:05 francis Exp $
 
 module MySociety
     module Format
@@ -30,8 +30,14 @@ module MySociety
         def Format.make_clickable(text, params = {})
             nofollow = params[:nofollow]
             contract = params[:contract]
-
             ret = ' ' + text + ' '
+
+            # Special case as we get already HTML encoded < and > at end and start
+            # of URLs often, when used to bracket them
+            # e.g. http://www.whatdotheyknow.com/request/83/response/212
+            ret = ret.gsub(/&gt;/, " GTCODE ")
+            ret = ret.gsub(/&lt;/, " LTCODE ")
+
             ret = ret.gsub(/(https?):\/\/([^\s<>{}()]+[^\s.,<>{}()])/i, "<a href='\\1://\\2'" + (nofollow ? " rel='nofollow'" : "") + ">\\1://\\2</a>")
             ret = ret.gsub(/(\s)www\.([a-z0-9\-]+)((?:\.[a-z0-9\-\~]+)+)((?:\/[^ <>{}()\n\r]*[^., <>{}()\n\r])?)/i,
                         "\\1<a href='http://www.\\2\\3\\4'" + (nofollow ? " rel='nofollow'" : "") + ">www.\\2\\3\\4</a>")
@@ -39,6 +45,11 @@ module MySociety
                 ret = ret.gsub(/(<a href='[^']*'(?: rel='nofollow')?>)([^<]{40})[^<]{3,}<\/a>/, '\\1\\2...</a>')
             end
             ret = ret.gsub(/(\s)([a-z0-9\-_.]+)@([^,< \n\r]*[^.,< \n\r])/i, "\\1<a href=\"mailto:\\2@\\3\">\\2@\\3</a>")
+
+            # Put back the codes for < and >
+            ret = ret.gsub(" GTCODE ", "&gt;")
+            ret = ret.gsub(" LTCODE ", "&lt;")
+
             ret = ret.strip
             return ret
         end
