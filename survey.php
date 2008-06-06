@@ -6,7 +6,7 @@
  * Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: survey.php,v 1.1 2008-06-03 19:05:32 francis Exp $
+ * $Id: survey.php,v 1.2 2008-06-06 20:15:56 francis Exp $
  * 
  */
 
@@ -24,7 +24,7 @@ function survey_check_if_already_done($user_code, $auth_signature) {
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
-    curl_setopt($ch, CURLOPT_USERAGENT, 'PHP survey client, version $Id: survey.php,v 1.1 2008-06-03 19:05:32 francis Exp $');
+    curl_setopt($ch, CURLOPT_USERAGENT, 'PHP survey client, version $Id: survey.php,v 1.2 2008-06-06 20:15:56 francis Exp $');
     curl_setopt($ch, CURLOPT_URL, OPTION_SURVEY_URL);
     curl_setopt($ch, CURLOPT_POST, 1);
     curl_setopt($ch, CURLOPT_POSTFIELDS, "querydone=1&user_code=" . urlencode($user_code) . "&auth_signature=" . urlencode($auth_signature));
@@ -38,7 +38,13 @@ function survey_check_if_already_done($user_code, $auth_signature) {
 
     curl_close($ch);
     
-    return $r ? true : false;
+    $r = trim($r);
+    if ($r == "1")
+        return true;
+    elseif ($r == "0")
+        return false;
+    else
+        err("Error returned from survey service: " . $r);
 }
 
 
