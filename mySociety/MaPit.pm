@@ -8,7 +8,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # WWW: http://www.mysociety.org
 #
-# $Id: MaPit.pm,v 1.40 2007-10-06 09:26:17 matthew Exp $
+# $Id: MaPit.pm,v 1.41 2008-06-24 11:50:23 francis Exp $
 
 package mySociety::MaPit;
 
@@ -184,7 +184,10 @@ sub get_voting_areas_geometry ($;$) {
   many results. 'polygon' should return at most one result for a type.
 
   If TYPE is present, restricts to areas of that type, such as WMC for
-  Westminster Constituencies only.
+  Westminster Constituencies only. If not specified, note that doing the
+  EUR/SPE/WAE calculation can be very slow (order of 10-20 seconds on live
+  site). XXX Can this be improved by short-circuiting (only one EUR result
+  returned, etc.)?
 
 =cut
 sub get_voting_areas_by_location ($$;$$) {
