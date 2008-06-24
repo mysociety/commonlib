@@ -8,7 +8,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: mapit.php,v 1.60 2008-06-24 11:50:23 francis Exp $
+ * $Id: mapit.php,v 1.61 2008-06-24 11:59:16 francis Exp $
  *
  */
 
