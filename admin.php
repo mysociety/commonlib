@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin.php,v 1.38 2006-12-19 15:03:35 francis Exp $
+ * $Id: admin.php,v 1.39 2008-07-08 09:21:52 matthew Exp $
  * 
  */
 
@@ -21,6 +21,21 @@ function admin_display_error($num, $message, $file, $line, $context) {
     print "<p><strong>$message</strong> in $file:$line</p>";
 }
 err_set_handler_display('admin_display_error');
+
+/*
+
+admin_page_display is used to create an admin section of a website. SITE_NAME
+is used for a display title, PAGES is an array of admin pages (described
+below), and default (optional) is an admin page to show on the main page.
+
+PAGES can also contain null items for breaks in the list of pages.
+
+An admin page is an object that has, at minimum, an id string and a display
+function.  The id string is used in the URL of the admin page, and the display
+function is called to display that page. The web-admin directories for each
+project contain examples of this function in the index.php files.
+
+*/
 
 function admin_page_display($site_name, $pages, $default = null) {
     $maintitle = "$site_name admin";
