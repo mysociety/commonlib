@@ -6,7 +6,7 @@
 # Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Email.pm,v 1.24 2008-03-13 11:57:02 matthew Exp $
+# $Id: Email.pm,v 1.25 2008-07-16 14:52:39 matthew Exp $
 #
 
 package mySociety::Email::Error;
@@ -183,20 +183,20 @@ sub do_template_substitution ($$) {
     }
 
     $body  =~ s/\r\n/\n/gs;
+    $body =~ s/^\s+$//mg;
 
     # Merge paragraphs into their own line.  Two blank lines separate a
-    # paragraph.
+    # paragraph. End a line with two spaces to force a linebreak.
 
     # regex means, "replace any line ending that is neither preceded (?<!\n)
-    # nor followed (?![ \t]*\n) by a blank line with a single space".
-    $body =~ s#(?<!\n)[ \t]*\n(?![ \t]*\n)# #gs;
+    # nor followed (?!\n) by a blank line with a single space".
+    $body =~ s#(?<!\n)(?<!  )\n(?!\n)# #gs;
 
     # Wrap text to 72-column lines.
     local($Text::Wrap::columns = 69);
     local($Text::Wrap::huge = 'overflow');
     local($Text::Wrap::unexpand = 0);
     my $wrapped = Text::Wrap::wrap('     ', '     ', $body);
-    $wrapped =~ s/^\s+$//mg;
 
     return ($subject, $wrapped);
 }
