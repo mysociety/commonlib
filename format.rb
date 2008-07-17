@@ -4,7 +4,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: format.rb,v 1.16 2008-06-11 20:00:22 francis Exp $
+# $Id: format.rb,v 1.17 2008-07-17 11:24:04 francis Exp $
 
 module MySociety
     module Format
@@ -99,6 +99,12 @@ module MySociety
             end
 
             text
+        end
+
+        # Really, why aren't these in Ruby? (and no, capitalize is no good, as it
+        # lowercases the whole of the rest of the string, yeuch)
+        def Format.lcfirst(text)
+            text[0,1].downcase + text[1,text.size]
         end
 
     end
