@@ -6,7 +6,7 @@
 # Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Email.pm,v 1.25 2008-07-16 14:52:39 matthew Exp $
+# $Id: Email.pm,v 1.26 2008-07-29 22:34:25 matthew Exp $
 #
 
 package mySociety::Email::Error;
@@ -182,8 +182,8 @@ sub do_template_substitution ($$) {
         $body =~ s#^Subject: ([^\n]*)\n\n##s;
     }
 
-    $body  =~ s/\r\n/\n/gs;
-    $body =~ s/^\s+$//mg;
+    $body =~ s/\r\n/\n/gs;
+    $body =~ s/^\s+$//mg; # Note this also reduces any gap between paragraphs of >1 blank line to 1
 
     # Merge paragraphs into their own line.  Two blank lines separate a
     # paragraph. End a line with two spaces to force a linebreak.
@@ -197,6 +197,7 @@ sub do_template_substitution ($$) {
     local($Text::Wrap::huge = 'overflow');
     local($Text::Wrap::unexpand = 0);
     my $wrapped = Text::Wrap::wrap('     ', '     ', $body);
+    $wrapped =~ s/^\s+$//mg; # Do it again because of wordwrapping indented lines
 
     return ($subject, $wrapped);
 }
@@ -273,11 +274,17 @@ sub construct_email ($) {
         throw mySociety::Email::Error("Fields '_body_' and '_unwrapped_body_' both specified") if (exists($p->{_body_}));
         my $t = $p->{_unwrapped_body_};
         $t =~ s/\r\n/\n/gs;
+        my $sig;
+        $sig = $1 if $t =~ s/(\n-- \n.*)//ms;
         local($Text::Wrap::columns = 69);
         local($Text::Wrap::huge = 'overflow');
         local($Text::Wrap::unexpand = 0);
         $p->{_body_} = Text::Wrap::wrap('     ', '     ', $t);
         $p->{_body_} =~ s/^\s+$//mg;
+        if ($sig) {
+            $sig = Text::Wrap::wrap('', '', $sig);
+            $p->{_body_} .= $sig;
+        }
         delete($p->{_unwrapped_body_});
     }
 
