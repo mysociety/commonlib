@@ -5,7 +5,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: atcocif.py,v 1.3 2008-07-31 17:19:55 francis Exp $
+# $Id: atcocif.py,v 1.4 2008-07-31 17:56:30 francis Exp $
 #
 
 # TODO:
@@ -116,14 +116,14 @@ class ATCO:
     # Adjacency function for use with Dijkstra's algorithm on earliest time to arrive somewhere.
     # Given a location (string short code) and a date/time, it finds every
     # other station you can get there on time by one direct train/bus. 
-    def adjacent_location_times(self, location, target_arrival_datetime):
-        logging.debug("adjacent_location_times location: " + location + " target_arrival_datetime: " + str(target_arrival_datetime))
-        if location not in self.journeys_visiting_location:
-            raise Exception, "No journeys known visiting location " + location
+    def adjacent_location_times(self, target_location, target_arrival_datetime):
+        logging.debug("adjacent_location_times target_location: " + target_location + " target_arrival_datetime: " + str(target_arrival_datetime))
+        if target_location not in self.journeys_visiting_location:
+            raise Exception, "No journeys known visiting target_location " + target_location
 
-        # ret is dictionary from location to time at that location
-        ret = {}
-        for journey in self.journeys_visiting_location[location]:
+        # adjacents is dictionary from location to time at that location
+        adjacents = {}
+        for journey in self.journeys_visiting_location[target_location]:
             logging.debug("\tconsidering journey: " + journey.unique_journey_identifier)
 
             # Check whether the journey runs on the relevant date
@@ -133,9 +133,11 @@ class ATCO:
                 logging.debug("\t\tnot valid on date: " + reason)
             else:
                 # Find out when it arrives at this stop
-                arrival_time_at_location = journey.find_arrival_time_at_location(location)
-                logging.debug("\t\tarrival time at location: " + str(arrival_time_at_location))
-                arrival_datetime_at_location = datetime.datetime.combine(target_arrival_datetime.date(), arrival_time_at_location)
+                arrival_time_at_target_location = journey.find_arrival_time_at_location(target_location)
+                # XXX arrival_time_at_target_location could be None here for e.g. pick up only stops
+                assert arrival_time_at_target_location != None, "expand this code"
+                logging.debug("\t\tarrival time at target location: " + str(arrival_time_at_target_location))
+                arrival_datetime_at_target_location = datetime.datetime.combine(target_arrival_datetime.date(), arrival_time_at_target_location)
 
                 # Work out how long we need to allow to change at the stop
                 # XXX here need to know if the stop is the last destination stop, as you don't need interchange time
@@ -149,16 +151,31 @@ class ATCO:
                 
                 # See whether if we want to use this journey to get to this
                 # stop, we get there on time to change to the next journey.
-                if arrival_datetime_at_location + interchange_time > target_arrival_datetime:
+                if arrival_datetime_at_target_location + interchange_time > target_arrival_datetime:
                     logging.debug("\t\twhich is too late with interchange time %s, so not using journey" % str(interchange_time))
                 else:
-                    logging.debug("\t\tadding stops...")
+                    logging.debug("\t\tadding stops")
                     # Now go through every earlier stop, and add it to the list of returnable nodes
+                    for hop in journey.hops:
+                        # We've arrived at the target location
+                        if hop.location == target_location:
+                            break
+                        if hop.is_pick_up():
+                            departure_datetime = datetime.datetime.combine(target_arrival_datetime.date(), hop.published_departure_time)
+                            # if the time at this hop is later than at target, must be a midnight rollover, and really
+                            # this hop is on the the day before, so change to that
+                            if departure_datetime > arrival_datetime_at_target_location:
+                                departure_datetime = datetime.datetime.combine(target_arrival_datetime.date() - datetime.timedelta(1), hop.published_departure_time)
 
-                    # remember to catch midnight case
-                                 
+                            if hop.location in adjacents:
+                                curr_latest = adjacents[hop.location]
+                                if departure_datetime > curr_latest:
+                                    adjacents[hop.location] = departure_datetime
+                            else:
+                                adjacents[hop.location] = departure_datetime
+                    # *** remember to catch midnight case
 
-        return ret
+        return adjacents
             
 
 ###########################################################
@@ -276,12 +293,7 @@ class JourneyHeader(CIFRecord):
             if hop.location == location:
                 # XXX performance: could return here rather than assert, if we checked for duplicate stops thoroughly elsewhere
                 assert ret == None, "location %s appears twice in journey %s" % (location, self.unique_journey_identifier)
-                if isinstance(hop, JourneyIntermediate):
-                    # B is documented "both pick up and set down flag"
-                    # T is undocumented, but seems to mean train (so let's assume pick up and set down XXX)
-                    # Other values you'll need to not use this hop
-                    assert hop.activity_flag in ['B', 'T'], "activity_flag %s in journey %s not supported" % (hop.activity_flag, self.unique_journey_identifier)
-                if not isinstance(hop, JourneyOrigin):
+                if hop.is_set_down():
                     ret = hop.published_arrival_time
 
         return ret
@@ -300,6 +312,12 @@ class JourneyOrigin(CIFRecord):
         self.bay_number = matches.group(3).strip()
         self.timing_point_indicator = { 'T0' : False, 'T1' : True }[matches.group(4)]
         self.fare_stage_indicator = { 'F0' : False, 'F1' : True, '  ' : None }[matches.group(5)]
+
+    def is_set_down(self):
+        return False
+
+    def is_pick_up(self):
+        return True
     
 # Intermediate stop on journey
 class JourneyIntermediate(CIFRecord):
@@ -319,6 +337,23 @@ class JourneyIntermediate(CIFRecord):
         self.timing_point_indicator = { 'T0' : False, 'T1' : True }[matches.group(6)]
         self.fare_stage_indicator = { 'F0' : False, 'F1' : True, '  ' : None }[matches.group(7)]
 
+    def is_set_down(self):
+        # T is undocumented, but seems to mean train (so let's assume pick up and set down XXX)
+        if self.activity_flag in ['B', 'S', 'T']:
+            return True
+        if self.activity_flag in ['N', 'P']:
+            return False
+        assert False, "activity_flag %s not supported" % (self.activity_flag)
+
+    def is_pick_up(self):
+        # T is undocumented, but seems to mean train (so let's assume pick up and set down XXX)
+        if self.activity_flag in ['B', 'P', 'T']:
+            return True
+        if self.activity_flag in ['N', 'S']:
+            return False
+        assert False, "activity_flag %s not supported" % (self.activity_flag)
+
+
 # Destination of journey route
 class JourneyDestination(CIFRecord):
     def __init__(self, line):
@@ -334,6 +369,12 @@ class JourneyDestination(CIFRecord):
         self.timing_point_indicator = { 'T0' : False, 'T1' : True }[matches.group(4)]
         self.fare_stage_indicator = { 'F0' : False, 'F1' : True, '  ' : None }[matches.group(5)]
 
+    def is_set_down(self):
+        return True
+
+    def is_pick_up(self):
+        return False
+ 
 # Destination of journey route, stores also additional record in self.additional
 class Location(CIFRecord):
     def __init__(self, line):
@@ -353,7 +394,7 @@ class Location(CIFRecord):
 
     def __str__(self):
         ret = CIFRecord.__str__(self) + "\n"
-        if self.add_additional: 
+        if self.additional: 
             ret = ret + "\t" + str(self.additional)
         return ret
 
