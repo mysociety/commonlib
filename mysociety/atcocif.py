@@ -5,7 +5,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: atcocif.py,v 1.5 2008-07-31 20:54:47 francis Exp $
+# $Id: atcocif.py,v 1.6 2008-08-01 15:15:30 francis Exp $
 #
 
 # TODO:
@@ -20,6 +20,14 @@
 # Do all trains have T for activity_flag? They should have pick up only for some cases, Matthew says: but NEEDS CHANGING
 #    london-brum will be pick up only at watford
 #    manchester-london will be pick up only at stockport
+# Test exceptional date ranges
+# Check circular journeys work fine
+# School terms are needed but not implemented - where is the data?
+# Bank holidays are needed but not implemented - where is the data?
+# interchange times
+# - find proper ones to use for TRAIN and BUS
+# - what is an LFBUS?
+# - there are other ones as well, e.g. 09 etc. probably right to default to bus, but check
 
 """
 Load files in the ATCO-CIF file format, which is used in the UK to specify
@@ -72,7 +80,7 @@ class ATCO:
         current_item = None
         for line in self.handle.readlines():
             line = line.strip("\n\r")
-            #print line
+            #logging.debug(line)
             record_identity = line[0:2]
             record = None
 
@@ -80,6 +88,9 @@ class ATCO:
             if record_identity == 'QS':
                 current_item = JourneyHeader(line)
                 self.journeys.append(current_item)
+            elif record_identity == 'QE':
+                assert isinstance(current_item, JourneyHeader)
+                current_item.add_exception(JourneyException(line))
             elif record_identity == 'QO':
                 assert isinstance(current_item, JourneyHeader)
                 current_item.add_hop(JourneyOrigin(line))
@@ -112,7 +123,14 @@ class ATCO:
                 if hop.location not in self.journeys_visiting_location:
                     self.journeys_visiting_location[hop.location] = set()
 
-                assert journey not in self.journeys_visiting_location[hop.location], "same location appears twice in one journey"
+                if journey in self.journeys_visiting_location[hop.location]:
+                    if hop == journey.hops[0] and hop == journey.hops[-1]:
+                        # if it's a simple loop, starting and ending at same point, then that's OK
+                        logging.debug("journey " + journey.unique_journey_identifier + " loops")
+                        pass
+                    else:
+                        assert "same location %s appears twice in one journey %s, and not at start/end" % (hop.location, journey.unique_journey_identifier)
+
                 self.journeys_visiting_location[hop.location].add(journey)
 
         self.location_details = {}
@@ -151,10 +169,11 @@ class ATCO:
                     # XXX here need to know if the stop is the last destination stop, as you don't need interchange time
                     if journey.vehicle_type == 'TRAIN':
                         interchange_time_in_minutes = self.train_interchange_default
-                    elif journey.vehicle_type == 'BUS': # XXX not tested
-                        interchange_time_in_minutes = self.bus_interchange_default
+                    #elif journey.vehicle_type == 'BUS' or journey.vehicle_type == 'LFBUS' or journey.vehicle_type == '09':
                     else:
-                        assert False, "unknown vehicle type for working out interchange time default: %s" % journey.vehicle_type
+                        interchange_time_in_minutes = self.bus_interchange_default
+                    #else:
+                    #    assert False, "unknown vehicle type for working out interchange time default: %s journey: %s" % (journey.vehicle_type, journey.unique_journey_identifier)
                     interchange_time = datetime.timedelta(minutes = interchange_time_in_minutes)
                     
                     # See whether if we want to use this journey to get to this
@@ -165,8 +184,9 @@ class ATCO:
                         logging.debug("\t\tadding stops")
                         # Now go through every earlier stop, and add it to the list of returnable nodes
                         for hop in journey.hops:
-                            # We've arrived at the target location
-                            if hop.location == target_location:
+                            # We've arrived at the target location (check is_set_down here so looped
+                            # journeys, where we end on stop we started, work)
+                            if hop.is_set_down() and hop.location == target_location:
                                 break
                             if hop.is_pick_up():
                                 departure_datetime = datetime.datetime.combine(target_arrival_datetime.date(), hop.published_departure_time)
@@ -175,7 +195,7 @@ class ATCO:
                                 # XXX bah this is rubbish as it won't have done the is right day check right
                                 if departure_datetime > arrival_datetime_at_target_location:
                                     departure_datetime = datetime.datetime.combine(target_arrival_datetime.date() - datetime.timedelta(1), hop.published_departure_time)
-
+                                # Use this location if new, or if it is later departure time than any previous one the same we've found.
                                 if hop.location in adjacents:
                                     curr_latest = adjacents[hop.location]
                                     if departure_datetime > curr_latest:
@@ -192,6 +212,8 @@ def parse_time(time_string):
     return datetime.time(int(time_string[0:2]), int(time_string[2:4]), 0)
 
 def parse_date(date_string):
+    if date_string == '99999999':
+        date_string = '99991231'
     return datetime.date(
         int(date_string[0:4]), int(date_string[4:6]), int(date_string[6:8]),
     )
@@ -267,6 +289,8 @@ class JourneyHeader(CIFRecord):
         self.route_direction = matches.group(13)
 
         self.hops = []
+        self.hop_lines = {}
+        self.exceptions = []
 
     def __str__(self):
         ret = CIFRecord.__str__(self) + "\n"
@@ -277,19 +301,42 @@ class JourneyHeader(CIFRecord):
         return ret
 
     def add_hop(self, hop):
+        if hop.line in self.hop_lines:
+            # if we go to the same stop at the same time again, ignore duplicate
+            logging.warn("removed duplicate stop/time " + hop.line)
+            return
         assert isinstance(hop, JourneyOrigin) or isinstance(hop, JourneyIntermediate) or isinstance(hop, JourneyDestination)
         self.hops.append(hop)
+        self.hop_lines[hop.line] = True
+
+    def add_exception(self, exception):
+        assert isinstance(exception, JourneyException)
+        self.exceptions.append(exception)
 
     # Given a datetime.date returns True or False according to whether the
     # journey runs on that date.
     def is_valid_on_date(self, d):
-        if not self.first_date_of_operation <= d and d <= self.last_date_of_operation:
-            return False, "%s not in range of date of operation %s - %s" % (str(d), str(self.first_date_of_operation), str(self.last_date_of_operation))
+        # check date ranges, and exceptions to them
+        # XXX not clearly defined in spec how these nest, but hey, this naive implementation might do
+        excepted_state = None
+        for exception in self.exceptions:
+            if exception.start_of_exceptional_period <= d and d <= exception.end_of_exceptional_period:
+                excepted_state = exception.operation_code
+        if excepted_state == False:
+            return False, "%s not in range of exceptional date records" % (str(d))
+        if excepted_state == None:
+            if not self.first_date_of_operation <= d and d <= self.last_date_of_operation:
+                return False, "%s not in range of date of operation %s - %s" % (str(d), str(self.first_date_of_operation), str(self.last_date_of_operation))
+
+        # check runs on this day of week
         if not self.operates_on_day_of_week[d.isoweekday()]:
             return False, "journey doesn't operate on a " + d.strftime('%A')
 
-        assert self.school_term_time == " ", "fancy school term related journey not implemented"
-        assert self.bank_holidays == " ", "fancy bank holiday related journey not implemented"
+        # school terms
+        # assert self.school_term_time == " ", "fancy school term related journey not implemented " + self.school_term_time
+
+        # bank holidays
+        # assert self.bank_holidays == " ", "fancy bank holiday related journey not implemented " + self.bank_holidays
 
         return True, "OK"
 
@@ -299,19 +346,30 @@ class JourneyHeader(CIFRecord):
         ret = None
         for hop in self.hops:
             if hop.location == location:
-                # XXX performance: could return here rather than assert, if we checked for duplicate stops thoroughly elsewhere
-                assert ret == None, "location %s appears twice in journey %s" % (location, self.unique_journey_identifier)
                 if hop.is_set_down():
                     ret = hop.published_arrival_time
 
         return ret
+
+# Exceptions to dates of journey
+class JourneyException(CIFRecord):
+    def __init__(self, line):
+        CIFRecord.__init__(self, line, "QE")
+
+        matches = re.match('^QE(\d{8})(\d{8})([01])$', line)
+        if not matches:
+            raise Exception("Journey origin line incorrectly formatted: " + line)
+
+        self.start_of_exceptional_period = parse_date(matches.group(1))
+        self.end_of_exceptional_period = parse_date(matches.group(2))
+        self.operation_code = bool(int(matches.group(3)))
 
 # Origin of journey route
 class JourneyOrigin(CIFRecord):
     def __init__(self, line):
         CIFRecord.__init__(self, line, "QO")
 
-        matches = re.match('^QO(.{12})(\d{4})(.{3})(T[01])(F0|F1|  )$', line)
+        matches = re.match('^QO(.{12})(\d{4})(.{3})(T[01])(F0|F1|  ) ?$', line)
         if not matches:
             raise Exception("Journey origin line incorrectly formatted: " + line)
 
@@ -388,7 +446,7 @@ class Location(CIFRecord):
     def __init__(self, line):
         CIFRecord.__init__(self, line, "QL")
 
-        matches = re.match('^QL([NDR])(.{12})(.{48})(.)([BSPRID])(.{8})$', line)
+        matches = re.match('^QL([NDR])(.{12})(.{48})(.)([BSPRID ])(.{8})$', line)
         if not matches:
             raise Exception("Location line incorrectly formatted: " + line)
 
@@ -409,6 +467,15 @@ class Location(CIFRecord):
     def add_additional(self, additional):
         assert isinstance(additional, LocationAdditional)
         self.additional = additional
+
+    def long_description(self):
+        ret = self.full_location
+        if self.additional:
+            if len(self.additional.town_name) > 0:
+                ret += ", " + self.additional.town_name 
+            if len(self.additional.district_name) > 0:
+                ret += ", " + self.additional.district_name
+        return ret
         
 # Additional information on journey route
 class LocationAdditional(CIFRecord):
