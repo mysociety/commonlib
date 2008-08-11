@@ -5,14 +5,13 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: atcocif.py,v 1.6 2008-08-01 15:15:30 francis Exp $
+# $Id: atcocif.py,v 1.7 2008-08-11 16:23:53 francis Exp $
 #
 
 # TODO:
 # Look at the transaction types, are they always nice?
 # Allow for the interchange time at the end :) - currently we'll always arrive early by that time
 # timetz - what about time zones!  http://docs.python.org/lib/datetime-datetime.html
-# Work out correct date to use, which week in October is the data set valid for? (intersect everything)
 #
 # Journeys over midnight will be knackered, no idea how ATCO-CIF even stores them
 #  - in particular, which day are journeys starting just after midnight stored for?
