@@ -5,7 +5,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: atcocif.py,v 1.7 2008-08-11 16:23:53 francis Exp $
+# $Id: atcocif.py,v 1.8 2008-08-13 12:39:40 francis Exp $
 #
 
 # TODO:
@@ -16,6 +16,7 @@
 # Journeys over midnight will be knackered, no idea how ATCO-CIF even stores them
 #  - in particular, which day are journeys starting just after midnight stored for?
 #  - see "XXX bah" below for hack that will do for now but NEEDS CHANGING
+#
 # Do all trains have T for activity_flag? They should have pick up only for some cases, Matthew says: but NEEDS CHANGING
 #    london-brum will be pick up only at watford
 #    manchester-london will be pick up only at stockport
@@ -27,6 +28,9 @@
 # - find proper ones to use for TRAIN and BUS
 # - what is an LFBUS?
 # - there are other ones as well, e.g. 09 etc. probably right to default to bus, but check
+
+# Later:
+# Check what activity_flag 'O' for trains definitively means
 
 """
 Load files in the ATCO-CIF file format, which is used in the UK to specify
@@ -136,16 +140,30 @@ class ATCO:
         for location in self.locations:
             self.location_details[location.location] = location
 
+    # Look for journeys that cross midnight
+    def find_journeys_crossing_midnight(self):
+        for journey in self.journeys:
+            previous_departure_time = datetime.time(0, 0, 0)
+            for hop in journey.hops:
+                if hop.is_pick_up():
+                    if previous_departure_time > hop.published_departure_time:
+                        print "journey " + journey.unique_journey_identifier + " spans midnight"
+                    previous_departure_time = hop.published_departure_time
+            
+
     # Adjacency function for use with Dijkstra's algorithm on earliest time to arrive somewhere.
     # Given a location (string short code) and a date/time, it finds every
     # other station you can get there on time by one direct train/bus. 
     def adjacent_location_times(self, target_location, target_arrival_datetime):
+        # Check that there are journeys visiting this location
         logging.debug("adjacent_location_times target_location: " + target_location + " target_arrival_datetime: " + str(target_arrival_datetime))
         if target_location not in self.journeys_visiting_location:
             raise Exception, "No journeys known visiting target_location " + target_location
 
-        # adjacents is dictionary from location to time at that location
+        # Adjacents is dictionary from location to time at that location, and
+        # is the data structure we are going to return from this function.
         adjacents = {}
+        # Go through every journey visiting the location
         for journey in self.journeys_visiting_location[target_location]:
             logging.debug("\tconsidering journey: " + journey.unique_journey_identifier)
 
@@ -168,11 +186,8 @@ class ATCO:
                     # XXX here need to know if the stop is the last destination stop, as you don't need interchange time
                     if journey.vehicle_type == 'TRAIN':
                         interchange_time_in_minutes = self.train_interchange_default
-                    #elif journey.vehicle_type == 'BUS' or journey.vehicle_type == 'LFBUS' or journey.vehicle_type == '09':
                     else:
                         interchange_time_in_minutes = self.bus_interchange_default
-                    #else:
-                    #    assert False, "unknown vehicle type for working out interchange time default: %s journey: %s" % (journey.vehicle_type, journey.unique_journey_identifier)
                     interchange_time = datetime.timedelta(minutes = interchange_time_in_minutes)
                     
                     # See whether if we want to use this journey to get to this
@@ -402,21 +417,37 @@ class JourneyIntermediate(CIFRecord):
         self.timing_point_indicator = { 'T0' : False, 'T1' : True }[matches.group(6)]
         self.fare_stage_indicator = { 'F0' : False, 'F1' : True, '  ' : None }[matches.group(7)]
 
-    def is_set_down(self):
-        # T is undocumented, but seems to mean train (so let's assume pick up and set down XXX)
-        if self.activity_flag in ['B', 'S', 'T']:
-            return True
-        if self.activity_flag in ['N', 'P']:
-            return False
-        assert False, "activity_flag %s not supported" % (self.activity_flag)
+        # We think O means no stop for trains, and all such entries have no time marked
+        if self.activity_flag == 'O':
+            assert self.published_arrival_time == datetime.time(0, 0, 0) and self.published_departure_time == datetime.time(0, 0, 0)
+        # D is another undocumented train pickup/putdown flag, always
+        # associated with 0000 for arrival time. We think it means they only
+        # know the departure time, and not arrival. Let us depressingly assume
+        # they are the same.
+        if self.activity_flag == 'D':
+            assert self.published_departure_time == datetime.time(0, 0, 0)
+            assert self.published_arrival_time != datetime.time(0, 0, 0)
+            self.published_departure_time = self.published_arrival_time
 
-    def is_pick_up(self):
-        # T is undocumented, but seems to mean train (so let's assume pick up and set down XXX)
-        if self.activity_flag in ['B', 'P', 'T']:
+    # B - both pick up and set down
+    # P - pick up only
+    # S - set down only
+    # N - neither pick u pnor set down
+    # T - undocumented, but seems to mean train (so let's assume pick up and set down XXX)
+    # D - another train special, see above where we hack the departure time for it
+    # O - we think means a train stop where train doesn't stop XXX
+    def is_set_down(self):
+        if self.activity_flag in ['B', 'S', 'T', 'D']:
             return True
-        if self.activity_flag in ['N', 'S']:
+        if self.activity_flag in ['N', 'P', 'O']:
             return False
-        assert False, "activity_flag %s not supported" % (self.activity_flag)
+        assert False, "activity_flag %s not supported (location %s) " % (self.activity_flag, self.location)
+    def is_pick_up(self):
+        if self.activity_flag in ['B', 'P', 'T', 'D']:
+            return True
+        if self.activity_flag in ['N', 'S', 'O']:
+            return False
+        assert False, "activity_flag %s not supported (location %s)" % (self.activity_flag, self.location)
 
 
 # Destination of journey route
