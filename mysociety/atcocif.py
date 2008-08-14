@@ -5,7 +5,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: atcocif.py,v 1.8 2008-08-13 12:39:40 francis Exp $
+# $Id: atcocif.py,v 1.9 2008-08-14 19:12:55 francis Exp $
 #
 
 # TODO:
@@ -17,9 +17,6 @@
 #  - in particular, which day are journeys starting just after midnight stored for?
 #  - see "XXX bah" below for hack that will do for now but NEEDS CHANGING
 #
-# Do all trains have T for activity_flag? They should have pick up only for some cases, Matthew says: but NEEDS CHANGING
-#    london-brum will be pick up only at watford
-#    manchester-london will be pick up only at stockport
 # Test exceptional date ranges
 # Check circular journeys work fine
 # School terms are needed but not implemented - where is the data?
@@ -30,7 +27,13 @@
 # - there are other ones as well, e.g. 09 etc. probably right to default to bus, but check
 
 # Later:
-# Check what activity_flag 'O' for trains definitively means
+# Train activity flags
+# - they should have pick up only for some cases, Matthew says:
+#    london-brum will be pick up only at watford
+#    manchester-london will be pick up only at stockport
+# - check what activity_flag 'O' for trains definitively means
+# - check what activity_flag 'D' for trains definitively means
+
 
 """
 Load files in the ATCO-CIF file format, which is used in the UK to specify
@@ -167,57 +170,63 @@ class ATCO:
         for journey in self.journeys_visiting_location[target_location]:
             logging.debug("\tconsidering journey: " + journey.unique_journey_identifier)
 
-            # Check whether the journey runs on the relevant date
-            # XXX assumes we don't do journeys over midnight
-            (valid_on_date, reason) = journey.is_valid_on_date(target_arrival_datetime.date()) 
-            if not valid_on_date:
-                logging.debug("\t\tnot valid on date: " + reason)
-            else:
-                # Find out when it arrives at this stop
-                arrival_time_at_target_location = journey.find_arrival_time_at_location(target_location)
-                if arrival_time_at_target_location == None:
-                    # arrival_time_at_target_location could be None here for e.g. pick up only stops
-                    pass
-                else:
-                    logging.debug("\t\tarrival time at target location: " + str(arrival_time_at_target_location))
-                    arrival_datetime_at_target_location = datetime.datetime.combine(target_arrival_datetime.date(), arrival_time_at_target_location)
-
-                    # Work out how long we need to allow to change at the stop
-                    # XXX here need to know if the stop is the last destination stop, as you don't need interchange time
-                    if journey.vehicle_type == 'TRAIN':
-                        interchange_time_in_minutes = self.train_interchange_default
-                    else:
-                        interchange_time_in_minutes = self.bus_interchange_default
-                    interchange_time = datetime.timedelta(minutes = interchange_time_in_minutes)
-                    
-                    # See whether if we want to use this journey to get to this
-                    # stop, we get there on time to change to the next journey.
-                    if arrival_datetime_at_target_location + interchange_time > target_arrival_datetime:
-                        logging.debug("\t\twhich is too late with interchange time %s, so not using journey" % str(interchange_time))
-                    else:
-                        logging.debug("\t\tadding stops")
-                        # Now go through every earlier stop, and add it to the list of returnable nodes
-                        for hop in journey.hops:
-                            # We've arrived at the target location (check is_set_down here so looped
-                            # journeys, where we end on stop we started, work)
-                            if hop.is_set_down() and hop.location == target_location:
-                                break
-                            if hop.is_pick_up():
-                                departure_datetime = datetime.datetime.combine(target_arrival_datetime.date(), hop.published_departure_time)
-                                # if the time at this hop is later than at target, must be a midnight rollover, and really
-                                # this hop is on the the day before, so change to that
-                                # XXX bah this is rubbish as it won't have done the is right day check right
-                                if departure_datetime > arrival_datetime_at_target_location:
-                                    departure_datetime = datetime.datetime.combine(target_arrival_datetime.date() - datetime.timedelta(1), hop.published_departure_time)
-                                # Use this location if new, or if it is later departure time than any previous one the same we've found.
-                                if hop.location in adjacents:
-                                    curr_latest = adjacents[hop.location]
-                                    if departure_datetime > curr_latest:
-                                        adjacents[hop.location] = departure_datetime
-                                else:
-                                    adjacents[hop.location] = departure_datetime
+            self._adjacent_location_times_for_journey(target_location, target_arrival_datetime, adjacents, journey)
 
         return adjacents
+
+    def _adjacent_location_times_for_journey(self, target_location, target_arrival_datetime, adjacents, journey):
+        # Check whether the journey runs on the relevant date
+        # XXX assumes we don't do journeys over midnight
+        (valid_on_date, reason) = journey.is_valid_on_date(target_arrival_datetime.date()) 
+        if not valid_on_date:
+            logging.debug("\t\tnot valid on date: " + reason)
+        else:
+            # Find out when it arrives at this stop
+            arrival_time_at_target_location = journey.find_arrival_time_at_location(target_location)
+            if arrival_time_at_target_location == None:
+                # arrival_time_at_target_location could be None here for e.g. pick up only stops
+                pass
+            else:
+                logging.debug("\t\tarrival time at target location: " + str(arrival_time_at_target_location))
+                arrival_datetime_at_target_location = datetime.datetime.combine(target_arrival_datetime.date(), arrival_time_at_target_location)
+
+                # Work out how long we need to allow to change at the stop
+                # XXX here need to know if the stop is the last destination stop, as you don't need interchange time
+                if journey.vehicle_type == 'TRAIN':
+                    interchange_time_in_minutes = self.train_interchange_default
+                else:
+                    interchange_time_in_minutes = self.bus_interchange_default
+                interchange_time = datetime.timedelta(minutes = interchange_time_in_minutes)
+                
+                # See whether if we want to use this journey to get to this
+                # stop, we get there on time to change to the next journey.
+                if arrival_datetime_at_target_location + interchange_time > target_arrival_datetime:
+                    logging.debug("\t\twhich is too late with interchange time %s, so not using journey" % str(interchange_time))
+                else:
+                    logging.debug("\t\tadding stops")
+                    self._adjacent_location_times_add_stops(target_location, target_arrival_datetime, adjacents, journey, arrival_datetime_at_target_location)
+
+    def _adjacent_location_times_add_stops(self, target_location, target_arrival_datetime, adjacents, journey, arrival_datetime_at_target_location):
+        # Now go through every earlier stop, and add it to the list of returnable nodes
+        for hop in journey.hops:
+            # We've arrived at the target location (check is_set_down here so looped
+            # journeys, where we end on stop we started, work)
+            if hop.is_set_down() and hop.location == target_location:
+                break
+            if hop.is_pick_up():
+                departure_datetime = datetime.datetime.combine(target_arrival_datetime.date(), hop.published_departure_time)
+                # if the time at this hop is later than at target, must be a midnight rollover, and really
+                # this hop is on the the day before, so change to that
+                # XXX bah this is rubbish as it won't have done the is right day check right
+                if departure_datetime > arrival_datetime_at_target_location:
+                    departure_datetime = datetime.datetime.combine(target_arrival_datetime.date() - datetime.timedelta(1), hop.published_departure_time)
+                # Use this location if new, or if it is later departure time than any previous one the same we've found.
+                if hop.location in adjacents:
+                    curr_latest = adjacents[hop.location]
+                    if departure_datetime > curr_latest:
+                        adjacents[hop.location] = departure_datetime
+                else:
+                    adjacents[hop.location] = departure_datetime
             
 
 ###########################################################
