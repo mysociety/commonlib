@@ -161,7 +161,7 @@ sub create_file_to_replace ($) {
         last if (!$h and !$!{EEXIST});
         return ($n, $h);
     }
-    die $!;
+    die $! . ": " . $name;
 }
 
 1;
