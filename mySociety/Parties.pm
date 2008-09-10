@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Parties.pm,v 1.17 2008-05-05 18:09:25 francis Exp $
+# $Id: Parties.pm,v 1.18 2008-09-10 08:27:09 dademcron Exp $
 #
 
 package mySociety::Parties;
@@ -58,6 +58,7 @@ display them with.
     "Scottish Green Party" => "Green",
 
     "Ind" => "Independent",
+    "Independent Health Coalition" => "Independent Health Coalition",
 
     "Labour" => "Labour",
     "Lab" => "Labour",
