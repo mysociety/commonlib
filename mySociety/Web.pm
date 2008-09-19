@@ -6,7 +6,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Web.pm,v 1.17 2008-02-04 22:50:30 matthew Exp $
+# $Id: Web.pm,v 1.18 2008-09-19 10:24:56 matthew Exp $
 #
 
 package mySociety::Web;
@@ -206,20 +206,24 @@ sub ImportMulti ($%) {
     }
 }
 
-=item NewURL [PARAM VALUE ...]
+=item NewURL Q [PARAM VALUE ...]
 
-Return a URL for reinvoking this script with changed parameters. Each PARAM
-gives the name of a parameter; the VALUE may be a scalar, a reference list to
-indicate that a multivalued parameter should be added; or undef to indicate
-that the parameter should be removed in the new URL.
+Return a URL with changed parameters. Each PARAM gives the name of a parameter;
+the VALUE may be a scalar, a reference list to indicate that a multivalued
+parameter should be added; or undef to indicate that the parameter should be
+removed in the new URL. The special PARAMs of -url and -retain state an
+override URL and whether to keep the current parameters respectively.
 
 =cut
 sub NewURL ($%) {
     my ($q, %p) = @_;
-    my $url = $q->url(-relative=>1);
+    my $url = $p{-url} || $q->url(-relative=>1);
     $url =~ s/\?$//;
-    my %params = map { $_ => $q->param($_) } $q->param();
+    my %params;
+    %params = map { $_ => $q->param($_) || '' } $q->param()
+        if $p{-retain};
     foreach my $key (keys %p) {
+        next if $key eq '-url' || $key eq '-retain';
         if (defined $p{$key}) {
             $params{$key} = $p{$key};
         } else {
