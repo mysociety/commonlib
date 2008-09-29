@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Alert.pm,v 1.41 2008-09-19 10:24:56 matthew Exp $
+# $Id: Alert.pm,v 1.42 2008-09-29 11:49:39 matthew Exp $
 
 package mySociety::Alert::Error;
 
@@ -20,6 +20,7 @@ use strict;
 use Error qw(:try);
 use File::Slurp;
 use FindBin;
+use POSIX qw(strftime mktime);
 use XML::RSS;
 
 use Page;
@@ -197,7 +198,7 @@ sub _send_aggregated_alert_email(%) {
     my $result;
     if (mySociety::Config::get('STAGING_SITE')) {
         $result = 1; # SOFT_ERROR
-	print $email;
+        print $email;
     } else {
         $result = mySociety::EmailUtil::send_email($email, mySociety::Config::get('CONTACT_EMAIL'),
             $data{alert_email});
@@ -241,9 +242,14 @@ sub generate_rss ($$;$$) {
         'July','August','September','October','November','December');
     while (my $row = $q->fetchrow_hashref) {
         # XXX: How to do this properly? name might be null in comment table, hence needing this
+        my $pubDate;
         $row->{name} ||= 'anonymous';
         # And we want pretty dates... :-/
-        $row->{confirmed} =~ s/^\d\d\d\d-(\d\d)-(\d\d) .*/ordinal($2+0).' '.$months[$1]/e if $row->{confirmed};
+        if ($row->{confirmed}) {
+            $row->{confirmed} =~ /^(\d\d\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/;
+            $pubDate = strftime("%a, %d %b %Y %H:%M:%S %z", $6, $5, $4, $3, $2-1, $1-1900, -1, -1, -1);
+            $row->{confirmed} = ordinal($3+0) . ' ' . $months[$2];
+        }
 
         (my $title = $alert_type->{item_title}) =~ s/{{(.*?)}}/$row->{$1}/g;
         (my $link = $alert_type->{item_link}) =~ s/{{(.*?)}}/$row->{$1}/g;
@@ -254,6 +260,8 @@ sub generate_rss ($$;$$) {
             guid => $url . $link,
             description => ent(ent($desc)) # Yes, double-encoded, really.
         );
+        $item{pubDate} = $pubDate if $pubDate;
+
         # XXX: Not-very-generic extensions
         if ($row->{photo}) {
             $item{description} .= ent("\n<br><img src=\"$url/photo?id=$row->{id}\">");
