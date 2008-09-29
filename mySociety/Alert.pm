@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Alert.pm,v 1.42 2008-09-29 11:49:39 matthew Exp $
+# $Id: Alert.pm,v 1.43 2008-09-29 12:08:59 matthew Exp $
 
 package mySociety::Alert::Error;
 
@@ -20,7 +20,7 @@ use strict;
 use Error qw(:try);
 use File::Slurp;
 use FindBin;
-use POSIX qw(strftime mktime);
+use POSIX qw(strftime);
 use XML::RSS;
 
 use Page;
@@ -247,7 +247,7 @@ sub generate_rss ($$;$$) {
         # And we want pretty dates... :-/
         if ($row->{confirmed}) {
             $row->{confirmed} =~ /^(\d\d\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/;
-            $pubDate = strftime("%a, %d %b %Y %H:%M:%S %z", $6, $5, $4, $3, $2-1, $1-1900, -1, -1, -1);
+            $pubDate = strftime("%a, %d %b %Y %H:%M:%S %z", $6, $5, $4, $3, $2-1, $1-1900, -1, -1, 0);
             $row->{confirmed} = ordinal($3+0) . ' ' . $months[$2];
         }
 
