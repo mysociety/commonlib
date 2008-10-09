@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Alert.pm,v 1.43 2008-09-29 12:08:59 matthew Exp $
+# $Id: Alert.pm,v 1.44 2008-10-09 14:20:55 matthew Exp $
 
 package mySociety::Alert::Error;
 
@@ -192,7 +192,7 @@ sub _send_aggregated_alert_email(%) {
         _parameters_ => \%data,
         From => [mySociety::Config::get('CONTACT_EMAIL'), mySociety::Config::get('CONTACT_NAME')],
         To => $data{alert_email},
-        'Message-ID' => sprintf('<alert-%s-%s@mysociety.org>', time(), unpack('h*', random_bytes(5))),
+        'Message-ID' => sprintf('<alert-%s-%s@mysociety.org>', time(), unpack('h*', random_bytes(5, 1))),
     });
 
     my $result;

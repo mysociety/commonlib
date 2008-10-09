@@ -6,7 +6,7 @@
 # Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: AuthToken.pm,v 1.5 2008-01-11 18:20:33 matthew Exp $
+# $Id: AuthToken.pm,v 1.6 2008-10-09 14:20:55 matthew Exp $
 #
 
 package mySociety::AuthToken;
@@ -41,7 +41,7 @@ Return a new random token.
 
 =cut
 sub random_token () {
-    return ab64_encode(random_bytes(12));
+    return ab64_encode(random_bytes(12, 1));
 }
 
 =item store SCOPE DATA
@@ -98,7 +98,7 @@ sub destroy ($$) {
 # to check it.
 sub sign_with_shared_secret ($$) {
     my ($item, $secret) = @_;
-    my $salt = unpack("H*", random_bytes(8));
+    my $salt = unpack("H*", random_bytes(8, 1));
     my $sha = sha1_hex("$salt-$secret-$item");
     return "$sha-$salt";
 }
