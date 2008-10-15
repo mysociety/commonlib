@@ -7,7 +7,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: CGIFast.pm,v 1.1 2008-02-03 19:23:50 matthew Exp $
+# $Id: CGIFast.pm,v 1.2 2008-10-15 22:07:26 matthew Exp $
 #
 # Copyright 1995,1996, Lincoln D. Stein.  All rights reserved.
 # It may be used and modified freely, but I do request that this copyright
@@ -67,7 +67,10 @@ sub new {
          return undef unless FCGI::accept() >= 0;
      }
      }
-     CGI->_reset_globals;
+     # CGI::Fast 1.07 calls _reset_globals, this is a slight improvement
+     my $x = $CGI::XHTML;
+     CGI->initialize_globals;
+     $CGI::XHTML = $x;
      return $CGI::Q = $self->SUPER::new($initializer, @param);
 }
 

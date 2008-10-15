@@ -6,7 +6,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Web.pm,v 1.18 2008-09-19 10:24:56 matthew Exp $
+# $Id: Web.pm,v 1.19 2008-10-15 22:07:26 matthew Exp $
 #
 
 package mySociety::Web;
@@ -26,7 +26,7 @@ eval {
 use HTML::Entities;
 use HTTP::Date qw();
 
-use fields qw(q scratch);
+use fields qw(q scratch site);
 @mySociety::Web::ISA = qw(Exporter); # for the Import* methods
 
 BEGIN {
@@ -297,6 +297,7 @@ sub Cond304 ($$;$) {
         unless (defined($time) || defined($etag));
 
     print $self->q()->header(
+        -charset => 'utf-8',
                 -status => '304 Not Modified',
                 (defined($time) ? (-Last_Modified => HTTP::Date::time2str($time)) : ()),
                 (defined($etag) ? (-Etag => 'W/' . quote_etag($etag)) : ())
