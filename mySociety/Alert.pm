@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Alert.pm,v 1.44 2008-10-09 14:20:55 matthew Exp $
+# $Id: Alert.pm,v 1.45 2008-10-22 15:59:19 matthew Exp $
 
 package mySociety::Alert::Error;
 
@@ -153,6 +153,7 @@ sub email_alerts () {
     }
 
     # Nearby done separately as the table contains the parameters
+    my $template = dbh()->selectrow_array("select template from alert_type where ref = 'local_problems'");
     my $query = "select * from alert where alert_type='local_problems' and whendisabled is null and confirmed=1 order by id";
     $query = dbh()->prepare($query);
     $query->execute();
@@ -165,7 +166,7 @@ sub email_alerts () {
         my $d = mySociety::Gaze::get_radius_containing_population($lat, $lon, 200000);
         $d = int($d*10+0.5)/10;
 
-        my %data = ( template => 'alert-problem-nearby', data => '', alert_id => $alert->{id}, alert_email => $alert->{email} );
+        my %data = ( template => $template, data => '', alert_id => $alert->{id}, alert_email => $alert->{email} );
         my $q = "select * from problem_find_nearby(?, ?, ?) as nearby, problem
             where nearby.problem_id = problem.id and problem.state in ('confirmed', 'fixed')
             and problem.created >= ?
@@ -195,14 +196,8 @@ sub _send_aggregated_alert_email(%) {
         'Message-ID' => sprintf('<alert-%s-%s@mysociety.org>', time(), unpack('h*', random_bytes(5, 1))),
     });
 
-    my $result;
-    if (mySociety::Config::get('STAGING_SITE')) {
-        $result = 1; # SOFT_ERROR
-        print $email;
-    } else {
-        $result = mySociety::EmailUtil::send_email($email, mySociety::Config::get('CONTACT_EMAIL'),
+    my $result = mySociety::EmailUtil::send_email($email, mySociety::Config::get('CONTACT_EMAIL'),
             $data{alert_email});
-    }
     if ($result == mySociety::EmailUtil::EMAIL_SUCCESS) {
         dbh()->commit();
     } else {
