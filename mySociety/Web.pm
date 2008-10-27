@@ -6,7 +6,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Web.pm,v 1.19 2008-10-15 22:07:26 matthew Exp $
+# $Id: Web.pm,v 1.20 2008-10-27 15:31:43 matthew Exp $
 #
 
 package mySociety::Web;
@@ -217,8 +217,12 @@ override URL and whether to keep the current parameters respectively.
 =cut
 sub NewURL ($%) {
     my ($q, %p) = @_;
-    my $url = $p{-url} || $q->url(-relative=>1);
-    $url =~ s/\?$//;
+    # $q->url(-relative=>1) is buggy in CGI.pm v3.15 as packaged with etch.
+    # But $q->request_uri() doesn't exist until v3.11 and we have v3.04 on sarge.
+    my $url = $p{-url} || $ENV{REQUEST_URI};
+    $url =~ s/\?.*$//s; # Strip query string
+    ($url) = $url =~ m{([^/]+)$} unless $p{-url};
+    $url ||= '';
     my %params;
     %params = map { $_ => $q->param($_) || '' } $q->param()
         if $p{-retain};
