@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: countries.php,v 1.19 2007-11-08 22:12:42 matthew Exp $
+ * $Id: countries.php,v 1.20 2008-10-30 12:34:48 matthew Exp $
  * 
  */
 
@@ -312,6 +312,7 @@ $countries_statecode_to_name = array(
         'OK' => 'Oklahoma',
         'OR' => 'Oregon',
         'PA' => 'Pennsylvania',
+        'PR' => 'Puerto Rico',
         'RI' => 'Rhode Island',
         'SC' => 'South Carolina',
         'SD' => 'South Dakota',
