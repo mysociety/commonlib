@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.88 2008-09-15 13:34:29 matthew Exp $
+ * $Id: utility.php,v 1.89 2008-11-07 00:59:30 matthew Exp $
  * 
  */
 
@@ -348,8 +348,8 @@ function english_ordinal($cardinal)
 function prettify($s, $html = true) {
     global $locale_current;
 
-    if (preg_match('#^(\d{4})-(\d\d)-(\d\d)$#',$s,$m)) {
-        list(,$y,$m,$d) = $m;
+    if (preg_match('#^(\d{4})-(\d\d)-(\d\d)$#',$s,$mm)) {
+        list(,$y,$m,$d) = $mm;
         $e = mktime(12,0,0,$m,$d,$y);
         if ($locale_current == 'en-gb') {
             if ($html)
@@ -363,8 +363,8 @@ function prettify($s, $html = true) {
             return strftime('%Y&#24180;%m&#26376;%d&#26085;', $e);
         return strftime('%e %B %Y', $e);
     }
-    if (preg_match('#^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d:\d\d)$#',$s,$m)) {
-        list(,$y,$m,$d,$tim) = $m;
+    if (preg_match('#^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d:\d\d)$#',$s,$mm)) {
+        list(,$y,$m,$d,$tim) = $mm;
         $e = mktime(12,0,0,$m,$d,$y);
         if ($locale_current == 'en-gb') {
             if ($html)
