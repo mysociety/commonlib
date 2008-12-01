@@ -6,7 +6,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: person.php,v 1.27 2008-01-03 10:58:48 matthew Exp $
+ * $Id: person.php,v 1.28 2008-12-01 13:46:50 matthew Exp $
  * 
  */
 
@@ -177,7 +177,7 @@ function person_cookie_token($id, $duration = null) {
         err("ID should be a decimal integer, not '$id'");
     if (!preg_match('/^[1-9]\d*$/', $duration) || $duration <= 0)
         err("DURATION should be a positive decimal integer, not '$duration'");
-    $salt = bin2hex(random_bytes(8));
+    $salt = bin2hex(urandom_bytes(8));
     $start = time();
     $sha = sha1("$id/$start/$duration/$salt/" . db_secret());
     return sprintf('%d/%d/%d/%s/%s', $id, $start, $duration, $salt, $sha);

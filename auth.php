@@ -7,7 +7,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: auth.php,v 1.9 2008-01-11 18:05:38 matthew Exp $
+ * $Id: auth.php,v 1.10 2008-12-01 13:46:50 matthew Exp $
  * 
  */
 
@@ -27,7 +27,7 @@ function auth_ab64_encode($i) {
 /* auth_random_token
  * Returns a random token. */
 function auth_random_token() {
-    $token = auth_ab64_encode(random_bytes(12));
+    $token = auth_ab64_encode(urandom_bytes(12));
     return $token;
 }
 
@@ -82,7 +82,7 @@ function auth_token_destroy($scope, $token) {
  * SIGNATURE. Pass the ITEM and SIGNATURE into auth_verify_with_shared_secret
  * to check it. */
 function auth_sign_with_shared_secret($item, $secret) {
-    $salt = bin2hex(random_bytes(8));
+    $salt = bin2hex(urandom_bytes(8));
     $sha = sha1("$salt-$secret-$item");
     return "$sha-$salt";
 }
