@@ -6,7 +6,7 @@
 # Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Person.pm,v 1.5 2007-08-02 11:45:08 matthew Exp $
+# $Id: Person.pm,v 1.6 2008-12-03 13:23:43 matthew Exp $
 #
 
 package mySociety::Person::Error;
@@ -230,7 +230,7 @@ sub cookie_token ($;$) {
     croak "DURATION must be a positive decimal integer, not '$duration'"
         unless ($duration =~ /^[1-9]\d*$/);
 
-    my $salt = pack('h*', random_bytes(8));
+    my $salt = pack('h*', random_bytes(8, 1));
     my $start = time();
     my $sha = sha1_hex("$id/$start/$duration/$salt/" . secret());
     return sprintf('%d/%d/%d/%s/%s', $id, $start, $duration, $salt, $sha);

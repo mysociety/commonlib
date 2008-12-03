@@ -6,7 +6,7 @@
 # Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: RequestStash.pm,v 1.3 2007-08-02 11:45:08 matthew Exp $
+# $Id: RequestStash.pm,v 1.4 2008-12-03 13:23:43 matthew Exp $
 #
 
 package mySociety::RequestStash::Error;
@@ -53,7 +53,7 @@ sub stash ($;$$$) {
     # Specified explicitly.
     my ($method, $url, $params, $extra) = @_;
 
-    my $key = unpack('h*', random_bytes(8));
+    my $key = unpack('h*', random_bytes(8, 1));
     
     if ($method eq 'GET' || $method eq 'HEAD') {
         # Strip query from URL and recreate it.
