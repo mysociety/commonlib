@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Alert.pm,v 1.45 2008-10-22 15:59:19 matthew Exp $
+# $Id: Alert.pm,v 1.46 2008-12-08 10:54:16 matthew Exp $
 
 package mySociety::Alert::Error;
 
@@ -206,8 +206,8 @@ sub _send_aggregated_alert_email(%) {
     }
 }
 
-sub generate_rss ($$;$$) {
-    my ($type, $qs, $db_params, $title_params) = @_;
+sub generate_rss ($$$;$$) {
+    my ($type, $xsl, $qs, $db_params, $title_params) = @_;
     $db_params ||= [];
     my $url = mySociety::Config::get('BASE_URL');
     my $q = dbh()->prepare('select * from alert_type where ref=?');
@@ -217,7 +217,7 @@ sub generate_rss ($$;$$) {
 
     # Do our own encoding
     my $rss = new XML::RSS( version => '2.0', encoding => 'UTF-8',
-        stylesheet=>'/xsl.xsl', encode_output => undef );
+        stylesheet=>$xsl, encode_output => undef );
     $rss->add_module(prefix=>'georss', uri=>'http://www.georss.org/georss');
 
     my $query = 'select * from ' . $alert_type->{item_table} . ' where '
