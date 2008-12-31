@@ -4,7 +4,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: validate.rb,v 1.3 2008-05-27 09:14:10 francis Exp $
+# $Id: validate.rb,v 1.4 2008-12-31 12:34:56 francis Exp $
 
 module MySociety
     module Validate
