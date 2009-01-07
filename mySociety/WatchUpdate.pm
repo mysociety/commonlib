@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WatchUpdate.pm,v 1.5 2006-08-07 10:39:49 chris Exp $
+# $Id: WatchUpdate.pm,v 1.6 2009-01-07 20:30:51 matthew Exp $
 #
 
 package mySociety::WatchUpdate;
@@ -61,7 +61,7 @@ sub changed ($) {
     # Check at most once per second.
     return 0 if (exists($self->{lastcheck}) && $self->{lastcheck} >= time());
     foreach (($0, values %INC)) {
-        my $s = stat($_);
+        my $s = stat($_) or next;
         if (exists($self->{size}->{$_}) and exists($self->{time}->{$_})) {
             if ($s->size() != $self->{size}->{$_} or $s->mtime() != $self->{time}->{$_}) {
                 return 1;
