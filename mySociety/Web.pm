@@ -6,7 +6,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Web.pm,v 1.20 2008-10-27 15:31:43 matthew Exp $
+# $Id: Web.pm,v 1.21 2009-01-13 17:06:20 matthew Exp $
 #
 
 package mySociety::Web;
@@ -48,16 +48,17 @@ mySociety::CGIFast if available, or CGI otherwise.
 
 =cut
 sub new ($;$) {
-    my ($class, $q) = @_;
+    my mySociety::Web $self = shift;
+    my $q = shift;
     if (!defined($q)) {
         $q = $have_cgi_fast ? new mySociety::CGIFast() : new CGI();
         return undef if (!defined($q)); # reproduce mySociety::CGIFast behaviour
     }
     $q->autoEscape(1);
-    my $self = fields::new('mySociety::Web');
+    $self = fields::new($self) unless ref $self;
     $self->{q} = $q;
     $self->{scratch} = { };
-    return bless($self, $class);
+    return $self;
 }
 
 # q
