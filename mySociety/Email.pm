@@ -6,7 +6,7 @@
 # Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
 # Email: chris@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Email.pm,v 1.26 2008-07-29 22:34:25 matthew Exp $
+# $Id: Email.pm,v 1.27 2009-01-26 12:54:08 matthew Exp $
 #
 
 package mySociety::Email::Error;
@@ -130,9 +130,9 @@ sub format_mimewords ($;$) {
                 }
             }
         }seg;
-        local($Text::Wrap::columns = 75);
-        local($Text::Wrap::huge = 'overflow');
-        local($Text::Wrap::unexpand = 0);
+        local($Text::Wrap::columns) = 75;
+        local($Text::Wrap::huge) = 'overflow';
+        local($Text::Wrap::unexpand) = 0;
         $octets = Text::Wrap::wrap('', ' ', $octets);
         $octets =~ s/\?= =\?$charset\?$encoding\?//g;
         return $octets;
@@ -193,9 +193,9 @@ sub do_template_substitution ($$) {
     $body =~ s#(?<!\n)(?<!  )\n(?!\n)# #gs;
 
     # Wrap text to 72-column lines.
-    local($Text::Wrap::columns = 69);
-    local($Text::Wrap::huge = 'overflow');
-    local($Text::Wrap::unexpand = 0);
+    local($Text::Wrap::columns) = 69;
+    local($Text::Wrap::huge) = 'overflow';
+    local($Text::Wrap::unexpand) = 0;
     my $wrapped = Text::Wrap::wrap('     ', '     ', $body);
     $wrapped =~ s/^\s+$//mg; # Do it again because of wordwrapping indented lines
 
@@ -276,9 +276,9 @@ sub construct_email ($) {
         $t =~ s/\r\n/\n/gs;
         my $sig;
         $sig = $1 if $t =~ s/(\n-- \n.*)//ms;
-        local($Text::Wrap::columns = 69);
-        local($Text::Wrap::huge = 'overflow');
-        local($Text::Wrap::unexpand = 0);
+        local($Text::Wrap::columns) = 69;
+        local($Text::Wrap::huge) = 'overflow';
+        local($Text::Wrap::unexpand) = 0;
         $p->{_body_} = Text::Wrap::wrap('     ', '     ', $t);
         $p->{_body_} =~ s/^\s+$//mg;
         if ($sig) {
