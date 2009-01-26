@@ -6,7 +6,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: ArrayUtils.pm,v 1.2 2005-07-14 17:51:05 francis Exp $
+# $Id: ArrayUtils.pm,v 1.3 2009-01-26 14:21:51 matthew Exp $
 #
 
 package mySociety::ArrayUtils;

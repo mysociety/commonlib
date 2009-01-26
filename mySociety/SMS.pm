@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email:angie@mysociety.org; WWW: http://www.mysociety.org/
 #
-my $rcsid = ''; $rcsid .= '$Id: SMS.pm,v 1.2 2007-11-27 15:34:44 angie Exp $';
+my $rcsid = ''; $rcsid .= '$Id: SMS.pm,v 1.3 2009-01-26 14:21:52 matthew Exp $';
 
 package mySociety::SMS;
 

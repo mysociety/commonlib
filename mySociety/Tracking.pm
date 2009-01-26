@@ -4,9 +4,9 @@
 # Perl interface to the tracking service.
 #
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
-# Email: chris@mysociety.org; WWW: http://www.mysociety.org/
+# Email: team@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Tracking.pm,v 1.4 2006-08-15 13:06:23 chris Exp $
+# $Id: Tracking.pm,v 1.5 2009-01-26 14:21:52 matthew Exp $
 #
 
 package mySociety::Tracking;

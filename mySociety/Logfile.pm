@@ -4,9 +4,9 @@
 # Logfile reading/searching stuff.
 #
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
-# Email: chris@mysociety.org; WWW: http://www.mysociety.org/
+# Email: team@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Logfile.pm,v 1.9 2006-10-03 14:47:46 francis Exp $
+# $Id: Logfile.pm,v 1.10 2009-01-26 14:21:52 matthew Exp $
 #
 
 package mySociety::Logfile::Error;

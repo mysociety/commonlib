@@ -5,9 +5,9 @@
 # (a generalisation of Adobe's ASCII85) which is much faster.
 #
 # Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
-# Email: chris@mysociety.org; WWW: http://www.mysociety.org/
+# Email: team@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: BaseN.pm,v 1.2 2006-11-20 15:12:23 matthew Exp $
+# $Id: BaseN.pm,v 1.3 2009-01-26 14:21:51 matthew Exp $
 #
 
 package mySociety::BaseN;

@@ -4,9 +4,9 @@
 # Object for watching for changes to a script.
 #
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
-# Email: chris@mysociety.org; WWW: http://www.mysociety.org/
+# Email: team@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WatchUpdate.pm,v 1.7 2009-01-13 17:06:19 matthew Exp $
+# $Id: WatchUpdate.pm,v 1.8 2009-01-26 14:21:52 matthew Exp $
 #
 
 package mySociety::WatchUpdate;

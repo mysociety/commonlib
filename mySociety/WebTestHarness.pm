@@ -12,7 +12,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.63 2008-01-16 19:30:16 matthew Exp $
+# $Id: WebTestHarness.pm,v 1.64 2009-01-26 14:21:52 matthew Exp $
 #
 
 # Overload of WWW::Mechanize

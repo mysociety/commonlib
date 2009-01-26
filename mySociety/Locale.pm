@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Locale.pm,v 1.5 2008-10-27 17:46:54 matthew Exp $
+# $Id: Locale.pm,v 1.6 2009-01-26 14:21:52 matthew Exp $
 
 package mySociety::Locale;
 

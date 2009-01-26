@@ -6,7 +6,7 @@
 # Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: GeoUtil.pm,v 1.5 2007-06-17 08:22:06 matthew Exp $
+# $Id: GeoUtil.pm,v 1.6 2009-01-26 14:21:52 matthew Exp $
 #
 
 package mySociety::GeoUtil;

@@ -13,7 +13,7 @@
 # 
 # notwithstanding any licence stated for any other mySociety code.
 #
-# $Id: SymbolicMode.pm,v 1.1 2005-11-18 12:08:06 chris Exp $
+# $Id: SymbolicMode.pm,v 1.2 2009-01-26 14:21:50 matthew Exp $
 #
 
 package File::SymbolicMode;

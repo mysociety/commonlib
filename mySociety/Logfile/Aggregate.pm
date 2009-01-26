@@ -4,9 +4,9 @@
 # Represent a set of logfiles.
 #
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
-# Email: chris@mysociety.org; WWW: http://www.mysociety.org/
+# Email: team@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Aggregate.pm,v 1.2 2005-01-28 19:45:23 chris Exp $
+# $Id: Aggregate.pm,v 1.3 2009-01-26 14:21:55 matthew Exp $
 #
 
 package mySociety::Logfile::Aggregate;

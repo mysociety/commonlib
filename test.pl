@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: test.pl,v 1.1 2004-11-10 09:50:39 francis Exp $
+# $Id: test.pl,v 1.2 2009-01-26 14:21:50 matthew Exp $
 
 use mySociety::Config;
 

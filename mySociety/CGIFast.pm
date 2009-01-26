@@ -7,7 +7,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: CGIFast.pm,v 1.2 2008-10-15 22:07:26 matthew Exp $
+# $Id: CGIFast.pm,v 1.3 2009-01-26 14:21:51 matthew Exp $
 #
 # Copyright 1995,1996, Lincoln D. Stein.  All rights reserved.
 # It may be used and modified freely, but I do request that this copyright

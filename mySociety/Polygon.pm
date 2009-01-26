@@ -6,7 +6,7 @@
 # Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Polygon.pm,v 1.1 2006-09-28 10:06:41 francis Exp $
+# $Id: Polygon.pm,v 1.2 2009-01-26 14:21:52 matthew Exp $
 #
 
 use strict;

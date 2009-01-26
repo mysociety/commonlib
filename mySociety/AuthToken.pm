@@ -4,9 +4,9 @@
 # General utilities for tokens mapped to hashes.
 #
 # Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
-# Email: chris@mysociety.org; WWW: http://www.mysociety.org/
+# Email: team@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: AuthToken.pm,v 1.6 2008-10-09 14:20:55 matthew Exp $
+# $Id: AuthToken.pm,v 1.7 2009-01-26 14:21:51 matthew Exp $
 #
 
 package mySociety::AuthToken;

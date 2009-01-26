@@ -6,7 +6,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 
-my $rcsid = ''; $rcsid .= '$Id: HandleMail.pm,v 1.3 2008-04-16 09:35:45 matthew Exp $';
+my $rcsid = ''; $rcsid .= '$Id: HandleMail.pm,v 1.4 2009-01-26 14:21:52 matthew Exp $';
 
 package mySociety::HandleMail;
 

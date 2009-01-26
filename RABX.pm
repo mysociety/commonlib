@@ -4,9 +4,9 @@
 # RPC using Anything But XML.
 #
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
-# Email: chris@mysociety.org; WWW: http://www.mysociety.org/
+# Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: RABX.pm,v 1.23 2007-08-14 12:09:32 matthew Exp $
+# $Id: RABX.pm,v 1.24 2009-01-26 14:21:50 matthew Exp $
 
 # References:
 #   Netstrings are documented here: http://cr.yp.to/proto/netstrings.txt
@@ -422,7 +422,7 @@ use HTTP::Response;
 use Data::Dumper;
 use Regexp::Common qw(URI);
 
-my $rcsid = ''; $rcsid .= '$Id: RABX.pm,v 1.23 2007-08-14 12:09:32 matthew Exp $';
+my $rcsid = ''; $rcsid .= '$Id: RABX.pm,v 1.24 2009-01-26 14:21:50 matthew Exp $';
 
 =back
 
@@ -542,7 +542,7 @@ sub call ($$@) {
     my $resp = $self->ua()->request($req);
 
     if (!$resp->is_success()) {
-        throw RABX::Error("HTTP error: " . $resp->status_line(), RABX::Error::TRANSPORT);
+        throw RABX::Error("HTTP error for <" . $self->url() . ">: " . $resp->status_line(), RABX::Error::TRANSPORT);
     } else {
         my $parsed = RABX::return_string_parse($resp->content());
         return $parsed;

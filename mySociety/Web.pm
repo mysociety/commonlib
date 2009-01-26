@@ -4,9 +4,9 @@
 # CGI-like class which we can extend.
 #
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
-# Email: chris@mysociety.org; WWW: http://www.mysociety.org/
+# Email: team@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Web.pm,v 1.21 2009-01-13 17:06:20 matthew Exp $
+# $Id: Web.pm,v 1.22 2009-01-26 14:21:52 matthew Exp $
 #
 
 package mySociety::Web;

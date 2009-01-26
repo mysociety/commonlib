@@ -4,9 +4,9 @@
 # Voting area definitions.
 #
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
-# Email: chris@mysociety.org; WWW: http://www.mysociety.org/
+# Email: team@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: VotingArea.pm,v 1.31 2007-09-12 17:38:10 matthew Exp $
+# $Id: VotingArea.pm,v 1.32 2009-01-26 14:21:52 matthew Exp $
 #
 
 package mySociety::VotingArea;

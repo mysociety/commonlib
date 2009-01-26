@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Alert.pm,v 1.46 2008-12-08 10:54:16 matthew Exp $
+# $Id: Alert.pm,v 1.47 2009-01-26 14:21:51 matthew Exp $
 
 package mySociety::Alert::Error;
 
@@ -188,16 +188,17 @@ sub _send_aggregated_alert_email(%) {
     $data{unsubscribe_url} = mySociety::Config::get('BASE_URL') . '/A/'
         . mySociety::AuthToken::store('alert', { id => $data{alert_id}, type => 'unsubscribe', email => $data{alert_email} } );
     my $template = File::Slurp::read_file("$FindBin::Bin/../templates/emails/$data{template}");
+    my $sender = mySociety::Config::get('CONTACT_EMAIL');
+    $sender =~ s/team/fms-DO-NOT-REPLY/; # XXX
     my $email = mySociety::Email::construct_email({
         _template_ => $template,
         _parameters_ => \%data,
-        From => [mySociety::Config::get('CONTACT_EMAIL'), mySociety::Config::get('CONTACT_NAME')],
+        From => [ $sender, mySociety::Config::get('CONTACT_NAME') ],
         To => $data{alert_email},
         'Message-ID' => sprintf('<alert-%s-%s@mysociety.org>', time(), unpack('h*', random_bytes(5, 1))),
     });
 
-    my $result = mySociety::EmailUtil::send_email($email, mySociety::Config::get('CONTACT_EMAIL'),
-            $data{alert_email});
+    my $result = mySociety::EmailUtil::send_email($email, $sender, $data{alert_email});
     if ($result == mySociety::EmailUtil::EMAIL_SUCCESS) {
         dbh()->commit();
     } else {

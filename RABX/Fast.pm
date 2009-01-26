@@ -4,12 +4,12 @@
 # Fast (C) serialisation code.
 #
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
-# Email: chris@mysociety.org; WWW: http://www.mysociety.org/
+# Email: team@mysociety.org; WWW: http://www.mysociety.org/
 #
 
 package RABX::Fast;
 
-my $rcsid = ''; $rcsid .= '$Id: Fast.pm,v 1.5 2005-02-23 13:10:40 chris Exp $';
+my $rcsid = ''; $rcsid .= '$Id: Fast.pm,v 1.6 2009-01-26 14:21:51 matthew Exp $';
 
 use strict;
 

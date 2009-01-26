@@ -4,9 +4,9 @@
 # Web login stuff.
 #
 # Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
-# Email: chris@mysociety.org; WWW: http://www.mysociety.org/
+# Email: team@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Person.pm,v 1.6 2008-12-03 13:23:43 matthew Exp $
+# $Id: Person.pm,v 1.7 2009-01-26 14:21:52 matthew Exp $
 #
 
 package mySociety::Person::Error;

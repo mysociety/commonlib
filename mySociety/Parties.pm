@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Parties.pm,v 1.18 2008-09-10 08:27:09 dademcron Exp $
+# $Id: Parties.pm,v 1.19 2009-01-26 14:21:52 matthew Exp $
 #
 
 package mySociety::Parties;

@@ -4,9 +4,9 @@
 # Perl interface to rate-limiting.
 #
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
-# Email: chris@mysociety.org; WWW: http://www.mysociety.org/
+# Email: team@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Ratty.pm,v 1.5 2007-01-26 10:20:20 louise Exp $
+# $Id: Ratty.pm,v 1.6 2009-01-26 14:21:52 matthew Exp $
 #
 
 package mySociety::Ratty;

@@ -4,9 +4,9 @@
 # Arbitrary bitstreams.
 #
 # Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
-# Email: chris@mysociety.org; WWW: http://www.mysociety.org/
+# Email: team@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Bitstream.pm,v 1.1 2006-11-17 17:44:05 chris Exp $
+# $Id: Bitstream.pm,v 1.2 2009-01-26 14:21:51 matthew Exp $
 #
 
 package mySociety::Bitstream;

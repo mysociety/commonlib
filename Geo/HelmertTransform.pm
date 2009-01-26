@@ -11,14 +11,14 @@
 # software; you can redistribute it and/or modify it under the same terms as
 # Perl itself.
 # 
-# Email: chris@mysociety.org; WWW: http://www.mysociety.org/
+# Email: team@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: HelmertTransform.pm,v 1.11 2006-11-06 09:05:03 chris Exp $
+# $Id: HelmertTransform.pm,v 1.12 2009-01-26 14:21:51 matthew Exp $
 #
 
 package Geo::HelmertTransform;
 
-($Geo::HelmertTransform::VERSION) = ('$Id: HelmertTransform.pm,v 1.11 2006-11-06 09:05:03 chris Exp $' =~ /^\$Id: [^\s]+,v (\d+\.\d+) /);
+($Geo::HelmertTransform::VERSION) = ('$Id: HelmertTransform.pm,v 1.12 2009-01-26 14:21:51 matthew Exp $' =~ /^\$Id: [^\s]+,v (\d+\.\d+) /);
 
 use strict;
 
@@ -289,7 +289,7 @@ http://www.osni.gov.uk/downloads/Making%20maps%20GPS%20compatible.pdf
 
 =head1 AUTHOR AND COPYRIGHT
 
-Written by Chris Lightfoot, chris@mysociety.org
+Written by Chris Lightfoot, team@mysociety.org
 
 Copyright (c) UK Citizens Online Democracy.
 
@@ -298,7 +298,7 @@ the same terms as Perl itself.
 
 =head1 VERSION
 
-$Id: HelmertTransform.pm,v 1.11 2006-11-06 09:05:03 chris Exp $
+$Id: HelmertTransform.pm,v 1.12 2009-01-26 14:21:51 matthew Exp $
 
 =cut
 
