@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: team@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Config.pm,v 1.19 2009-01-26 14:21:51 matthew Exp $
+# $Id: Config.pm,v 1.20 2009-01-26 14:42:37 matthew Exp $
 #
 
 package mySociety::Config;
@@ -52,7 +52,7 @@ sub find_php () {
             return "$dir/$name" if (-x "$dir/$name");
         }
     }
-    die "unable to locate PHP binary, needed to read config file";
+    throw Error::Simple "unable to locate PHP binary, needed to read config file";
 }
 
 =item read_config FILE [DEFAULTS]
@@ -68,7 +68,7 @@ sub read_config ($;$) {
     my ($f, $defaults) = @_;
 
     if (! -r $f) {
-        die "$f: read permissions not OK for config file";
+        throw Error::Simple "$f: read permissions not OK for config file";
     }
 
     my $old_SIGCHLD = $SIG{CHLD};
@@ -89,7 +89,7 @@ sub read_config ($;$) {
     my $p2 = new IO::Pipe($inr, $inw);
 
     my $pid = fork();
-    die "fork: $!" unless (defined($pid));
+    throw Error::Simple "fork: $!" unless (defined($pid));
     if ($pid == 0) {
         # Delete everything from the environment other than our special
         # variable to give PHP the config file name. We don't want PHP to pick
@@ -107,7 +107,7 @@ sub read_config ($;$) {
         $inr->close();
         $outw->close();
 
-        exec($php_path) or die "$php_path: exec: $!";
+        exec($php_path) or throw Error::Simple "$php_path: exec: $!";
     }
 
     $inr->close();
@@ -138,9 +138,9 @@ EOF
 
     if (!defined($line)) {
         if ($outr->error()) {
-            die "$php_path: $f: $!";
+            throw Error::Simple "$php_path: $f: $!";
         } else {
-            die "$php_path: $f: no option output from subprocess";
+            throw Error::Simple "$php_path: $f: no option output from subprocess";
         }
     }
 
@@ -151,7 +151,7 @@ EOF
     pop(@vals); # The buffer ends "\0" so there's always a trailing empty value
                 # at the end of the buffer. I love perl! Perl is my friend!
 
-    die "$php_path: $f: bad option output from subprocess" if (scalar(@vals) % 2);
+    throw Error::Simple "$php_path: $f: bad option output from subprocess" if (scalar(@vals) % 2);
 
     my %config = @vals;
 
@@ -163,9 +163,9 @@ EOF
 
     if ($?) {
         if ($? & 127) {
-            die "$php_path: killed by signal " . ($? & 127);
+            throw Error::Simple "$php_path: killed by signal " . ($? & 127);
         } else {
-            die "$php_path: exited with failure status " . ($? >> 8);
+            throw Error::Simple "$php_path: exited with failure status " . ($? >> 8);
         }
     }
 
@@ -199,7 +199,7 @@ function is implicitly called by get and get_all.
 my %cached_configs;
 sub load_default() {
     my $filename = $main_config_filename;
-    die "Please call mySociety::Config::set_file to specify config file" if (!defined($filename));
+    throw Error::Simple "Please call mySociety::Config::set_file to specify config file" if (!defined($filename));
 
     if (!defined($cached_configs{$filename})) {
         $cached_configs{$filename} = read_config($filename);
@@ -224,7 +224,7 @@ sub get ($;$) {
     } elsif (@_ == 2) {
         return $default;
     } else {
-        die "No value for '$key' in '" . $config->{'CONFIG_FILE_NAME'} .  "', and no default specified";
+        throw Error::Simple "No value for '$key' in '" . $config->{'CONFIG_FILE_NAME'} .  "', and no default specified";
     }
 }
 

@@ -6,7 +6,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: team@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Web.pm,v 1.22 2009-01-26 14:21:52 matthew Exp $
+# $Id: Web.pm,v 1.23 2009-01-26 14:42:37 matthew Exp $
 #
 
 package mySociety::Web;
@@ -220,7 +220,7 @@ sub NewURL ($%) {
     my ($q, %p) = @_;
     # $q->url(-relative=>1) is buggy in CGI.pm v3.15 as packaged with etch.
     # But $q->request_uri() doesn't exist until v3.11 and we have v3.04 on sarge.
-    my $url = $p{-url} || $ENV{REQUEST_URI};
+    my $url = $p{-url} || $ENV{REQUEST_URI} || '';
     $url =~ s/\?.*$//s; # Strip query string
     ($url) = $url =~ m{([^/]+)$} unless $p{-url};
     $url ||= '';

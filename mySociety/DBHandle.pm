@@ -9,7 +9,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: team@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: DBHandle.pm,v 1.20 2009-01-26 14:21:51 matthew Exp $
+# $Id: DBHandle.pm,v 1.21 2009-01-26 14:42:37 matthew Exp $
 #
 
 package mySociety::DBHandle::Error;
@@ -188,6 +188,7 @@ END {
 
 sub select_all {
     my ($query, @bind_values) = @_;
+    our $dbh;
     local $dbh->{HandleError} =
         sub ($$$) {
             my ($err) = @_;
