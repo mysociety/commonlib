@@ -9,7 +9,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: team@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: DBHandle.pm,v 1.22 2009-01-26 15:06:14 matthew Exp $
+# $Id: DBHandle.pm,v 1.23 2009-01-26 18:12:22 matthew Exp $
 #
 
 package mySociety::DBHandle::Error;
@@ -188,17 +188,16 @@ END {
 
 sub select_all {
     my ($query, @bind_values) = @_;
-    # Commenting out for now
-    #our $dbh;
-    #local $dbh->{HandleError} =
-    #    sub ($$$) {
-    #        my ($err) = @_;
-    #        # Let's not make any unwise assumptions about reentrancy here.
-    #        local $dbh->{HandleError} = sub ($$$) { };
-    #        $dbh->rollback();
-    #        throw mySociety::DBHandle::Error($err . ": '" . $query . "' - args '" . join("','", @bind_values) . "'");
-    #    };
-    dbh()->selectall_arrayref($query, { Slice => {} }, @bind_values);
+    my $dbh = dbh();
+    local $dbh->{HandleError} =
+        sub ($$$) {
+            my ($err) = @_;
+            # Let's not make any unwise assumptions about reentrancy here.
+            local $dbh->{HandleError} = sub ($$$) { };
+            $dbh->rollback();
+            throw mySociety::DBHandle::Error($err . ": '" . $query . "' - args '" . join("','", @bind_values) . "'");
+        };
+    $dbh->selectall_arrayref($query, { Slice => {} }, @bind_values);
 }
 
 1;
