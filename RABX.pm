@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: RABX.pm,v 1.24 2009-01-26 14:21:50 matthew Exp $
+# $Id: RABX.pm,v 1.25 2009-02-02 10:36:36 matthew Exp $
 
 # References:
 #   Netstrings are documented here: http://cr.yp.to/proto/netstrings.txt
@@ -422,7 +422,7 @@ use HTTP::Response;
 use Data::Dumper;
 use Regexp::Common qw(URI);
 
-my $rcsid = ''; $rcsid .= '$Id: RABX.pm,v 1.24 2009-01-26 14:21:50 matthew Exp $';
+my $rcsid = ''; $rcsid .= '$Id: RABX.pm,v 1.25 2009-02-02 10:36:36 matthew Exp $';
 
 =back
 
@@ -632,7 +632,7 @@ sub dispatch (%) { # XXX should take stream + environment hash
           "Content-Length: ",  length($retstr), "\n";
     print "Cache-Control: max-age=$maxage\n" if ($maxage);
     print "\n",
-          $retstr;
+          "$retstr\n";
 }
 
 1;
