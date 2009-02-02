@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Locale.pm,v 1.6 2009-01-26 14:21:52 matthew Exp $
+# $Id: Locale.pm,v 1.7 2009-02-02 11:01:12 matthew Exp $
 
 package mySociety::Locale;
 
@@ -21,6 +21,10 @@ my $gettext;
 # as Perl treats the _ function as magic
 sub _ {
     return $gettext->get($_[0]);
+}
+
+sub nget {
+    return $gettext->nget(@_);
 }
 
 our %langmap = ();
