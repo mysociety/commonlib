@@ -5,10 +5,11 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: atcocif.py,v 1.9 2008-08-14 19:12:55 francis Exp $
+# $Id: atcocif.py,v 1.10 2009-02-04 17:41:40 francis Exp $
 #
 
 # TODO:
+# Move adjacent_location_times etc. to another file
 # Look at the transaction types, are they always nice?
 # Allow for the interchange time at the end :) - currently we'll always arrive early by that time
 # timetz - what about time zones!  http://docs.python.org/lib/datetime-datetime.html
@@ -36,10 +37,26 @@
 
 
 """
-Load files in the ATCO-CIF file format, which is used in the UK to specify
+Loads files in the ATCO-CIF file format, which is used in the UK to specify
 public transport journeys for accessibility planning by the National Public
 Transport Data Repository (NPTDR).
+
 Specification is here: http://www.pti.org.uk/CIF/atco-cif-spec.pdf 
+
+atcocif.py does a lightweight, low level parse of the file. It aims to be
+tolerant of deviations from the specification only where those have been found
+in the wild.
+
+There are some low level helper functions, which interpret the ATCO-CIF file.
+For example, is_valid_on_date tests whether a particular journey applies on a
+given specific day (allowing for weekends, bank holidays, school holidays etc.)
+
+The simplest ATCO-CIF file is just a header, with no further records.
+>>> atco = ATCO()
+>>> atco.read_string('ATCO-CIF0510      Buckinghamshire - BUS               ATCOPT20080125165808')
+>>> atco.file_header.file_originator
+'Buckinghamshire - BUS'
+
 """
 
 import os
@@ -48,6 +65,7 @@ import re
 import datetime
 import mx.DateTime
 import logging
+import StringIO
 
 ###########################################################
 # Main class
@@ -69,7 +87,7 @@ class ATCO:
         for location in self.locations:
             ret = ret + str(location) + "\n"
         return ret
-    
+
     # Load in an ATCO-CIF file, parsing ever record
     def read(self, f):
         """read(FILE) ->
@@ -77,7 +95,16 @@ class ATCO:
            FILE is the name of the ATCO-CIF file to load in.
         """
 
-        self.handle = open(f)
+        return self.read_file_handle(open(f))
+
+    # Load from a string
+    def read_string(self, s):
+        h = StringIO.StringIO(s)
+        return self.read_file_handle(h)
+
+    # Load from a file handle
+    def read_file_handle(self, h):
+        self.handle = h
 
         line = self.handle.readline().strip("\n\r")
         self.file_header = FileHeader(line)
@@ -231,10 +258,33 @@ class ATCO:
 
 ###########################################################
 # Helper functions
+
 def parse_time(time_string):
+    '''Converts a time string from an ATCO-CIF field into a Python time object.
+
+    >>> parse_time('0549')
+    datetime.time(5, 49)
+    >>> parse_time('9999')
+    Traceback (most recent call last):
+        ...
+    ValueError: hour must be in 0..23
+    '''
+    assert len(time_string) == 4
     return datetime.time(int(time_string[0:2]), int(time_string[2:4]), 0)
 
 def parse_date(date_string):
+    '''Converts a date string from an ATCO-CIF field into a Python date object.
+
+    >>> parse_date('20080204')
+    datetime.date(2008, 2, 4)
+    >>> parse_date('99999999') # appears in some bus timetables e.g. ATCO_040_BUS.CIF in 2007 sample data
+    datetime.date(9999, 12, 31)
+    >>> parse_date('20083001')
+    Traceback (most recent call last):
+        ...
+    ValueError: month must be in 1..12
+    '''
+    assert len(date_string) == 8
     if date_string == '99999999':
         date_string = '99991231'
     return datetime.date(
@@ -242,23 +292,44 @@ def parse_date(date_string):
     )
 
 def parse_date_time(date_string, time_string):
+    '''Converts a date and time string from an ATCO-CIF field into a Python
+    combined date/time object. Unlike timetable times above, these full time
+    stamps also contain seconds.
+
+    >>> parse_date_time('20090204','155901')
+    datetime.datetime(2009, 2, 4, 15, 59, 1)
+    '''
+    assert len(date_string) == 8
+    assert len(time_string) == 6
     return datetime.datetime(
         int(date_string[0:4]), int(date_string[4:6]), int(date_string[6:8]),
-        int(time_string[0:2]), int(time_string[2:4]), 0
+        int(time_string[0:2]), int(time_string[2:4]), int(time_string[4:6]), 0
     )
-
-#return mx.DateTime.DateTimeFrom(date_string + " " + time_string)
 
 ###########################################################
 # Individual record classes
 
-# Base class of individual records from the ATCO-CIF file. Stores the line of
-# text the the derived classes parser into members of the class.
 class CIFRecord:
+    """Base class of individual records from the ATCO-CIF file. Stores the line of
+    text the the derived classes parser into members of the class. 
+
+    Each line has a two character identifier at its start, which is checked against
+    the expected identifier passed in.
+
+    >>> c = CIFRecord("QT9100BORNEND 0620   T1", "QT")
+    >>> c = CIFRecord("QT9100BORNEND 0620   T1", "QX")
+    Traceback (most recent call last):
+        ...
+    Exception: CIF identifier 'QT' when expected 'QX'
+    """
+
     def __init__(self, line, record_identity):
+        assert len(record_identity) == 2
         self.line = line
+        assert len(line) >= 2
         self.record_identity = line[0:2]
-        assert self.record_identity == record_identity
+        if self.record_identity != record_identity:
+            raise Exception, "CIF identifier '" + self.record_identity + "' when expected '" + record_identity + "'"
 
     def __str__(self):
         ret = self.__class__.__name__ + "\n"
@@ -273,6 +344,28 @@ class CIFRecord:
 
 # Main header of whole file
 class FileHeader(CIFRecord):
+    """ATC-CIF files begin with a special header that cannot be nonsense.
+
+    >>> atco = ATCO()
+    >>> atco.read_string(u'ATnonsense')
+    Traceback (most recent call last):
+        ...
+    Exception: ATCO-CIF header line incorrectly formatted: ATnonsense
+
+    Here is an example of a valid header. The space padded strings within the header
+    are trimmed, and the production date/time is parsed out as a Python object.
+
+    >>> atco.read_string(u'ATCO-CIF0510                       70 - RAIL        ATCORAIL20080124115909')
+    >>> atco.file_header.version_major, atco.file_header.version_minor
+    (5, 10)
+    >>> atco.file_header.file_originator
+    u'70 - RAIL'
+    >>> atco.file_header.source_product
+    u'ATCORAIL'
+    >>> atco.file_header.production_datetime
+    datetime.datetime(2008, 1, 24, 11, 59, 9)
+    """
+
     def __init__(self, line):
         CIFRecord.__init__(self, line, "AT")
 
@@ -285,8 +378,38 @@ class FileHeader(CIFRecord):
         self.source_product = matches.group(4).strip()
         self.production_datetime = parse_date_time(matches.group(5), matches.group(6))
 
-# Header of a journey record, stores all associated records too (in self.hops)
 class JourneyHeader(CIFRecord):
+    '''Header of a journey record, stores all associated records too (in self.hops)
+
+    >>> jh = JourneyHeader('QSNGW    6B3920070521200712071111100  2B82P10553TRAIN           I')
+    >>> jh.transaction_type # New/Delete/Revise
+    'N'
+    >>> jh.operator
+    'GW'
+    >>> jh.unique_journey_identifier
+    '6B39'
+    >>> jh.first_date_of_operation
+    datetime.date(2007, 5, 21)
+    >>> jh.last_date_of_operation
+    datetime.date(2007, 12, 7)
+    >>> jh.operates_on_day_of_week
+    [False, True, True, True, True, True, False, False]
+    >>> jh.school_term_time
+    ' '
+    >>> jh.bank_holidays
+    ' '
+    >>> jh.route_number
+    '2B82'
+    >>> jh.running_board
+    'P10553'
+    >>> jh.vehicle_type
+    'TRAIN'
+    >>> jh.registration_number
+    ''
+    >>> jh.route_direction
+    'I'
+    '''
+
     def __init__(self, line):
         CIFRecord.__init__(self, line, "QS")
 
@@ -303,6 +426,7 @@ class JourneyHeader(CIFRecord):
         day_of_week_group = matches.group(6)
         for day_of_week in range(1, 8):
             self.operates_on_day_of_week[day_of_week] = bool(int(day_of_week_group[day_of_week - 1]))
+        self.operates_on_day_of_week[0] = bool(int(day_of_week_group[6])) # fill in Sunday at both ends for convenience
         self.school_term_time = matches.group(7)
         self.bank_holidays = matches.group(8)
         self.route_number = matches.group(9)
