@@ -5,7 +5,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: atcocif.py,v 1.10 2009-02-04 17:41:40 francis Exp $
+# $Id: atcocif.py,v 1.11 2009-02-06 15:54:22 francis Exp $
 #
 
 # TODO:
@@ -47,9 +47,9 @@ atcocif.py does a lightweight, low level parse of the file. It aims to be
 tolerant of deviations from the specification only where those have been found
 in the wild.
 
-There are some low level helper functions, which interpret the ATCO-CIF file.
-For example, is_valid_on_date tests whether a particular journey applies on a
-given specific day (allowing for weekends, bank holidays, school holidays etc.)
+There are some helper functions, which interpret the ATCO-CIF file. For
+example, is_valid_on_date tests whether a particular journey applies on a given
+specific day (allowing for weekends, bank holidays, school holidays etc.)
 
 The simplest ATCO-CIF file is just a header, with no further records.
 >>> atco = ATCO()
@@ -88,17 +88,26 @@ class ATCO:
             ret = ret + str(location) + "\n"
         return ret
 
-    # Load in an ATCO-CIF file, parsing ever record
     def read(self, f):
-        """read(FILE) ->
-           
-           FILE is the name of the ATCO-CIF file to load in.
-        """
+        '''Loads at ATCO-CIF file from a file.
+
+        >>> import tempfile
+        >>> n = tempfile.NamedTemporaryFile()
+        >>> n.write('ATCO-CIF0510      Buckinghamshire - COACH             ATCOPT20080126111426')
+        >>> n.flush()
+        >>> atco = ATCO()
+        >>> atco.read(n.name)
+        >>> n.close()
+        '''
 
         return self.read_file_handle(open(f))
 
-    # Load from a string
     def read_string(self, s):
+        '''Loads at ATCO-CIF file from a string.
+
+        >>> atco = ATCO()
+        >>> atco.read_string('ATCO-CIF0510      Buckinghamshire - COACH             ATCOPT20080126111426')
+        '''
         h = StringIO.StringIO(s)
         return self.read_file_handle(h)
 
@@ -123,7 +132,7 @@ class ATCO:
                 self.journeys.append(current_item)
             elif record_identity == 'QE':
                 assert isinstance(current_item, JourneyHeader)
-                current_item.add_exception(JourneyException(line))
+                current_item.add_date_running_exception(JourneyDateRunning(line))
             elif record_identity == 'QO':
                 assert isinstance(current_item, JourneyHeader)
                 current_item.add_hop(JourneyOrigin(line))
@@ -379,8 +388,9 @@ class FileHeader(CIFRecord):
         self.production_datetime = parse_date_time(matches.group(5), matches.group(6))
 
 class JourneyHeader(CIFRecord):
-    '''Header of a journey record, stores all associated records too (in self.hops)
-
+    '''Header of a journey record. It stores all associated records too, and so 
+    represents the whole journey. 
+    
     >>> jh = JourneyHeader('QSNGW    6B3920070521200712071111100  2B82P10553TRAIN           I')
     >>> jh.transaction_type # New/Delete/Revise
     'N'
@@ -408,6 +418,12 @@ class JourneyHeader(CIFRecord):
     ''
     >>> jh.route_direction
     'I'
+
+    JourneyDateRunning records are stored in self.date_running_exceptions - see
+    the JourneyDateRunning definition for examples.
+
+    JourneyOrigin, JourneyIntermediate, JourneyDestination records are stored
+    in self.hops - see add_hop below for examples.
     '''
 
     def __init__(self, line):
@@ -437,7 +453,7 @@ class JourneyHeader(CIFRecord):
 
         self.hops = []
         self.hop_lines = {}
-        self.exceptions = []
+        self.date_running_exceptions = []
 
     def __str__(self):
         ret = CIFRecord.__str__(self) + "\n"
@@ -447,26 +463,28 @@ class JourneyHeader(CIFRecord):
             ret = ret + "\t" + str(counter) + ". " + str(hop) + "\n"
         return ret
 
-    def add_hop(self, hop):
-        if hop.line in self.hop_lines:
-            # if we go to the same stop at the same time again, ignore duplicate
-            logging.warn("removed duplicate stop/time " + hop.line)
-            return
-        assert isinstance(hop, JourneyOrigin) or isinstance(hop, JourneyIntermediate) or isinstance(hop, JourneyDestination)
-        self.hops.append(hop)
-        self.hop_lines[hop.line] = True
+    def add_date_running_exception(self, exception):
+        '''See JourneyDateRunning for documentation of this function.'''
+        assert isinstance(exception, JourneyDateRunning)
+        self.date_running_exceptions.append(exception)
 
-    def add_exception(self, exception):
-        assert isinstance(exception, JourneyException)
-        self.exceptions.append(exception)
-
-    # Given a datetime.date returns True or False according to whether the
-    # journey runs on that date.
     def is_valid_on_date(self, d):
-        # check date ranges, and exceptions to them
+        '''Given a datetime.date returns True or False according to whether the
+        journey runs on that date.
+
+        >>> jh = JourneyHeader('QSNGW    6B3920070521200712071111100  2B82P10553TRAIN           I')
+        >>> jh.is_valid_on_date(datetime.date(2007, 5, 21))
+        (True, 'OK')
+        >>> jh.is_valid_on_date(datetime.date(2007, 5, 20))
+        (False, '2007-05-20 not in range of date of operation 2007-05-21 - 2007-12-07')
+        >>> jh.is_valid_on_date(datetime.date(2007, 5, 26))
+        (False, "journey doesn't operate on a Saturday")
+
+        You can add exceptions to the date range, see JourneyDateRunning below for examples.
+        '''
         # XXX not clearly defined in spec how these nest, but hey, this naive implementation might do
         excepted_state = None
-        for exception in self.exceptions:
+        for exception in self.date_running_exceptions:
             if exception.start_of_exceptional_period <= d and d <= exception.end_of_exceptional_period:
                 excepted_state = exception.operation_code
         if excepted_state == False:
@@ -487,9 +505,42 @@ class JourneyHeader(CIFRecord):
 
         return True, "OK"
 
-    # Given a location (as a string short code), return the time this journey
-    # stops there, or None if it only starts there, or doesn't stop there.
+    def add_hop(self, hop):
+        '''This associates the start, intermediate and final stops of a journey
+        with the journey header.
+
+        >>> jh = JourneyHeader('QSNCH   2933E20071008200712071111100  1H49P80092TRAIN           I')
+        >>> jh.add_hop(JourneyOrigin('QO9100PRINRIS 16362  T1  '))
+        >>> jh.add_hop(JourneyIntermediate('QI9100SUNDRTN 16401640T   T1  '))
+        >>> jh.add_hop(JourneyIntermediate('QI9100HWYCOMB 16471647T3  T1  '))
+        >>> jh.add_hop(JourneyIntermediate('QI9100BCNSFLD 16531653T   T1  '))
+        >>> jh.add_hop(JourneyIntermediate('QI9100GERRDSX 16591659T   T1  '))
+        >>> jh.add_hop(JourneyDestination('QT9100MARYLBN 17286  T1  '))
+
+        There are then some other functions you can call.
+
+        >>> jh.find_arrival_time_at_location('9100BCNSFLD')
+        datetime.time(16, 53)
+        >>> print jh.find_arrival_time_at_location('9100PRINRIS')
+        None
+        >>> print jh.find_arrival_time_at_location('somewhere else')
+        None
+        '''
+
+        if hop.line in self.hop_lines:
+            # if we go to the same stop at the same time again, ignore duplicate
+            logging.warn("removed duplicate stop/time " + hop.line)
+            return
+        assert isinstance(hop, JourneyOrigin) or isinstance(hop, JourneyIntermediate) or isinstance(hop, JourneyDestination)
+        self.hops.append(hop)
+        self.hop_lines[hop.line] = True
+
     def find_arrival_time_at_location(self, location):
+        ''' Given a location (as a string short code), return the time this journey
+        stops there, or None if it only starts there, or doesn't stop there.
+            
+        See add_hop above for examples.
+        '''
         ret = None
         for hop in self.hops:
             if hop.location == location:
@@ -499,7 +550,24 @@ class JourneyHeader(CIFRecord):
         return ret
 
 # Exceptions to dates of journey
-class JourneyException(CIFRecord):
+class JourneyDateRunning(CIFRecord):
+    '''Optionally follows a JourneyHeader. The header itself has only one simple
+    date range for when a journey runs. This record creates exceptions from
+    that range for when the journey does or does not run. 
+
+    >>> jh = JourneyHeader('QSNSUC   599B20070910204912311111100  X5        COACH           5')
+    >>> jh.is_valid_on_date(datetime.date(2007,12,25)) # Christmas day
+    (True, 'OK')
+    >>> jdr = JourneyDateRunning('QE20071225200712250')
+    >>> (jdr.start_of_exceptional_period, jdr.end_of_exceptional_period)
+    (datetime.date(2007, 12, 25), datetime.date(2007, 12, 25))
+    >>> jdr.operation_code
+    False
+    >>> jh.add_date_running_exception(jdr)
+    >>> jh.is_valid_on_date(datetime.date(2007,12,25)) # Christmas day
+    (False, '2007-12-25 not in range of exceptional date records')
+    '''
+
     def __init__(self, line):
         CIFRecord.__init__(self, line, "QE")
 
@@ -511,8 +579,28 @@ class JourneyException(CIFRecord):
         self.end_of_exceptional_period = parse_date(matches.group(2))
         self.operation_code = bool(int(matches.group(3)))
 
-# Origin of journey route
 class JourneyOrigin(CIFRecord):
+    '''Start of a journey route.
+
+    >>> jo = JourneyOrigin('QO9100MDNHEAD 09375B T1  ')
+    >>> jo.location
+    '9100MDNHEAD'
+    >>> jo.published_departure_time
+    datetime.time(9, 37)
+    >>> jo.bay_number
+    '5B'
+    >>> jo.timing_point_indicator
+    True
+    >>> print jo.fare_stage_indicator # '  ' isn't in the spec for this, but occurs in wild, so we return None for it
+    None
+
+    There are some additional functions compatible with those in JourneyIntermediate.
+    >>> jo.is_set_down()
+    False
+    >>> jo.is_pick_up()
+    True
+    '''
+
     def __init__(self, line):
         CIFRecord.__init__(self, line, "QO")
 
@@ -532,8 +620,33 @@ class JourneyOrigin(CIFRecord):
     def is_pick_up(self):
         return True
     
-# Intermediate stop on journey
 class JourneyIntermediate(CIFRecord):
+    '''Intermediate stop on a journey.
+
+    >>> ji = JourneyIntermediate('QI9100FURZEP  09410941T   T1  ')
+    >>> ji.location
+    '9100FURZEP'
+    >>> ji.published_arrival_time
+    datetime.time(9, 41)
+    >>> ji.published_departure_time
+    datetime.time(9, 41)
+    >>> ji.activity_flag # T isn't a documented value, but seen in wild, see below
+    'T'
+    >>> ji.bay_number
+    ''
+    >>> ji.timing_point_indicator
+    True
+    >>> print ji.fare_stage_indicator # '  ' isn't in the spec for this, but occurs in wild, so we return None for it
+    None
+
+    These functions tell you if the vehicle lets passengers off or allows
+    passengers on at the stop. They interpret the activity_flag, 
+    >>> ji.is_set_down()
+    True
+    >>> ji.is_pick_up()
+    True
+    '''
+
     def __init__(self, line):
         CIFRecord.__init__(self, line, "QI")
 
@@ -583,8 +696,28 @@ class JourneyIntermediate(CIFRecord):
         assert False, "activity_flag %s not supported (location %s)" % (self.activity_flag, self.location)
 
 
-# Destination of journey route
 class JourneyDestination(CIFRecord):
+    '''End of a journey route.
+
+    >>> jd = JourneyDestination('QT9100MARLOW  0959   T1  ')
+    >>> jd.location
+    '9100MARLOW'
+    >>> jd.published_arrival_time
+    datetime.time(9, 59)
+    >>> jd.bay_number
+    ''
+    >>> jd.timing_point_indicator
+    True
+    >>> print jd.fare_stage_indicator # '  ' isn't in the spec for this, but occurs in wild, so we return None for it
+    None
+
+    There are some additional functions compatible with those in JourneyIntermediate.
+    >>> jd.is_set_down()
+    True
+    >>> jd.is_pick_up()
+    False
+    '''
+
     def __init__(self, line):
         CIFRecord.__init__(self, line, "QT")
 
@@ -663,4 +796,8 @@ class LocationAdditional(CIFRecord):
 
 
 
+# Run tests if this module is executed
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
 
