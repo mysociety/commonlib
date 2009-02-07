@@ -5,11 +5,10 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: atcocif.py,v 1.11 2009-02-06 15:54:22 francis Exp $
+# $Id: atcocif.py,v 1.12 2009-02-07 01:11:58 francis Exp $
 #
 
 # TODO:
-# Move adjacent_location_times etc. to another file
 # Look at the transaction types, are they always nice?
 # Allow for the interchange time at the end :) - currently we'll always arrive early by that time
 # timetz - what about time zones!  http://docs.python.org/lib/datetime-datetime.html
@@ -18,11 +17,11 @@
 #  - in particular, which day are journeys starting just after midnight stored for?
 #  - see "XXX bah" below for hack that will do for now but NEEDS CHANGING
 #
-# Test exceptional date ranges
+# Test exceptional date ranges more thoroughly
 # Check circular journeys work fine
 # School terms are needed but not implemented - where is the data?
 # Bank holidays are needed but not implemented - where is the data?
-# interchange times
+# Interchange times
 # - find proper ones to use for TRAIN and BUS
 # - what is an LFBUS?
 # - there are other ones as well, e.g. 09 etc. probably right to default to bus, but check
@@ -71,12 +70,7 @@ import StringIO
 # Main class
 
 class ATCO:
-    # train_interchange_default - time in minutes to allow by default to change trains at same station
-    # bus_interchange_default - likewise for buses, at exact same stop
-    def __init__(self, train_interchange_default = 5, bus_interchange_default = 1):
-        self.train_interchange_default = train_interchange_default
-        self.bus_interchange_default = bus_interchange_default
-
+    def __init__(self):
         self.journeys = []
         self.locations = []
 
@@ -89,7 +83,7 @@ class ATCO:
         return ret
 
     def read(self, f):
-        '''Loads at ATCO-CIF file from a file.
+        '''Loads an ATCO-CIF file from a file.
 
         >>> import tempfile
         >>> n = tempfile.NamedTemporaryFile()
@@ -103,7 +97,7 @@ class ATCO:
         return self.read_file_handle(open(f))
 
     def read_string(self, s):
-        '''Loads at ATCO-CIF file from a string.
+        '''Loads an ATCO-CIF file from a string.
 
         >>> atco = ATCO()
         >>> atco.read_string('ATCO-CIF0510      Buckinghamshire - COACH             ATCOPT20080126111426')
@@ -111,8 +105,8 @@ class ATCO:
         h = StringIO.StringIO(s)
         return self.read_file_handle(h)
 
-    # Load from a file handle
     def read_file_handle(self, h):
+        '''Loads an ATCO-CIF file from a file handle.'''
         self.handle = h
 
         line = self.handle.readline().strip("\n\r")
@@ -157,113 +151,6 @@ class ATCO:
             else:
                 raise Exception("Unknown record type " + record_identity)
 
-    # Make dictionaries so it is quick to look up all journeys visiting a particular location etc.
-    def index_by_short_codes(self):
-        self.journeys_visiting_location = {}
-        for journey in self.journeys:
-            for hop in journey.hops:
-                if hop.location not in self.journeys_visiting_location:
-                    self.journeys_visiting_location[hop.location] = set()
-
-                if journey in self.journeys_visiting_location[hop.location]:
-                    if hop == journey.hops[0] and hop == journey.hops[-1]:
-                        # if it's a simple loop, starting and ending at same point, then that's OK
-                        logging.debug("journey " + journey.unique_journey_identifier + " loops")
-                        pass
-                    else:
-                        assert "same location %s appears twice in one journey %s, and not at start/end" % (hop.location, journey.unique_journey_identifier)
-
-                self.journeys_visiting_location[hop.location].add(journey)
-
-        self.location_details = {}
-        for location in self.locations:
-            self.location_details[location.location] = location
-
-    # Look for journeys that cross midnight
-    def find_journeys_crossing_midnight(self):
-        for journey in self.journeys:
-            previous_departure_time = datetime.time(0, 0, 0)
-            for hop in journey.hops:
-                if hop.is_pick_up():
-                    if previous_departure_time > hop.published_departure_time:
-                        print "journey " + journey.unique_journey_identifier + " spans midnight"
-                    previous_departure_time = hop.published_departure_time
-            
-
-    # Adjacency function for use with Dijkstra's algorithm on earliest time to arrive somewhere.
-    # Given a location (string short code) and a date/time, it finds every
-    # other station you can get there on time by one direct train/bus. 
-    def adjacent_location_times(self, target_location, target_arrival_datetime):
-        # Check that there are journeys visiting this location
-        logging.debug("adjacent_location_times target_location: " + target_location + " target_arrival_datetime: " + str(target_arrival_datetime))
-        if target_location not in self.journeys_visiting_location:
-            raise Exception, "No journeys known visiting target_location " + target_location
-
-        # Adjacents is dictionary from location to time at that location, and
-        # is the data structure we are going to return from this function.
-        adjacents = {}
-        # Go through every journey visiting the location
-        for journey in self.journeys_visiting_location[target_location]:
-            logging.debug("\tconsidering journey: " + journey.unique_journey_identifier)
-
-            self._adjacent_location_times_for_journey(target_location, target_arrival_datetime, adjacents, journey)
-
-        return adjacents
-
-    def _adjacent_location_times_for_journey(self, target_location, target_arrival_datetime, adjacents, journey):
-        # Check whether the journey runs on the relevant date
-        # XXX assumes we don't do journeys over midnight
-        (valid_on_date, reason) = journey.is_valid_on_date(target_arrival_datetime.date()) 
-        if not valid_on_date:
-            logging.debug("\t\tnot valid on date: " + reason)
-        else:
-            # Find out when it arrives at this stop
-            arrival_time_at_target_location = journey.find_arrival_time_at_location(target_location)
-            if arrival_time_at_target_location == None:
-                # arrival_time_at_target_location could be None here for e.g. pick up only stops
-                pass
-            else:
-                logging.debug("\t\tarrival time at target location: " + str(arrival_time_at_target_location))
-                arrival_datetime_at_target_location = datetime.datetime.combine(target_arrival_datetime.date(), arrival_time_at_target_location)
-
-                # Work out how long we need to allow to change at the stop
-                # XXX here need to know if the stop is the last destination stop, as you don't need interchange time
-                if journey.vehicle_type == 'TRAIN':
-                    interchange_time_in_minutes = self.train_interchange_default
-                else:
-                    interchange_time_in_minutes = self.bus_interchange_default
-                interchange_time = datetime.timedelta(minutes = interchange_time_in_minutes)
-                
-                # See whether if we want to use this journey to get to this
-                # stop, we get there on time to change to the next journey.
-                if arrival_datetime_at_target_location + interchange_time > target_arrival_datetime:
-                    logging.debug("\t\twhich is too late with interchange time %s, so not using journey" % str(interchange_time))
-                else:
-                    logging.debug("\t\tadding stops")
-                    self._adjacent_location_times_add_stops(target_location, target_arrival_datetime, adjacents, journey, arrival_datetime_at_target_location)
-
-    def _adjacent_location_times_add_stops(self, target_location, target_arrival_datetime, adjacents, journey, arrival_datetime_at_target_location):
-        # Now go through every earlier stop, and add it to the list of returnable nodes
-        for hop in journey.hops:
-            # We've arrived at the target location (check is_set_down here so looped
-            # journeys, where we end on stop we started, work)
-            if hop.is_set_down() and hop.location == target_location:
-                break
-            if hop.is_pick_up():
-                departure_datetime = datetime.datetime.combine(target_arrival_datetime.date(), hop.published_departure_time)
-                # if the time at this hop is later than at target, must be a midnight rollover, and really
-                # this hop is on the the day before, so change to that
-                # XXX bah this is rubbish as it won't have done the is right day check right
-                if departure_datetime > arrival_datetime_at_target_location:
-                    departure_datetime = datetime.datetime.combine(target_arrival_datetime.date() - datetime.timedelta(1), hop.published_departure_time)
-                # Use this location if new, or if it is later departure time than any previous one the same we've found.
-                if hop.location in adjacents:
-                    curr_latest = adjacents[hop.location]
-                    if departure_datetime > curr_latest:
-                        adjacents[hop.location] = departure_datetime
-                else:
-                    adjacents[hop.location] = departure_datetime
-            
 
 ###########################################################
 # Helper functions
@@ -351,7 +238,6 @@ class CIFRecord:
 
         return ret
 
-# Main header of whole file
 class FileHeader(CIFRecord):
     """ATC-CIF files begin with a special header that cannot be nonsense.
 
@@ -788,11 +674,6 @@ class LocationAdditional(CIFRecord):
         self.grid_reference_northing = matches.group(4).strip()
         self.district_name = matches.group(5).strip()
         self.town_name = matches.group(6).strip()
-
-        
-
-
-
 
 
 
