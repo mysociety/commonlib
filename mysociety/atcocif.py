@@ -5,38 +5,31 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: atcocif.py,v 1.12 2009-02-07 01:11:58 francis Exp $
+# $Id: atcocif.py,v 1.13 2009-02-09 15:55:40 francis Exp $
 #
 
 # TODO:
-# Look at the transaction types, are they always nice?
-# Allow for the interchange time at the end :) - currently we'll always arrive early by that time
-# timetz - what about time zones!  http://docs.python.org/lib/datetime-datetime.html
+# Look at the transaction types, are they always nice? What do with 'D' ones?
+# Test exceptional date ranges more thoroughly, give error if they nest at all
 #
-# Journeys over midnight will be knackered, no idea how ATCO-CIF even stores them
-#  - in particular, which day are journeys starting just after midnight stored for?
-#  - see "XXX bah" below for hack that will do for now but NEEDS CHANGING
-#
-# Test exceptional date ranges more thoroughly
-# Check circular journeys work fine
-# School terms are needed but not implemented - where is the data?
-# Bank holidays are needed but not implemented - where is the data?
-# Interchange times
-# - find proper ones to use for TRAIN and BUS
-# - what is an LFBUS?
-# - there are other ones as well, e.g. 09 etc. probably right to default to bus, but check
+# Work round school terms and bank holidays for definite somehow
+#   School terms are needed but not implemented - where is the data?
+#   Bank holidays are needed but not implemented - where is the data?
+
+# Test duplicate hop removal - how do we test logging in doctest?
+#        >>> logging.basicConfig(level=logging.WARN)
+#        >>> jh.add_hop(JourneyIntermediate('QI9100BCNSFLD 16531653T   T1  '))
+#        removed duplicate stop/time QI9100BCNSFLD 16531653T   T1  
 
 # Later:
+# Test is_set_down, is_pick_up maybe a bit more
 # Train activity flags
 # - they should have pick up only for some cases, Matthew says:
 #    london-brum will be pick up only at watford
 #    manchester-london will be pick up only at stockport
-# - check what activity_flag 'O' for trains definitively means
-# - check what activity_flag 'D' for trains definitively means
+# - check what activity flags 'T', 'O', 'D' for trains definitively mean
 
-
-"""
-Loads files in the ATCO-CIF file format, which is used in the UK to specify
+"""Loads files in the ATCO-CIF file format, which is used in the UK to specify
 public transport journeys for accessibility planning by the National Public
 Transport Data Repository (NPTDR).
 
@@ -55,7 +48,6 @@ The simplest ATCO-CIF file is just a header, with no further records.
 >>> atco.read_string('ATCO-CIF0510      Buckinghamshire - BUS               ATCOPT20080125165808')
 >>> atco.file_header.file_originator
 'Buckinghamshire - BUS'
-
 """
 
 import os
@@ -146,10 +138,62 @@ class ATCO:
                 current_item.add_additional(LocationAdditional(line))
 
             # Other
-            elif record_identity in ['QV', 'QD']:
+            elif record_identity in [
+                'QV', # Vehicle type record
+                'QD'  # Route description record
+            ]:
                 logging.warning("Ignoring record type " + record_identity)
             else:
                 raise Exception("Unknown record type " + record_identity)
+
+    def index_by_short_codes(self):
+        '''Make dictionaries so it is quick to look up all journeys visiting a
+        particular location, and to get details about a location from its identifier.
+
+        >>> atco = ATCO()
+        >>> atco.read_string("""ATCO-CIF0510                       70 - RAIL        ATCORAIL20080124115909
+        ... QSNGW    6B1820070521200712071111100  2B02P10452TRAIN           I
+        ... QO9100MDNHEAD 0549URLT1  
+        ... QI9100FURZEP  05530553T   T1  
+        ... QI9100COOKHAM 05560556T   T1  
+        ... QI9100BORNEND 06010605T   T1  
+        ... QT9100MARLOW  0612   T1  
+        ... QSNGW    6B1A20070521200712071111100  2B04P10456TRAIN           I
+        ... QO9100MDNHEAD 0608URLT1  
+        ... QI9100FURZEP  06120612T   T1  
+        ... QI9100COOKHAM 00000000O   T1  
+        ... QT9100BORNEND 0620   T1  
+        ... QLN9100COOKHAM Cookham Rail Station                             RE0057284
+        ... QBN9100COOKHAM 488690  185060                                                  
+        ... """)
+        >>> atco.index_by_short_codes()
+        >>> journeys_visiting_cookham = atco.journeys_visiting_location["9100COOKHAM"]
+        >>> [x.operator + x.unique_journey_identifier for x in journeys_visiting_cookham]
+        ['GW6B1A', 'GW6B18']
+        >>> atco.location_details["9100COOKHAM"].long_description()
+        'Cookham Rail Station'
+        '''
+
+        self.journeys_visiting_location = {}
+        for journey in self.journeys:
+            for hop in journey.hops:
+                if hop.location not in self.journeys_visiting_location:
+                    self.journeys_visiting_location[hop.location] = set()
+
+                if journey in self.journeys_visiting_location[hop.location]:
+                    if hop == journey.hops[0] and hop == journey.hops[-1]:
+                        # if it's a simple loop, starting and ending at same point, then that's OK
+                        logging.debug("journey " + journey.unique_journey_identifier + " loops")
+                        pass
+                    else:
+                        assert "same location %s appears twice in one journey %s, and not at start/end" % (hop.location, journey.unique_journey_identifier)
+
+                self.journeys_visiting_location[hop.location].add(journey)
+
+        self.location_details = {}
+        for location in self.locations:
+            self.location_details[location.location] = location
+
 
 
 ###########################################################
@@ -203,7 +247,7 @@ def parse_date_time(date_string, time_string):
     )
 
 ###########################################################
-# Individual record classes
+# Base record class
 
 class CIFRecord:
     """Base class of individual records from the ATCO-CIF file. Stores the line of
@@ -272,6 +316,9 @@ class FileHeader(CIFRecord):
         self.file_originator = matches.group(3).strip()
         self.source_product = matches.group(4).strip()
         self.production_datetime = parse_date_time(matches.group(5), matches.group(6))
+
+###########################################################
+# Journey record classes
 
 class JourneyHeader(CIFRecord):
     '''Header of a journey record. It stores all associated records too, and so 
@@ -435,7 +482,6 @@ class JourneyHeader(CIFRecord):
 
         return ret
 
-# Exceptions to dates of journey
 class JourneyDateRunning(CIFRecord):
     '''Optionally follows a JourneyHeader. The header itself has only one simple
     date range for when a journey runs. This record creates exceptions from
@@ -564,7 +610,7 @@ class JourneyIntermediate(CIFRecord):
     # B - both pick up and set down
     # P - pick up only
     # S - set down only
-    # N - neither pick u pnor set down
+    # N - neither pick up nor set down
     # T - undocumented, but seems to mean train (so let's assume pick up and set down XXX)
     # D - another train special, see above where we hack the departure time for it
     # O - we think means a train stop where train doesn't stop XXX
@@ -622,9 +668,38 @@ class JourneyDestination(CIFRecord):
 
     def is_pick_up(self):
         return False
+###########################################################
+# Location record classes
  
-# Destination of journey route, stores also additional record in self.additional
 class Location(CIFRecord):
+    '''Further details about a location. 
+
+    >>> l = Location('QLN9100CHLFNAL Chalfont and Latimer Rail Station                RE0044056')
+    >>> l.transaction_type
+    'N'
+    >>> l.location
+    '9100CHLFNAL'
+    >>> l.full_location 
+    'Chalfont and Latimer Rail Station'
+    >>> l.gazetteer_code 
+    ' '
+    >>> l.point_type
+    'R'
+    >>> l.national_gazetteer_id
+    'E0044056'
+
+    It stores associated additional records as well.
+    >>> la = LocationAdditional('QBN9100CHLFNAL 499647  197573  Chiltern                                        ')
+    >>> l.add_additional(la)
+    >>> l.additional.grid_reference_easting
+    '499647'
+    
+    There is a long description of the location, which includes useful fields
+    from the additional record.
+    >>> l.long_description()
+    'Chalfont and Latimer Rail Station, Chiltern'
+    '''
+
     def __init__(self, line):
         CIFRecord.__init__(self, line, "QL")
 
@@ -648,6 +723,7 @@ class Location(CIFRecord):
 
     def add_additional(self, additional):
         assert isinstance(additional, LocationAdditional)
+        assert additional.location == self.location
         self.additional = additional
 
     def long_description(self):
@@ -659,8 +735,24 @@ class Location(CIFRecord):
                 ret += ", " + self.additional.district_name
         return ret
         
-# Additional information on journey route
 class LocationAdditional(CIFRecord):
+    ''' Additional information on journey route, automatically attached to associated Location.
+
+    >>> la = LocationAdditional('QBN9100CHLFNAL 499647  197573  Chiltern                                        ')
+    >>> la.transaction_type
+    'N'
+    >>> la.location
+    '9100CHLFNAL'
+    >>> la.grid_reference_easting
+    '499647'
+    >>> la.grid_reference_northing
+    '197573'
+    >>> la.district_name
+    'Chiltern'
+    >>> la.town_name
+    ''
+    '''
+
     def __init__(self, line):
         CIFRecord.__init__(self, line, "QB")
 
@@ -676,8 +768,10 @@ class LocationAdditional(CIFRecord):
         self.town_name = matches.group(6).strip()
 
 
+###########################################################
 
-# Run tests if this module is executed
+# Run tests if this module is executed directly. Recommended you use nosetests
+# with doctest enabled to run tests found in lots of modules.
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
