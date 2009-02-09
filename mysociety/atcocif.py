@@ -5,7 +5,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: atcocif.py,v 1.13 2009-02-09 15:55:40 francis Exp $
+# $Id: atcocif.py,v 1.14 2009-02-09 19:05:31 francis Exp $
 #
 
 # TODO:
@@ -14,7 +14,18 @@
 #
 # Work round school terms and bank holidays for definite somehow
 #   School terms are needed but not implemented - where is the data?
+#        [rs] Simple answer is "no" - the week for the sample to be taken is
+#        deliberately one which is in school and University term time.  The data can
+#        only represent the services operating in that week, when you should assume
+#        that Schoolday journeys operate, and NSch ones don't.  Any conclusions other
+#        than for the sample week would be prone to inaccuracy as I have no way of
+#        knowing whether filtering was put in place in some data sources to exclude
+#        services and journeys which did not operate in the sample week.
 #   Bank holidays are needed but not implemented - where is the data?
+#        [rs] Bank Holidays are not generally handled within the data - and no
+#        conclusions can be drawn about the availability of Bank Holiday services
+#        from NPTDR data.  The remit is only to have a complete set of data for the
+#        sample week.
 
 # Test duplicate hop removal - how do we test logging in doctest?
 #        >>> logging.basicConfig(level=logging.WARN)
@@ -23,6 +34,7 @@
 
 # Later:
 # Test is_set_down, is_pick_up maybe a bit more
+# Test if timing point indicator tells you if points are interpolated
 # Train activity flags
 # - they should have pick up only for some cases, Matthew says:
 #    london-brum will be pick up only at watford
@@ -48,7 +60,32 @@ The simplest ATCO-CIF file is just a header, with no further records.
 >>> atco.read_string('ATCO-CIF0510      Buckinghamshire - BUS               ATCOPT20080125165808')
 >>> atco.file_header.file_originator
 'Buckinghamshire - BUS'
+
+A more complicated example is included in the fixtures directory. It is a
+fictional partial timetable for Thomas the Tank Engine's branch line, as
+described here.
+
+http://en.wikipedia.org/wiki/North_Western_Railway_(fictional)#Thomas.27_Branch_Line
+
+>>> atco = ATCO()
+>>> atco.read("fixtures/thomas-branch-line.cif")
+
+You can create indices on it, in order to look up the journeys that visit a
+particular stop.
+
+>>> atco.index_by_short_codes()
+>>> journeys_visiting_elsbridge = atco.journeys_visiting_location['ELSBRIDGE']
+>>> [(x.operator, x.unique_journey_identifier) for x in journeys_visiting_elsbridge]
+[('NWR', 'TT01')]
+
 """
+
+#Todo cif file:
+#Add direct services to Tidmouth
+#Add some services run by Daisy on Thomas's line
+#Reduced Sunday service
+#
+#Link to map of full network http://en.wikipedia.org/wiki/Sodor_(fictional_island)
 
 import os
 import sys
