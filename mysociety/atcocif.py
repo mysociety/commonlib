@@ -5,11 +5,15 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: atcocif.py,v 1.14 2009-02-09 19:05:31 francis Exp $
+# $Id: atcocif.py,v 1.15 2009-02-10 17:30:47 francis Exp $
 #
 
 # TODO:
+
+# Check that journey unique id is correct
+#
 # Look at the transaction types, are they always nice? What do with 'D' ones?
+#
 # Test exceptional date ranges more thoroughly, give error if they nest at all
 #
 # Work round school terms and bank holidays for definite somehow
@@ -61,31 +65,7 @@ The simplest ATCO-CIF file is just a header, with no further records.
 >>> atco.file_header.file_originator
 'Buckinghamshire - BUS'
 
-A more complicated example is included in the fixtures directory. It is a
-fictional partial timetable for Thomas the Tank Engine's branch line, as
-described here.
-
-http://en.wikipedia.org/wiki/North_Western_Railway_(fictional)#Thomas.27_Branch_Line
-
->>> atco = ATCO()
->>> atco.read("fixtures/thomas-branch-line.cif")
-
-You can create indices on it, in order to look up the journeys that visit a
-particular stop.
-
->>> atco.index_by_short_codes()
->>> journeys_visiting_elsbridge = atco.journeys_visiting_location['ELSBRIDGE']
->>> [(x.operator, x.unique_journey_identifier) for x in journeys_visiting_elsbridge]
-[('NWR', 'TT01')]
-
 """
-
-#Todo cif file:
-#Add direct services to Tidmouth
-#Add some services run by Daisy on Thomas's line
-#Reduced Sunday service
-#
-#Link to map of full network http://en.wikipedia.org/wiki/Sodor_(fictional_island)
 
 import os
 import sys
@@ -179,9 +159,9 @@ class ATCO:
                 'QV', # Vehicle type record
                 'QD'  # Route description record
             ]:
-                logging.warning("Ignoring record type " + record_identity)
+                logging.warning("Ignoring record type '" + record_identity + "'")
             else:
-                raise Exception("Unknown record type " + record_identity)
+                raise Exception("Unknown record type '" + record_identity + "'")
 
     def index_by_short_codes(self):
         '''Make dictionaries so it is quick to look up all journeys visiting a
@@ -205,7 +185,7 @@ class ATCO:
         ... """)
         >>> atco.index_by_short_codes()
         >>> journeys_visiting_cookham = atco.journeys_visiting_location["9100COOKHAM"]
-        >>> [x.operator + x.unique_journey_identifier for x in journeys_visiting_cookham]
+        >>> [x.id for x in journeys_visiting_cookham]
         ['GW6B1A', 'GW6B18']
         >>> atco.location_details["9100COOKHAM"].long_description()
         'Cookham Rail Station'
@@ -220,10 +200,10 @@ class ATCO:
                 if journey in self.journeys_visiting_location[hop.location]:
                     if hop == journey.hops[0] and hop == journey.hops[-1]:
                         # if it's a simple loop, starting and ending at same point, then that's OK
-                        logging.debug("journey " + journey.unique_journey_identifier + " loops")
+                        logging.debug("journey " + journey.id + " loops")
                         pass
                     else:
-                        assert "same location %s appears twice in one journey %s, and not at start/end" % (hop.location, journey.unique_journey_identifier)
+                        assert "same location %s appears twice in one journey %s, and not at start/end" % (hop.location, journey.id)
 
                 self.journeys_visiting_location[hop.location].add(journey)
 
@@ -234,7 +214,7 @@ class ATCO:
 
 
 ###########################################################
-# Helper functions
+# Helper functions and classes
 
 def parse_time(time_string):
     '''Converts a time string from an ATCO-CIF field into a Python time object.
@@ -282,6 +262,36 @@ def parse_date_time(date_string, time_string):
         int(date_string[0:4]), int(date_string[4:6]), int(date_string[6:8]),
         int(time_string[0:2]), int(time_string[2:4]), int(time_string[4:6]), 0
     )
+
+class BoolWithReason:
+    '''Behaves as a boolean, only stores an explanatory string as well.
+    
+    >>> bwr1 = BoolWithReason(False, "the frobnitz was klutzed")
+    >>> "yes" if bwr1 else "no"
+    'no'
+    >>> bwr1.reason
+    'the frobnitz was klutzed'
+    >>> bwr1
+    BoolWithReason(False, 'the frobnitz was klutzed')
+
+    >>> bwr2 = BoolWithReason(True, "all was good")
+    >>> "yes" if bwr2 else "no"
+    'yes'
+    >>> bwr2
+    BoolWithReason(True, 'all was good')
+    '''
+
+    def __init__(self, value, reason):
+        self.value = value
+        self.reason = reason
+
+    def __repr__(self):
+        return "BoolWithReason(" + repr(self.value) + ", " + repr(self.reason) + ")"
+
+    def __nonzero__(self):
+        return self.value
+
+
 
 ###########################################################
 # Base record class
@@ -368,6 +378,8 @@ class JourneyHeader(CIFRecord):
     'GW'
     >>> jh.unique_journey_identifier
     '6B39'
+    >> jh.id
+    'GW7B39'
     >>> jh.first_date_of_operation
     datetime.date(2007, 5, 21)
     >>> jh.last_date_of_operation
@@ -421,6 +433,9 @@ class JourneyHeader(CIFRecord):
         self.registration_number = matches.group(12).strip()
         self.route_direction = matches.group(13)
 
+        # Operator code and journey identifier are unique together
+        self.id = self.operator + self.unique_journey_identifier
+
         self.hops = []
         self.hop_lines = {}
         self.date_running_exceptions = []
@@ -439,16 +454,16 @@ class JourneyHeader(CIFRecord):
         self.date_running_exceptions.append(exception)
 
     def is_valid_on_date(self, d):
-        '''Given a datetime.date returns True or False according to whether the
-        journey runs on that date.
+        '''Given a datetime.date returns a pair of True or False according to
+        whether the journey runs on that date, and the reasoning.
 
         >>> jh = JourneyHeader('QSNGW    6B3920070521200712071111100  2B82P10553TRAIN           I')
         >>> jh.is_valid_on_date(datetime.date(2007, 5, 21))
-        (True, 'OK')
+        BoolWithReason(True, 'OK')
         >>> jh.is_valid_on_date(datetime.date(2007, 5, 20))
-        (False, '2007-05-20 not in range of date of operation 2007-05-21 - 2007-12-07')
+        BoolWithReason(False, '2007-05-20 not in range of date of operation 2007-05-21 - 2007-12-07')
         >>> jh.is_valid_on_date(datetime.date(2007, 5, 26))
-        (False, "journey doesn't operate on a Saturday")
+        BoolWithReason(False, "journey doesn't operate on a Saturday")
 
         You can add exceptions to the date range, see JourneyDateRunning below for examples.
         '''
@@ -458,14 +473,14 @@ class JourneyHeader(CIFRecord):
             if exception.start_of_exceptional_period <= d and d <= exception.end_of_exceptional_period:
                 excepted_state = exception.operation_code
         if excepted_state == False:
-            return False, "%s not in range of exceptional date records" % (str(d))
+            return BoolWithReason(False, "%s not in range of exceptional date records" % (str(d)))
         if excepted_state == None:
             if not self.first_date_of_operation <= d and d <= self.last_date_of_operation:
-                return False, "%s not in range of date of operation %s - %s" % (str(d), str(self.first_date_of_operation), str(self.last_date_of_operation))
+                return BoolWithReason(False, "%s not in range of date of operation %s - %s" % (str(d), str(self.first_date_of_operation), str(self.last_date_of_operation)))
 
         # check runs on this day of week
         if not self.operates_on_day_of_week[d.isoweekday()]:
-            return False, "journey doesn't operate on a " + d.strftime('%A')
+            return BoolWithReason(False, "journey doesn't operate on a " + d.strftime('%A'))
 
         # school terms
         # assert self.school_term_time == " ", "fancy school term related journey not implemented " + self.school_term_time
@@ -473,7 +488,7 @@ class JourneyHeader(CIFRecord):
         # bank holidays
         # assert self.bank_holidays == " ", "fancy bank holiday related journey not implemented " + self.bank_holidays
 
-        return True, "OK"
+        return BoolWithReason(True, "OK")
 
     def add_hop(self, hop):
         '''This associates the start, intermediate and final stops of a journey
@@ -526,7 +541,7 @@ class JourneyDateRunning(CIFRecord):
 
     >>> jh = JourneyHeader('QSNSUC   599B20070910204912311111100  X5        COACH           5')
     >>> jh.is_valid_on_date(datetime.date(2007,12,25)) # Christmas day
-    (True, 'OK')
+    BoolWithReason(True, 'OK')
     >>> jdr = JourneyDateRunning('QE20071225200712250')
     >>> (jdr.start_of_exceptional_period, jdr.end_of_exceptional_period)
     (datetime.date(2007, 12, 25), datetime.date(2007, 12, 25))
@@ -534,7 +549,7 @@ class JourneyDateRunning(CIFRecord):
     False
     >>> jh.add_date_running_exception(jdr)
     >>> jh.is_valid_on_date(datetime.date(2007,12,25)) # Christmas day
-    (False, '2007-12-25 not in range of exceptional date records')
+    BoolWithReason(False, '2007-12-25 not in range of exceptional date records')
     '''
 
     def __init__(self, line):
