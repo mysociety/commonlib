@@ -5,7 +5,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: atcocif.py,v 1.15 2009-02-10 17:30:47 francis Exp $
+# $Id: atcocif.py,v 1.16 2009-02-11 16:26:48 matthew Exp $
 #
 
 # TODO:
@@ -267,7 +267,7 @@ class BoolWithReason:
     '''Behaves as a boolean, only stores an explanatory string as well.
     
     >>> bwr1 = BoolWithReason(False, "the frobnitz was klutzed")
-    >>> "yes" if bwr1 else "no"
+    >>> bwr1 and "yes" or "no"
     'no'
     >>> bwr1.reason
     'the frobnitz was klutzed'
@@ -275,7 +275,7 @@ class BoolWithReason:
     BoolWithReason(False, 'the frobnitz was klutzed')
 
     >>> bwr2 = BoolWithReason(True, "all was good")
-    >>> "yes" if bwr2 else "no"
+    >>> bwr2 and "yes" or "no"
     'yes'
     >>> bwr2
     BoolWithReason(True, 'all was good')
@@ -378,8 +378,8 @@ class JourneyHeader(CIFRecord):
     'GW'
     >>> jh.unique_journey_identifier
     '6B39'
-    >> jh.id
-    'GW7B39'
+    >>> jh.id
+    'GW6B39'
     >>> jh.first_date_of_operation
     datetime.date(2007, 5, 21)
     >>> jh.last_date_of_operation
