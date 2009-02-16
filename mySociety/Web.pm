@@ -6,7 +6,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: team@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Web.pm,v 1.23 2009-01-26 14:42:37 matthew Exp $
+# $Id: Web.pm,v 1.24 2009-02-16 16:34:14 matthew Exp $
 #
 
 package mySociety::Web;
@@ -81,6 +81,7 @@ sub scratch ($) {
 sub AUTOLOAD {
     my $f = $mySociety::Web::AUTOLOAD;
     $f =~ s/^.*:://;
+    local $@ = undef;
     eval "sub $f { my \$q = shift; return \$q->{q}->$f(\@_); }";
     goto(&$mySociety::Web::AUTOLOAD);
 }
