@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Locale.pm,v 1.7 2009-02-02 11:01:12 matthew Exp $
+# $Id: Locale.pm,v 1.8 2009-02-16 18:56:45 matthew Exp $
 
 package mySociety::Locale;
 
@@ -33,7 +33,7 @@ our $lang;
 
 # negotiate_language CONFIG OVERRIDE
 # Sets $lang to negotiated language.
-# CONFIG is string from config file containing list of available languages. 
+# CONFIG is string from config file containing list of available languages.
 #        e.g. 'en-gb,English,en_GB|pt-br,Portugu&ecirc;s (Brasil),pt_BR'
 # OVERRIDE is override language, such as from cookie or domain name.  Set to
 # null to force negotiation of language from browser, using HTTP headers. */
@@ -91,6 +91,15 @@ sub push($) {
 sub pop() {
     my $l = pop @stack;
     change($l);
+}
+
+sub in_gb_locale(&) {
+    my $sub = shift;
+    mySociety::Locale::push('en-gb');
+    my (@result, $result);
+    wantarray ? @result = $sub->() : $result = $sub->();
+    mySociety::Locale::pop();
+    return wantarray ? @result : $result;
 }
 
 # gettext_domain DOMAIN
