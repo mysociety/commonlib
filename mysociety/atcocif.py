@@ -5,7 +5,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: atcocif.py,v 1.16 2009-02-11 16:26:48 matthew Exp $
+# $Id: atcocif.py,v 1.17 2009-02-17 10:15:58 matthew Exp $
 #
 
 # TODO:
@@ -242,7 +242,7 @@ def parse_date(date_string):
     ValueError: month must be in 1..12
     '''
     assert len(date_string) == 8
-    if date_string == '99999999':
+    if date_string == '99999999' or date_string == '        ':
         date_string = '99991231'
     return datetime.date(
         int(date_string[0:4]), int(date_string[4:6]), int(date_string[6:8]),
@@ -411,7 +411,7 @@ class JourneyHeader(CIFRecord):
     def __init__(self, line):
         CIFRecord.__init__(self, line, "QS")
 
-        matches = re.match('^QS([NDR])(.{4})(.{6})(\d{8})(\d{8})([01]{7})([ SH])([ ABX])(.{4})(.{6})(.{8})(.{8})(.)$', line)
+        matches = re.match('^QS([NDR])(.{4})(.{6})(\d{8})(\d{8}| {8})([01]{7})([ SH])([ ABX])(.{4})(.{6})(.{8})(.{8})(.)$', line)
         if not matches:
             raise Exception("Journey header line incorrectly formatted: " + line)
 
@@ -634,8 +634,9 @@ class JourneyIntermediate(CIFRecord):
     def __init__(self, line):
         CIFRecord.__init__(self, line, "QI")
 
-        # BPSN are only documented values for activity_flag, but in real files we've found TOD as well.
-        matches = re.match('^QI(.{12})(\d{4})(\d{4})([BPSNTOD])(.{3})(T[01])(F0|F1|  )$', line)
+        # BPSN are documented values for activity_flag in CIF file, other train ones are documented
+        # in http://www.atoc.org/rsp/_downloads/RJIS/20040601.pdf
+        matches = re.match('^QI(.{12})(\d{4})(\d{4})([BPSNACDORTUX-])(.{3})(T[01])(F0|F1|  )$', line)
         if not matches:
             raise Exception("Journey intermediate line incorrectly formatted: " + line)
 
@@ -650,32 +651,41 @@ class JourneyIntermediate(CIFRecord):
         # We think O means no stop for trains, and all such entries have no time marked
         if self.activity_flag == 'O':
             assert self.published_arrival_time == datetime.time(0, 0, 0) and self.published_departure_time == datetime.time(0, 0, 0)
-        # D is another undocumented train pickup/putdown flag, always
-        # associated with 0000 for arrival time. We think it means they only
-        # know the departure time, and not arrival. Let us depressingly assume
-        # they are the same.
+        # D is the same as S - Set Down only. Always has 0000 for departure time.
+        # Let us assume departure time = arrival.
         if self.activity_flag == 'D':
             assert self.published_departure_time == datetime.time(0, 0, 0)
             assert self.published_arrival_time != datetime.time(0, 0, 0)
             self.published_departure_time = self.published_arrival_time
+        # U appears to be the opposite, same as P (Pick Up only).
+        if self.activity_flag == 'U':
+            assert self.published_departure_time != datetime.time(0, 0, 0)
+            assert self.published_arrival_time == datetime.time(0, 0, 0)
+            self.published_arrival_time = self.published_departure_time
 
-    # B - both pick up and set down
-    # P - pick up only
-    # S - set down only
-    # N - neither pick up nor set down
-    # T - undocumented, but seems to mean train (so let's assume pick up and set down XXX)
-    # D - another train special, see above where we hack the departure time for it
-    # O - we think means a train stop where train doesn't stop XXX
+    # B - Both pick up and set down
+    # P - Pick up only
+    # S - Set down only
+    # N - Neither pick up nor set down
+    # A - stop/shunt to Allow other trains to pass
+    # C - stop to Change trainmen
+    # D - set Down only (train)
+    # O - train stop for Other operating reasons (so same as N)
+    # R - Request stop
+    # T - both pick up and set down (Train)
+    # U - pick Up only (train)
+    # X - pass another train at Xing point on single line
+    # - - stop to attach/detach vehicles
     def is_set_down(self):
-        if self.activity_flag in ['B', 'S', 'T', 'D']:
+        if self.activity_flag in ['B', 'S', 'T', 'D', 'R']:
             return True
-        if self.activity_flag in ['N', 'P', 'O']:
+        if self.activity_flag in ['N', 'P', 'O', 'U', 'A', 'C', 'X', '-']:
             return False
         assert False, "activity_flag %s not supported (location %s) " % (self.activity_flag, self.location)
     def is_pick_up(self):
-        if self.activity_flag in ['B', 'P', 'T', 'D']:
+        if self.activity_flag in ['B', 'P', 'T', 'U', 'R']:
             return True
-        if self.activity_flag in ['N', 'S', 'O']:
+        if self.activity_flag in ['N', 'S', 'O', 'D', 'A', 'C', 'X', '-']:
             return False
         assert False, "activity_flag %s not supported (location %s)" % (self.activity_flag, self.location)
 
