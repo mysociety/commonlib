@@ -5,7 +5,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: atcocif.py,v 1.17 2009-02-17 10:15:58 matthew Exp $
+# $Id: atcocif.py,v 1.18 2009-02-20 13:49:57 matthew Exp $
 #
 
 # TODO:
@@ -211,7 +211,17 @@ class ATCO:
         for location in self.locations:
             self.location_details[location.location] = location
 
-
+#        self.nearby_locations = {}
+#        for location in self.locations:
+#            easting = self.location_details[location].additional.grid_reference_easting
+#            northing = self.location_details[location].additional.grid_reference_northing
+#            for other_location, data in self.location_details.items():
+#            other_easting = data.additional.grid_reference_easting
+#            other_northing = data.additional.grid_reference_northing
+#            dist = math.sqrt(((easting-other_easting)**2) + ((northing-other_northing)**2))
+#            if dist < 3200: # c. 2 miles
+#                logging.debug("%s (%d,%d) is %d away from %s (%d,%d)" % (location, easting, northing, dist, target_location, target_easting, target_northing))
+#                self.nearby_locations.setdefault(location, {}).setdefault(other_location, dist)
 
 ###########################################################
 # Helper functions and classes
@@ -439,6 +449,7 @@ class JourneyHeader(CIFRecord):
         self.hops = []
         self.hop_lines = {}
         self.date_running_exceptions = []
+        self.ignored = False
 
     def __str__(self):
         ret = CIFRecord.__str__(self) + "\n"
@@ -452,6 +463,10 @@ class JourneyHeader(CIFRecord):
         '''See JourneyDateRunning for documentation of this function.'''
         assert isinstance(exception, JourneyDateRunning)
         self.date_running_exceptions.append(exception)
+
+    def ignore(self):
+        '''Mark a journey to be ignored by future calculations to save time'''
+        self.ignored = True
 
     def is_valid_on_date(self, d):
         '''Given a datetime.date returns a pair of True or False according to
@@ -467,6 +482,10 @@ class JourneyHeader(CIFRecord):
 
         You can add exceptions to the date range, see JourneyDateRunning below for examples.
         '''
+
+        if self.ignored:
+            return BoolWithReason(False, 'journey being ignored')
+
         # XXX not clearly defined in spec how these nest, but hey, this naive implementation might do
         excepted_state = None
         for exception in self.date_running_exceptions:
@@ -592,7 +611,7 @@ class JourneyOrigin(CIFRecord):
         if not matches:
             raise Exception("Journey origin line incorrectly formatted: " + line)
 
-        self.location = matches.group(1).strip()
+        self.location = matches.group(1).strip().upper()
         self.published_departure_time = parse_time(matches.group(2))
         self.bay_number = matches.group(3).strip()
         self.timing_point_indicator = { 'T0' : False, 'T1' : True }[matches.group(4)]
@@ -640,7 +659,7 @@ class JourneyIntermediate(CIFRecord):
         if not matches:
             raise Exception("Journey intermediate line incorrectly formatted: " + line)
 
-        self.location = matches.group(1).strip()
+        self.location = matches.group(1).strip().upper()
         self.published_arrival_time = parse_time(matches.group(2))
         self.published_departure_time = parse_time(matches.group(3))
         self.activity_flag = matches.group(4)
@@ -719,7 +738,7 @@ class JourneyDestination(CIFRecord):
         if not matches:
             raise Exception("Journey destination line incorrectly formatted: " + line)
 
-        self.location = matches.group(1).strip()
+        self.location = matches.group(1).strip().upper()
         self.published_arrival_time = parse_time(matches.group(2))
         self.bay_number = matches.group(3).strip()
         self.timing_point_indicator = { 'T0' : False, 'T1' : True }[matches.group(4)]
@@ -754,7 +773,7 @@ class Location(CIFRecord):
     >>> la = LocationAdditional('QBN9100CHLFNAL 499647  197573  Chiltern                                        ')
     >>> l.add_additional(la)
     >>> l.additional.grid_reference_easting
-    '499647'
+    499647
     
     There is a long description of the location, which includes useful fields
     from the additional record.
@@ -806,9 +825,9 @@ class LocationAdditional(CIFRecord):
     >>> la.location
     '9100CHLFNAL'
     >>> la.grid_reference_easting
-    '499647'
+    499647
     >>> la.grid_reference_northing
-    '197573'
+    197573
     >>> la.district_name
     'Chiltern'
     >>> la.town_name
@@ -824,8 +843,8 @@ class LocationAdditional(CIFRecord):
 
         self.transaction_type = matches.group(1)
         self.location = matches.group(2).strip()
-        self.grid_reference_easting = matches.group(3).strip()
-        self.grid_reference_northing = matches.group(4).strip()
+        self.grid_reference_easting = int(matches.group(3).strip())
+        self.grid_reference_northing = int(matches.group(4).strip())
         self.district_name = matches.group(5).strip()
         self.town_name = matches.group(6).strip()
 
