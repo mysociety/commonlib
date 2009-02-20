@@ -5,14 +5,12 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: atcocif.py,v 1.18 2009-02-20 13:49:57 matthew Exp $
+# $Id: atcocif.py,v 1.19 2009-02-20 14:53:28 matthew Exp $
 #
 
 # TODO:
 
 # Check that journey unique id is correct
-#
-# Look at the transaction types, are they always nice? What do with 'D' ones?
 #
 # Test exceptional date ranges more thoroughly, give error if they nest at all
 #
@@ -39,11 +37,6 @@
 # Later:
 # Test is_set_down, is_pick_up maybe a bit more
 # Test if timing point indicator tells you if points are interpolated
-# Train activity flags
-# - they should have pick up only for some cases, Matthew says:
-#    london-brum will be pick up only at watford
-#    manchester-london will be pick up only at stockport
-# - check what activity flags 'T', 'O', 'D' for trains definitively mean
 
 """Loads files in the ATCO-CIF file format, which is used in the UK to specify
 public transport journeys for accessibility planning by the National Public
