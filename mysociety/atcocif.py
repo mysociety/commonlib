@@ -5,7 +5,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: atcocif.py,v 1.20 2009-02-23 12:18:45 francis Exp $
+# $Id: atcocif.py,v 1.21 2009-02-23 12:45:34 francis Exp $
 #
 
 # TODO:
@@ -103,13 +103,13 @@ class ATCO:
         if zipfile.is_zipfile(f):
             zf = zipfile.ZipFile(f, 'r')
             for zipfilename in zf.namelist():
-                logging.debug("reading zipped CIF files " + f + ", internal file " + zipfilename)
+                logging.info("reading zip file " + f + ", internal file " + zipfilename)
                 data = zf.read(zipfilename)
                 # XXX won't recurse into zip files in zip files, but so what
                 self.read_string(data)
         else:
             # Otherwise, just read it
-            logging.debug("reading CIF file " + f)
+            logging.info("reading CIF file " + f)
             return self.read_file_handle(open(f))
 
     def read_string(self, s):
