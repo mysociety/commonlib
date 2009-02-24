@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: RABX.pm,v 1.25 2009-02-02 10:36:36 matthew Exp $
+# $Id: RABX.pm,v 1.26 2009-02-24 14:41:49 francis Exp $
 
 # References:
 #   Netstrings are documented here: http://cr.yp.to/proto/netstrings.txt
@@ -92,6 +92,7 @@ use strict;
 
 use Error qw(:try);
 use IO::String;
+use JSON;
 use utf8;
 
 my $have_fast_serialisation = 0;
@@ -388,6 +389,32 @@ sub return_string_parse ($) {
     }
 }
 
+=item return_string_json VALUE
+
+=item return_string_json ERROR
+
+Similar to return_string, only returns JSON rather than netstrings.
+
+=cut
+sub return_string_json ($) {
+    my ($v) = @_;
+    my $val;
+    if (ref($v) and UNIVERSAL::isa($v, 'RABX::Error')) {
+        $val = { 
+            'error_value' => $v->value() | RABX::Error::SERVER,    # Indicate that error was detected on server side.
+            'error_text' => $v->text(),
+
+        };
+        if ($v->can('error_extradata')) {
+            $val->{'error_extradata'} = $v->extradata();
+        }
+    } else {
+        $val = $v;
+    }
+    return JSON::to_json($val);
+}
+
+
 =item serialise X
 
 Format X (reference or scalar) into a string, and return it.
@@ -422,7 +449,7 @@ use HTTP::Response;
 use Data::Dumper;
 use Regexp::Common qw(URI);
 
-my $rcsid = ''; $rcsid .= '$Id: RABX.pm,v 1.25 2009-02-02 10:36:36 matthew Exp $';
+my $rcsid = ''; $rcsid .= '$Id: RABX.pm,v 1.26 2009-02-24 14:41:49 francis Exp $';
 
 =back
 
@@ -553,6 +580,7 @@ package RABX::Server::CGI;
 
 use CGI;
 use Error qw(:try);
+use Data::Dumper;
 
 =back
 
@@ -634,5 +662,58 @@ sub dispatch (%) { # XXX should take stream + environment hash
     print "\n",
           "$retstr\n";
 }
+
+=item dispatch_rest FUNCTION SPEC [...]
+
+Similar to dispatch, but uses a non-RABX format for parameters and return
+value. Instead parameters are taken in the query string, separated by '/'.
+The return value is a JSON object.
+
+=cut
+sub dispatch_rest (%) { # XXX should take stream + environment hash
+    my (%funcs) = @_;
+    my $ret;
+
+    binmode(STDIN);
+    binmode(STDOUT);
+
+    my $maxage = 0;
+
+    try {
+        my $meth = $ENV{REQUEST_METHOD};
+        throw RABX::Error(qq#No REQUEST_METHOD in environment; this script must be run in a CGI/FastCGI context#, RABX::Error::INTERFACE)
+            if (!defined($meth));
+        throw RABX::Error(qq#Bad HTTP method "$meth"; should be "GET"#, RABX::Error::TRANSPORT)
+            if ($meth !~ m#^(GET)$#);
+
+        my ($func, @args) = split /\//, $ENV{QUERY_STRING};
+
+        @args = map { s#\+# #gs; s#%([0-9a-f][0-9a-f])#sprintf('%c', hex($1))#gesi; $_; } @args;
+
+        throw RABX::Error(qq#no function "$func"#, RABX::Error::INTERFACE)
+            if (!exists($funcs{$func}));
+
+        # Now actually call the function.
+        my $x = $funcs{$func};
+        if (ref($x) eq 'ARRAY') {
+            $maxage = $x->[1];
+            $x = $x->[0];
+        }
+        $ret = $x->(@args);
+    } catch RABX::Error with {
+        $ret = shift;
+    } otherwise {
+        my $E = shift;
+        $ret = new RABX::Error("$E", RABX::Error::UNKNOWN);
+    };
+
+    my $retstr = RABX::return_string_json($ret);
+    print "Content-Type: application/octet-stream\n",
+          "Content-Length: ",  length($retstr), "\n";
+    print "Cache-Control: max-age=$maxage\n" if ($maxage);
+    print "\n",
+          "$retstr\n";
+}
+
 
 1;
