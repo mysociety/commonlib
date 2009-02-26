@@ -6,7 +6,7 @@
 # Copyright (c) 2009 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: rabx.py,v 1.1 2009-02-24 14:49:41 francis Exp $
+# $Id: rabx.py,v 1.2 2009-02-26 09:46:02 francis Exp $
 #
 
 import os
@@ -28,6 +28,7 @@ class RABXException(Exception):
         return ret
 
 def call_rest_rabx(base_url, params):
+    params = [ '' if x == None else x for x in params ]
     params_quoted = [ urllib.quote_plus(x) for x in params ]
     params_joined = "/".join(params_quoted)
     url = base_url.replace(".cgi", "-rest.cgi") + "?" + params_joined
