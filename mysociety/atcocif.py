@@ -5,7 +5,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: atcocif.py,v 1.26 2009-03-02 18:20:55 francis Exp $
+# $Id: atcocif.py,v 1.27 2009-03-02 18:41:00 francis Exp $
 #
 
 # TODO:
@@ -63,6 +63,7 @@ class ATCO:
         self.journeys = []
         self.locations = []
         self.assume_no_holidays = assume_no_holidays
+        self.nearby_max_distance = None
 
     def __str__(self):
         ret = str(self.file_header) + "\n"
@@ -205,7 +206,7 @@ class ATCO:
         for location in self.locations:
             self.location_details[location.location] = location
 
-    def index_nearby_locations(self, max_distance):
+    def index_nearby_locations(self, nearby_max_distance):
         ''' Creates an index to make it quick to look up stops near other stops. The distance
         is the maximum distance to include stops of. Includes station itself, so all entries
         in array are present.
@@ -226,6 +227,12 @@ class ATCO:
         {Location('9100COOKHAM'): 0.0}
         '''
 
+        # see if we already have the index for this distance
+        if nearby_max_distance == self.nearby_max_distance:
+            return
+        
+        # otherwise, make it
+        self.nearby_max_distance = None
         self.nearby_locations = {}
         for location in self.locations:
             easting = location.additional.grid_reference_easting
@@ -234,9 +241,10 @@ class ATCO:
                 other_easting = other_location.additional.grid_reference_easting
                 other_northing = other_location.additional.grid_reference_northing
                 dist = math.sqrt(((easting-other_easting)**2) + ((northing-other_northing)**2))
-                if dist < max_distance:
+                if dist < nearby_max_distance:
                     logging.debug("%s (%d,%d) is %d away from %s (%d,%d)" % (location, easting, northing, dist, other_location.location, other_easting, other_northing))
                     self.nearby_locations.setdefault(location, {}).setdefault(other_location, dist)
+        self.nearby_max_distance = nearby_max_distance
 
 ###########################################################
 # Helper functions and classes
