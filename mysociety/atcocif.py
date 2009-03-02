@@ -5,7 +5,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: atcocif.py,v 1.22 2009-03-02 14:33:56 francis Exp $
+# $Id: atcocif.py,v 1.23 2009-03-02 16:07:45 francis Exp $
 #
 
 # TODO:
@@ -14,21 +14,6 @@
 #
 # Test exceptional date ranges more thoroughly, give error if they nest at all
 #
-# Work round school terms and bank holidays for definite somehow
-#   School terms are needed but not implemented - where is the data?
-#        [rs] Simple answer is "no" - the week for the sample to be taken is
-#        deliberately one which is in school and University term time.  The data can
-#        only represent the services operating in that week, when you should assume
-#        that Schoolday journeys operate, and NSch ones don't.  Any conclusions other
-#        than for the sample week would be prone to inaccuracy as I have no way of
-#        knowing whether filtering was put in place in some data sources to exclude
-#        services and journeys which did not operate in the sample week.
-#   Bank holidays are needed but not implemented - where is the data?
-#        [rs] Bank Holidays are not generally handled within the data - and no
-#        conclusions can be drawn about the availability of Bank Holiday services
-#        from NPTDR data.  The remit is only to have a complete set of data for the
-#        sample week.
-
 # Test duplicate hop removal - how do we test logging in doctest?
 #        >>> logging.basicConfig(level=logging.WARN)
 #        >>> jh.add_hop(JourneyIntermediate('QI9100BCNSFLD 16531653T   T1  '))
@@ -73,9 +58,12 @@ import zipfile
 # Main class
 
 class ATCO:
-    def __init__(self):
+    def __init__(self, assume_no_holidays = True):
+        '''assume_no_holidays assumes there are no school or bank holidays on the days
+        you are quering for.'''
         self.journeys = []
         self.locations = []
+        self.assume_no_holidays = assume_no_holidays
 
     def __str__(self):
         ret = str(self.file_header) + "\n"
@@ -138,7 +126,7 @@ class ATCO:
 
             # Journeys - store the clump of records relating to one journey 
             if record_identity == 'QS':
-                current_item = JourneyHeader(line)
+                current_item = JourneyHeader(line, assume_no_holidays = True)
                 self.journeys.append(current_item)
             elif record_identity == 'QE':
                 assert isinstance(current_item, JourneyHeader)
@@ -425,8 +413,9 @@ class JourneyHeader(CIFRecord):
     in self.hops - see add_hop below for examples.
     '''
 
-    def __init__(self, line):
+    def __init__(self, line, assume_no_holidays = True):
         CIFRecord.__init__(self, line, "QS")
+        self.assume_no_holidays = True
 
         matches = re.match('^QS([NDR])(.{4})(.{6})(\d{8})(\d{8}| {8})([01]{7})([ SH])([ ABX])(.{4})(.{6})(.{8})(.{8})(.)$', line)
         if not matches:
@@ -509,11 +498,16 @@ class JourneyHeader(CIFRecord):
         if not self.operates_on_day_of_week[d.isoweekday()]:
             return BoolWithReason(False, "journey doesn't operate on a " + d.strftime('%A'))
 
-        # school terms
-        # assert self.school_term_time == " ", "fancy school term related journey not implemented " + self.school_term_time
+        if not self.assume_no_holidays:
+            # NPTDR provides data only for days when there are no school or bank holidays,
+            # so can safely set assume_no_holidays when loading it. For other ATCO-CIF
+            # data sets, will need to import lists of holidays for this function to work.
 
-        # bank holidays
-        # assert self.bank_holidays == " ", "fancy bank holiday related journey not implemented " + self.bank_holidays
+            # school terms
+            assert self.school_term_time == " ", "fancy school term related journey not implemented " + self.school_term_time + ", perhaps set assume_no_holidays"
+
+            # bank holidays
+            assert self.bank_holidays == " ", "fancy bank holiday related journey not implemented " + self.bank_holidays + ", perhaps set assume_no_holidays"
 
         return BoolWithReason(True, "OK")
 
