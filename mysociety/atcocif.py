@@ -5,7 +5,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: atcocif.py,v 1.25 2009-03-02 17:57:53 francis Exp $
+# $Id: atcocif.py,v 1.26 2009-03-02 18:20:55 francis Exp $
 #
 
 # TODO:
@@ -219,11 +219,11 @@ class ATCO:
         ... """)
         >>> atco.index_by_short_codes()
         >>> atco.index_nearby_locations(3600) # c. 2 miles
-        >>> atco.nearby_locations['9100COOKHAM']
-        {'9100COOKHAM': 0.0, '9100FURZEP': 2754.6128584612393}
+        >>> atco.nearby_locations[atco.location_details['9100COOKHAM']]
+        {Location('9100COOKHAM'): 0.0, Location('9100FURZEP'): 2754.6128584612393}
         >>> atco.index_nearby_locations(10)
-        >>> atco.nearby_locations['9100COOKHAM']
-        {'9100COOKHAM': 0.0}
+        >>> atco.nearby_locations[atco.location_details['9100COOKHAM']]
+        {Location('9100COOKHAM'): 0.0}
         '''
 
         self.nearby_locations = {}
@@ -236,7 +236,7 @@ class ATCO:
                 dist = math.sqrt(((easting-other_easting)**2) + ((northing-other_northing)**2))
                 if dist < max_distance:
                     logging.debug("%s (%d,%d) is %d away from %s (%d,%d)" % (location, easting, northing, dist, other_location.location, other_easting, other_northing))
-                    self.nearby_locations.setdefault(location.location, {}).setdefault(other_location.location, dist)
+                    self.nearby_locations.setdefault(location, {}).setdefault(other_location, dist)
 
 ###########################################################
 # Helper functions and classes
@@ -824,6 +824,9 @@ class Location(CIFRecord):
         if self.additional: 
             ret = ret + "\t" + str(self.additional)
         return ret
+
+    def __repr__(self):
+        return "Location('" + self.location + "')"
 
     def add_additional(self, additional):
         assert isinstance(additional, LocationAdditional)
