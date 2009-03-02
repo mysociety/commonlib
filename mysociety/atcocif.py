@@ -5,12 +5,10 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: atcocif.py,v 1.23 2009-03-02 16:07:45 francis Exp $
+# $Id: atcocif.py,v 1.24 2009-03-02 16:23:03 francis Exp $
 #
 
 # TODO:
-
-# Check that journey unique id is correct
 #
 # Test exceptional date ranges more thoroughly, give error if they nest at all
 #
@@ -53,6 +51,7 @@ import mx.DateTime
 import logging
 import StringIO
 import zipfile
+import math
 
 ###########################################################
 # Main class
@@ -206,17 +205,38 @@ class ATCO:
         for location in self.locations:
             self.location_details[location.location] = location
 
-#        self.nearby_locations = {}
-#        for location in self.locations:
-#            easting = self.location_details[location].additional.grid_reference_easting
-#            northing = self.location_details[location].additional.grid_reference_northing
-#            for other_location, data in self.location_details.items():
-#            other_easting = data.additional.grid_reference_easting
-#            other_northing = data.additional.grid_reference_northing
-#            dist = math.sqrt(((easting-other_easting)**2) + ((northing-other_northing)**2))
-#            if dist < 3200: # c. 2 miles
-#                logging.debug("%s (%d,%d) is %d away from %s (%d,%d)" % (location, easting, northing, dist, target_location, target_easting, target_northing))
-#                self.nearby_locations.setdefault(location, {}).setdefault(other_location, dist)
+    def index_nearby_locations(self, max_distance):
+        ''' Creates an index to make it quick to look up stops near other stops. The distance
+        is the maximum distance to include stops of. Includes station itself, so all entries
+        in array are present.
+
+        >>> atco = ATCO()
+        >>> atco.read_string("""ATCO-CIF0510                       70 - RAIL        ATCORAIL20080124115909
+        ... QLN9100FURZEP  Furze Platt Rail Station                         RE0043271
+        ... QBN9100FURZEP  488294  182334                                                  
+        ... QLN9100COOKHAM Cookham Rail Station                             RE0057284
+        ... QBN9100COOKHAM 488690  185060                                                  
+        ... """)
+        >>> atco.index_by_short_codes()
+        >>> atco.index_nearby_locations(3600) # c. 2 miles
+        >>> atco.nearby_locations['9100COOKHAM']
+        {'9100COOKHAM': 0.0, '9100FURZEP': 2754.6128584612393}
+        >>> atco.index_nearby_locations(10)
+        >>> atco.nearby_locations['9100COOKHAM']
+        {'9100COOKHAM': 0.0}
+        '''
+
+        self.nearby_locations = {}
+        for location in self.locations:
+            easting = location.additional.grid_reference_easting
+            northing = location.additional.grid_reference_northing
+            for other_location, data in self.location_details.items():
+                other_easting = data.additional.grid_reference_easting
+                other_northing = data.additional.grid_reference_northing
+                dist = math.sqrt(((easting-other_easting)**2) + ((northing-other_northing)**2))
+                if dist < max_distance:
+                    logging.debug("%s (%d,%d) is %d away from %s (%d,%d)" % (location, easting, northing, dist, other_location, other_easting, other_northing))
+                    self.nearby_locations.setdefault(location.location, {}).setdefault(other_location, dist)
 
 ###########################################################
 # Helper functions and classes
