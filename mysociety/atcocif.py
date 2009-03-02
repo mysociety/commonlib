@@ -5,7 +5,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: atcocif.py,v 1.21 2009-02-23 12:45:34 francis Exp $
+# $Id: atcocif.py,v 1.22 2009-03-02 14:33:56 francis Exp $
 #
 
 # TODO:
@@ -433,6 +433,7 @@ class JourneyHeader(CIFRecord):
             raise Exception("Journey header line incorrectly formatted: " + line)
 
         self.transaction_type = matches.group(1)
+        assert self.transaction_type == 'N' # code doesn't handle other types yet
         self.operator = matches.group(2).strip()
         self.unique_journey_identifier = matches.group(3).strip()
         self.first_date_of_operation = parse_date(matches.group(4))
@@ -796,6 +797,7 @@ class Location(CIFRecord):
             raise Exception("Location line incorrectly formatted: " + line)
 
         self.transaction_type = matches.group(1)
+        assert self.transaction_type == 'N' # code doesn't handle other types yet
         self.location = matches.group(2).strip()
         self.full_location = matches.group(3).strip()
         self.gazetteer_code = matches.group(4)
