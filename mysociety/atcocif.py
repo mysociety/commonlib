@@ -5,7 +5,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: atcocif.py,v 1.24 2009-03-02 16:23:03 francis Exp $
+# $Id: atcocif.py,v 1.25 2009-03-02 17:57:53 francis Exp $
 #
 
 # TODO:
@@ -230,13 +230,13 @@ class ATCO:
         for location in self.locations:
             easting = location.additional.grid_reference_easting
             northing = location.additional.grid_reference_northing
-            for other_location, data in self.location_details.items():
-                other_easting = data.additional.grid_reference_easting
-                other_northing = data.additional.grid_reference_northing
+            for other_location in self.locations:
+                other_easting = other_location.additional.grid_reference_easting
+                other_northing = other_location.additional.grid_reference_northing
                 dist = math.sqrt(((easting-other_easting)**2) + ((northing-other_northing)**2))
                 if dist < max_distance:
-                    logging.debug("%s (%d,%d) is %d away from %s (%d,%d)" % (location, easting, northing, dist, other_location, other_easting, other_northing))
-                    self.nearby_locations.setdefault(location.location, {}).setdefault(other_location, dist)
+                    logging.debug("%s (%d,%d) is %d away from %s (%d,%d)" % (location, easting, northing, dist, other_location.location, other_easting, other_northing))
+                    self.nearby_locations.setdefault(location.location, {}).setdefault(other_location.location, dist)
 
 ###########################################################
 # Helper functions and classes
