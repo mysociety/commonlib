@@ -5,7 +5,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: atcocif.py,v 1.28 2009-03-03 00:02:14 francis Exp $
+# $Id: atcocif.py,v 1.29 2009-03-03 13:10:23 francis Exp $
 #
 
 # TODO:
@@ -560,6 +560,10 @@ class JourneyHeader(CIFRecord):
         None
         >>> print jh.find_arrival_time_at_location('somewhere else')
         None
+        >>> jh.find_departure_time_at_location('9100SUNDRTN')
+        datetime.time(16, 40)
+        >>> print jh.find_departure_time_at_location('9100MARYLBN')
+        None
         '''
 
         if hop.line in self.hop_lines:
@@ -583,6 +587,21 @@ class JourneyHeader(CIFRecord):
                     ret = hop.published_arrival_time
 
         return ret
+
+    def find_departure_time_at_location(self, location):
+        ''' Given a location (as a string short code), return the time this journey
+        starts there, or None if it only stops there, or doesn't start there.
+            
+        See add_hop above for examples.
+        '''
+        ret = None
+        for hop in self.hops:
+            if hop.location == location:
+                if hop.is_pick_up():
+                    ret = hop.published_departure_time
+
+        return ret
+
 
 class JourneyDateRunning(CIFRecord):
     '''Optionally follows a JourneyHeader. The header itself has only one simple
