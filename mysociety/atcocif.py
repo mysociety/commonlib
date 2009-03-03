@@ -5,10 +5,11 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: atcocif.py,v 1.27 2009-03-02 18:41:00 francis Exp $
+# $Id: atcocif.py,v 1.28 2009-03-03 00:02:14 francis Exp $
 #
 
 # TODO:
+# Rename location_details to location_from_id
 #
 # Test exceptional date ranges more thoroughly, give error if they nest at all
 #
