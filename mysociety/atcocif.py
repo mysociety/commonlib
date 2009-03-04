@@ -5,20 +5,16 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: atcocif.py,v 1.31 2009-03-04 01:41:26 francis Exp $
+# $Id: atcocif.py,v 1.32 2009-03-04 02:02:10 francis Exp $
 #
 
-# TODO:
-# Test exceptional date ranges more thoroughly, give error if they nest at all
-#
+# To do Later:
+# Test is_set_down, is_pick_up maybe a bit more
 # Test duplicate hop removal - how do we test logging in doctest?
 #        >>> logging.basicConfig(level=logging.WARN)
 #        >>> jh.add_hop(JourneyIntermediate('QI9100BCNSFLD 16531653T   T1  '))
 #        removed duplicate stop/time QI9100BCNSFLD 16531653T   T1  
-
-# Later:
-# Test is_set_down, is_pick_up maybe a bit more
-# Test if timing point indicator tells you if points are interpolated
+# See if timing point indicator tells you if points are interpolated
 
 """Loads files in the ATCO-CIF file format, which is used in the UK to specify
 public transport journeys for accessibility planning by the National Public
@@ -486,6 +482,19 @@ class JourneyHeader(CIFRecord):
     def add_date_running_exception(self, exception):
         '''See JourneyDateRunning for documentation of this function.'''
         assert isinstance(exception, JourneyDateRunning)
+
+        # test consistency with existing date running exceptions
+        for other in self.date_running_exceptions:
+            # see if the new one overlaps this other exception
+            if not(other.end_of_exceptional_period < exception.start_of_exceptional_period \
+                or exception.end_of_exceptional_period < other.start_of_exceptional_period):
+                # We're in trouble if it overlapped, and the operation code differed - 
+                # this is being conservative. It is possible ATCO-CIF documents what criteria
+                # causes one range to override another in this case.
+                if other.operation_code != exception.operation_code:
+                    raise Exception("Inconsistency between date running exceptions, " + exception.line + " and " + other.line)
+
+        # store the new date running exception
         self.date_running_exceptions.append(exception)
 
     def ignore(self):
@@ -510,7 +519,9 @@ class JourneyHeader(CIFRecord):
         if self.ignored:
             return BoolWithReason(False, 'journey being ignored')
 
-        # XXX not clearly defined in spec how these nest, but hey, this naive implementation might do
+        # add_date_running_exception above tests that the exception date ranges
+        # are consistent with each other, so this naive implementation that
+        # assumes no kind of nesting will do.
         excepted_state = None
         for exception in self.date_running_exceptions:
             if exception.start_of_exceptional_period <= d and d <= exception.end_of_exceptional_period:
@@ -627,6 +638,18 @@ class JourneyDateRunning(CIFRecord):
     >>> jh.add_date_running_exception(jdr)
     >>> jh.is_valid_on_date(datetime.date(2007,12,25)) # Christmas day
     BoolWithReason(False, '2007-12-25 not in range of exceptional date records')
+
+    If two JourneyDateRunning records contradict each other, it raises an error.
+
+    >>> jdr2 = JourneyDateRunning('QE20071225200712301')
+    >>> jh.add_date_running_exception(jdr2) # inconsistent, as overlaps and has different operation code
+    Traceback (most recent call last):
+        ...
+    Exception: Inconsistency between date running exceptions, QE20071225200712301 and QE20071225200712250
+    >>> jdr3 = JourneyDateRunning('QE20071225200712300')
+    >>> jh.add_date_running_exception(jdr3) # not inconsistent, as has same operation_code
+    >>> jdr4 = JourneyDateRunning('QE20071220200712241')
+    >>> jh.add_date_running_exception(jdr4) # no inconsistent, as date range doesn't overlap
     '''
 
     def __init__(self, line):
