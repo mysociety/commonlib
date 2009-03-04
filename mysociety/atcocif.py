@@ -5,7 +5,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: atcocif.py,v 1.34 2009-03-04 02:30:24 francis Exp $
+# $Id: atcocif.py,v 1.35 2009-03-04 16:34:01 matthew Exp $
 #
 
 # To do Later:
@@ -115,6 +115,9 @@ class ATCO:
         current_item = None
         for line in self.handle.readlines():
             line = line.strip("\n\r")
+            if not line:
+                continue # Ignore blank lines (never present in real CIF files, but can't hurt)
+
             #logging.debug(line)
             record_identity = line[0:2]
             record = None
@@ -469,6 +472,7 @@ class JourneyHeader(CIFRecord):
 
         self.hops = []
         self.hop_lines = {}
+        #self.hop_locations = {}
         self.date_running_exceptions = []
         self.ignored = False
 
@@ -565,51 +569,54 @@ class JourneyHeader(CIFRecord):
 
         There are then some other functions you can call.
 
-        >>> jh.find_arrival_time_at_location('9100BCNSFLD')
-        datetime.time(16, 53)
-        >>> print jh.find_arrival_time_at_location('9100PRINRIS')
-        None
-        >>> print jh.find_arrival_time_at_location('somewhere else')
-        None
-        >>> jh.find_departure_time_at_location('9100SUNDRTN')
-        datetime.time(16, 40)
-        >>> print jh.find_departure_time_at_location('9100MARYLBN')
-        None
+        >>> jh.find_arrival_times_at_location('9100BCNSFLD')
+        [datetime.time(16, 53)]
+        >>> print jh.find_arrival_times_at_location('9100PRINRIS')
+        []
+        >>> print jh.find_arrival_times_at_location('somewhere else')
+        []
+        >>> jh.find_departure_times_at_location('9100SUNDRTN')
+        [datetime.time(16, 40)]
+        >>> print jh.find_departure_times_at_location('9100MARYLBN')
+        []
         '''
 
         if hop.line in self.hop_lines:
             # if we go to the same stop at the same time again, ignore duplicate
             logging.warn("removed duplicate stop/time " + hop.line)
             return
+        #if hop.location in self.hop_locations:
+        #    print "duplicate stop %s %s" % (hop.location, hop.line)
         assert isinstance(hop, JourneyOrigin) or isinstance(hop, JourneyIntermediate) or isinstance(hop, JourneyDestination)
         self.hops.append(hop)
         self.hop_lines[hop.line] = True
+        #self.hop_locations[hop.location] = True
 
-    def find_arrival_time_at_location(self, location):
-        ''' Given a location (as a string short code), return the time this journey
-        stops there, or None if it only starts there, or doesn't stop there.
+    def find_arrival_times_at_location(self, location):
+        ''' Given a location (as a string short code), return the times this journey
+        stops there, or [] if it only starts there, or doesn't stop there.
             
         See add_hop above for examples.
         '''
-        ret = None
+        ret = []
         for hop in self.hops:
             if hop.location == location:
                 if hop.is_set_down():
-                    ret = hop.published_arrival_time
+                    ret.append(hop.published_arrival_time)
 
         return ret
 
-    def find_departure_time_at_location(self, location):
-        ''' Given a location (as a string short code), return the time this journey
-        starts there, or None if it only stops there, or doesn't start there.
+    def find_departure_times_at_location(self, location):
+        ''' Given a location (as a string short code), return the times this journey
+        starts there, or [] if it only stops there, or doesn't start there.
             
         See add_hop above for examples.
         '''
-        ret = None
+        ret = []
         for hop in self.hops:
             if hop.location == location:
                 if hop.is_pick_up():
-                    ret = hop.published_departure_time
+                    ret.append(hop.published_departure_time)
 
         return ret
 
