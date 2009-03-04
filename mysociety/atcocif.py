@@ -5,12 +5,10 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: atcocif.py,v 1.30 2009-03-04 01:26:10 francis Exp $
+# $Id: atcocif.py,v 1.31 2009-03-04 01:41:26 francis Exp $
 #
 
 # TODO:
-# Rename location_details to location_from_id
-#
 # Test exceptional date ranges more thoroughly, give error if they nest at all
 #
 # Test duplicate hop removal - how do we test logging in doctest?
@@ -183,7 +181,7 @@ class ATCO:
         >>> journeys_visiting_cookham = atco.journeys_visiting_location["9100COOKHAM"]
         >>> [x.id for x in journeys_visiting_cookham]
         ['GW-6B1A', 'GW-6B18']
-        >>> atco.location_details["9100COOKHAM"].long_description()
+        >>> atco.location_from_id["9100COOKHAM"].long_description()
         'Cookham Rail Station'
         '''
 
@@ -203,9 +201,9 @@ class ATCO:
 
                 self.journeys_visiting_location[hop.location].add(journey)
 
-        self.location_details = {}
+        self.location_from_id = {}
         for location in self.locations:
-            self.location_details[location.location] = location
+            self.location_from_id[location.location] = location
 
     def index_nearby_locations(self, nearby_max_distance):
         ''' Creates an index to make it quick to look up stops near other stops. The distance
@@ -221,10 +219,10 @@ class ATCO:
         ... """)
         >>> atco.index_by_short_codes()
         >>> atco.index_nearby_locations(3600) # c. 2 miles
-        >>> atco.nearby_locations[atco.location_details['9100COOKHAM']]
+        >>> atco.nearby_locations[atco.location_from_id['9100COOKHAM']]
         {Location('9100COOKHAM'): 0.0, Location('9100FURZEP'): 2754.6128584612393}
         >>> atco.index_nearby_locations(10)
-        >>> atco.nearby_locations[atco.location_details['9100COOKHAM']]
+        >>> atco.nearby_locations[atco.location_from_id['9100COOKHAM']]
         {Location('9100COOKHAM'): 0.0}
         '''
 
