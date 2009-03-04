@@ -5,7 +5,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: atcocif.py,v 1.32 2009-03-04 02:02:10 francis Exp $
+# $Id: atcocif.py,v 1.33 2009-03-04 02:03:07 francis Exp $
 #
 
 # To do Later:
@@ -490,7 +490,8 @@ class JourneyHeader(CIFRecord):
                 or exception.end_of_exceptional_period < other.start_of_exceptional_period):
                 # We're in trouble if it overlapped, and the operation code differed - 
                 # this is being conservative. It is possible ATCO-CIF documents what criteria
-                # causes one range to override another in this case.
+                # causes one range to override another in this case, in which case amend
+                # this and is_valid_on_date below appropriately.
                 if other.operation_code != exception.operation_code:
                     raise Exception("Inconsistency between date running exceptions, " + exception.line + " and " + other.line)
 
