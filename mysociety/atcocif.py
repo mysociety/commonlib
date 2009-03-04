@@ -5,7 +5,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: atcocif.py,v 1.35 2009-03-04 16:34:01 matthew Exp $
+# $Id: atcocif.py,v 1.36 2009-03-04 18:34:48 francis Exp $
 #
 
 # To do Later:
@@ -244,6 +244,35 @@ class ATCO:
                     logging.debug("%s (%d,%d) is %d away from %s (%d,%d)" % (location, easting, northing, dist, other_location.location, other_easting, other_northing))
                     self.nearby_locations.setdefault(location, {}).setdefault(other_location, dist)
         self.nearby_max_distance = nearby_max_distance
+
+    def statistics(self):
+        ''' Returns a dictionary of statistics about the loaded timetables. '''
+        stats = {}
+        stats['journey_count'] = len(self.journeys)
+        stats['location_count'] = len(self.locations)
+
+        c = 0
+        tot = 0
+        for location, nearby_dict in self.nearby_locations.iteritems():
+            c += 1
+            tot += len(nearby_dict)
+        assert c == len(self.locations)
+        stats['average_nearby_locations'] = float(tot) / c
+
+        c = 0
+        tot = 0
+        for location in self.locations:
+            direct_connecting_locations = {}
+            for journey in self.journeys_visiting_location[location.location]:
+                for hop in journey.hops:
+                    direct_connecting_locations[hop.location] = 1
+
+            c += 1
+            tot += len(direct_connecting_locations)
+        stats['average_direct_connecting_locations'] = float(tot) / c
+
+        return stats
+
 
 ###########################################################
 # Helper functions and classes
