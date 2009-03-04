@@ -5,7 +5,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: atcocif.py,v 1.29 2009-03-03 13:10:23 francis Exp $
+# $Id: atcocif.py,v 1.30 2009-03-04 01:26:10 francis Exp $
 #
 
 # TODO:
@@ -182,7 +182,7 @@ class ATCO:
         >>> atco.index_by_short_codes()
         >>> journeys_visiting_cookham = atco.journeys_visiting_location["9100COOKHAM"]
         >>> [x.id for x in journeys_visiting_cookham]
-        ['GW6B1A', 'GW6B18']
+        ['GW-6B1A', 'GW-6B18']
         >>> atco.location_details["9100COOKHAM"].long_description()
         'Cookham Rail Station'
         '''
@@ -413,7 +413,7 @@ class JourneyHeader(CIFRecord):
     >>> jh.unique_journey_identifier
     '6B39'
     >>> jh.id
-    'GW6B39'
+    'GW-6B39'
     >>> jh.first_date_of_operation
     datetime.date(2007, 5, 21)
     >>> jh.last_date_of_operation
@@ -470,7 +470,7 @@ class JourneyHeader(CIFRecord):
         self.route_direction = matches.group(13)
 
         # Operator code and journey identifier are unique together
-        self.id = self.operator + self.unique_journey_identifier
+        self.id = self.operator + "-" + self.unique_journey_identifier
 
         self.hops = []
         self.hop_lines = {}
@@ -601,6 +601,16 @@ class JourneyHeader(CIFRecord):
                     ret = hop.published_departure_time
 
         return ret
+
+    def crosses_midnight(self):
+        ''' Returns whether the journey takes place across midnight. '''
+        previous_departure_time = datetime.time(0, 0, 0)
+        for hop in self.hops:
+            if hop.is_pick_up():
+                if previous_departure_time > hop.published_departure_time:
+                    return True
+                previous_departure_time = hop.published_departure_time
+        return False
 
 
 class JourneyDateRunning(CIFRecord):
