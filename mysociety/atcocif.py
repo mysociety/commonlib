@@ -5,7 +5,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: atcocif.py,v 1.36 2009-03-04 18:34:48 francis Exp $
+# $Id: atcocif.py,v 1.37 2009-03-05 15:14:50 francis Exp $
 #
 
 # To do Later:
@@ -503,7 +503,9 @@ class JourneyHeader(CIFRecord):
         self.hop_lines = {}
         #self.hop_locations = {}
         self.date_running_exceptions = []
-        self.ignored = False
+
+        self.cache_valid = None
+        self.cache_valid_date = None
 
     def __str__(self):
         ret = CIFRecord.__str__(self) + "\n"
@@ -532,10 +534,6 @@ class JourneyHeader(CIFRecord):
         # store the new date running exception
         self.date_running_exceptions.append(exception)
 
-    def ignore(self):
-        '''Mark a journey to be ignored by future calculations to save time'''
-        self.ignored = True
-
     def is_valid_on_date(self, d):
         '''Given a datetime.date returns a pair of True or False according to
         whether the journey runs on that date, and the reasoning.
@@ -551,9 +549,14 @@ class JourneyHeader(CIFRecord):
         You can add exceptions to the date range, see JourneyDateRunning below for examples.
         '''
 
-        if self.ignored:
-            return BoolWithReason(False, 'journey being ignored')
+        # optimisaton if this called multiple times with same date
+        if d != self.cache_valid_date:
+            self.cache_valid = self._internal_is_valid_on_date(d)
+            self.cache_valid_date = d
 
+        return self.cache_valid
+
+    def _internal_is_valid_on_date(self, d):
         # add_date_running_exception above tests that the exception date ranges
         # are consistent with each other, so this naive implementation that
         # assumes no kind of nesting will do.
@@ -665,9 +668,18 @@ class JourneyDateRunning(CIFRecord):
     date range for when a journey runs. This record creates exceptions from
     that range for when the journey does or does not run. 
 
+    Here is a normal journey, which runs on Christmas day.
+
     >>> jh = JourneyHeader('QSNSUC   599B20070910204912311111100  X5        COACH           5')
     >>> jh.is_valid_on_date(datetime.date(2007,12,25)) # Christmas day
     BoolWithReason(True, 'OK')
+
+    Here we add an exception to make it not run on Christmas day. Note that we
+    construct the whole journey again, as it does internal caching if you call
+    it repeatedly with the same date. i.e. It expects you to load the whole
+    journey with exceptions in before using it rather than modify it during use.
+
+    >>> jh = JourneyHeader('QSNSUC   599B20070910204912311111100  X5        COACH           5')
     >>> jdr = JourneyDateRunning('QE20071225200712250')
     >>> (jdr.start_of_exceptional_period, jdr.end_of_exceptional_period)
     (datetime.date(2007, 12, 25), datetime.date(2007, 12, 25))
