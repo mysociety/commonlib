@@ -5,7 +5,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: atcocif.py,v 1.38 2009-03-09 16:16:11 francis Exp $
+# $Id: atcocif.py,v 1.39 2009-03-09 16:48:32 francis Exp $
 #
 
 # To do Later:
@@ -104,6 +104,17 @@ class ATCO:
         h = StringIO.StringIO(s)
         return self.read_file_handle(h)
 
+    def item_loaded(self, item):
+        ''' Override this function if, for example, you want to stream the
+        journeys in, rather than store them all in Python in memory.'''
+
+        if isinstance(item, JourneyHeader):
+            self.journeys.append(item)
+        elif isinstance(item, Location):
+            self.locations.append(item)
+        else:
+            assert False
+
     def read_file_handle(self, h):
         '''Loads an ATCO-CIF file from a file handle.'''
         self.handle = h
@@ -124,8 +135,9 @@ class ATCO:
 
             # Journeys - store the clump of records relating to one journey 
             if record_identity == 'QS':
+                if current_item != None:
+                    self.item_loaded(current_item)
                 current_item = JourneyHeader(line, assume_no_holidays = True)
-                self.journeys.append(current_item)
             elif record_identity == 'QE':
                 assert isinstance(current_item, JourneyHeader)
                 current_item.add_date_running_exception(JourneyDateRunning(line))
@@ -141,8 +153,9 @@ class ATCO:
             
             # Locations - store the group of records relating to one location
             elif record_identity == 'QL':
+                if current_item != None:
+                    self.item_loaded(current_item)
                 current_item = Location(line)
-                self.locations.append(current_item)
             elif record_identity == 'QB':
                 assert isinstance(current_item, Location)
                 current_item.add_additional(LocationAdditional(line))
@@ -155,6 +168,9 @@ class ATCO:
                 logging.warning("Ignoring record type '" + record_identity + "'")
             else:
                 raise Exception("Unknown record type '" + record_identity + "'")
+
+        if current_item != None:
+            self.item_loaded(current_item)
 
     def index_by_short_codes(self):
         '''Make dictionaries so it is quick to look up all journeys visiting a
