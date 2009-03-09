@@ -5,7 +5,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: atcocif.py,v 1.37 2009-03-05 15:14:50 francis Exp $
+# $Id: atcocif.py,v 1.38 2009-03-09 16:16:11 francis Exp $
 #
 
 # To do Later:
@@ -260,16 +260,20 @@ class ATCO:
         stats['average_nearby_locations'] = float(tot) / c
 
         c = 0
-        tot = 0
+        tot_direct_connecting_locations = 0
+        tot_journeys_per_connecting_pair = 0
         for location in self.locations:
             direct_connecting_locations = {}
+            hopcount = 0
             for journey in self.journeys_visiting_location[location.location]:
                 for hop in journey.hops:
                     direct_connecting_locations[hop.location] = 1
-
+                    hopcount += 1
             c += 1
-            tot += len(direct_connecting_locations)
-        stats['average_direct_connecting_locations'] = float(tot) / c
+            tot_direct_connecting_locations += len(direct_connecting_locations)
+            tot_journeys_per_connecting_pair += (hopcount / len(direct_connecting_locations))
+        stats['average_direct_connecting_locations'] = float(tot_direct_connecting_locations) / c
+        stats['average_journeys_per_connecting_pair'] = float(tot_journeys_per_connecting_pair) / c
 
         return stats
 
