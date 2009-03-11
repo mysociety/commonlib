@@ -6,7 +6,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: team@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Tracking.pm,v 1.6 2009-03-11 12:46:08 matthew Exp $
+# $Id: Tracking.pm,v 1.7 2009-03-11 12:47:08 matthew Exp $
 #
 
 package mySociety::Tracking;
@@ -33,7 +33,7 @@ sub code ($$) {
     my ($q, $extra) = @_;
     return '' if (!defined($extra));
     my $salt = sprintf('%08x', rand(0xffffffff));
-    my $url = $q->url(-path_info => 1);
+    my $url = $ENV{SCRIPT_URI}; # $q->url(-path_info => 1); is buggy in CGI.pm 3.15 on etch
     # XXX Can't use $q->query_string(), because that's reconstructed to include
     # the POST parameters too. Sigh.
     $url .= "?$ENV{QUERY_STRING}" if ($ENV{QUERY_STRING});
