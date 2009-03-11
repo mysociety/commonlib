@@ -6,7 +6,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: team@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Tracking.pm,v 1.5 2009-01-26 14:21:52 matthew Exp $
+# $Id: Tracking.pm,v 1.6 2009-03-11 12:46:08 matthew Exp $
 #
 
 package mySociety::Tracking;
@@ -50,7 +50,7 @@ sub code ($$) {
         $img .= ";extra=" . urlencode($extra);
     }
     $img .= ";sign=" . Digest::SHA1::sha1_hex($d);
-    return '<!- This "web bug" image is used to collect data which we use to improve our services. More on this at https://secure.mysociety.org/track/ --><img alt="" src="' . $img . '">';
+    return '<!-- This "web bug" image is used to collect data which we use to improve our services. More on this at https://secure.mysociety.org/track/ --><img alt="" src="' . $img . '">';
 }
 
 1;
