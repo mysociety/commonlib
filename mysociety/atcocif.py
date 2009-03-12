@@ -5,10 +5,10 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: atcocif.py,v 1.44 2009-03-12 17:57:20 francis Exp $
+# $Id: atcocif.py,v 1.45 2009-03-12 19:14:47 francis Exp $
 #
 
-# To do Later:
+# To do later:
 # Test is_set_down, is_pick_up maybe a bit more
 # See if timing point indicator tells you if points are interpolated
 # Date range exceptions are probably broken in some way, will need lots of
@@ -59,6 +59,7 @@ class ATCO:
         self.assume_no_holidays = assume_no_holidays
         self.nearby_max_distance = None
         self.show_progress = show_progress
+        self.line_patches = {}
 
         self.restrict_date_range_start = None
         self.restrict_date_range_end = None
@@ -71,6 +72,22 @@ class ATCO:
         assert restrict_date_range_start <= restrict_date_range_end
         self.restrict_date_range_start = restrict_date_range_start
         self.restrict_date_range_end = restrict_date_range_end
+
+    def register_line_patches(self, line_patches):
+        '''line_patches is a dictionary from an input line to a replacement line,
+        used to correct minor errors in specific data files.
+
+        >>> atco = ATCO()
+        >>> atco.register_line_patches( 
+        ... { "QSNGW    6B1820070521200712071111100  2B02P10452TRAIN           I" : 
+        ... "QSNGW    XXXX20070521200712071111100  2B02P10452TRAIN           I" } )
+        >>> atco.read_string("""ATCO-CIF0510                       70 - RAIL        ATCORAIL20080124115909
+        ... QSNGW    6B1820070521200712071111100  2B02P10452TRAIN           I
+        ... """)
+        >>> atco.journeys[0].id
+        'GW-XXXX'
+        '''
+        self.line_patches = line_patches
 
     def __str__(self):
         ret = str(self.file_header) + "\n"
@@ -153,8 +170,12 @@ class ATCO:
             line = line.strip("\n\r")
             if not line:
                 continue # Ignore blank lines (never present in real CIF files, but can't hurt)
-
             #logging.debug(line)
+
+            # apply any line patches
+            if line in self.line_patches:
+                line = self.line_patches[line]
+
             record_identity = line[0:2]
             record = None
 
