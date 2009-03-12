@@ -5,7 +5,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: atcocif.py,v 1.39 2009-03-09 16:48:32 francis Exp $
+# $Id: atcocif.py,v 1.40 2009-03-12 01:13:31 francis Exp $
 #
 
 # To do Later:
@@ -165,7 +165,7 @@ class ATCO:
                 'QV', # Vehicle type record
                 'QD'  # Route description record
             ]:
-                logging.warning("Ignoring record type '" + record_identity + "'")
+                logging.debug("Ignoring record type '" + record_identity + "'")
             else:
                 raise Exception("Unknown record type '" + record_identity + "'")
 
@@ -222,8 +222,7 @@ class ATCO:
 
     def index_nearby_locations(self, nearby_max_distance):
         ''' Creates an index to make it quick to look up stops near other stops. The distance
-        is the maximum distance to include stops of. Includes station itself, so all entries
-        in array are present.
+        is the maximum distance to include stops of.
 
         >>> atco = ATCO()
         >>> atco.read_string("""ATCO-CIF0510                       70 - RAIL        ATCORAIL20080124115909
@@ -235,10 +234,10 @@ class ATCO:
         >>> atco.index_by_short_codes()
         >>> atco.index_nearby_locations(3600) # c. 2 miles
         >>> atco.nearby_locations[atco.location_from_id['9100COOKHAM']]
-        {Location('9100COOKHAM'): 0.0, Location('9100FURZEP'): 2754.6128584612393}
+        {Location('9100FURZEP'): 2754.6128584612393}
         >>> atco.index_nearby_locations(10)
         >>> atco.nearby_locations[atco.location_from_id['9100COOKHAM']]
-        {Location('9100COOKHAM'): 0.0}
+        {}
         '''
 
         # see if we already have the index for this distance
@@ -249,16 +248,19 @@ class ATCO:
         self.nearby_max_distance = None
         self.nearby_locations = {}
         for location in self.locations:
+            self.nearby_locations.setdefault(location, {})
             easting = location.additional.grid_reference_easting
             northing = location.additional.grid_reference_northing
             for other_location in self.locations:
+                if location == other_location:
+                    continue
                 other_easting = other_location.additional.grid_reference_easting
                 other_northing = other_location.additional.grid_reference_northing
                 sqdist = (easting-other_easting)**2 + (northing-other_northing)**2
                 if sqdist < nearby_max_distance * nearby_max_distance:
                     dist = math.sqrt(sqdist)
-                    logging.debug("%s (%d,%d) is %d away from %s (%d,%d)" % (location, easting, northing, dist, other_location.location, other_easting, other_northing))
-                    self.nearby_locations.setdefault(location, {}).setdefault(other_location, dist)
+                    logging.debug("index_nearby_locations: %s (%d,%d) is %d away from %s (%d,%d)" % (location, easting, northing, dist, other_location.location, other_easting, other_northing))
+                    self.nearby_locations[location].setdefault(other_location, dist)
         self.nearby_max_distance = nearby_max_distance
 
     def statistics(self):
@@ -635,7 +637,7 @@ class JourneyHeader(CIFRecord):
 
         if hop.line in self.hop_lines:
             # if we go to the same stop at the same time again, ignore duplicate
-            logging.warn("removed duplicate stop/time " + hop.line)
+            logging.debug("removed duplicate stop/time " + hop.line)
             return
         #if hop.location in self.hop_locations:
         #    print "duplicate stop %s %s" % (hop.location, hop.line)
