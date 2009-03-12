@@ -5,16 +5,14 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: atcocif.py,v 1.43 2009-03-12 17:00:44 francis Exp $
+# $Id: atcocif.py,v 1.44 2009-03-12 17:57:20 francis Exp $
 #
 
 # To do Later:
 # Test is_set_down, is_pick_up maybe a bit more
-# Test duplicate hop removal - how do we test logging in doctest?
-#        >>> logging.basicConfig(level=logging.WARN)
-#        >>> jh.add_hop(JourneyIntermediate('QI9100BCNSFLD 16531653T   T1  '))
-#        removed duplicate stop/time QI9100BCNSFLD 16531653T   T1  
 # See if timing point indicator tells you if points are interpolated
+# Date range exceptions are probably broken in some way, will need lots of
+#   testing if this is used for something that relies on it.
 
 """Loads files in the ATCO-CIF file format, which is used in the UK to specify
 public transport journeys for accessibility planning by the National Public
@@ -54,13 +52,25 @@ import progressbar
 
 class ATCO:
     def __init__(self, assume_no_holidays = True, show_progress = False):
-        '''assume_no_holidays assumes there are no school or bank holidays on the days
+        '''Assume_no_holidays assumes there are no school or bank holidays on the days
         you are quering for.'''
         self.journeys = []
         self.locations = []
         self.assume_no_holidays = assume_no_holidays
         self.nearby_max_distance = None
         self.show_progress = show_progress
+
+        self.restrict_date_range_start = None
+        self.restrict_date_range_end = None
+
+    def restrict_to_date_range(self, restrict_date_range_start, restrict_date_range_end):
+        '''Ignore exceptional date ranges outside this range. Use this, e.g. for
+        NPTDR data where it is only valid in a week. This will avoid worrying
+        about unnecessary contradictions in the exceptional date range data if
+        they lie outside where we care about. '''
+        assert restrict_date_range_start <= restrict_date_range_end
+        self.restrict_date_range_start = restrict_date_range_start
+        self.restrict_date_range_end = restrict_date_range_end
 
     def __str__(self):
         ret = str(self.file_header) + "\n"
@@ -156,7 +166,7 @@ class ATCO:
                     current_item = JourneyHeader(line, assume_no_holidays = True)
                 elif record_identity == 'QE':
                     assert isinstance(current_item, JourneyHeader)
-                    current_item.add_date_running_exception(JourneyDateRunning(line))
+                    current_item.add_date_running_exception(JourneyDateRunning(line), self.restrict_date_range_start, self.restrict_date_range_end)
                 elif record_identity == 'QO':
                     assert isinstance(current_item, JourneyHeader)
                     current_item.add_hop(JourneyOrigin(line))
@@ -568,21 +578,29 @@ class JourneyHeader(CIFRecord):
             ret = ret + "\t" + str(counter) + ". " + str(hop) + "\n"
         return ret
 
-    def add_date_running_exception(self, exception):
+    def add_date_running_exception(self, exception, restrict_date_range_start = None, restrict_date_range_end = None):
         '''See JourneyDateRunning for documentation of this function.'''
         assert isinstance(exception, JourneyDateRunning)
 
-#        # test consistency with existing date running exceptions
-#        for other in self.date_running_exceptions:
-#            # see if the new one overlaps this other exception
-#            if not(other.end_of_exceptional_period < exception.start_of_exceptional_period \
-#                or exception.end_of_exceptional_period < other.start_of_exceptional_period):
-#                # We're in trouble if it overlapped, and the operation code differed - 
-#                # this is being conservative. It is possible ATCO-CIF documents what criteria
-#                # causes one range to override another in this case, in which case amend
-#                # this and is_valid_on_date below appropriately.
-#                if other.operation_code != exception.operation_code:
-#                    raise Exception("Inconsistency between date running exceptions, " + exception.line + " and " + other.line)
+        # see if it is an exception entirely outside the date range we are expecting
+        # things to work at - if so, throw it away.
+        if restrict_date_range_start:
+            assert restrict_date_range_start <= restrict_date_range_end
+            if restrict_date_range_end < exception.start_of_exceptional_period \
+                or exception.end_of_exceptional_period < restrict_date_range_start:
+                return
+
+        # test consistency with existing date running exceptions
+        for other in self.date_running_exceptions:
+            # see if the new one overlaps this other exception
+            if not(other.end_of_exceptional_period < exception.start_of_exceptional_period \
+                or exception.end_of_exceptional_period < other.start_of_exceptional_period):
+                # We're in trouble if it overlapped, and the operation code differed - 
+                # this is being conservative. It is possible ATCO-CIF documents what criteria
+                # causes one range to override another in this case, in which case amend
+                # this and is_valid_on_date below appropriately.
+                if other.operation_code != exception.operation_code:
+                    raise Exception("Inconsistency between date running exceptions, " + exception.line + " and " + other.line)
 
         # store the new date running exception
         self.date_running_exceptions.append(exception)
@@ -738,7 +756,11 @@ class JourneyDateRunning(CIFRecord):
     (datetime.date(2007, 12, 25), datetime.date(2007, 12, 25))
     >>> jdr.operation_code
     False
+    >>> len(jh.date_running_exceptions)
+    0
     >>> jh.add_date_running_exception(jdr)
+    >>> len(jh.date_running_exceptions)
+    1
     >>> jh.is_valid_on_date(datetime.date(2007,12,25)) # Christmas day
     BoolWithReason(False, '2007-12-25 not in range of exceptional date records')
 
@@ -749,6 +771,17 @@ class JourneyDateRunning(CIFRecord):
     Traceback (most recent call last):
         ...
     Exception: Inconsistency between date running exceptions, QE20071225200712301 and QE20071225200712250
+
+    Unless you tell it to ignore date ranges where you don't expect data to
+    work, in which case it won't even add the date range exception if it is
+    entirely outside the working range.
+
+    >>> len(jh.date_running_exceptions)
+    1
+    >>> jh.add_date_running_exception(jdr2, datetime.date(2007,1,1), datetime.date(2007,2,1)) 
+    >>> len(jh.date_running_exceptions)
+    1
+
     >>> jdr3 = JourneyDateRunning('QE20071225200712300')
     >>> jh.add_date_running_exception(jdr3) # not inconsistent, as has same operation_code
     >>> jdr4 = JourneyDateRunning('QE20071220200712241')
