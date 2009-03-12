@@ -5,7 +5,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: atcocif.py,v 1.40 2009-03-12 01:13:31 francis Exp $
+# $Id: atcocif.py,v 1.41 2009-03-12 04:24:35 francis Exp $
 #
 
 # To do Later:
@@ -47,6 +47,7 @@ import logging
 import StringIO
 import zipfile
 import math
+import progressbar
 
 ###########################################################
 # Main class
@@ -67,6 +68,11 @@ class ATCO:
         for location in self.locations:
             ret = ret + str(location) + "\n"
         return ret
+
+    def read_files(self, files):
+        '''Loads in multiple ATCO-CIF files.'''
+        for file in files:
+            self.read(file)
 
     def read(self, f):
         '''Loads an ATCO-CIF file from a file.
@@ -115,16 +121,25 @@ class ATCO:
         else:
             assert False
 
-    def read_file_handle(self, h):
+    def read_file_handle(self, h, progress = True):
         '''Loads an ATCO-CIF file from a file handle.'''
         self.handle = h
+
+        if progress:
+            file_len = os.fstat(self.handle.fileno())[6]
+            widgets = ['ATCO-CIF: ', progressbar.Percentage(), ' ', progressbar.Bar(marker=progressbar.RotatingMarker()),
+                       ' ', progressbar.ETA(), ' ', progressbar.FileTransferSpeed()]
+            pbar = progressbar.ProgressBar(widgets=widgets, maxval=file_len).start()
 
         line = self.handle.readline().strip("\n\r")
         self.file_header = FileHeader(line)
 
         # Load in every record - each record is one line of the file
         current_item = None
-        for line in self.handle.readlines():
+        for line in self.handle:
+            pbar.update(self.handle.tell())
+            print str(self.handle.tell()) + "/" + str(file_len)
+
             line = line.strip("\n\r")
             if not line:
                 continue # Ignore blank lines (never present in real CIF files, but can't hurt)
@@ -171,6 +186,9 @@ class ATCO:
 
         if current_item != None:
             self.item_loaded(current_item)
+
+        if progress:
+            pbar.finish()
 
     def index_by_short_codes(self):
         '''Make dictionaries so it is quick to look up all journeys visiting a
@@ -495,7 +513,7 @@ class JourneyHeader(CIFRecord):
         CIFRecord.__init__(self, line, "QS")
         self.assume_no_holidays = True
 
-        matches = re.match('^QS([NDR])(.{4})(.{6})(\d{8})(\d{8}| {8})([01]{7})([ SH])([ ABX])(.{4})(.{6})(.{8})(.{8})(.)$', line)
+        matches = re.match('^QS([NDR])(.{4})(.{6})(\d{8})(\d{8}| {8})([01]{7})([ SH])([ ABXG])(.{4})(.{6})(.{8})(.{8})(.)$', line)
         if not matches:
             raise Exception("Journey header line incorrectly formatted: " + line)
 
