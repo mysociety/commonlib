@@ -5,7 +5,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: atcocif.py,v 1.42 2009-03-12 04:27:47 francis Exp $
+# $Id: atcocif.py,v 1.43 2009-03-12 17:00:44 francis Exp $
 #
 
 # To do Later:
@@ -53,13 +53,14 @@ import progressbar
 # Main class
 
 class ATCO:
-    def __init__(self, assume_no_holidays = True):
+    def __init__(self, assume_no_holidays = True, show_progress = False):
         '''assume_no_holidays assumes there are no school or bank holidays on the days
         you are quering for.'''
         self.journeys = []
         self.locations = []
         self.assume_no_holidays = assume_no_holidays
         self.nearby_max_distance = None
+        self.show_progress = show_progress
 
     def __str__(self):
         ret = str(self.file_header) + "\n"
@@ -99,7 +100,7 @@ class ATCO:
         else:
             # Otherwise, just read it
             logging.info("reading CIF file " + f)
-            return self.read_file_handle(open(f))
+            return self.read_file_handle(open(f), os.stat(f)[6])
 
     def read_string(self, s):
         '''Loads an ATCO-CIF file from a string.
@@ -108,7 +109,7 @@ class ATCO:
         >>> atco.read_string('ATCO-CIF0510      Buckinghamshire - COACH             ATCOPT20080126111426')
         '''
         h = StringIO.StringIO(s)
-        return self.read_file_handle(h)
+        return self.read_file_handle(h, len(s))
 
     def item_loaded(self, item):
         ''' Override this function if, for example, you want to stream the
@@ -121,12 +122,11 @@ class ATCO:
         else:
             assert False
 
-    def read_file_handle(self, h, progress = True):
+    def read_file_handle(self, h, file_len):
         '''Loads an ATCO-CIF file from a file handle.'''
         self.handle = h
 
-        if progress:
-            file_len = os.fstat(self.handle.fileno())[6]
+        if self.show_progress:
             widgets = ['ATCO-CIF: ', progressbar.Percentage(), ' ', progressbar.Bar(marker=progressbar.RotatingMarker()),
                        ' ', progressbar.ETA(), ' ', progressbar.FileTransferSpeed()]
             pbar = progressbar.ProgressBar(widgets=widgets, maxval=file_len).start()
@@ -137,7 +137,8 @@ class ATCO:
         # Load in every record - each record is one line of the file
         current_item = None
         for line in self.handle:
-            pbar.update(self.handle.tell())
+            if self.show_progress:
+                pbar.update(self.handle.tell())
 
             line = line.strip("\n\r")
             if not line:
@@ -147,46 +148,51 @@ class ATCO:
             record_identity = line[0:2]
             record = None
 
-            # Journeys - store the clump of records relating to one journey 
-            if record_identity == 'QS':
-                if current_item != None:
-                    self.item_loaded(current_item)
-                current_item = JourneyHeader(line, assume_no_holidays = True)
-            elif record_identity == 'QE':
-                assert isinstance(current_item, JourneyHeader)
-                current_item.add_date_running_exception(JourneyDateRunning(line))
-            elif record_identity == 'QO':
-                assert isinstance(current_item, JourneyHeader)
-                current_item.add_hop(JourneyOrigin(line))
-            elif record_identity == 'QI':
-                assert isinstance(current_item, JourneyHeader)
-                current_item.add_hop(JourneyIntermediate(line))
-            elif record_identity == 'QT':
-                assert isinstance(current_item, JourneyHeader)
-                current_item.add_hop(JourneyDestination(line))
-            
-            # Locations - store the group of records relating to one location
-            elif record_identity == 'QL':
-                if current_item != None:
-                    self.item_loaded(current_item)
-                current_item = Location(line)
-            elif record_identity == 'QB':
-                assert isinstance(current_item, Location)
-                current_item.add_additional(LocationAdditional(line))
+            try:
+                # Journeys - store the clump of records relating to one journey 
+                if record_identity == 'QS':
+                    if current_item != None:
+                        self.item_loaded(current_item)
+                    current_item = JourneyHeader(line, assume_no_holidays = True)
+                elif record_identity == 'QE':
+                    assert isinstance(current_item, JourneyHeader)
+                    current_item.add_date_running_exception(JourneyDateRunning(line))
+                elif record_identity == 'QO':
+                    assert isinstance(current_item, JourneyHeader)
+                    current_item.add_hop(JourneyOrigin(line))
+                elif record_identity == 'QI':
+                    assert isinstance(current_item, JourneyHeader)
+                    current_item.add_hop(JourneyIntermediate(line))
+                elif record_identity == 'QT':
+                    assert isinstance(current_item, JourneyHeader)
+                    current_item.add_hop(JourneyDestination(line))
+                
+                # Locations - store the group of records relating to one location
+                elif record_identity == 'QL':
+                    if current_item != None:
+                        self.item_loaded(current_item)
+                    current_item = Location(line)
+                elif record_identity == 'QB':
+                    assert isinstance(current_item, Location)
+                    current_item.add_additional(LocationAdditional(line))
 
-            # Other
-            elif record_identity in [
-                'QV', # Vehicle type record
-                'QD'  # Route description record
-            ]:
-                logging.debug("Ignoring record type '" + record_identity + "'")
-            else:
-                raise Exception("Unknown record type '" + record_identity + "'")
+                # Other
+                elif record_identity in [
+                    'QV', # Vehicle type record
+                    'QD'  # Route description record
+                ]:
+                    logging.debug("Ignoring record type '" + record_identity + "'")
+                else:
+                    raise Exception("Unknown record type '" + record_identity + "'")
+            except:
+                # Show what line we were on, and reraise exception
+                logging.error("Exception caught reading line: " + line)
+                raise
 
         if current_item != None:
             self.item_loaded(current_item)
 
-        if progress:
+        if self.show_progress:
             pbar.finish()
 
     def index_by_short_codes(self):
@@ -321,13 +327,21 @@ def parse_time(time_string):
 
     >>> parse_time('0549')
     datetime.time(5, 49)
+    >>> parse_time('2410')
+    datetime.time(0, 10)
     >>> parse_time('9999')
     Traceback (most recent call last):
         ...
     ValueError: hour must be in 0..23
     '''
     assert len(time_string) == 4
-    return datetime.time(int(time_string[0:2]), int(time_string[2:4]), 0)
+    hour = int(time_string[0:2])
+    # Some authorities use 24 for journeys that cross midnight, some wrap round
+    # to 0. We change 24 so that it always wraps to 0.
+    if hour == 24:
+        hour = 0
+    minute = int(time_string[2:4])
+    return datetime.time(hour, minute, 0)
 
 def parse_date(date_string):
     '''Converts a date string from an ATCO-CIF field into a Python date object.
@@ -558,17 +572,17 @@ class JourneyHeader(CIFRecord):
         '''See JourneyDateRunning for documentation of this function.'''
         assert isinstance(exception, JourneyDateRunning)
 
-        # test consistency with existing date running exceptions
-        for other in self.date_running_exceptions:
-            # see if the new one overlaps this other exception
-            if not(other.end_of_exceptional_period < exception.start_of_exceptional_period \
-                or exception.end_of_exceptional_period < other.start_of_exceptional_period):
-                # We're in trouble if it overlapped, and the operation code differed - 
-                # this is being conservative. It is possible ATCO-CIF documents what criteria
-                # causes one range to override another in this case, in which case amend
-                # this and is_valid_on_date below appropriately.
-                if other.operation_code != exception.operation_code:
-                    raise Exception("Inconsistency between date running exceptions, " + exception.line + " and " + other.line)
+#        # test consistency with existing date running exceptions
+#        for other in self.date_running_exceptions:
+#            # see if the new one overlaps this other exception
+#            if not(other.end_of_exceptional_period < exception.start_of_exceptional_period \
+#                or exception.end_of_exceptional_period < other.start_of_exceptional_period):
+#                # We're in trouble if it overlapped, and the operation code differed - 
+#                # this is being conservative. It is possible ATCO-CIF documents what criteria
+#                # causes one range to override another in this case, in which case amend
+#                # this and is_valid_on_date below appropriately.
+#                if other.operation_code != exception.operation_code:
+#                    raise Exception("Inconsistency between date running exceptions, " + exception.line + " and " + other.line)
 
         # store the new date running exception
         self.date_running_exceptions.append(exception)
@@ -738,7 +752,7 @@ class JourneyDateRunning(CIFRecord):
     >>> jdr3 = JourneyDateRunning('QE20071225200712300')
     >>> jh.add_date_running_exception(jdr3) # not inconsistent, as has same operation_code
     >>> jdr4 = JourneyDateRunning('QE20071220200712241')
-    >>> jh.add_date_running_exception(jdr4) # no inconsistent, as date range doesn't overlap
+    >>> jh.add_date_running_exception(jdr4) # not inconsistent, as date range doesn't overlap
     '''
 
     def __init__(self, line):
