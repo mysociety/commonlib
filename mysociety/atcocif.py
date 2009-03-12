@@ -5,7 +5,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: atcocif.py,v 1.41 2009-03-12 04:24:35 francis Exp $
+# $Id: atcocif.py,v 1.42 2009-03-12 04:27:47 francis Exp $
 #
 
 # To do Later:
@@ -138,7 +138,6 @@ class ATCO:
         current_item = None
         for line in self.handle:
             pbar.update(self.handle.tell())
-            print str(self.handle.tell()) + "/" + str(file_len)
 
             line = line.strip("\n\r")
             if not line:
