@@ -5,7 +5,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: atcocif.py,v 1.45 2009-03-12 19:14:47 francis Exp $
+# $Id: atcocif.py,v 1.46 2009-03-13 11:16:35 francis Exp $
 #
 
 # To do later:
@@ -60,6 +60,7 @@ class ATCO:
         self.nearby_max_distance = None
         self.show_progress = show_progress
         self.line_patches = {}
+        self.locations_to_ignore = {}
 
         self.restrict_date_range_start = None
         self.restrict_date_range_end = None
@@ -88,6 +89,16 @@ class ATCO:
         'GW-XXXX'
         '''
         self.line_patches = line_patches
+
+    def register_locations_to_ignore(self, locations_to_ignore):
+        '''removed_stops is a set of identifiers of stops which should
+        be thrown away. 
+        
+        For example, the Lincolnshire NPTDR data has some stops which aren't
+        real stops, but just indicate that destinations vary depending on
+        bookings.'''
+
+        self.locations_to_ignore = locations_to_ignore
 
     def __str__(self):
         ret = str(self.file_header) + "\n"
@@ -190,22 +201,32 @@ class ATCO:
                     current_item.add_date_running_exception(JourneyDateRunning(line), self.restrict_date_range_start, self.restrict_date_range_end)
                 elif record_identity == 'QO':
                     assert isinstance(current_item, JourneyHeader)
-                    current_item.add_hop(JourneyOrigin(line))
+                    jo = JourneyOrigin(line)
+                    if jo.location not in self.locations_to_ignore:
+                        current_item.add_hop(jo)
                 elif record_identity == 'QI':
                     assert isinstance(current_item, JourneyHeader)
-                    current_item.add_hop(JourneyIntermediate(line))
+                    ji = JourneyIntermediate(line)
+                    if ji.location not in self.locations_to_ignore:
+                        current_item.add_hop(ji)
                 elif record_identity == 'QT':
                     assert isinstance(current_item, JourneyHeader)
-                    current_item.add_hop(JourneyDestination(line))
+                    jd = JourneyDestination(line)
+                    if jd.location not in self.locations_to_ignore:
+                        current_item.add_hop(jd)
                 
                 # Locations - store the group of records relating to one location
                 elif record_identity == 'QL':
-                    if current_item != None:
-                        self.item_loaded(current_item)
-                    current_item = Location(line)
+                    new_item = Location(line)
+                    if new_item.location not in self.locations_to_ignore:
+                        if current_item != None:
+                            self.item_loaded(current_item)
+                        current_item = new_item
                 elif record_identity == 'QB':
-                    assert isinstance(current_item, Location)
-                    current_item.add_additional(LocationAdditional(line))
+                    la = LocationAdditional(line)
+                    if la.location not in self.locations_to_ignore:
+                        assert isinstance(current_item, Location)
+                        current_item.add_additional(la)
 
                 # Other
                 elif record_identity in [
@@ -987,6 +1008,7 @@ class JourneyDestination(CIFRecord):
 
     def is_pick_up(self):
         return False
+
 ###########################################################
 # Location record classes
  
@@ -1085,8 +1107,10 @@ class LocationAdditional(CIFRecord):
 
         self.transaction_type = matches.group(1)
         self.location = matches.group(2).strip()
-        self.grid_reference_easting = int(matches.group(3).strip())
-        self.grid_reference_northing = int(matches.group(4).strip())
+        easting = matches.group(3).strip()
+        northing = matches.group(4).strip()
+        self.grid_reference_easting = easting and int(easting) or -1
+        self.grid_reference_northing = northing and int(northing) or -1
         self.district_name = matches.group(5).strip()
         self.town_name = matches.group(6).strip()
 
