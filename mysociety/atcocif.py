@@ -5,7 +5,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: atcocif.py,v 1.46 2009-03-13 11:16:35 francis Exp $
+# $Id: atcocif.py,v 1.47 2009-03-13 11:18:51 francis Exp $
 #
 
 # To do later:
@@ -1096,6 +1096,14 @@ class LocationAdditional(CIFRecord):
     'Chiltern'
     >>> la.town_name
     ''
+
+    If the grid references are not present, they get set to -1.
+
+    >>> la2 = LocationAdditional('QBN000000023750                Caythorpe                                       ' )
+    >>> la2.grid_reference_easting
+    -1
+    >>> la2.grid_reference_northing
+    -1
     '''
 
     def __init__(self, line):
