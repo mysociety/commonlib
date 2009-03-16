@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Parties.pm,v 1.19 2009-01-26 14:21:52 matthew Exp $
+# $Id: Parties.pm,v 1.20 2009-03-16 10:12:57 matthew Exp $
 #
 
 package mySociety::Parties;
@@ -106,6 +106,8 @@ display them with.
     "Sinn F\x{e9}in" => "Sinn Féin",
 
     "Solidarity Group" => "Solidarity Group", 
+
+    "Traditional Unionist" => "Traditional Unionist Voice",
 
     "UK Independence Party" => "UK Independence",
     "UK Independence" => "UK Independence",
