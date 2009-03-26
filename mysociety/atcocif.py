@@ -5,7 +5,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: atcocif.py,v 1.47 2009-03-13 11:18:51 francis Exp $
+# $Id: atcocif.py,v 1.48 2009-03-26 08:44:11 francis Exp $
 #
 
 # To do later:
@@ -428,6 +428,18 @@ def parse_date_time(date_string, time_string):
         int(date_string[0:4]), int(date_string[4:6]), int(date_string[6:8]),
         int(time_string[0:2]), int(time_string[2:4]), int(time_string[4:6]), 0
     )
+
+def canonicalise_location(location):
+    '''Removes excess spaces, and makes the location uppercase.
+
+    >>> canonicalise_location("TTA 2322")
+    'TTA2322'
+    >>> canonicalise_location('9300eri')
+    '9300ERI'
+    '''
+    location = location.strip().upper()
+    location = location.replace(" ", "")
+    return location
 
 class BoolWithReason:
     '''Behaves as a boolean, only stores an explanatory string as well.
@@ -870,7 +882,7 @@ class JourneyOrigin(CIFRecord):
         if not matches:
             raise Exception("Journey origin line incorrectly formatted: " + line)
 
-        self.location = matches.group(1).strip().upper()
+        self.location = canonicalise_location(matches.group(1))
         self.published_departure_time = parse_time(matches.group(2))
         self.bay_number = matches.group(3).strip()
         self.timing_point_indicator = { 'T0' : False, 'T1' : True }[matches.group(4)]
@@ -918,7 +930,7 @@ class JourneyIntermediate(CIFRecord):
         if not matches:
             raise Exception("Journey intermediate line incorrectly formatted: " + line)
 
-        self.location = matches.group(1).strip().upper()
+        self.location = canonicalise_location(matches.group(1))
         self.published_arrival_time = parse_time(matches.group(2))
         self.published_departure_time = parse_time(matches.group(3))
         self.activity_flag = matches.group(4)
@@ -997,7 +1009,7 @@ class JourneyDestination(CIFRecord):
         if not matches:
             raise Exception("Journey destination line incorrectly formatted: " + line)
 
-        self.location = matches.group(1).strip().upper()
+        self.location = canonicalise_location(matches.group(1))
         self.published_arrival_time = parse_time(matches.group(2))
         self.bay_number = matches.group(3).strip()
         self.timing_point_indicator = { 'T0' : False, 'T1' : True }[matches.group(4)]
@@ -1050,7 +1062,7 @@ class Location(CIFRecord):
 
         self.transaction_type = matches.group(1)
         assert self.transaction_type == 'N' # code doesn't handle other types yet
-        self.location = matches.group(2).strip()
+        self.location = canonicalise_location(matches.group(2))
         self.full_location = matches.group(3).strip()
         self.gazetteer_code = matches.group(4)
         self.point_type = matches.group(5)
@@ -1114,7 +1126,7 @@ class LocationAdditional(CIFRecord):
             raise Exception("Location additional line incorrectly formatted: " + line)
 
         self.transaction_type = matches.group(1)
-        self.location = matches.group(2).strip()
+        self.location = canonicalise_location(matches.group(2))
         easting = matches.group(3).strip()
         northing = matches.group(4).strip()
         self.grid_reference_easting = easting and int(easting) or -1
