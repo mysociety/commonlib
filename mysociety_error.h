@@ -5,7 +5,7 @@
 // Copyright (c) 2009 UK Citizens Online Democracy. All rights reserved.
 // Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 //
-// $Id: mysociety_error.h,v 1.1 2009-03-23 09:30:06 francis Exp $
+// $Id: mysociety_error.h,v 1.2 2009-03-26 09:36:22 francis Exp $
 //
 
 #include <string>
@@ -49,4 +49,9 @@ void my_fread ( void * ptr, size_t size, size_t count, FILE * stream ) {
     assert(ret == count);
 }
 
+/* Error handling version of fwrite */
+void my_fwrite ( const void * ptr, size_t size, size_t count, FILE * stream ) {
+    size_t ret = fwrite(ptr, size, count, stream);
+    assert(ret == count);
+}
 
