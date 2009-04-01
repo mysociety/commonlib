@@ -8,7 +8,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # WWW: http://www.mysociety.org
 #
-# $Id: MaPit.pm,v 1.44 2009-04-01 18:04:12 matthew Exp $
+# $Id: MaPit.pm,v 1.45 2009-04-01 18:22:48 matthew Exp $
 
 package mySociety::MaPit;
 
@@ -196,12 +196,12 @@ sub get_voting_areas_by_location ($$;$$) {
     return $rabx_client->call('MaPit.get_voting_areas_by_location', @_);
 }
 
-=item MaPit::get_areas_by_type TYPE [ALL]
+=item MaPit::get_areas_by_type TYPE [MIN_GENERATION]
 
   Returns an array of ids of all the voting areas of type TYPE. TYPE is the
   three letter code such as WMC. By default only gets active areas in
-  current generation, if ALL is true then gets all areas for all
-  generations.
+  current generation, if MIN_GENERATION is provided then returns from that
+  generation on, or if -1 then gets all areas for all generations.
 
 =cut
 sub get_areas_by_type ($;$) {
