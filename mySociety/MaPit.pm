@@ -8,7 +8,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # WWW: http://www.mysociety.org
 #
-# $Id: MaPit.pm,v 1.43 2009-01-26 14:21:52 matthew Exp $
+# $Id: MaPit.pm,v 1.44 2009-04-01 18:04:12 matthew Exp $
 
 package mySociety::MaPit;
 
@@ -115,14 +115,15 @@ sub get_voting_areas_info ($) {
     return $rabx_client->call('MaPit.get_voting_areas_info', @_);
 }
 
-=item MaPit::get_voting_area_by_name NAME [TYPE]
+=item MaPit::get_voting_area_by_name NAME [TYPE] [MIN_GENERATION]
 
   Given NAME, return the area IDs (and other info) that begin with that
   name, or undef if none found. If TYPE is specified (scalar or array ref),
-  only return areas of those type(s).
+  only return areas of those type(s). If MIN_GENERATION is given, return
+  all areas since then.
 
 =cut
-sub get_voting_area_by_name ($;$) {
+sub get_voting_area_by_name ($;$$) {
     configure() if !defined $rabx_client;
     return $rabx_client->call('MaPit.get_voting_area_by_name', @_);
 }
@@ -147,7 +148,7 @@ sub get_voting_area_by_name ($;$) {
 
   sense - a positive value to include the part, negative to exclude (a
   hole) points - an array of pairs of (eastings, northings) if POLYGON_TYPE
-  is 'ng", or (latitude, longitude) if POLYGON_TYPE is 'wgs84'.
+  is 'ng', or (latitude, longitude) if POLYGON_TYPE is 'wgs84'.
 
   If for some reason any of the values above are not known, they will not
   be present in the array. For example, we currently only have data for
