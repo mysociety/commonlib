@@ -5,7 +5,7 @@
 // Copyright (c) 2009 UK Citizens Online Democracy. All rights reserved.
 // Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 //
-// $Id: mysociety_error.h,v 1.2 2009-03-26 09:36:22 francis Exp $
+// $Id: mysociety_error.h,v 1.3 2009-04-14 16:13:38 francis Exp $
 //
 
 #include <string>
@@ -21,10 +21,10 @@
  * debug_assert for ones that can be stripped. */
 #ifdef DEBUG
     void do_log(boost::basic_format<char, std::char_traits<char>, std::allocator<char> > &bf) {
-        puts(bf.str().c_str());
+        puts(("DEBUG: " + bf.str()).c_str());
     }
     void do_log(const std::string& str) {
-        puts(str.c_str());
+        puts(("DEBUG: " + str).c_str());
     }
     #define log(message) do_log(message);
     #define debug_assert(thing) assert(thing);
