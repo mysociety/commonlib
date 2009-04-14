@@ -5,7 +5,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: config.py,v 1.8 2008-03-06 20:22:28 francis Exp $
+# $Id: config.py,v 1.9 2009-04-14 18:14:36 francis Exp $
 #
 
 """
