@@ -6,7 +6,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 
-my $rcsid = ''; $rcsid .= '$Id: HandleMail.pm,v 1.4 2009-01-26 14:21:52 matthew Exp $';
+my $rcsid = ''; $rcsid .= '$Id: HandleMail.pm,v 1.5 2009-04-16 16:54:30 louise Exp $';
 
 package mySociety::HandleMail;
 
@@ -18,9 +18,18 @@ use Mail::Internet;
 use MIME::Parser;
 use mySociety::SystemMisc;
 
+
+use constant ERR_NO_USER => 1;
+use constant ERR_NO_RELAY => 2;
+use constant ERR_MAILBOX_FULL => 3;
+use constant ERR_MAILBOX_UNAVAILABLE => 4;
+use constant ERR_UNROUTEABLE => 5;
+use constant ERR_TIMEOUT => 6;
+
 # Don't print diagnostics to standard error, as this can result in bounce
 # messages being generated (only in response to non-bounce input, obviously).
 mySociety::SystemMisc::log_to_stderr(0);
+
 
 sub get_message {
     my @lines = ();
@@ -97,6 +106,262 @@ sub get_token {
     return $token;
 }
 
+
+# parse_ill_formed_bounce TEXT
+# Attempt to extract bounce attributes if the email represented by TEXT is an ill-formed bounce
+# email.
+sub parse_ill_formed_bounce ($){
+    my $lines = shift;
+    my $mail = join("\n", @$lines);
+    my %data = parse_smtp_error($mail);
+    if (!$data{message}){
+        %data = parse_remote_host_error($mail);
+    }
+    if (!$data{message}){
+        %data = parse_qmail_error($mail);
+    }
+    if (!$data{message}){
+        %data = parse_exim_error($mail);
+    }
+    return %data;
+}
+
+# parse_exim_error TEXT
+# parse a bounce error email in standard exim-output format
+# and return a hash of attributes 
+sub parse_exim_error ($){
+    my $text = shift;
+    my $domain;
+    my $message;
+    my $email_address;
+    my $permanent = 0;
+    my $problem;
+    my $main_para_pattern = '\s*\n?\s*                              
+                            The\ following\ address\(es\)\ failed:
+                            \n\s*\n\s*';
+    
+    my $message_pattern = '\s*\n
+                          (\s*\(.*?generated.*?\)\s*\n)?    #option description of where the address was generated from
+                          (.*?)\n';                         # error message
+    
+    my $email_pattern = '(.*?@(.*?))';
+    
+    my $standard_text = 'This\ is\ a\ permanent\ error.'
+                        . $main_para_pattern 
+                        . $email_pattern 
+                        . $message_pattern;           
+    
+    if ($text =~ /$standard_text/x){
+        $email_address = $1;
+        $domain = $2;
+        $message = $4;
+        $permanent = 1;
+    }
+    my $alternative_text = 'of\ its\ recipients.' 
+                            . $main_para_pattern 
+                            . $email_pattern 
+                            . $message_pattern;
+    if ($text =~ /$alternative_text/x){
+        $email_address = $1;
+        $domain = $2;
+        $message = $4;
+    
+    }
+    
+    if ($message){
+        $message = join(' ', split(' ', $message));
+        $problem = get_problem_from_message($message);
+    }
+    
+    return (domain => $domain, 
+            message => $message, 
+            problem => $problem,
+            permanent => $permanent, 
+            email_address => $email_address);
+}
+
+# parse_qmail_error TEXT
+# parse a bounce error email in standard qmail-output format
+# and return a hash of attributes
+sub parse_qmail_error ($){
+    my $text = shift;
+    my $domain;
+    my $message;
+    my $email_address;
+    my $dsn_code;
+    my $problem;
+    my $main_para_pattern = 'Hi. This is the qmail-send program.*?\n\s*';
+    my $email_pattern = '<(.*@(.*))>:\n';
+    my $message_pattern = '((([^\n]*\w+[^\n]*)\n)*)';
+    my $standard_text = $main_para_pattern . $email_pattern . $message_pattern;
+    if ($text =~ /$standard_text/s){
+        $email_address = $1;
+        $domain = $2;
+        $message = $3;
+        $message = join(' ', split(' ', $message));
+        if ($message =~ s/ \(#(\d\.\d\.\d)\)$//){
+            $dsn_code = $1;
+        }
+        $problem = get_problem_from_message($message);
+    }
+
+    return (domain => $domain, 
+            message => $message, 
+            problem => $problem,
+            dsn_code => $dsn_code, 
+            email_address => $email_address);
+}
+
+# parse_remote_host_error TEXT
+# parse a bounce error email describing the response from a remote host
+# and return a hash of attributes
+sub parse_remote_host_error ($){
+    my $text = shift;
+    my $email_address;
+    my $domain;
+    my $message;
+    my $smtp_code;
+    my $dsn_code;
+    my $problem;
+    if ($text =~ /does not like recipient.\n\s*Remote host said: (\d\d\d) (\d\.\d\.\d) <(.*@(.*))>: (.*?)\n/) {
+        $smtp_code = $1;
+        $dsn_code = $2;
+        $email_address = $3;
+        $domain = $4;
+        $message = $5;
+        $problem = get_problem_from_message($message);
+    }
+    
+    return (domain => $domain, 
+            smtp_code => $smtp_code, 
+            dsn_code => $dsn_code, 
+            problem => $problem,
+            email_address => $email_address, 
+            message => $message);
+}
+
+# parse_smtp_error TEXT
+# parse a bounce error email in standard SMTP output format
+# and return a hash of attributes
+sub parse_smtp_error ($){
+    my $text = shift;
+    my $domain;
+    my $message;
+    my $smtp_code;
+    my $dsn_code;
+    my $email_address;
+    my $problem;
+    
+    if ($text =~ /SMTP error from remote mail server after RCPT TO:<(.*@(.*?))>:\s+host [^ ]* \[[^ ]*\]:(.*?)\n(((.*\S+.*)\n)*)/) {
+        $email_address = $1;
+        $domain = $2; 
+        $message = $3 || '';
+        if ($4){
+            $message .= $4;
+        }
+        $message = join(' ', split(' ', $message));
+        if ($message =~ s/^(\d\d\d)( |-)//){
+            $smtp_code = $1;
+        }
+        if ($message =~ s/^(\d\.\d\.\d) //){
+            $dsn_code = $1;
+        }
+        if ($message =~ s/ \(#(\d\.\d\.\d)\)$//){
+            $dsn_code = $1;
+        }
+        $message =~ s/^<.*?>: //;
+        $problem = get_problem_from_message($message);
+    }
+
+    return (domain => $domain, 
+            smtp_code => $smtp_code, 
+            dsn_code => $dsn_code, 
+            email_address => $email_address,
+            problem => $problem, 
+            message => $message), 
+}
+
+# get_problem_from_message TEXT
+# Translate an error message into a problem constant
+sub get_problem_from_message($){
+    my ($message) = @_;
+    my $problem;
+    my @no_user_synonyms = ('address rejected',
+                            'does not exist', 
+                            'email address for typos',
+                            'invalid address',
+                            'invalid recipient', 
+                            'never logged onto their free aim',
+                            'no mailbox here by that name', 
+                            'no such mailbox',
+                            'no such address',
+                            'no such recipient',
+                            'no such user', 
+                            'not a valid mailbox',
+                            'recipient unknown',
+                            'unable to validate recipient',
+                            'unknown recipient',
+                            'unknown user', 
+                            'unknown (\S+) user',
+                            'user invalid',
+                            'user (is )?unknown');
+                            
+    my $no_user_pattern = join('|', @no_user_synonyms);
+       
+    my @no_relay_synonyms = ('as a relay', 
+                             'no valid cert for gatewaying', 
+                             'not configured to relay mail',
+                             'relay access denied',
+                             'relaying denied');
+    my $no_relay_pattern = join('|', @no_relay_synonyms);
+       
+    my @mailbox_full_synonyms = ('mail quota exceeded',
+                                 'mailbox disk quota exceeded',
+                                 'mailbox has exceeded the limit',
+                                 'mailbox is full', 
+                                 'mailfolder is over the allowed quota', 
+                                 'over quota', 
+                                 'recipient overquota', 
+                                 'user has exceeded their quota');
+    my $mailbox_full_pattern = join('|', @mailbox_full_synonyms);
+    
+    my @mailbox_unavailable_synonyms = ('mailbox disabled', 
+                                        'mailbox inactive', 
+                                        'mailbox is disabled',
+                                        'mailbox unavailable',
+                                        'user account not activated');
+
+    my $mailbox_unavailable_pattern = join('|', @mailbox_unavailable_synonyms);
+    
+    my @unrouteable_synonyms = ('all relevant mx records point to non-existent hosts', 
+                                "domain isn't in my list of allowed rcpthosts",
+                                'unrouteable');
+
+    my $unrouteable_pattern = join('|', @unrouteable_synonyms); 
+    
+    my @timeout_synonyms = ('retry timeout', 
+                            'retry time not reached for any host after a long failure period');
+
+    my $timeout_pattern = join('|', @timeout_synonyms); 
+    
+    if($message =~ /$mailbox_full_pattern/i){
+        $problem = ERR_MAILBOX_FULL;
+    }elsif ($message =~ /$no_user_pattern/i){
+        $problem = ERR_NO_USER;
+    }elsif($message =~ /$no_relay_pattern/i){
+        $problem = ERR_NO_RELAY;
+    }elsif($message =~ /$mailbox_unavailable_pattern/i){
+        $problem = ERR_MAILBOX_UNAVAILABLE;
+    }elsif($message =~ /$unrouteable_pattern/i){
+        $problem = ERR_UNROUTEABLE;
+    }elsif($message =~ /$timeout_pattern/i){
+        $problem = ERR_TIMEOUT;
+    }
+    
+    return $problem;
+}
+
+
 # parse_dsn_bounce TEXT
 # Attempt to parse TEXT (scalar or reference to list of lines) as an RFC1894
 # delivery status notification email. On success, return the DSN status string
@@ -111,6 +376,7 @@ sub parse_dsn_bounce ($) {
     return undef if (!$ent || !$ent->is_multipart() || lc($ent->mime_type()) ne 'multipart/report');
     # The second part of the multipart entity should be of type
     # message/delivery-status.
+    
     my $status = $ent->parts(1);
     return undef if (!$status || lc($status->mime_type()) ne 'message/delivery-status');
 
