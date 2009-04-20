@@ -5,7 +5,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: atcocif.py,v 1.48 2009-03-26 08:44:11 francis Exp $
+# $Id: atcocif.py,v 1.49 2009-04-20 12:59:47 francis Exp $
 #
 
 # To do later:
@@ -1036,7 +1036,7 @@ class Location(CIFRecord):
     'Chalfont and Latimer Rail Station'
     >>> l.gazetteer_code 
     ' '
-    >>> l.point_type
+    >>> l.point_type # bay / stop / paired stop etc.
     'R'
     >>> l.national_gazetteer_id
     'E0044056'
