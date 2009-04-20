@@ -6,7 +6,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 
-my $rcsid = ''; $rcsid .= '$Id: HandleMail.pm,v 1.5 2009-04-16 16:54:30 louise Exp $';
+my $rcsid = ''; $rcsid .= '$Id: HandleMail.pm,v 1.6 2009-04-20 10:15:04 louise Exp $';
 
 package mySociety::HandleMail;
 
@@ -25,6 +25,7 @@ use constant ERR_MAILBOX_FULL => 3;
 use constant ERR_MAILBOX_UNAVAILABLE => 4;
 use constant ERR_UNROUTEABLE => 5;
 use constant ERR_TIMEOUT => 6;
+use constant ERR_SPAM => 7;
 
 # Don't print diagnostics to standard error, as this can result in bounce
 # messages being generated (only in response to non-bounce input, obviously).
@@ -113,7 +114,14 @@ sub get_token {
 sub parse_ill_formed_bounce ($){
     my $lines = shift;
     my $mail = join("\n", @$lines);
-    my %data = parse_smtp_error($mail);
+    
+    my %data = parse_mdn_error($lines);
+    if (!$data{message}){
+        %data = parse_remote_host_error($mail);
+    }
+    if (!$data{message}){
+        %data = parse_smtp_error($mail);
+    }
     if (!$data{message}){
         %data = parse_remote_host_error($mail);
     }
@@ -251,8 +259,12 @@ sub parse_smtp_error ($){
     my $dsn_code;
     my $email_address;
     my $problem;
+    my $smtp_start = 'SMTP error from remote mail server after ';
+    my $host_pattern = '\s+host [^ ]* \[[^ ]*\]:';
+    my $message_pattern = '(.*?)\n(((.*\S+.*)\n)*)';
+    my $rcpt_pattern = $smtp_start . 'RCPT TO:<(.*@(.*?))>:' . $host_pattern . $message_pattern;
     
-    if ($text =~ /SMTP error from remote mail server after RCPT TO:<(.*@(.*?))>:\s+host [^ ]* \[[^ ]*\]:(.*?)\n(((.*\S+.*)\n)*)/) {
+    if ($text =~ /$rcpt_pattern/) {
         $email_address = $1;
         $domain = $2; 
         $message = $3 || '';
@@ -260,16 +272,21 @@ sub parse_smtp_error ($){
             $message .= $4;
         }
         $message = join(' ', split(' ', $message));
-        if ($message =~ s/^(\d\d\d)( |-)//){
-            $smtp_code = $1;
-        }
-        if ($message =~ s/^(\d\.\d\.\d) //){
-            $dsn_code = $1;
-        }
-        if ($message =~ s/ \(#(\d\.\d\.\d)\)$//){
-            $dsn_code = $1;
-        }
+        ($message, $dsn_code, $smtp_code) = get_codes_from_message($message);
         $message =~ s/^<.*?>: //;
+        $problem = get_problem_from_message($message);
+    }
+    
+    my $end_pattern = '(.*@(.*?))\s*\n\s*' . $smtp_start . 'end of data:\n' . $host_pattern . $message_pattern;
+    if ($text =~ /$end_pattern/){
+        $email_address = $1;
+        $domain = $2;
+        $message = $3 || '';
+        if ($4){
+            $message .= $4;
+        }
+        $message = join(' ', split(' ', $message));
+        ($message, $dsn_code, $smtp_code) = get_codes_from_message($message);
         $problem = get_problem_from_message($message);
     }
 
@@ -279,6 +296,49 @@ sub parse_smtp_error ($){
             email_address => $email_address,
             problem => $problem, 
             message => $message), 
+}
+
+# parse_mdn_error TEXT
+# Parse an error email in a standard MDN format and return a hash of attributes 
+sub parse_mdn_error($){
+    my ($lines) = @_;
+    
+    my $email_address;
+    my $domain;
+    my ($mdn, $message) = parse_mdn_bounce($lines);
+    if ($mdn){
+        if ($message =~ /<(.*?@(.*?))>/){
+            $email_address = $1;
+            $domain = $2;
+        }
+        my $problem = get_problem_from_message($message);
+        return (message => $message, 
+                problem => $problem, 
+                email_address => $email_address, 
+                domain => $domain);
+    }else{
+        return ();
+    }
+}
+
+# get_codes_from_message TEXT
+# Extract SMTP or DSN error codes from an email error message
+# Returns an array of the message (with codes removed), any 
+# DSN code, and any SMTP code
+sub get_codes_from_message($){
+    my ($message) = @_;
+    my $dsn_code;
+    my $smtp_code;
+    if ($message =~ s/^(\d\d\d)( |-)//){
+        $smtp_code = $1;
+    }
+    if ($message =~ s/^(\d\.\d\.\d) //){
+        $dsn_code = $1;
+    }
+    if ($message =~ s/ \(#(\d\.\d\.\d)\)$//){
+        $dsn_code = $1;
+    }
+    return ($message, $dsn_code, $smtp_code);
 }
 
 # get_problem_from_message TEXT
@@ -305,13 +365,13 @@ sub get_problem_from_message($){
                             'unknown (\S+) user',
                             'user invalid',
                             'user (is )?unknown');
-                            
     my $no_user_pattern = join('|', @no_user_synonyms);
        
     my @no_relay_synonyms = ('as a relay', 
                              'no valid cert for gatewaying', 
                              'not configured to relay mail',
                              'relay access denied',
+                             'relay denied',
                              'relaying denied');
     my $no_relay_pattern = join('|', @no_relay_synonyms);
        
@@ -321,6 +381,7 @@ sub get_problem_from_message($){
                                  'mailbox is full', 
                                  'mailfolder is over the allowed quota', 
                                  'over quota', 
+                                 'quota exceeded',
                                  'recipient overquota', 
                                  'user has exceeded their quota');
     my $mailbox_full_pattern = join('|', @mailbox_full_synonyms);
@@ -330,20 +391,22 @@ sub get_problem_from_message($){
                                         'mailbox is disabled',
                                         'mailbox unavailable',
                                         'user account not activated');
-
     my $mailbox_unavailable_pattern = join('|', @mailbox_unavailable_synonyms);
     
     my @unrouteable_synonyms = ('all relevant mx records point to non-existent hosts', 
                                 "domain isn't in my list of allowed rcpthosts",
                                 'unrouteable');
-
     my $unrouteable_pattern = join('|', @unrouteable_synonyms); 
     
     my @timeout_synonyms = ('retry timeout', 
                             'retry time not reached for any host after a long failure period');
-
     my $timeout_pattern = join('|', @timeout_synonyms); 
-    
+
+    my @spam_synonyms = ('message looks like spam',
+                         'high on spam scale',
+                         'rejected due to security policies - mcspamsignature');
+    my $spam_pattern = join('|', @spam_synonyms);
+        
     if($message =~ /$mailbox_full_pattern/i){
         $problem = ERR_MAILBOX_FULL;
     }elsif ($message =~ /$no_user_pattern/i){
@@ -356,9 +419,54 @@ sub get_problem_from_message($){
         $problem = ERR_UNROUTEABLE;
     }elsif($message =~ /$timeout_pattern/i){
         $problem = ERR_TIMEOUT;
+    }elsif($message =~ /$spam_pattern/i){
+        $problem = ERR_SPAM;
     }
     
     return $problem;
+}
+
+# parse_dsn_bounce TEXT
+# Attempt to parse TEXT (scalar or reference to list of lines) as an RFC3798
+# message disposition notification email. On success, return the MDN disposition string and
+# an error string. On failure (when TEXT cannot be parsed) return undef.
+sub parse_mdn_bounce ($) {
+    my $P = new MIME::Parser();
+     $P->output_to_core(1); 
+     my $ent = $P->parse_data(join("\n", @{$_[0]}) . "\n");
+     
+     return undef if (!$ent || !$ent->is_multipart() || lc($ent->mime_type()) ne 'multipart/report');
+     
+     # The first part of the multipart entity should be a human-readable explanation of the MDN
+     my $message_part = $ent->parts(0);
+     my $h = $message_part->bodyhandle()->open('r');
+     my $message = '';
+     while (defined($_ = $h->getline())) {
+          $message .= $_;
+      }
+     $message = join(' ', split(' ', $message));
+     $h->close();
+      
+     # The second part of the multipart entity should be of type
+     # message/disposition-notification.
+     my $status = $ent->parts(1);
+     return undef if (!$status || lc($status->mime_type()) ne 'message/disposition-notification');
+    
+     # The disposition message is given in an RFC822-format header field within the body of
+     # the delivery status message.
+     $h = $status->bodyhandle()->open('r');
+
+     my $r;
+     while (defined($_ = $h->getline())) {
+         chomp();
+         if (/^Disposition:\s+(.*?)\s*$/) {
+             $r = $1;
+             last;
+         }
+     }
+     $h->close();
+
+     return ($r, $message);
 }
 
 

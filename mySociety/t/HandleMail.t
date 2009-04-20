@@ -6,13 +6,13 @@
 #  Copyright (c) 2009 UK Citizens Online Democracy. All rights reserved.
 # Email: louise@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: HandleMail.t,v 1.2 2009-04-16 16:54:31 louise Exp $
+# $Id: HandleMail.t,v 1.3 2009-04-20 10:15:06 louise Exp $
 #
 
 use strict;
 use warnings; 
 
-use Test::More tests => 132;
+use Test::More qw(no_plan);
 
 # Horrible boilerplate to set up appropriate library paths.
 use FindBin;
@@ -38,6 +38,14 @@ sub parse_dsn_bounce($){
     my $message_file = shift;
     my @lines = create_test_message($message_file);
     return mySociety::HandleMail::parse_dsn_bounce(\@lines);
+}
+
+#---------------------------------
+
+sub parse_mdn_bounce($){
+    my $message_file = shift;
+    my @lines = create_test_message($message_file);
+    return mySociety::HandleMail::parse_mdn_bounce(\@lines);
 }
 
 #---------------------------------
@@ -69,6 +77,15 @@ sub test_parse_dsn_bounce(){
     $status = parse_dsn_bounce('hotmail-mailbox-unavailable.txt');   
     is($status, undef, 'parse_dsn_bounce should return a status of undef for a "Mailbox unavailable" bounce from Hotmail without a DSN part');
       
+    return 1;
+}
+
+sub test_parse_mdn_bounce(){
+    
+    my ($disposition, $message) = parse_mdn_bounce('dovecot-mdn-quota-exceeded.txt');
+    is($disposition, 'automatic-action/MDN-sent-automatically; deleted', 'parse_mdn bounce should return the correct disposition string for a "Quota exceeded" mail from Dovecot');
+    is($message, 'Your message to <anon@virgin.net> was automatically rejected: Quota exceeded', 'parse_mdn bounce should return the correct message for a "Quota exceeded" mail from Dovecot');
+    
     return 1;
 }
 
@@ -106,6 +123,14 @@ sub test_parse_ill_formed_bounce(){
                         domain => 'lycos.co.uk');
     expect_ill_formed_bounce_values('exim long retry mail','exim-long-retry.txt', %expected_values);
 
+    %expected_values = (smtp_code => undef, 
+                        message => 'Your message to <anon@virgin.net> was automatically rejected: Quota exceeded', 
+                        dsn_code => undef,
+                        problem => mySociety::HandleMail::ERR_MAILBOX_FULL,
+                        email_address => 'anon@virgin.net', 
+                        domain => 'virgin.net');
+    expect_ill_formed_bounce_values('mdn quota exceeded','dovecot-mdn-quota-exceeded.txt', %expected_values);
+    
     return 1;
 }
 
@@ -232,7 +257,71 @@ sub test_parse_smtp_error(){
     
     $text = 'anon@askal.com
       SMTP error from remote mail server after end of data:
-      host mail.askal.com [81.137.231.49]: 554 Sorry, message looks like SPAM to me';
+      host mail.askal.com [81.137.231.49]: 554 Sorry, message looks like SPAM to me
+      ';
+    %expected_values = (domain => 'askal.com', 
+                        smtp_code => '554', 
+                        dsn_code => undef, 
+                        email_address => 'anon@askal.com',
+                        problem => mySociety::HandleMail::ERR_SPAM,
+                        message => 'Sorry, message looks like SPAM to me');
+    expect_parse_smtp_values('askal example', $text, %expected_values);
+    
+    $text = 'anon@fsw.vu.nl
+      SMTP error from remote mail server after end of data:
+      host mx-1.mf.surf.net [195.169.124.153]: 554 5.7.1 Message scored extremely high on spam scale.  No incident created.
+      ';
+    %expected_values = (domain => 'fsw.vu.nl', 
+                        smtp_code => '554', 
+                        dsn_code => '5.7.1', 
+                        email_address => 'anon@fsw.vu.nl',
+                        problem => mySociety::HandleMail::ERR_SPAM,
+                        message => 'Message scored extremely high on spam scale. No incident created.');
+    expect_parse_smtp_values('vu example', $text, %expected_values);
+    
+    $text = 'anon@fairadsl.co.uk
+        SMTP error from remote mail server after end of data:
+        host email3.bootsit.com [84.45.84.225]: 550 5.7.1 Relay Denied
+    ';
+    %expected_values = (domain => 'fairadsl.co.uk', 
+                        smtp_code => '550', 
+                        dsn_code => '5.7.1', 
+                        email_address => 'anon@fairadsl.co.uk',
+                        problem => mySociety::HandleMail::ERR_NO_RELAY,
+                        message => 'Relay Denied');
+    expect_parse_smtp_values('fairadsl example', $text, %expected_values);
+    
+    $text = 'anon@toynbeehall.org.uk
+          SMTP error from remote mail server after end of data:
+          host service24.mimecast.com [212.2.3.153]: 554 email rejected due to security policies - MCSpamSignature.sa.28.6
+    ';
+    %expected_values = (domain => 'toynbeehall.org.uk', 
+                        smtp_code => '554', 
+                        dsn_code => undef, 
+                        email_address => 'anon@toynbeehall.org.uk',
+                        problem => mySociety::HandleMail::ERR_SPAM,
+                        message => 'email rejected due to security policies - MCSpamSignature.sa.28.6');
+    expect_parse_smtp_values('toynbeehall example', $text, %expected_values);    
+    
+    $text = 'anon@Youth-Action.net
+      SMTP error from remote mail server after MAIL FROM:<twfy-bounce@theyworkforyou.com> SIZE=5050:
+      host mailserver.youth-action.net [81.86.250.118]:
+      550 This message has been blocked by Policy Patrol
+    ';
+    
+    $text = 'anon@sunderland.gov.uk
+      SMTP error from remote mail server after initial connection:
+      host mail.sunderland.gov.uk [193.195.42.194]:
+      550 Requested action not taken: mailbox unavailable.
+    ';
+      
+    $text = 'anon@btinternet.com
+        SMTP error from remote mailer after initial connection:
+        host mx1.bt.mail.yahoo.com [217.146.188.189]:
+        421 4.7.0 [TS02] Messages from 77.92.95.112 temporarily deferred due to user complaints - 4.16.56.1; see http://postmaster.yahoo.com/421-ts02.html:
+        retry timeout exceeded
+    ';
+    
     return 1;
 }
 
@@ -433,11 +522,12 @@ sub test_parse_exim_error(){
     return 1;
 }
 
-
-
+ 
 ok(test_parse_dsn_bounce() == 1, 'Ran all tests for parse_dsn_bounce');
+ok(test_parse_mdn_bounce() == 1, 'Ran all tests for parse_mdn_bounce');
 ok(test_parse_ill_formed_bounce() == 1, 'Ran all tests for parse_ill_formed_bounce');
 ok(test_parse_smtp_error() == 1, 'Ran all tests for parse_smtp_error');
 ok(test_parse_remote_host_error() == 1, 'Ran all tests for parse_remote_host_error');
 ok(test_parse_qmail_error() == 1, 'Ran all tests for parse_qmail_error');
 ok(test_parse_exim_error() == 1, 'Ran all tests for parse_exim_error');
+
