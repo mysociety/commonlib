@@ -6,7 +6,7 @@
 #  Copyright (c) 2009 UK Citizens Online Democracy. All rights reserved.
 # Email: louise@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: HandleMail.t,v 1.3 2009-04-20 10:15:06 louise Exp $
+# $Id: HandleMail.t,v 1.4 2009-04-20 13:19:58 louise Exp $
 #
 
 use strict;
@@ -179,7 +179,8 @@ sub expect_parse_exim_values($$%){
 
 sub test_parse_smtp_error(){
 
-    my $text = 'SMTP error from remote mail server after RCPT TO:<anon@hotmail.com>:
+    my $text = 'anon@hotmail.com
+    SMTP error from remote mail server after RCPT TO:<anon@hotmail.com>:
     host mx3.hotmail.com [65.55.37.104]: 550 Requested action not taken:
     mailbox unavailable
     ';
@@ -191,8 +192,9 @@ sub test_parse_smtp_error(){
                            message => 'Requested action not taken: mailbox unavailable');
     expect_parse_smtp_values('hotmail example', $text, %expected_values);
 
-    $text = 'SMTP error from remote mail server after RCPT TO:<anon@fcg.com>:
-      host smtp2.fcg.com [199.196.56.212]: 550 No such user (anon@fcg.com)
+    $text = 'anon@fcg.com
+    SMTP error from remote mail server after RCPT TO:<anon@fcg.com>:
+    host smtp2.fcg.com [199.196.56.212]: 550 No such user (anon@fcg.com)
     ';
     %expected_values = (domain => 'fcg.com', 
                         smtp_code => '550', 
@@ -202,7 +204,8 @@ sub test_parse_smtp_error(){
                         message => 'No such user (anon@fcg.com)');
     expect_parse_smtp_values('fcg example', $text, %expected_values);
     
-    $text = 'SMTP error from remote mail server after RCPT TO:<anon@server.fsnet.co.uk>:
+    $text = 'anon@server.fsnet.co.uk
+    SMTP error from remote mail server after RCPT TO:<anon@server.fsnet.co.uk>:
     host mail-in.freeserve.com [193.252.22.184]: 552 5.2.2 <anon@server.fsnet.co.uk>:
     Recipient address rejected: Over quota
     ';
@@ -214,7 +217,8 @@ sub test_parse_smtp_error(){
                         message => 'Recipient address rejected: Over quota');
     expect_parse_smtp_values('fsnet example', $text, %expected_values);
     
-    $text = 'SMTP error from remote mail server after RCPT TO:<anon@abbeyfm.co.uk>:
+    $text = 'anon@abbeyfm.co.uk
+    SMTP error from remote mail server after RCPT TO:<anon@abbeyfm.co.uk>:
     host abbeyfm.co.uk [87.106.26.53]: 553 sorry, that domain isn\'t in my list of allowed rcpthosts; no valid cert for gatewaying (#5.7.1)
     ';
     %expected_values = (domain => 'abbeyfm.co.uk', 
@@ -225,7 +229,8 @@ sub test_parse_smtp_error(){
                         message => "sorry, that domain isn't in my list of allowed rcpthosts; no valid cert for gatewaying");
     expect_parse_smtp_values('abbeyfm example', $text, %expected_values);
 
-    $text = 'SMTP error from remote mail server after RCPT TO:<anon@ntlworld.com>:
+    $text = 'anon@ntlworld.com
+    SMTP error from remote mail server after RCPT TO:<anon@ntlworld.com>:
     host smtpin.ntlworld.com [81.103.221.10]: 550 Invalid recipient:
     <anon@ntlworld.com>
     ';
@@ -237,7 +242,8 @@ sub test_parse_smtp_error(){
                         message => 'Invalid recipient: <anon@ntlworld.com>');
     expect_parse_smtp_values('ntlworld example', $text, %expected_values);
     
-    $text = 'SMTP error from remote mail server after RCPT TO:<anon@anon.com>:
+    $text = 'anon@anon.com
+    SMTP error from remote mail server after RCPT TO:<anon@anon.com>:
     host cluster1.eu.messagelabs.com [195.245.230.115]:
     553-you are trying to use me [server-10.tower-57.messagelabs
     553-.com] as a relay, but I have not been configured to let
@@ -308,12 +314,26 @@ sub test_parse_smtp_error(){
       host mailserver.youth-action.net [81.86.250.118]:
       550 This message has been blocked by Policy Patrol
     ';
+    %expected_values = (domain => 'Youth-Action.net', 
+                        smtp_code => '550', 
+                        dsn_code => undef, 
+                        email_address => 'anon@Youth-Action.net',
+                        problem => mySociety::HandleMail::ERR_SPAM,
+                        message => 'This message has been blocked by Policy Patrol');
+    expect_parse_smtp_values('youth action example', $text, %expected_values);    
     
     $text = 'anon@sunderland.gov.uk
       SMTP error from remote mail server after initial connection:
       host mail.sunderland.gov.uk [193.195.42.194]:
       550 Requested action not taken: mailbox unavailable.
     ';
+    %expected_values = (domain => 'sunderland.gov.uk', 
+                        smtp_code => '550', 
+                        dsn_code => undef, 
+                        email_address => 'anon@sunderland.gov.uk',
+                        problem => mySociety::HandleMail::ERR_MAILBOX_UNAVAILABLE,
+                        message => 'Requested action not taken: mailbox unavailable.');
+    expect_parse_smtp_values('sunderland example', $text, %expected_values);
       
     $text = 'anon@btinternet.com
         SMTP error from remote mailer after initial connection:
@@ -321,7 +341,53 @@ sub test_parse_smtp_error(){
         421 4.7.0 [TS02] Messages from 77.92.95.112 temporarily deferred due to user complaints - 4.16.56.1; see http://postmaster.yahoo.com/421-ts02.html:
         retry timeout exceeded
     ';
+    %expected_values = (domain => 'btinternet.com', 
+                        smtp_code => '421', 
+                        dsn_code => '4.7.0', 
+                        email_address => 'anon@btinternet.com',
+                        problem => mySociety::HandleMail::ERR_TEMPORARILY_DEFERRED,
+                        message => '[TS02] Messages from 77.92.95.112 temporarily deferred due to user complaints - 4.16.56.1; see http://postmaster.yahoo.com/421-ts02.html: retry timeout exceeded');
+    expect_parse_smtp_values('btinternet example', $text, %expected_values);
     
+    $text = 'anon@anon.com
+      SMTP error from remote mail server after RCPT TO:<anon@anon.com>:
+      host anon.com [91.121.84.154]: 550-Verification failed for <twfy-bounce@theyworkforyou.com>
+      550-The mail server could not deliver mail to twfy-bounce@theyworkforyou.com.  The account or domain may not exist, they may be blacklisted, or missing the proper dns entries.
+      550 Sender verify failed
+      ';
+    %expected_values = (domain => 'anon.com', 
+                      smtp_code => '550', 
+                      dsn_code => undef, 
+                      email_address => 'anon@anon.com',
+                      problem => mySociety::HandleMail::ERR_VERIFICATION_FAILED,
+                      message => 'Verification failed for <twfy-bounce@theyworkforyou.com> 550-The mail server could not deliver mail to twfy-bounce@theyworkforyou.com. The account or domain may not exist, they may be blacklisted, or missing the proper dns entries. 550 Sender verify failed');
+    expect_parse_smtp_values('sender verify example', $text, %expected_values);
+      
+    $text = 'anon@redmail.com
+    SMTP error from remote mail server after pipelined DATA:
+    host relay-1.mail.fido.net [194.70.36.21]: 597 we have a reason to believe this message is unwanted here
+    ';  
+    %expected_values = (domain => 'redmail.com', 
+                      smtp_code => '597', 
+                      dsn_code => undef, 
+                      email_address => 'anon@redmail.com',
+                      problem =>  mySociety::HandleMail::ERR_SPAM,
+                      message => 'we have a reason to believe this message is unwanted here');
+    expect_parse_smtp_values('redmail example', $text, %expected_values);
+    
+    $text = 'anon@surreycc.gov.uk
+      SMTP error from remote mail server after RCPT TO:<anon@surreycc.gov.uk>:
+      host a.surreycc.gov.uk [212.137.33.124]:
+      550 5.7.1 Unable to deliver to <anon@surreycc.gov.uk>
+      ';   
+    %expected_values = (domain => 'surreycc.gov.uk', 
+                    smtp_code => '550', 
+                    dsn_code => '5.7.1', 
+                    email_address => 'anon@surreycc.gov.uk',
+                    problem =>  mySociety::HandleMail::ERR_MESSAGE_REFUSED,
+                    message => 'Unable to deliver to <anon@surreycc.gov.uk>');
+    expect_parse_smtp_values('surreycc example', $text, %expected_values);
+      
     return 1;
 }
 
@@ -522,7 +588,6 @@ sub test_parse_exim_error(){
     return 1;
 }
 
- 
 ok(test_parse_dsn_bounce() == 1, 'Ran all tests for parse_dsn_bounce');
 ok(test_parse_mdn_bounce() == 1, 'Ran all tests for parse_mdn_bounce');
 ok(test_parse_ill_formed_bounce() == 1, 'Ran all tests for parse_ill_formed_bounce');

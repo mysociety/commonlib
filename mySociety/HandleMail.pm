@@ -6,7 +6,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 
-my $rcsid = ''; $rcsid .= '$Id: HandleMail.pm,v 1.6 2009-04-20 10:15:04 louise Exp $';
+my $rcsid = ''; $rcsid .= '$Id: HandleMail.pm,v 1.7 2009-04-20 13:19:58 louise Exp $';
 
 package mySociety::HandleMail;
 
@@ -26,6 +26,9 @@ use constant ERR_MAILBOX_UNAVAILABLE => 4;
 use constant ERR_UNROUTEABLE => 5;
 use constant ERR_TIMEOUT => 6;
 use constant ERR_SPAM => 7;
+use constant ERR_TEMPORARILY_DEFERRED => 8;
+use constant ERR_VERIFICATION_FAILED => 9;
+use constant ERR_MESSAGE_REFUSED => 10;
 
 # Don't print diagnostics to standard error, as this can result in bounce
 # messages being generated (only in response to non-bounce input, obviously).
@@ -259,37 +262,26 @@ sub parse_smtp_error ($){
     my $dsn_code;
     my $email_address;
     my $problem;
-    my $smtp_start = 'SMTP error from remote mail server after ';
-    my $host_pattern = '\s+host [^ ]* \[[^ ]*\]:';
+    my $mail_pattern = '(\S*@(.*?))\s*\n\s*';
+    my $smtp_start = 'SMTP error from remote mail(?:er)? (?:server )?after ';
+    my $host_pattern = '\s+host [^ ]* \[[^ ]*\]:(?:\n)?';
     my $message_pattern = '(.*?)\n(((.*\S+.*)\n)*)';
-    my $rcpt_pattern = $smtp_start . 'RCPT TO:<(.*@(.*?))>:' . $host_pattern . $message_pattern;
-    
-    if ($text =~ /$rcpt_pattern/) {
+    my $error_time_pattern = '(RCPT TO:<.*@.*?>:|end of data:\n|pipelined DATA:\n|initial connection:\n|MAIL FROM:<.*?> SIZE=\d+:)';
+    my $error_pattern = $mail_pattern . $smtp_start . $error_time_pattern . $host_pattern . $message_pattern;
+ 
+    if ($text =~ /$error_pattern/){
         $email_address = $1;
-        $domain = $2; 
-        $message = $3 || '';
-        if ($4){
-            $message .= $4;
+        $domain = $2;
+        $message = $4 || '';
+        if ($5){
+            $message .= $5;
         }
         $message = join(' ', split(' ', $message));
         ($message, $dsn_code, $smtp_code) = get_codes_from_message($message);
         $message =~ s/^<.*?>: //;
         $problem = get_problem_from_message($message);
     }
-    
-    my $end_pattern = '(.*@(.*?))\s*\n\s*' . $smtp_start . 'end of data:\n' . $host_pattern . $message_pattern;
-    if ($text =~ /$end_pattern/){
-        $email_address = $1;
-        $domain = $2;
-        $message = $3 || '';
-        if ($4){
-            $message .= $4;
-        }
-        $message = join(' ', split(' ', $message));
-        ($message, $dsn_code, $smtp_code) = get_codes_from_message($message);
-        $problem = get_problem_from_message($message);
-    }
-
+      
     return (domain => $domain, 
             smtp_code => $smtp_code, 
             dsn_code => $dsn_code, 
@@ -346,6 +338,9 @@ sub get_codes_from_message($){
 sub get_problem_from_message($){
     my ($message) = @_;
     my $problem;
+    
+    my @temporary_deferral_synonyms = ('temporarily deferred');
+    my $temporary_deferral_pattern = join('|', @temporary_deferral_synonyms);
     my @no_user_synonyms = ('address rejected',
                             'does not exist', 
                             'email address for typos',
@@ -404,10 +399,20 @@ sub get_problem_from_message($){
 
     my @spam_synonyms = ('message looks like spam',
                          'high on spam scale',
-                         'rejected due to security policies - mcspamsignature');
+                         'rejected due to security policies', 
+                         'message has been blocked',
+                         'this message is unwanted here');
     my $spam_pattern = join('|', @spam_synonyms);
         
-    if($message =~ /$mailbox_full_pattern/i){
+    my @verification_failed_synonyms = ('sender verify failed');
+    my $verification_failed_pattern = join('|', @verification_failed_synonyms);
+    
+    my @message_refused_synonyms = ('unable to deliver to');
+    my $message_refused_pattern = join('|', @message_refused_synonyms);
+    
+    if($message =~ /$temporary_deferral_pattern/i){
+        $problem = ERR_TEMPORARILY_DEFERRED;
+    }elsif($message =~ /$mailbox_full_pattern/i){
         $problem = ERR_MAILBOX_FULL;
     }elsif ($message =~ /$no_user_pattern/i){
         $problem = ERR_NO_USER;
@@ -421,6 +426,10 @@ sub get_problem_from_message($){
         $problem = ERR_TIMEOUT;
     }elsif($message =~ /$spam_pattern/i){
         $problem = ERR_SPAM;
+    }elsif($message =~ /$verification_failed_pattern/i){
+        $problem = ERR_VERIFICATION_FAILED;
+    }elsif($message =~ /$message_refused_pattern/i){
+        $problem = ERR_MESSAGE_REFUSED;
     }
     
     return $problem;
@@ -477,17 +486,18 @@ sub parse_mdn_bounce ($) {
 # return undef.
 sub parse_dsn_bounce ($) {
     my $P = new MIME::Parser();
+
     $P->output_to_core(1);  # avoid temporary files when we can
-
+    # print join("\n", @{$_[0]});
     my $ent = $P->parse_data(join("\n", @{$_[0]}) . "\n");
-
+    
     return undef if (!$ent || !$ent->is_multipart() || lc($ent->mime_type()) ne 'multipart/report');
     # The second part of the multipart entity should be of type
     # message/delivery-status.
     
     my $status = $ent->parts(1);
+  
     return undef if (!$status || lc($status->mime_type()) ne 'message/delivery-status');
-
     # The status is given in an RFC822-format header field within the body of
     # the delivery status message.
     my $h = $status->bodyhandle()->open('r');
