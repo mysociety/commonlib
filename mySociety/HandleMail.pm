@@ -6,7 +6,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 
-my $rcsid = ''; $rcsid .= '$Id: HandleMail.pm,v 1.7 2009-04-20 13:19:58 louise Exp $';
+my $rcsid = ''; $rcsid .= '$Id: HandleMail.pm,v 1.8 2009-04-21 12:09:46 louise Exp $';
 
 package mySociety::HandleMail;
 
@@ -29,6 +29,9 @@ use constant ERR_SPAM => 7;
 use constant ERR_TEMPORARILY_DEFERRED => 8;
 use constant ERR_VERIFICATION_FAILED => 9;
 use constant ERR_MESSAGE_REFUSED => 10;
+use constant ERR_AUTH_REQUIRED => 11;
+use constant ERR_BAD_SYNTAX => 12;
+use constant ERR_DELAY => 13;
 
 # Don't print diagnostics to standard error, as this can result in bounce
 # messages being generated (only in response to non-bounce input, obviously).
@@ -111,10 +114,10 @@ sub get_token {
 }
 
 
-# parse_ill_formed_bounce TEXT
+# parse_bounce TEXT
 # Attempt to extract bounce attributes if the email represented by TEXT is an ill-formed bounce
 # email.
-sub parse_ill_formed_bounce ($){
+sub parse_bounce ($){
     my $lines = shift;
     my $mail = join("\n", @$lines);
     
@@ -134,6 +137,13 @@ sub parse_ill_formed_bounce ($){
     if (!$data{message}){
         %data = parse_exim_error($mail);
     }
+    if (!$data{message}){
+        %data = parse_aol_error($mail);
+    }
+    if (!$data{message}){
+        %data = parse_yahoo_error($mail);
+    }
+    
     return %data;
 }
 
@@ -145,7 +155,6 @@ sub parse_exim_error ($){
     my $domain;
     my $message;
     my $email_address;
-    my $permanent = 0;
     my $problem;
     my $main_para_pattern = '\s*\n?\s*                              
                             The\ following\ address\(es\)\ failed:
@@ -155,7 +164,7 @@ sub parse_exim_error ($){
                           (\s*\(.*?generated.*?\)\s*\n)?    #option description of where the address was generated from
                           (.*?)\n';                         # error message
     
-    my $email_pattern = '(.*?@(.*?))';
+    my $email_pattern = '(.*?@(\S+))';
     
     my $standard_text = 'This\ is\ a\ permanent\ error.'
                         . $main_para_pattern 
@@ -166,7 +175,6 @@ sub parse_exim_error ($){
         $email_address = $1;
         $domain = $2;
         $message = $4;
-        $permanent = 1;
     }
     my $alternative_text = 'of\ its\ recipients.' 
                             . $main_para_pattern 
@@ -179,6 +187,16 @@ sub parse_exim_error ($){
     
     }
     
+    my $delay_text = '(A message that you sent has not yet been delivered((([^\n]*\w+[^\n]*)\n)*))';
+    if ($text =~ /$delay_text/m){
+        $message = $1;
+        my $failed_address = 'The address to which the message has not yet been delivered is:\n\s*\n\s*' . $email_pattern;
+        if ($text =~ /$failed_address/){
+            $email_address = $1;
+            $domain = $2;
+        }
+    }
+    
     if ($message){
         $message = join(' ', split(' ', $message));
         $problem = get_problem_from_message($message);
@@ -187,7 +205,6 @@ sub parse_exim_error ($){
     return (domain => $domain, 
             message => $message, 
             problem => $problem,
-            permanent => $permanent, 
             email_address => $email_address);
 }
 
@@ -287,7 +304,7 @@ sub parse_smtp_error ($){
             dsn_code => $dsn_code, 
             email_address => $email_address,
             problem => $problem, 
-            message => $message), 
+            message => $message);
 }
 
 # parse_mdn_error TEXT
@@ -311,6 +328,51 @@ sub parse_mdn_error($){
     }else{
         return ();
     }
+}
+
+# parse_aol_error TEXT
+# Parse an AOL format bounce error message and return a hash of attributes
+sub parse_aol_error($){
+    my $text = shift;
+    my $email_address;
+    my $domain;
+    my $problem;
+    my $message;
+    
+    if ($text =~ /from: Mail Delivery Subsystem <MAILER-DAEMON\@aol.com>/ && $text =~ /(Your mail to the following recipients could not be delivered because they are not accepting mail from \S+\s*\n\s*\n\s*(\S+))/){
+        $message = $1;
+        $email_address = $2 . '@aol.com';
+        $domain = 'aol.com';
+        $message = join(' ', split(' ', $message));
+        $problem = get_problem_from_message($message);
+    }
+    return (domain => $domain, 
+            email_address => $email_address,
+            problem => $problem, 
+            message => $message);
+}
+
+# parse_yahoo_error TEXT
+sub parse_yahoo_error($){
+    my $text = shift;
+    my $email_address;
+    my $domain;
+    my $problem;
+    my $message;
+    my $message_pattern = '\s*\n(((.*\S+.*)\n)*)';
+    
+    if ($text =~ /Message from\s+yahoo.(?:com|co\.uk).\s*\n\s*Unable to deliver message to the following address\(es\)\.\s*\n\s*\n\s*<(.*?@(.*?))>:$message_pattern/){
+        $email_address = $1;
+        $domain = $2;
+        $message = $3;
+        $message = join(' ', split(' ', $message));
+        $problem = get_problem_from_message($message);
+    }
+
+    return (domain => $domain, 
+            email_address => $email_address,
+            problem => $problem, 
+            message => $message);
 }
 
 # get_codes_from_message TEXT
@@ -341,25 +403,44 @@ sub get_problem_from_message($){
     
     my @temporary_deferral_synonyms = ('temporarily deferred');
     my $temporary_deferral_pattern = join('|', @temporary_deferral_synonyms);
-    my @no_user_synonyms = ('address rejected',
+    my @no_user_synonyms = ('address is not known',
+                            'address is unknown',
+                            'addressee unknown',
+                            'address not recognised',
+                            'address rejected',
+                            'bad destination mailbox address',
                             'does not exist', 
+                            'does not have their email address registered',
                             'email address for typos',
                             'invalid address',
+                            'invalid mailbox',
                             'invalid recipient', 
+                            'mailbox not found',
+                            'mail to that recipient is not accepted',
                             'never logged onto their free aim',
+                            'no account by that name here',
                             'no mailbox here by that name', 
                             'no such mailbox',
                             'no such address',
                             'no such recipient',
                             'no such user', 
                             'not a valid mailbox',
+                            'not our customer',
+                            'recipient address unknown',
+                            'recipient no longer on server',
+                            'recipient not recognized',
+                            'recipient rejected',
                             'recipient unknown',
+                            'unknown or illegal alias',
                             'unable to validate recipient',
                             'unknown recipient',
                             'unknown user', 
                             'unknown (\S+) user',
+                            'user doesn\'t have a (\S+) account',
                             'user invalid',
-                            'user (is )?unknown');
+                            'user not found',
+                            'user (is )?unknown',
+                            'was shut down');
     my $no_user_pattern = join('|', @no_user_synonyms);
        
     my @no_relay_synonyms = ('as a relay', 
@@ -367,41 +448,98 @@ sub get_problem_from_message($){
                              'not configured to relay mail',
                              'relay access denied',
                              'relay denied',
-                             'relaying denied');
+                             'relaying denied',
+                             'relay not permitted',
+                             'unable to relay',
+                             "won't relay");
     my $no_relay_pattern = join('|', @no_relay_synonyms);
        
-    my @mailbox_full_synonyms = ('mail quota exceeded',
+    my @mailbox_full_synonyms = ('account is overquota',
+                                 'address no longer accepts mail',
+                                 'mail quota exceeded',
+                                 'mailbox belonging to \S+ is full',
                                  'mailbox disk quota exceeded',
                                  'mailbox has exceeded the limit',
+                                 'mailbox full',
                                  'mailbox is full', 
                                  'mailfolder is over the allowed quota', 
                                  'over quota', 
                                  'quota exceeded',
                                  'recipient overquota', 
-                                 'user has exceeded their quota');
+                                 'user exceeds storage quota',
+                                 'user has exceeded their quota',
+                                 'user over disk quota');
     my $mailbox_full_pattern = join('|', @mailbox_full_synonyms);
     
-    my @mailbox_unavailable_synonyms = ('mailbox disabled', 
+    my @mailbox_unavailable_synonyms = ('account deactivated',
+                                        'account discontinued',
+                                        'account has been disabled',
+                                        'account inactive',
+                                        'account not available',
+                                        'account that you tried to reach is disabled',
+                                        'due to extended inactivity new mail is not currently being accepted',
+                                        'exchangedefender does not protect this email address',
+                                        'inactive user',
+                                        'is no longer valid',
+                                        'mailbox currently suspended',
+                                        'mailbox disabled', 
                                         'mailbox inactive', 
+                                        'mailbox is inactive',
                                         'mailbox is disabled',
+                                        'mailbox temporarily disabled',
                                         'mailbox unavailable',
-                                        'user account not activated');
+                                        'not accepting mail for this email address',
+                                        'recipient has left',
+                                        'user account is unavailable',
+                                        'user account not activated', 
+                                        'user is inactive');
     my $mailbox_unavailable_pattern = join('|', @mailbox_unavailable_synonyms);
     
     my @unrouteable_synonyms = ('all relevant mx records point to non-existent hosts', 
+                                'an mx or srv record indicated no smtp service',
                                 "domain isn't in my list of allowed rcpthosts",
                                 'unrouteable');
     my $unrouteable_pattern = join('|', @unrouteable_synonyms); 
     
-    my @timeout_synonyms = ('retry timeout', 
+    my @timeout_synonyms = ('operation timed out',
+                            'smtp timeout',
+                            'retry timeout', 
                             'retry time not reached for any host after a long failure period');
     my $timeout_pattern = join('|', @timeout_synonyms); 
 
-    my @spam_synonyms = ('message looks like spam',
+    my @spam_synonyms = ('blocked',
+                         'bounced by server content filter',
+                         'delivery not authorized, message refused',
+                         'does not have a valid MX DNS record',
+                         'does not have permissions to submit to this server',
+                         'failed spam test',
+                         'g_deny_smtp blocked this ip',
                          'high on spam scale',
-                         'rejected due to security policies', 
+                         'listed in connection control deny list',
+                         'listed in deny list',
+                         'mail appears to be unsolicited',
+                         'mail from rejected',
                          'message has been blocked',
-                         'this message is unwanted here');
+                         'message has been detected as spam',
+                         'message identified by \S+ as spam',
+                         'message looks like spam',
+                         'message refused',
+                         'not accepting mail from',
+                         'penalty box error',
+                         'policy violation',
+                         'rejected as spam',
+                         'rejected due to security policies', 
+                         'rejected for policy reasons',
+                         'rule imposed mailbox access',
+                         'spam message not queued', 
+                         'spam message, not delivered',
+                         'spam sent',
+                         'spam source blocked',
+                         'this message is unwanted here', 
+                         "user_doesn't_want_to_receive_mails_from_your_address",
+                         'was considered spam',
+                         'was rejected by the realtime block list',
+                         'your ip address is from a blacklisted country');
     my $spam_pattern = join('|', @spam_synonyms);
         
     my @verification_failed_synonyms = ('sender verify failed');
@@ -410,6 +548,15 @@ sub get_problem_from_message($){
     my @message_refused_synonyms = ('unable to deliver to');
     my $message_refused_pattern = join('|', @message_refused_synonyms);
     
+    my @auth_required_synonyms = ('server requires authentication');
+    my $auth_required_pattern = join('|', @auth_required_synonyms);
+    
+    my @bad_syntax_synonyms = ('syntax error');
+    my $bad_syntax_pattern = join('|', @bad_syntax_synonyms);
+
+    my @delay_synonyms = ('has not yet been delivered');
+    my $delay_pattern = join('|', @delay_synonyms);
+        
     if($message =~ /$temporary_deferral_pattern/i){
         $problem = ERR_TEMPORARILY_DEFERRED;
     }elsif($message =~ /$mailbox_full_pattern/i){
@@ -430,6 +577,12 @@ sub get_problem_from_message($){
         $problem = ERR_VERIFICATION_FAILED;
     }elsif($message =~ /$message_refused_pattern/i){
         $problem = ERR_MESSAGE_REFUSED;
+    }elsif($message =~ /$auth_required_pattern/i){
+       $problem = ERR_AUTH_REQUIRED;
+    }elsif($message =~ /$bad_syntax_pattern/i){
+       $problem = ERR_BAD_SYNTAX;
+    }elsif($message =~ /$delay_pattern/i){
+       $problem = ERR_DELAY;
     }
     
     return $problem;
@@ -462,7 +615,7 @@ sub parse_mdn_bounce ($) {
      return undef if (!$status || lc($status->mime_type()) ne 'message/disposition-notification');
     
      # The disposition message is given in an RFC822-format header field within the body of
-     # the delivery status message.
+     # the disposition notification message.
      $h = $status->bodyhandle()->open('r');
 
      my $r;
@@ -478,6 +631,48 @@ sub parse_mdn_bounce ($) {
      return ($r, $message);
 }
 
+# parse_ill_formed_dsn_bounce TEXT
+# Aggressive attempt to parse TEXT (scalar or reference to list of lines) as an RFC1894
+# delivery status notification email. On success, return the DSN status string
+# "x.y.z" (class, subject, detail). On failure (when TEXT cannot be parsed)
+# return undef. Will parse various kinds of badly formed DSNs.
+sub parse_ill_formed_dsn_bounce($){
+
+    my $P = new MIME::Parser();
+
+    $P->output_to_core(1);  # avoid temporary files when we can
+    # print join("\n", @{$_[0]});
+    my $ent = $P->parse_data(join("\n", @{$_[0]}) . "\n");
+    
+    my $mime_type = lc($ent->mime_type());
+  
+    return undef if (!$ent || !$ent->is_multipart() || ($mime_type ne 'multipart/report' &&  $mime_type ne 'multipart/mixed'));
+    # The second part of the multipart entity should be of type
+    # message/delivery-status.
+    my $status = $ent->parts(1);
+    
+    # if not, try the second part of the first part of the message
+    if (!$status || lc($status->mime_type()) ne 'message/delivery-status'){
+        $status = $ent->parts(0)->parts(1);
+        return undef if (!$status || lc($status->mime_type()) ne 'message/delivery-status');
+    }
+    
+    # The status is given in an RFC822-format header field within the body of
+    # the delivery status message.
+    my $h = $status->bodyhandle()->open('r');
+
+    my $r;
+    while (defined($_ = $h->getline())) {
+        chomp();
+        if (/^Status:\s+(\d\.\d+\.\d+)\s*/) {
+            $r = $1;
+            last;
+        }
+    }
+    $h->close();
+
+    return $r;    
+}
 
 # parse_dsn_bounce TEXT
 # Attempt to parse TEXT (scalar or reference to list of lines) as an RFC1894
@@ -490,7 +685,7 @@ sub parse_dsn_bounce ($) {
     $P->output_to_core(1);  # avoid temporary files when we can
     # print join("\n", @{$_[0]});
     my $ent = $P->parse_data(join("\n", @{$_[0]}) . "\n");
-    
+
     return undef if (!$ent || !$ent->is_multipart() || lc($ent->mime_type()) ne 'multipart/report');
     # The second part of the multipart entity should be of type
     # message/delivery-status.

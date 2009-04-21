@@ -6,7 +6,7 @@
 #  Copyright (c) 2009 UK Citizens Online Democracy. All rights reserved.
 # Email: louise@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: HandleMail.t,v 1.4 2009-04-20 13:19:58 louise Exp $
+# $Id: HandleMail.t,v 1.5 2009-04-21 12:09:46 louise Exp $
 #
 
 use strict;
@@ -42,6 +42,14 @@ sub parse_dsn_bounce($){
 
 #---------------------------------
 
+sub parse_ill_formed_dsn_bounce($){
+    my $message_file = shift;
+    my @lines = create_test_message($message_file);
+    return mySociety::HandleMail::parse_ill_formed_dsn_bounce(\@lines);
+}
+
+#---------------------------------
+
 sub parse_mdn_bounce($){
     my $message_file = shift;
     my @lines = create_test_message($message_file);
@@ -50,10 +58,10 @@ sub parse_mdn_bounce($){
 
 #---------------------------------
 
-sub parse_ill_formed_bounce($){
+sub parse_bounce($){
     my $message_file = shift;
     my @lines = create_test_message($message_file);
-    return mySociety::HandleMail::parse_ill_formed_bounce(\@lines);
+    return mySociety::HandleMail::parse_bounce(\@lines);
 }
 
 #---------------------------------
@@ -77,6 +85,15 @@ sub test_parse_dsn_bounce(){
     $status = parse_dsn_bounce('hotmail-mailbox-unavailable.txt');   
     is($status, undef, 'parse_dsn_bounce should return a status of undef for a "Mailbox unavailable" bounce from Hotmail without a DSN part');
       
+    $status = parse_ill_formed_dsn_bounce('dsn-with-extra-text-in-status-field.txt');   
+    is($status, '5.0.0', 'parse_dsn_bounce should return a status of "5.0.0" for an "Unknown address" bounce that is not well formed');
+     
+    $status = parse_ill_formed_dsn_bounce('mailbox-full-multipart-mixed-dsn.txt');   
+    is($status, '5.2.2', 'parse_dsn_bounce should return a status of "5.2.2" for a DSN message whose content type is multipart/mixed'); 
+
+    $status = parse_ill_formed_dsn_bounce('yahoo-dsn-bounce.txt');   
+    is($status, '4.4.7', 'parse_dsn_bounce should return a status of "4.4.7" for a DSN message'); 
+
     return 1;
 }
 
@@ -89,7 +106,7 @@ sub test_parse_mdn_bounce(){
     return 1;
 }
 
-sub test_parse_ill_formed_bounce(){
+sub test_parse_bounce(){
 
     my %expected_values = (smtp_code => '550', 
                            message => 'Recipient address rejected: User unknown in virtual mailbox table', 
@@ -97,7 +114,7 @@ sub test_parse_ill_formed_bounce(){
                            problem => mySociety::HandleMail::ERR_NO_USER,
                            email_address => 'anon@bigwidetalk.org', 
                            domain => 'bigwidetalk.org');
-    expect_ill_formed_bounce_values('messagelabs unknown user mail','messagelabs-unknown-user.txt', %expected_values);
+    expect_bounce_values('messagelabs unknown user mail','messagelabs-unknown-user.txt', %expected_values);
              
     %expected_values = (smtp_code => '550', 
                         message => 'Requested action not taken: mailbox unavailable', 
@@ -105,7 +122,7 @@ sub test_parse_ill_formed_bounce(){
                         problem => mySociety::HandleMail::ERR_MAILBOX_UNAVAILABLE,
                         email_address => 'anon@hotmail.com', 
                         domain => 'hotmail.com');
-    expect_ill_formed_bounce_values('hotmail mailbox unavailable mail','hotmail-mailbox-unavailable.txt', %expected_values);
+    expect_bounce_values('hotmail mailbox unavailable mail','hotmail-mailbox-unavailable.txt', %expected_values);
 
     %expected_values = (smtp_code => undef, 
                         message => 'The users mailfolder is over the allowed quota (size).', 
@@ -113,7 +130,7 @@ sub test_parse_ill_formed_bounce(){
                         problem => mySociety::HandleMail::ERR_MAILBOX_FULL,
                         email_address => 'anon@boltblue.com', 
                         domain => 'boltblue.com');
-    expect_ill_formed_bounce_values('qmail over quota mail','qmail-over-quota.txt', %expected_values);
+    expect_bounce_values('qmail over quota mail','qmail-over-quota.txt', %expected_values);
 
     %expected_values = (smtp_code => undef, 
                         message => 'retry time not reached for any host after a long failure period', 
@@ -121,7 +138,7 @@ sub test_parse_ill_formed_bounce(){
                         problem => mySociety::HandleMail::ERR_TIMEOUT,
                         email_address => 'anon@lycos.co.uk', 
                         domain => 'lycos.co.uk');
-    expect_ill_formed_bounce_values('exim long retry mail','exim-long-retry.txt', %expected_values);
+    expect_bounce_values('exim long retry mail','exim-long-retry.txt', %expected_values);
 
     %expected_values = (smtp_code => undef, 
                         message => 'Your message to <anon@virgin.net> was automatically rejected: Quota exceeded', 
@@ -129,16 +146,32 @@ sub test_parse_ill_formed_bounce(){
                         problem => mySociety::HandleMail::ERR_MAILBOX_FULL,
                         email_address => 'anon@virgin.net', 
                         domain => 'virgin.net');
-    expect_ill_formed_bounce_values('mdn quota exceeded','dovecot-mdn-quota-exceeded.txt', %expected_values);
+    expect_bounce_values('mdn quota exceeded','dovecot-mdn-quota-exceeded.txt', %expected_values);
+    
+    %expected_values = (smtp_code => undef, 
+                        message => 'Your mail to the following recipients could not be delivered because they are not accepting mail from hassle@hassleme.co.uk: anon', 
+                        dsn_code => undef,
+                        problem => mySociety::HandleMail::ERR_SPAM,
+                        email_address => 'anon@aol.com', 
+                        domain => 'aol.com');
+    expect_bounce_values('aol spam','aol-spam.txt', %expected_values);
+    
+    %expected_values = (smtp_code => undef, 
+                        message => 'unable to connect to remote server [194.73.73.127:25]: Operation timed out I\'m not going to try again; this message has been in the queue too long.', 
+                        dsn_code => undef,
+                        problem => mySociety::HandleMail::ERR_TIMEOUT,
+                        email_address => 'anon@btinternet.com', 
+                        domain => 'btinternet.com');
+    expect_bounce_values('yahoo timeout','yahoo-timeout.txt', %expected_values);
     
     return 1;
 }
 
-sub expect_ill_formed_bounce_values($$%){
+sub expect_bounce_values($$%){
     my ($example, $file, %values) = @_;
-    my %data = parse_ill_formed_bounce($file);
+    my %data = parse_bounce($file);
     for my $key (keys %values) {
-        is($data{$key}, $values{$key}, 'parse_ill_formed_bounce can correctly extract ' . $key . ' from ' . $example);
+        is($data{$key}, $values{$key}, 'parse_bounce can correctly extract ' . $key . ' from ' . $example);
     }
     
 }
@@ -174,6 +207,14 @@ sub expect_parse_exim_values($$%){
     my %data = mySociety::HandleMail::parse_exim_error($text);
     for my $key (keys %values) {
         is($data{$key}, $values{$key}, 'parse_exim_error can correctly extract ' . $key . ' from ' . $example);
+    }
+}
+
+sub expect_parse_yahoo_values($$%){
+    my ($example, $text, %values) = @_;
+    my %data = mySociety::HandleMail::parse_yahoo_error($text);
+    for my $key (keys %values) {
+        is($data{$key}, $values{$key}, 'parse_yahoo_error can correctly extract ' . $key . ' from ' . $example);
     }
 }
 
@@ -388,6 +429,30 @@ sub test_parse_smtp_error(){
                     message => 'Unable to deliver to <anon@surreycc.gov.uk>');
     expect_parse_smtp_values('surreycc example', $text, %expected_values);
       
+    $text = 'anon@anon.com
+      SMTP error from remote mail server after RCPT TO:<anon@anon.com>:
+      host anon.com [67.228.55.144]: 503 This mail server requires authentication when attempting to send to a non-local e-mail address. Please check your mail client settings or contact your administrator to verify that the domain or address is defined for this server.
+      ';
+    %expected_values = (domain => 'anon.com', 
+                  smtp_code => '503', 
+                  dsn_code => undef, 
+                  email_address => 'anon@anon.com',
+                  problem =>  mySociety::HandleMail::ERR_AUTH_REQUIRED,
+                  message => 'This mail server requires authentication when attempting to send to a non-local e-mail address. Please check your mail client settings or contact your administrator to verify that the domain or address is defined for this server.');
+    expect_parse_smtp_values('auth example', $text, %expected_values);
+    
+    $text = 'anon@itaubank.com.br
+      SMTP error from remote mail server after MAIL FROM:<hm@sandwich.ukcod.org.uk> SIZE=2175:
+      host post3.itau.com.br [200.196.152.253]: 501 Syntax error in parameters or arguments -
+      ';
+    %expected_values = (domain => 'itaubank.com.br', 
+                  smtp_code => '501', 
+                  dsn_code => undef, 
+                  email_address => 'anon@itaubank.com.br',
+                  problem =>  mySociety::HandleMail::ERR_BAD_SYNTAX,
+                  message => 'Syntax error in parameters or arguments -');
+    expect_parse_smtp_values('syntax example', $text, %expected_values);
+    
     return 1;
 }
 
@@ -446,6 +511,36 @@ sub test_parse_qmail_error(){
     return 1;
 }
 
+sub test_parse_yahoo_error(){
+    
+    my $text = 'Message from yahoo.co.uk.
+    Unable to deliver message to the following address(es).
+
+    <anon@yahoo.co.uk>:
+    Sorry your message to anon@yahoo.co.uk cannot be delivered. This account has been disabled or discontinued [#102].
+    ';
+    my %expected_values = (domain => 'yahoo.co.uk',
+                           message => 'Sorry your message to anon@yahoo.co.uk cannot be delivered. This account has been disabled or discontinued [#102].', 
+                           problem => mySociety::HandleMail::ERR_MAILBOX_UNAVAILABLE,
+                           email_address => 'anon@yahoo.co.uk');
+    expect_parse_yahoo_values('yahoo example', $text, %expected_values);
+   
+    $text = "Message from  yahoo.com.
+    Unable to deliver message to the following address(es).
+
+    <anon\@btinternet.com>:
+    unable to connect to remote server [194.73.73.127:25]: Operation timed out
+    I'm not going to try again; this message has been in the queue too long.
+    ";
+    %expected_values = (domain => 'btinternet.com',
+                        message => 'unable to connect to remote server [194.73.73.127:25]: Operation timed out I\'m not going to try again; this message has been in the queue too long.', 
+                        problem => mySociety::HandleMail::ERR_TIMEOUT,
+                        email_address => 'anon@btinternet.com');
+    expect_parse_yahoo_values('yahoo example', $text, %expected_values);
+    
+    return 1;
+}
+
 sub test_parse_exim_error(){
     
     my $text = 'This message was created automatically by mail delivery software.
@@ -459,7 +554,6 @@ sub test_parse_exim_error(){
     my %expected_values = (domain => 'fsnet.co.uk',
                            message => 'Unrouteable address', 
                            problem => mySociety::HandleMail::ERR_UNROUTEABLE,
-                           permanent => 1,
                            email_address => 'anon@fsnet.co.uk');
     expect_parse_exim_values('fsnet example', $text, %expected_values);
         
@@ -474,7 +568,6 @@ sub test_parse_exim_error(){
     %expected_values = (domain => 'supanet.com',
                         message => 'mailbox is full: retry timeout exceeded', 
                         problem => mySociety::HandleMail::ERR_MAILBOX_FULL,
-                        permanent => 1,
                         email_address => 'anon@supanet.com');
     expect_parse_exim_values('supanet example', $text, %expected_values);
         
@@ -489,7 +582,6 @@ sub test_parse_exim_error(){
     %expected_values = (domain => 'lycos.co.uk',
                         message => 'retry time not reached for any host after a long failure period', 
                         problem => mySociety::HandleMail::ERR_TIMEOUT,
-                        permanent => 1,
                         email_address => 'anon@lycos.co.uk');
     expect_parse_exim_values('lycos example', $text, %expected_values);
         
@@ -504,7 +596,6 @@ sub test_parse_exim_error(){
     %expected_values = (domain => 'anon.co.uk',
                         message => 'retry timeout exceeded',
                         problem => mySociety::HandleMail::ERR_TIMEOUT,
-                        permanent => 1, 
                         email_address => 'anon@anon.co.uk');
     expect_parse_exim_values('anon.co.uk example', $text, %expected_values);
 
@@ -519,7 +610,6 @@ sub test_parse_exim_error(){
     %expected_values = (domain => 'uk.com',
                         message => 'all relevant MX records point to non-existent hosts', 
                         problem => mySociety::HandleMail::ERR_UNROUTEABLE,
-                        permanent => 1,
                         email_address => 'anon@uk.com');
     expect_parse_exim_values('uk.com example', $text, %expected_values);
 
@@ -534,7 +624,6 @@ sub test_parse_exim_error(){
     %expected_values = (domain => 'anon.karoo.co.uk',
                         message => 'mailbox is full', 
                         problem => mySociety::HandleMail::ERR_MAILBOX_FULL,
-                        permanent => 0,
                         email_address => 'anon@anon.karoo.co.uk');
     expect_parse_exim_values('karoo example', $text, %expected_values);
         
@@ -550,7 +639,6 @@ sub test_parse_exim_error(){
     %expected_values = (domain => 'canterbury.ac.uk',
                         message => 'retry timeout exceeded',
                         problem => mySociety::HandleMail::ERR_TIMEOUT,
-                        permanent => 1, 
                         email_address => 'anon@canterbury.ac.uk');
     expect_parse_exim_values('canterbury example', $text, %expected_values); 
      
@@ -563,7 +651,6 @@ sub test_parse_exim_error(){
       all relevant MX records point to non-existent hosts or (invalidly) to IP addresses
     ';
     %expected_values = (domain => 'mosaichomes.co.uk',
-                        permanent => 1,
                         problem => mySociety::HandleMail::ERR_UNROUTEABLE,
                         message => 'all relevant MX records point to non-existent hosts or (invalidly) to IP addresses', 
                         email_address => 'anon@mosaichomes.co.uk');
@@ -579,20 +666,43 @@ sub test_parse_exim_error(){
           mailbox is full: retry timeout exceeded
     ';
     %expected_values = (domain => 'anon.keele.ac.uk',
-                        permanent => 1,
                         problem => mySociety::HandleMail::ERR_MAILBOX_FULL,
                         message => 'mailbox is full: retry timeout exceeded', 
                         email_address => 'anon@anon.keele.ac.uk');
     expect_parse_exim_values('keele example', $text, %expected_values);
     
+    $text = "This message was created automatically by mail delivery software.
+    A message that you sent has not yet been delivered to one or more of its
+    recipients after more than 24 hours on the queue on sandwich.ukcod.org.uk.
+
+    The message identifier is:     1L7v7Z-00025a-Qx
+    The subject of the message is: Don't forget to... 
+    The date of the message is:    Wed, 03 Dec 2008 17:02:41 +0000
+
+    The address to which the message has not yet been delivered is:
+
+      anon\@yahoo.com
+
+    No action is required on your part. Delivery attempts will continue for
+    some time, and this warning may be repeated at intervals if the message
+    remains undelivered. Eventually the mail delivery software will give up,
+    and when that happens, the message will be returned to you.";
+    %expected_values = (domain => 'yahoo.com',
+                        problem => mySociety::HandleMail::ERR_DELAY,
+                        message => 'A message that you sent has not yet been delivered to one or more of its recipients after more than 24 hours on the queue on sandwich.ukcod.org.uk.', 
+                        email_address => 'anon@yahoo.com');
+    expect_parse_exim_values('yahoo delay example', $text, %expected_values);
+    
     return 1;
 }
 
+
 ok(test_parse_dsn_bounce() == 1, 'Ran all tests for parse_dsn_bounce');
 ok(test_parse_mdn_bounce() == 1, 'Ran all tests for parse_mdn_bounce');
-ok(test_parse_ill_formed_bounce() == 1, 'Ran all tests for parse_ill_formed_bounce');
+ok(test_parse_bounce() == 1, 'Ran all tests for parse_bounce');
 ok(test_parse_smtp_error() == 1, 'Ran all tests for parse_smtp_error');
 ok(test_parse_remote_host_error() == 1, 'Ran all tests for parse_remote_host_error');
 ok(test_parse_qmail_error() == 1, 'Ran all tests for parse_qmail_error');
 ok(test_parse_exim_error() == 1, 'Ran all tests for parse_exim_error');
+ok(test_parse_yahoo_error() == 1, 'Ran all tests for parse_yahoo_error');
 
