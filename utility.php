@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: utility.php,v 1.89 2008-11-07 00:59:30 matthew Exp $
+ * $Id: utility.php,v 1.90 2009-04-21 16:18:51 matthew Exp $
  * 
  */
 
@@ -271,10 +271,12 @@ function check_is_valid_regexp($regex) {
  * XXX should this not return null? */
 function http_auth_user() {
     $editor = null;
-    if (array_key_exists("REMOTE_USER", $_SERVER))
-        $editor = $_SERVER["REMOTE_USER"];
+    if (array_key_exists('REDIRECT_REMOTE_USER', $_SERVER))
+        $editor = $_SERVER['REDIRECT_REMOTE_USER'];
+    elseif (array_key_exists('REMOTE_USER', $_SERVER))
+        $editor = $_SERVER['REMOTE_USER'];
     if (!$editor) 
-        $editor = "*unknown*";
+        $editor = '*unknown*';
     return $editor;
 }
 
