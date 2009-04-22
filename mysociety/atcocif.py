@@ -5,7 +5,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: atcocif.py,v 1.49 2009-04-20 12:59:47 francis Exp $
+# $Id: atcocif.py,v 1.50 2009-04-22 13:13:36 francis Exp $
 #
 
 # To do later:
@@ -61,6 +61,7 @@ class ATCO:
         self.show_progress = show_progress
         self.line_patches = {}
         self.locations_to_ignore = {}
+        self.vehicle_type_to_code = {}
 
         self.restrict_date_range_start = None
         self.restrict_date_range_end = None
@@ -222,15 +223,22 @@ class ATCO:
                         if current_item != None:
                             self.item_loaded(current_item)
                         current_item = new_item
+                        self.vehicle_type_to_code[current_item.vehicle_type] = current_item.type_code
                 elif record_identity == 'QB':
                     la = LocationAdditional(line)
                     if la.location not in self.locations_to_ignore:
                         assert isinstance(current_item, Location)
                         current_item.add_additional(la)
 
+                # Vehicle types
+                elif record_identity == 'QV':
+                    new_item = VehicleType(line)
+                    if current_item != None:
+                        self.item_loaded(current_item)
+                    current_item = new_item
+
                 # Other
                 elif record_identity in [
-                    'QV', # Vehicle type record
                     'QD'  # Route description record
                 ]:
                     logging.debug("Ignoring record type '" + record_identity + "'")
@@ -1134,6 +1142,47 @@ class LocationAdditional(CIFRecord):
         self.district_name = matches.group(5).strip()
         self.town_name = matches.group(6).strip()
 
+###########################################################
+# Vehicle type classes
+ 
+class VehicleType(CIFRecord):
+    '''Types of vehicles.
+
+    >>> l = VehicleType('QVNLFBUS   Bus                     ')
+    >>> l.vehicle_type
+    'LFBUS'
+    >>> l.vehicle_long_type
+    'Bus'
+    >>> l.type_code()
+    'B'
+
+    >>> l2 = VehicleType('QVNFERRY   Ferry/River Bus         ')
+    >>> l2.vehicle_type
+    'FERRY'
+    >>> l2.vehicle_long_type
+    'Ferry/River Bus'
+    >>> l2.type_code()
+    'F'
+    '''
+
+    types = { 'Bus' : 'B', 'Coach' : 'C', 'Ferry/River Bus' : 'F', 'Metro' : 'M', 'Heavy Rail' : 'T', 'Air' : 'A' }
+
+    def __init__(self, line):
+        CIFRecord.__init__(self, line, "QV")
+
+        matches = re.match('^QV([NDR])(.{8})(.{24})$', line)
+        if not matches:
+            raise Exception("Vehicle type line incorrectly formatted: " + line)
+
+        self.transaction_type = matches.group(1)
+        assert self.transaction_type == 'N' # code doesn't handle other types yet
+        self.vehicle_type = matches.group(2).strip()
+        self.vehicle_long_type = matches.group(3).strip()
+
+        assert self.vehicle_long_type in VehicleType.types
+
+    def type_code(self):
+        return VehicleType.types[self.vehicle_long_type]
 
 ###########################################################
 
