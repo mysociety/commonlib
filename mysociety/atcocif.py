@@ -5,7 +5,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: atcocif.py,v 1.50 2009-04-22 13:13:36 francis Exp $
+# $Id: atcocif.py,v 1.51 2009-04-22 15:48:05 francis Exp $
 #
 
 # To do later:
@@ -56,6 +56,7 @@ class ATCO:
         you are quering for.'''
         self.journeys = []
         self.locations = []
+        self.vehicle_types = []
         self.assume_no_holidays = assume_no_holidays
         self.nearby_max_distance = None
         self.show_progress = show_progress
@@ -107,6 +108,8 @@ class ATCO:
             ret = ret + str(journey) + "\n"
         for location in self.locations:
             ret = ret + str(location) + "\n"
+        for vehicle_type in self.vehicle_types:
+            ret = ret + str(vehicle_type) + "\n"
         return ret
 
     def read_files(self, files):
@@ -158,6 +161,8 @@ class ATCO:
             self.journeys.append(item)
         elif isinstance(item, Location):
             self.locations.append(item)
+        elif isinstance(item, VehicleType):
+            self.vehicle_types.append(item)
         else:
             assert False
 
@@ -223,7 +228,6 @@ class ATCO:
                         if current_item != None:
                             self.item_loaded(current_item)
                         current_item = new_item
-                        self.vehicle_type_to_code[current_item.vehicle_type] = current_item.type_code
                 elif record_identity == 'QB':
                     la = LocationAdditional(line)
                     if la.location not in self.locations_to_ignore:
@@ -236,6 +240,8 @@ class ATCO:
                     if current_item != None:
                         self.item_loaded(current_item)
                     current_item = new_item
+                    # There aren't many vehicle types, just always index them
+                    self.vehicle_type_to_code[current_item.vehicle_type] = current_item.type_code()
 
                 # Other
                 elif record_identity in [
@@ -302,6 +308,22 @@ class ATCO:
         self.location_from_id = {}
         for location in self.locations:
             self.location_from_id[location.location] = location
+
+    def _test_vehicle_type_to_code(self):
+        ''' An index to let you look up type of a journey given its vehicle_type is
+        always made.  The type codes are single characters, e.g. 'B' for bus, 'T'
+        for train.
+
+        >>> atco = ATCO()
+        >>> atco.read_string("""ATCO-CIF0510          Oxfordshire - BUS               ATCOPT20081211043503
+        ... QSNT09115110120070421219912310001000  498       EABUS           I
+        ... QVNEABUS   Bus                     
+        ... """)
+        >>> atco.journeys[0].vehicle_type
+        'EABUS'
+        >>> atco.vehicle_type_to_code[atco.journeys[0].vehicle_type]
+        'B'
+        '''
 
     def index_nearby_locations(self, nearby_max_distance):
         ''' Creates an index to make it quick to look up stops near other stops. The distance
