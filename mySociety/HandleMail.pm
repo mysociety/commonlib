@@ -6,7 +6,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 
-my $rcsid = ''; $rcsid .= '$Id: HandleMail.pm,v 1.8 2009-04-21 12:09:46 louise Exp $';
+my $rcsid = ''; $rcsid .= '$Id: HandleMail.pm,v 1.9 2009-04-22 13:40:26 louise Exp $';
 
 package mySociety::HandleMail;
 
@@ -395,6 +395,28 @@ sub get_codes_from_message($){
     return ($message, $dsn_code, $smtp_code);
 }
 
+# is_permanent PROBLEM_CODE
+# Return 1 if the problem is permanent, otherwise 0.
+sub is_permanent($){
+    my $problem = shift;
+    
+    return 0 if ($problem == ERR_MAILBOX_FULL);
+    return 0 if ($problem == ERR_TIMEOUT);
+    return 0 if ($problem == ERR_TEMPORARILY_DEFERRED);
+    return 0 if ($problem == ERR_DELAY);
+     
+    return 1 if ($problem == ERR_NO_USER);
+    return 1 if ($problem == ERR_NO_RELAY);
+    return 1 if ($problem == ERR_MAILBOX_UNAVAILABLE);
+    return 1 if ($problem == ERR_UNROUTEABLE);
+    return 1 if ($problem == ERR_SPAM);
+    return 1 if ($problem == ERR_VERIFICATION_FAILED);
+    return 1 if ($problem == ERR_MESSAGE_REFUSED);
+    return 1 if ($problem == ERR_AUTH_REQUIRED);
+    return 1 if ($problem == ERR_BAD_SYNTAX);  
+
+}
+
 # get_problem_from_message TEXT
 # Translate an error message into a problem constant
 sub get_problem_from_message($){
@@ -588,7 +610,7 @@ sub get_problem_from_message($){
     return $problem;
 }
 
-# parse_dsn_bounce TEXT
+# parse_mdn_bounce TEXT
 # Attempt to parse TEXT (scalar or reference to list of lines) as an RFC3798
 # message disposition notification email. On success, return the MDN disposition string and
 # an error string. On failure (when TEXT cannot be parsed) return undef.
@@ -631,47 +653,75 @@ sub parse_mdn_bounce ($) {
      return ($r, $message);
 }
 
+# parse_mime_mail TEXT
+# convert TEXT (scalar or reference to list of lines) to a MIME::Entity
+# object
+sub parse_mime_mail($){
+    my $P = new MIME::Parser();
+    $P->output_to_core(1);  # avoid temporary files when we can
+    my $ent = $P->parse_data(join("\n", @{$_[0]}) . "\n");
+    return $ent;
+}
+
+# get_dsn_attributes STATUS_PART STRICT
+# Extract the DSN status string and final recipient from STATUS_PART - the body of a delivery status message
+# If STRICT, will only extract from well-formed fields
+sub get_dsn_attributes($$){
+    
+    # The status and final recipient are given in RFC822-format header fields within the body of
+    # the delivery status message.
+    my ($status_part, $strict) = @_;
+    my $status_pattern;
+    my $strict_status_pattern = '^Status:\s+(\d\.\d+\.\d+)\s*$';
+    my $loose_status_pattern = '^Status:\s+(\d\.\d+\.\d+)\s*';
+    if ($strict){
+        $status_pattern = $strict_status_pattern;
+    }else{
+        $status_pattern = $loose_status_pattern;
+    }
+    my $h = $status_part->bodyhandle()->open('r');
+    
+    my $status; 
+    my $recipient;
+    while (defined($_ = $h->getline())) {
+        chomp();
+        if (/$status_pattern/) {
+            $status = $1;
+        }elsif(/^Final-Recipient:\s*\S+;\s*(\S+)\s*$/i){
+            $recipient = $1;
+        }
+        
+    }
+    $h->close();
+
+    if ($status){
+        my %attributes = (status => $status, recipient => $recipient);
+        return \%attributes;
+    }
+    return undef;
+}
 # parse_ill_formed_dsn_bounce TEXT
 # Aggressive attempt to parse TEXT (scalar or reference to list of lines) as an RFC1894
 # delivery status notification email. On success, return the DSN status string
 # "x.y.z" (class, subject, detail). On failure (when TEXT cannot be parsed)
 # return undef. Will parse various kinds of badly formed DSNs.
 sub parse_ill_formed_dsn_bounce($){
-
-    my $P = new MIME::Parser();
-
-    $P->output_to_core(1);  # avoid temporary files when we can
-    # print join("\n", @{$_[0]});
-    my $ent = $P->parse_data(join("\n", @{$_[0]}) . "\n");
     
+    my $ent = parse_mime_mail($_[0]);
     my $mime_type = lc($ent->mime_type());
   
     return undef if (!$ent || !$ent->is_multipart() || ($mime_type ne 'multipart/report' &&  $mime_type ne 'multipart/mixed'));
     # The second part of the multipart entity should be of type
     # message/delivery-status.
-    my $status = $ent->parts(1);
+    my $status_part = $ent->parts(1);
     
     # if not, try the second part of the first part of the message
-    if (!$status || lc($status->mime_type()) ne 'message/delivery-status'){
-        $status = $ent->parts(0)->parts(1);
-        return undef if (!$status || lc($status->mime_type()) ne 'message/delivery-status');
+    if (!$status_part || lc($status_part->mime_type()) ne 'message/delivery-status'){
+        $status_part = $ent->parts(0)->parts(1);
+        return undef if (!$status_part || lc($status_part->mime_type()) ne 'message/delivery-status');
     }
-    
-    # The status is given in an RFC822-format header field within the body of
-    # the delivery status message.
-    my $h = $status->bodyhandle()->open('r');
-
-    my $r;
-    while (defined($_ = $h->getline())) {
-        chomp();
-        if (/^Status:\s+(\d\.\d+\.\d+)\s*/) {
-            $r = $1;
-            last;
-        }
-    }
-    $h->close();
-
-    return $r;    
+    my $strict = 0;
+    return get_dsn_attributes($status_part, $strict);
 }
 
 # parse_dsn_bounce TEXT
@@ -680,33 +730,14 @@ sub parse_ill_formed_dsn_bounce($){
 # "x.y.z" (class, subject, detail). On failure (when TEXT cannot be parsed)
 # return undef.
 sub parse_dsn_bounce ($) {
-    my $P = new MIME::Parser();
-
-    $P->output_to_core(1);  # avoid temporary files when we can
-    # print join("\n", @{$_[0]});
-    my $ent = $P->parse_data(join("\n", @{$_[0]}) . "\n");
-
+    
+    my $ent = parse_mime_mail($_[0]);
     return undef if (!$ent || !$ent->is_multipart() || lc($ent->mime_type()) ne 'multipart/report');
     # The second part of the multipart entity should be of type
     # message/delivery-status.
-    
-    my $status = $ent->parts(1);
-  
-    return undef if (!$status || lc($status->mime_type()) ne 'message/delivery-status');
-    # The status is given in an RFC822-format header field within the body of
-    # the delivery status message.
-    my $h = $status->bodyhandle()->open('r');
-
-    my $r;
-    while (defined($_ = $h->getline())) {
-        chomp();
-        if (/^Status:\s+(\d\.\d+\.\d+)\s*$/) {
-            $r = $1;
-            last;
-        }
-    }
-    $h->close();
-
-    return $r;
+    my $status_part = $ent->parts(1);
+    return undef if (!$status_part || lc($status_part->mime_type()) ne 'message/delivery-status');
+    my $strict = 1;
+    return get_dsn_attributes($status_part, $strict);
 }
 

@@ -6,7 +6,7 @@
 #  Copyright (c) 2009 UK Citizens Online Democracy. All rights reserved.
 # Email: louise@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: HandleMail.t,v 1.5 2009-04-21 12:09:46 louise Exp $
+# $Id: HandleMail.t,v 1.6 2009-04-22 13:40:26 louise Exp $
 #
 
 use strict;
@@ -70,29 +70,45 @@ BEGIN { use_ok('mySociety::HandleMail'); }
 
 sub test_parse_dsn_bounce(){
 
-    my $status = parse_dsn_bounce('aol-mailbox-full.txt');
-    is($status, "5.2.2", 'parse_dsn_bounce should return a status of "5.2.2" for a "Mailbox full" bounce from AOL');
-    
-    $status = parse_dsn_bounce('nhs-user-over-quota.txt');   
-    is($status, "5.1.1", 'parse_dsn_bounce should return a status of "5.1.1" for a "User over quota" bounce from the NHS');
-    
-    $status = parse_dsn_bounce('hotmail-improper-command-sequence.txt');   
-    is($status, "5.5.0", 'parse_dsn_bounce should return a status of "5.5.0" for an "Improper command sequence" bounce from Hotmail');
+    my $r = parse_dsn_bounce('aol-mailbox-full.txt');
+    my %attributes = %{$r};
+    is($attributes{status}, "5.2.2", 'parse_dsn_bounce should return a status of "5.2.2" for a "Mailbox full" bounce from AOL');
+    is($attributes{recipient}, 'anon@aol.com', 'parse_dsn_bounce should return a recipient of "anon@aol.com" for a "Mailbox full" bounce from AOL');
 
-    $status = parse_dsn_bounce('messagelabs-unknown-user.txt');   
-    is($status, undef, 'parse_dsn_bounce should return a status of undef for a "Unknown user" bounce from MessageLabs without a DSN part');
+    
+    $r = parse_dsn_bounce('nhs-user-over-quota.txt');   
+    %attributes = %{$r};
+    is($attributes{status}, "5.1.1", 'parse_dsn_bounce should return a status of "5.1.1" for a "User over quota" bounce from the NHS');
+    is($attributes{recipient}, 'anon@nhs.net', 'parse_dsn_bounce should return a recipient of "anon@nhs.net" for a "User over quota" bounce from the NHS');
 
-    $status = parse_dsn_bounce('hotmail-mailbox-unavailable.txt');   
-    is($status, undef, 'parse_dsn_bounce should return a status of undef for a "Mailbox unavailable" bounce from Hotmail without a DSN part');
+    
+    $r = parse_dsn_bounce('hotmail-improper-command-sequence.txt'); 
+    %attributes = %{$r};  
+    is($attributes{status}, "5.5.0", 'parse_dsn_bounce should return a status of "5.5.0" for an "Improper command sequence" bounce from Hotmail');
+    is($attributes{recipient}, 'anon@hotmail.com', 'parse_dsn_bounce should return a recipient of "anon@hotmail.com" for an "Improper command sequence" bounce from Hotmail');
+
+
+    $r = parse_dsn_bounce('messagelabs-unknown-user.txt');   
+    is($r, undef, 'parse_dsn_bounce should return undef for a "Unknown user" bounce from MessageLabs without a DSN part');
+
+    $r = parse_dsn_bounce('hotmail-mailbox-unavailable.txt');   
+    is($r, undef, 'parse_dsn_bounce should return undef for a "Mailbox unavailable" bounce from Hotmail without a DSN part');
       
-    $status = parse_ill_formed_dsn_bounce('dsn-with-extra-text-in-status-field.txt');   
-    is($status, '5.0.0', 'parse_dsn_bounce should return a status of "5.0.0" for an "Unknown address" bounce that is not well formed');
-     
-    $status = parse_ill_formed_dsn_bounce('mailbox-full-multipart-mixed-dsn.txt');   
-    is($status, '5.2.2', 'parse_dsn_bounce should return a status of "5.2.2" for a DSN message whose content type is multipart/mixed'); 
+    $r = parse_ill_formed_dsn_bounce('dsn-with-extra-text-in-status-field.txt');
+    %attributes = %{$r};     
+    is($attributes{status}, '5.0.0', 'parse_dsn_bounce should return a status of "5.0.0" for an "Unknown address" bounce that is not well formed');
+    is($attributes{recipient}, 'anon@anon.com', 'parse_dsn_bounce should return a recipient of "anon@anon.com" for an "Unknown address" bounce that is not well formed');
 
-    $status = parse_ill_formed_dsn_bounce('yahoo-dsn-bounce.txt');   
-    is($status, '4.4.7', 'parse_dsn_bounce should return a status of "4.4.7" for a DSN message'); 
+     
+    $r = parse_ill_formed_dsn_bounce('mailbox-full-multipart-mixed-dsn.txt');   
+    %attributes = %{$r};  
+    is($attributes{status}, '5.2.2', 'parse_dsn_bounce should return a status of "5.2.2" for a DSN message whose content type is multipart/mixed'); 
+    is($attributes{recipient}, 'anon@onmobile.com', 'parse_dsn_bounce should return a recipient of "anon@onmobile.com" for a DSN message whose content type is multipart/mixed'); 
+
+    $r = parse_ill_formed_dsn_bounce('yahoo-dsn-bounce.txt');   
+    %attributes = %{$r};  
+    is($attributes{status}, '4.4.7', 'parse_dsn_bounce should return a status of "4.4.7" for a DSN message'); 
+    is($attributes{recipient}, 'anon@osu.edu', 'parse_dsn_bounce should return a recipient of "anon@osu.edu" for a DSN message'); 
 
     return 1;
 }
@@ -696,7 +712,7 @@ sub test_parse_exim_error(){
     return 1;
 }
 
-
+ 
 ok(test_parse_dsn_bounce() == 1, 'Ran all tests for parse_dsn_bounce');
 ok(test_parse_mdn_bounce() == 1, 'Ran all tests for parse_mdn_bounce');
 ok(test_parse_bounce() == 1, 'Ran all tests for parse_bounce');
@@ -705,4 +721,3 @@ ok(test_parse_remote_host_error() == 1, 'Ran all tests for parse_remote_host_err
 ok(test_parse_qmail_error() == 1, 'Ran all tests for parse_qmail_error');
 ok(test_parse_exim_error() == 1, 'Ran all tests for parse_exim_error');
 ok(test_parse_yahoo_error() == 1, 'Ran all tests for parse_yahoo_error');
-
