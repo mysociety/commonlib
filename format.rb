@@ -4,7 +4,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: format.rb,v 1.18 2009-04-23 13:25:33 francis Exp $
+# $Id: format.rb,v 1.19 2009-04-23 13:32:08 francis Exp $
 
 # XXX there are some tests in foi/spec/lib/format_spec.rb
 # Really these should be in this rblib directory, and somehow made to run from
@@ -46,7 +46,7 @@ module MySociety
 
             # Sometimes get angle bracketed URLs with newlines in the middle of them.
             # http://www.whatdotheyknow.com/request/advice_sought_from_information_c#incoming-24711
-            ret = ret.gsub(/( LTCODE http.*[\n\r].* GTCODE )/) { |m| m.gsub(/[\n\r]/, "") }
+            ret = ret.gsub(/( LTCODE http.*([\n\r].*)+ GTCODE )/) { |m| m.gsub(/[\n\r]/, "") }
 
             ret = ret.gsub(/(https?):\/\/([^\s<>{}()]+[^\s.,<>{}()])/i, "<a href='\\1://\\2'" + (nofollow ? " rel='nofollow'" : "") + ">\\1://\\2</a>")
             ret = ret.gsub(/(\s)www\.([a-z0-9\-]+)((?:\.[a-z0-9\-\~]+)+)((?:\/[^ <>{}()\n\r]*[^., <>{}()\n\r])?)/i,
