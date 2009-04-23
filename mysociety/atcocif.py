@@ -5,7 +5,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: atcocif.py,v 1.52 2009-04-23 09:58:35 francis Exp $
+# $Id: atcocif.py,v 1.53 2009-04-23 10:03:03 francis Exp $
 #
 
 # To do later:
@@ -241,7 +241,10 @@ class ATCO:
                         self.item_loaded(current_item)
                     current_item = new_item
                     # There aren't many vehicle types, just always index them
-                    self.vehicle_type_to_code[current_item.vehicle_type] = current_item.type_code()
+                    if current_item.vehicle_type in self.vehicle_type_to_code:
+                        assert self.vehicle_type_to_code[current_item.vehicle_type] == current_item.type_code()
+                    else:
+                        self.vehicle_type_to_code[current_item.vehicle_type] = current_item.type_code()
 
                 # Other
                 elif record_identity in [
@@ -323,6 +326,16 @@ class ATCO:
         'EABUS'
         >>> atco.vehicle_type_to_code[atco.journeys[0].vehicle_type]
         'B'
+
+        If types are inconsistent, it will give an error.
+
+        >>> atco.read_string("""ATCO-CIF0510          Oxfordshire - BUS               ATCOPT20081211043503
+        ... QVNEABUS   Bus                     
+        ... QVNEABUS   Coach                   
+        ... """)
+        Traceback (most recent call last):
+            ...
+        AssertionError
         '''
 
     def index_nearby_locations(self, nearby_max_distance):
