@@ -5,7 +5,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: atcocif.py,v 1.54 2009-04-23 11:02:47 francis Exp $
+# $Id: atcocif.py,v 1.55 2009-04-23 15:50:47 francis Exp $
 #
 
 # To do later:
@@ -66,6 +66,7 @@ class ATCO:
 
         self.restrict_date_range_start = None
         self.restrict_date_range_end = None
+        self.file_loading_number = 0
 
     def restrict_to_date_range(self, restrict_date_range_start, restrict_date_range_end):
         '''Ignore exceptional date ranges outside this range. Use this, e.g. for
@@ -170,6 +171,10 @@ class ATCO:
         '''Loads an ATCO-CIF file from a file handle.'''
         self.handle = h
 
+        self.file_loading_number += 1
+        if not self.file_loading_number in self.vehicle_type_to_code:
+            self.vehicle_type_to_code[self.file_loading_number] = {}
+
         if self.show_progress:
             widgets = ['ATCO-CIF: ', progressbar.Percentage(), ' ', progressbar.Bar(marker=progressbar.RotatingMarker()),
                        ' ', progressbar.ETA(), ' ', progressbar.FileTransferSpeed()]
@@ -201,7 +206,7 @@ class ATCO:
                 if record_identity == 'QS':
                     if current_item != None:
                         self.item_loaded(current_item)
-                    current_item = JourneyHeader(line, assume_no_holidays = True)
+                    current_item = JourneyHeader(line, self.file_loading_number, assume_no_holidays = True)
                 elif record_identity == 'QE':
                     assert isinstance(current_item, JourneyHeader)
                     current_item.add_date_running_exception(JourneyDateRunning(line), self.restrict_date_range_start, self.restrict_date_range_end)
@@ -241,11 +246,11 @@ class ATCO:
                         self.item_loaded(current_item)
                     current_item = new_item
                     # There aren't many vehicle types, just always index them
-                    if current_item.vehicle_type in self.vehicle_type_to_code:
-                        if self.vehicle_type_to_code[current_item.vehicle_type] != current_item.type_code():
-                            raise Exception("Inconsistent vehicle type codes; previously had " + self.vehicle_type_to_code[current_item.vehicle_type] + " for type " + current_item.vehicle_type + " when this line has " + current_item.type_code() + ", line is: " + line)
+                    if current_item.vehicle_type in self.vehicle_type_to_code[self.file_loading_number]:
+                        if self.vehicle_type_to_code[self.file_loading_number][current_item.vehicle_type] != current_item.type_code():
+                            raise Exception("Inconsistent vehicle type codes; previously had " + self.vehicle_type_to_code[self.file_loading_number][current_item.vehicle_type] + " for type " + current_item.vehicle_type + " when this line has " + current_item.type_code() + ", line is: " + line)
                     else:
-                        self.vehicle_type_to_code[current_item.vehicle_type] = current_item.type_code()
+                        self.vehicle_type_to_code[self.file_loading_number][current_item.vehicle_type] = current_item.type_code()
 
                 # Other
                 elif record_identity in [
@@ -315,7 +320,7 @@ class ATCO:
 
     def _test_vehicle_type_to_code(self):
         ''' An index to let you look up type of a journey given its vehicle_type is
-        always made.  The type codes are single characters, e.g. 'B' for bus, 'T'
+        always made. The type codes are single characters, e.g. 'B' for bus, 'T'
         for train.
 
         >>> atco = ATCO()
@@ -325,7 +330,7 @@ class ATCO:
         ... """)
         >>> atco.journeys[0].vehicle_type
         'EABUS'
-        >>> atco.vehicle_type_to_code[atco.journeys[0].vehicle_type]
+        >>> atco.vehicle_type_to_code[atco.file_loading_number][atco.journeys[0].vehicle_type]
         'B'
 
         If types are inconsistent, it will give an error.
@@ -593,7 +598,7 @@ class JourneyHeader(CIFRecord):
     '''Header of a journey record. It stores all associated records too, and so 
     represents the whole journey. 
     
-    >>> jh = JourneyHeader('QSNGW    6B3920070521200712071111100  2B82P10553TRAIN           I')
+    >>> jh = JourneyHeader('QSNGW    6B3920070521200712071111100  2B82P10553TRAIN           I', 1)
     >>> jh.transaction_type # New/Delete/Revise
     'N'
     >>> jh.operator
@@ -630,9 +635,10 @@ class JourneyHeader(CIFRecord):
     in self.hops - see add_hop below for examples.
     '''
 
-    def __init__(self, line, assume_no_holidays = True):
+    def __init__(self, line, file_loading_number, assume_no_holidays = True):
         CIFRecord.__init__(self, line, "QS")
         self.assume_no_holidays = True
+        self.file_loading_number = file_loading_number
 
         matches = re.match('^QS([NDR])(.{4})(.{6})(\d{8})(\d{8}| {8})([01]{7})([ SH])([ ABXG])(.{4})(.{6})(.{8})(.{8})(.)$', line)
         if not matches:
@@ -707,7 +713,7 @@ class JourneyHeader(CIFRecord):
         '''Given a datetime.date returns a pair of True or False according to
         whether the journey runs on that date, and the reasoning.
 
-        >>> jh = JourneyHeader('QSNGW    6B3920070521200712071111100  2B82P10553TRAIN           I')
+        >>> jh = JourneyHeader('QSNGW    6B3920070521200712071111100  2B82P10553TRAIN           I', 1)
         >>> jh.is_valid_on_date(datetime.date(2007, 5, 21))
         BoolWithReason(True, 'OK')
         >>> jh.is_valid_on_date(datetime.date(2007, 5, 20))
@@ -760,7 +766,7 @@ class JourneyHeader(CIFRecord):
         '''This associates the start, intermediate and final stops of a journey
         with the journey header.
 
-        >>> jh = JourneyHeader('QSNCH   2933E20071008200712071111100  1H49P80092TRAIN           I')
+        >>> jh = JourneyHeader('QSNCH   2933E20071008200712071111100  1H49P80092TRAIN           I', 1)
         >>> jh.add_hop(JourneyOrigin('QO9100PRINRIS 16362  T1  '))
         >>> jh.add_hop(JourneyIntermediate('QI9100SUNDRTN 16401640T   T1  '))
         >>> jh.add_hop(JourneyIntermediate('QI9100HWYCOMB 16471647T3  T1  '))
@@ -831,6 +837,14 @@ class JourneyHeader(CIFRecord):
                 previous_departure_time = hop.published_departure_time
         return False
 
+    def vehicle_code(self, atco):
+        ''' Returns the single character code for the vehicle type. Uses its
+        file_loading_number as the self.vehicle_type variable is specific to
+        the file that the data came from. i.e. The same codes are used for
+        different types of transport. '''
+        vehicle_code = atco.vehicle_type_to_code[self.file_loading_number][self.vehicle_type]
+        return vehicle_code 
+
 
 class JourneyDateRunning(CIFRecord):
     '''Optionally follows a JourneyHeader. The header itself has only one simple
@@ -839,7 +853,7 @@ class JourneyDateRunning(CIFRecord):
 
     Here is a normal journey, which runs on Christmas day.
 
-    >>> jh = JourneyHeader('QSNSUC   599B20070910204912311111100  X5        COACH           5')
+    >>> jh = JourneyHeader('QSNSUC   599B20070910204912311111100  X5        COACH           5', 1)
     >>> jh.is_valid_on_date(datetime.date(2007,12,25)) # Christmas day
     BoolWithReason(True, 'OK')
 
@@ -848,7 +862,7 @@ class JourneyDateRunning(CIFRecord):
     it repeatedly with the same date. i.e. It expects you to load the whole
     journey with exceptions in before using it rather than modify it during use.
 
-    >>> jh = JourneyHeader('QSNSUC   599B20070910204912311111100  X5        COACH           5')
+    >>> jh = JourneyHeader('QSNSUC   599B20070910204912311111100  X5        COACH           5', 1)
     >>> jdr = JourneyDateRunning('QE20071225200712250')
     >>> (jdr.start_of_exceptional_period, jdr.end_of_exceptional_period)
     (datetime.date(2007, 12, 25), datetime.date(2007, 12, 25))
