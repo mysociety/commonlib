@@ -5,7 +5,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: atcocif.py,v 1.53 2009-04-23 10:03:03 francis Exp $
+# $Id: atcocif.py,v 1.54 2009-04-23 11:02:47 francis Exp $
 #
 
 # To do later:
@@ -242,7 +242,8 @@ class ATCO:
                     current_item = new_item
                     # There aren't many vehicle types, just always index them
                     if current_item.vehicle_type in self.vehicle_type_to_code:
-                        assert self.vehicle_type_to_code[current_item.vehicle_type] == current_item.type_code()
+                        if self.vehicle_type_to_code[current_item.vehicle_type] != current_item.type_code():
+                            raise Exception("Inconsistent vehicle type codes; previously had " + self.vehicle_type_to_code[current_item.vehicle_type] + " for type " + current_item.vehicle_type + " when this line has " + current_item.type_code() + ", line is: " + line)
                     else:
                         self.vehicle_type_to_code[current_item.vehicle_type] = current_item.type_code()
 
@@ -335,7 +336,7 @@ class ATCO:
         ... """)
         Traceback (most recent call last):
             ...
-        AssertionError
+        Exception: Inconsistent vehicle type codes; previously had B for type EABUS when this line has C, line is: QVNEABUS   Coach                   
         '''
 
     def index_nearby_locations(self, nearby_max_distance):
