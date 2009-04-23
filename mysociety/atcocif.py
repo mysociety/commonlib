@@ -5,7 +5,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: atcocif.py,v 1.55 2009-04-23 15:50:47 francis Exp $
+# $Id: atcocif.py,v 1.56 2009-04-23 16:34:45 francis Exp $
 #
 
 # To do later:
@@ -659,7 +659,7 @@ class JourneyHeader(CIFRecord):
         self.bank_holidays = matches.group(8)
         self.route_number = matches.group(9)
         self.running_board = matches.group(10).strip()
-        self.vehicle_type = matches.group(11).strip()
+        self.vehicle_type = matches.group(11).strip().upper()
         self.registration_number = matches.group(12).strip()
         self.route_direction = matches.group(13)
 
