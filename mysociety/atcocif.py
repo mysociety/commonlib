@@ -5,7 +5,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: atcocif.py,v 1.51 2009-04-22 15:48:05 francis Exp $
+# $Id: atcocif.py,v 1.52 2009-04-23 09:58:35 francis Exp $
 #
 
 # To do later:
@@ -1178,7 +1178,7 @@ class VehicleType(CIFRecord):
     >>> l.type_code()
     'B'
 
-    >>> l2 = VehicleType('QVNFERRY   Ferry/River Bus         ')
+    >>> l2 = VehicleType('QVNFerry   Ferry/River Bus         ')
     >>> l2.vehicle_type
     'FERRY'
     >>> l2.vehicle_long_type
@@ -1198,7 +1198,7 @@ class VehicleType(CIFRecord):
 
         self.transaction_type = matches.group(1)
         assert self.transaction_type == 'N' # code doesn't handle other types yet
-        self.vehicle_type = matches.group(2).strip()
+        self.vehicle_type = matches.group(2).strip().upper()
         self.vehicle_long_type = matches.group(3).strip()
 
         assert self.vehicle_long_type in VehicleType.types
