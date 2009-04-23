@@ -4,7 +4,11 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: format.rb,v 1.17 2008-07-17 11:24:04 francis Exp $
+# $Id: format.rb,v 1.18 2009-04-23 13:25:33 francis Exp $
+
+# XXX there are some tests in foi/spec/lib/format_spec.rb
+# Really these should be in this rblib directory, and somehow made to run from
+# the foi app.
 
 module MySociety
     module Format
@@ -36,9 +40,13 @@ module MySociety
 
             # Special case as we get already HTML encoded < and > at end and start
             # of URLs often, when used to bracket them
-            # e.g. http://www.whatdotheyknow.com/request/83/response/212
-            ret = ret.gsub(/&gt;/, " GTCODE ")
+            # e.g. http://www.whatdotheyknow.com/request/records_of_tenancy_property#incoming-212
             ret = ret.gsub(/&lt;/, " LTCODE ")
+            ret = ret.gsub(/&gt;/, " GTCODE ")
+
+            # Sometimes get angle bracketed URLs with newlines in the middle of them.
+            # http://www.whatdotheyknow.com/request/advice_sought_from_information_c#incoming-24711
+            ret = ret.gsub(/( LTCODE http.*[\n\r].* GTCODE )/) { |m| m.gsub(/[\n\r]/, "") }
 
             ret = ret.gsub(/(https?):\/\/([^\s<>{}()]+[^\s.,<>{}()])/i, "<a href='\\1://\\2'" + (nofollow ? " rel='nofollow'" : "") + ">\\1://\\2</a>")
             ret = ret.gsub(/(\s)www\.([a-z0-9\-]+)((?:\.[a-z0-9\-\~]+)+)((?:\/[^ <>{}()\n\r]*[^., <>{}()\n\r])?)/i,
@@ -49,8 +57,8 @@ module MySociety
             ret = ret.gsub(/(\s)([a-z0-9\-_.]+)@([^,< \n\r]*[^.,< \n\r])/i, "\\1<a href=\"mailto:\\2@\\3\">\\2@\\3</a>")
 
             # Put back the codes for < and >
-            ret = ret.gsub(" GTCODE ", "&gt;")
             ret = ret.gsub(" LTCODE ", "&lt;")
+            ret = ret.gsub(" GTCODE ", "&gt;")
 
             ret = ret.strip
             return ret
