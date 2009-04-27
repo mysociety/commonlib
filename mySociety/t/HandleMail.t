@@ -6,7 +6,7 @@
 #  Copyright (c) 2009 UK Citizens Online Democracy. All rights reserved.
 # Email: louise@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: HandleMail.t,v 1.6 2009-04-22 13:40:26 louise Exp $
+# $Id: HandleMail.t,v 1.7 2009-04-27 16:22:00 louise Exp $
 #
 
 use strict;
@@ -712,6 +712,15 @@ sub test_parse_exim_error(){
     return 1;
 }
 
+sub test_verp_envelope_sender(){
+    my $recipient = 'aperson@a.nother.dom';
+    my $prefix = 'bounce-tests';
+    my $domain = 'www.example.com';
+    my $sender = mySociety::HandleMail::verp_envelope_sender($recipient, $prefix, $domain);
+    my $expected_sender = 'bounce-tests+aperson=a.nother.dom@www.example.com';
+    is($sender, $expected_sender, 'A standard VERP envelope sender can be created');
+}
+
  
 ok(test_parse_dsn_bounce() == 1, 'Ran all tests for parse_dsn_bounce');
 ok(test_parse_mdn_bounce() == 1, 'Ran all tests for parse_mdn_bounce');
@@ -721,3 +730,4 @@ ok(test_parse_remote_host_error() == 1, 'Ran all tests for parse_remote_host_err
 ok(test_parse_qmail_error() == 1, 'Ran all tests for parse_qmail_error');
 ok(test_parse_exim_error() == 1, 'Ran all tests for parse_exim_error');
 ok(test_parse_yahoo_error() == 1, 'Ran all tests for parse_yahoo_error');
+ok(test_verp_envelope_sender() == 1, 'Ran all tests for verp_envelope_sender');

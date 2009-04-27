@@ -6,7 +6,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 
-my $rcsid = ''; $rcsid .= '$Id: HandleMail.pm,v 1.9 2009-04-22 13:40:26 louise Exp $';
+my $rcsid = ''; $rcsid .= '$Id: HandleMail.pm,v 1.10 2009-04-27 16:22:00 louise Exp $';
 
 package mySociety::HandleMail;
 
@@ -113,6 +113,14 @@ sub get_token {
     return $token;
 }
 
+# verp_envelope_sender RECIPIENT PREFIX DOMAIN
+# Creates a string suitable for use as a VERP envelope sender for a mail to
+# RECIPIENT. PREFIX at DOMAIN needs to be set up to handle the bounces.
+sub verp_envelope_sender($$$){
+    my ($recipient, $prefix, $domain) = @_;
+    my ($recipient_mailbox, $recipient_domain) = split('@', $recipient);
+    return $prefix . '+' . $recipient_mailbox . '=' . $recipient_domain . '@' . $domain;
+}
 
 # parse_bounce TEXT
 # Attempt to extract bounce attributes if the email represented by TEXT is an ill-formed bounce
@@ -615,7 +623,7 @@ sub get_problem_from_message($){
 # message disposition notification email. On success, return the MDN disposition string and
 # an error string. On failure (when TEXT cannot be parsed) return undef.
 sub parse_mdn_bounce ($) {
-    my $P = new MIME::Parser();
+     my $P = new MIME::Parser();
      $P->output_to_core(1); 
      my $ent = $P->parse_data(join("\n", @{$_[0]}) . "\n");
      
