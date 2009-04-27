@@ -6,7 +6,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 
-my $rcsid = ''; $rcsid .= '$Id: HandleMail.pm,v 1.11 2009-04-27 17:31:06 louise Exp $';
+my $rcsid = ''; $rcsid .= '$Id: HandleMail.pm,v 1.12 2009-04-27 18:34:35 louise Exp $';
 
 package mySociety::HandleMail;
 
@@ -119,7 +119,7 @@ sub get_token {
 sub get_bounced_address($$$){
     my ($address, $prefix, $domain) = @_;
     my $address_part = get_token($address, $prefix . '+', $domain);
-    $address_part =~ s/(=)([^=]+$)/@\2/;
+    $address_part =~ s/(=)([^=]+$)/\@$2/;
     return $address_part;
 }
 
