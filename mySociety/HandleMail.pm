@@ -6,7 +6,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 
-my $rcsid = ''; $rcsid .= '$Id: HandleMail.pm,v 1.10 2009-04-27 16:22:00 louise Exp $';
+my $rcsid = ''; $rcsid .= '$Id: HandleMail.pm,v 1.11 2009-04-27 17:31:06 louise Exp $';
 
 package mySociety::HandleMail;
 
@@ -111,6 +111,16 @@ sub get_token {
     my ($token) = ($a->user() =~ m#^\Q$prefix\E(.*)#);
     #print "token $token\n";
     return $token;
+}
+
+# get_bounced_address ADDRESS PREFIX DOMAIN
+# Get the bounced address from a VERP address created with
+# verp_envelope_sender
+sub get_bounced_address($$$){
+    my ($address, $prefix, $domain) = @_;
+    my $address_part = get_token($address, $prefix . '+', $domain);
+    $address_part =~ s/(=)([^=]+$)/@\2/;
+    return $address_part;
 }
 
 # verp_envelope_sender RECIPIENT PREFIX DOMAIN

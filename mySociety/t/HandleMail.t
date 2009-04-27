@@ -6,7 +6,7 @@
 #  Copyright (c) 2009 UK Citizens Online Democracy. All rights reserved.
 # Email: louise@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: HandleMail.t,v 1.7 2009-04-27 16:22:00 louise Exp $
+# $Id: HandleMail.t,v 1.8 2009-04-27 17:31:06 louise Exp $
 #
 
 use strict;
@@ -712,15 +712,57 @@ sub test_parse_exim_error(){
     return 1;
 }
 
+sub expect_sender($$$$$){
+    my ($prefix, $domain, $recipient, $expected_sender, $message) = @_;
+    my $sender = mySociety::HandleMail::verp_envelope_sender($recipient, $prefix, $domain);
+    is($sender, $expected_sender, $message);
+}
+
 sub test_verp_envelope_sender(){
+    
     my $recipient = 'aperson@a.nother.dom';
     my $prefix = 'bounce-tests';
     my $domain = 'www.example.com';
-    my $sender = mySociety::HandleMail::verp_envelope_sender($recipient, $prefix, $domain);
     my $expected_sender = 'bounce-tests+aperson=a.nother.dom@www.example.com';
-    is($sender, $expected_sender, 'A standard VERP envelope sender can be created');
+    expect_sender($prefix, $domain, $recipient, $expected_sender, 'A standard VERP envelope sender can be created');
+    
+    $recipient = 'test+me@a.nother.dom';
+    $expected_sender = 'bounce-tests+test+me=a.nother.dom@www.example.com';
+    expect_sender($prefix, $domain, $recipient, $expected_sender, 'A VERP envelope sender can be created for an email with a plus sign in it');
+
+    $recipient = 'test=me@a.nother.dom';
+    $expected_sender = 'bounce-tests+test=me=a.nother.dom@www.example.com';
+    expect_sender($prefix, $domain, $recipient, $expected_sender, 'A VERP envelope sender can be created for an email with an equals sign in it');
+   
+    return 1;
 }
 
+sub expect_bounced_address($$$$$){
+    my ($prefix, $domain, $address, $expected_address, $message) = @_;
+    ($address) = Mail::Address->parse($address);
+    my $bounced_address = mySociety::HandleMail::get_bounced_address($address, $prefix, $domain);
+    is($bounced_address, $expected_address, $message);
+    
+}
+sub test_get_bounced_address(){
+    
+    my $prefix = 'bounce-tests';
+    my $domain = 'www.example.com';
+    
+    my $address = 'bounce-tests+aperson=a.nother.dom@www.example.com';
+    my $expected_address = 'aperson@a.nother.dom';
+    expect_bounced_address($prefix, $domain, $address, $expected_address, 'A standard VERP bounce can be parsed');
+    
+    $address = 'bounce-tests+test+me=a.nother.dom@www.example.com';
+    $expected_address = 'test+me@a.nother.dom';
+    expect_bounced_address($prefix, $domain, $address, $expected_address, 'A VERP bounce for an address with a plus sign in it can be parsed');
+
+    $address = 'bounce-tests+test=me=a.nother.dom@www.example.com';
+    $expected_address = 'test=me@a.nother.dom';
+    expect_bounced_address($prefix, $domain, $address, $expected_address, 'A VERP bounce for an address with an equals sign in it can be parsed');
+    
+    return 1;
+}
  
 ok(test_parse_dsn_bounce() == 1, 'Ran all tests for parse_dsn_bounce');
 ok(test_parse_mdn_bounce() == 1, 'Ran all tests for parse_mdn_bounce');
@@ -731,3 +773,4 @@ ok(test_parse_qmail_error() == 1, 'Ran all tests for parse_qmail_error');
 ok(test_parse_exim_error() == 1, 'Ran all tests for parse_exim_error');
 ok(test_parse_yahoo_error() == 1, 'Ran all tests for parse_yahoo_error');
 ok(test_verp_envelope_sender() == 1, 'Ran all tests for verp_envelope_sender');
+ok(test_get_bounced_address() == 1, 'Ran all tests for get_bounced_address');
