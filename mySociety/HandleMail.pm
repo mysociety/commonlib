@@ -6,7 +6,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 
-my $rcsid = ''; $rcsid .= '$Id: HandleMail.pm,v 1.13 2009-04-29 12:46:37 louise Exp $';
+my $rcsid = ''; $rcsid .= '$Id: HandleMail.pm,v 1.14 2009-04-29 16:30:29 louise Exp $';
 
 package mySociety::HandleMail;
 
@@ -39,25 +39,38 @@ mySociety::SystemMisc::log_to_stderr(0);
 
 
 sub get_message {
-    my @lines = ();
-    my $is_bounce_message = 0;
+    my @message_lines = ();
     while (defined($_ = STDIN->getline())) {
-        chomp;
+        push(@message_lines, $_);
+    }
+    exit 75 if STDIN->error(); # Failed to read it; should defer.
+    return parse_message(@message_lines);
+}
+
+# parse_message MESSAGE_LINES
+# Turn an array of MESSAGE_LINES into a hash with elements for the lines, a
+# Mail::Internet message, the return path, and a flag indicating if 
+# this message is a bounce
+sub parse_message(@) { 
+    
+    my @lines = ();
+    my(@message_lines) = @_;
+    my $is_bounce_message = 0;
+    for my $line (@message_lines) {
+        chomp($line);
         # Skip any From_ line-- we don't need it. BUT, on some systems (e.g.
         # FreeBSD with default exim config), there will be no Return-Path in a
         # message even at final delivery time. So use the insanely ugly
         # "From MAILER-DAEMON ..." thing to distinguish bounces, if it is present.
-        if (@lines == 0 and m#^From #) {
-            $is_bounce_message = 1 if (m#^From MAILER-DAEMON #);
+        if (@lines == 0 and $line =~ m#^From #) {
+            $is_bounce_message = 1 if ($line =~ m#^From MAILER-DAEMON #);
         } else {
-            push(@lines, $_);
+            push(@lines, $line);
         }
     }
-    exit 75 if STDIN->error(); # Failed to read it; should defer.
-
     my $m = new Mail::Internet([@lines]);
     exit 0 unless defined $m; # Unable to parse message; should drop.
-
+    
     my $return_path;
     if (!$is_bounce_message) {
         # RFC2822: 'The "Return-Path:" header field contains a pair of angle
@@ -75,16 +88,48 @@ sub get_message {
 
     return ( is_bounce_message => $is_bounce_message, lines => \@lines,
         message => $m, return_path => $return_path );
+        
 }
+
+# process_mailbox FILENAME
+# Process the contents of a mailbox and return them 
+# as an array of hashes as returned by parse_message
+sub process_mailbox($){
+   
+    open(FP, shift) or die $!;
+    my @emails = ();
+    my $line;
+    my @lines;
+    while ($line = <FP>) {
+        chomp $line;
+        # Start of new message
+        if ($line =~ /^From /) {
+            if (@lines) {
+                print '.';
+                push(@emails, parse_message(@lines));
+    	    }
+            @lines = ();
+
+        } else {
+            push @lines, $line;
+        }
+    }
+    push(@emails, parse_message(@lines));
+    close FP;
+    return @emails;
+}
+
 
 # Get the recipient of a Mail::Internet message
 sub get_bounce_recipient {
     my $m = shift;
 
     my $to = $m->head()->get("To");
+    
     exit 0 unless defined($to); # Not a lot we can do without an address to parse.
 
     my ($a) = Mail::Address->parse($to);
+    
     exit 0 unless defined($a); # Couldn't parse first To: address.
     
     return $a;
