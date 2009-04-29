@@ -6,7 +6,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 
-my $rcsid = ''; $rcsid .= '$Id: HandleMail.pm,v 1.12 2009-04-27 18:34:35 louise Exp $';
+my $rcsid = ''; $rcsid .= '$Id: HandleMail.pm,v 1.13 2009-04-29 12:46:37 louise Exp $';
 
 package mySociety::HandleMail;
 
@@ -106,7 +106,7 @@ sub get_bounce_from {
 # Checks and returns the user part of the address given, ignoring the prefix
 sub get_token {
     my ($a, $prefix, $domain) = @_;
-    exit(0) if ($a->user() !~ m#^\Q$prefix\E# or lc($a->host()) ne lc($domain));
+    return undef if ($a->user() !~ m#^\Q$prefix\E# or lc($a->host()) ne lc($domain));
     # NB we make no assumptions about the contens of the token.
     my ($token) = ($a->user() =~ m#^\Q$prefix\E(.*)#);
     #print "token $token\n";
@@ -115,10 +115,12 @@ sub get_token {
 
 # get_bounced_address ADDRESS PREFIX DOMAIN
 # Get the bounced address from a VERP address created with
-# verp_envelope_sender
+# verp_envelope_sender. Returns undef if no bounced address 
+# can be parsed
 sub get_bounced_address($$$){
     my ($address, $prefix, $domain) = @_;
     my $address_part = get_token($address, $prefix . '+', $domain);
+    return undef unless $address_part;
     $address_part =~ s/(=)([^=]+$)/\@$2/;
     return $address_part;
 }

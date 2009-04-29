@@ -6,7 +6,7 @@
 #  Copyright (c) 2009 UK Citizens Online Democracy. All rights reserved.
 # Email: louise@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: HandleMail.t,v 1.8 2009-04-27 17:31:06 louise Exp $
+# $Id: HandleMail.t,v 1.9 2009-04-29 12:46:38 louise Exp $
 #
 
 use strict;
@@ -761,8 +761,13 @@ sub test_get_bounced_address(){
     $expected_address = 'test=me@a.nother.dom';
     expect_bounced_address($prefix, $domain, $address, $expected_address, 'A VERP bounce for an address with an equals sign in it can be parsed');
     
+    $address = 'not-a-verp-bounce@www.example.com';
+    $expected_address = undef;
+    expect_bounced_address($prefix, $domain, $address, $expected_address, 'A non VERP bounce returns an undef bounced address');
+    
     return 1;
 }
+
  
 ok(test_parse_dsn_bounce() == 1, 'Ran all tests for parse_dsn_bounce');
 ok(test_parse_mdn_bounce() == 1, 'Ran all tests for parse_mdn_bounce');
