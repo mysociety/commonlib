@@ -6,7 +6,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 
-my $rcsid = ''; $rcsid .= '$Id: HandleMail.pm,v 1.14 2009-04-29 16:30:29 louise Exp $';
+my $rcsid = ''; $rcsid .= '$Id: HandleMail.pm,v 1.15 2009-04-29 17:58:29 louise Exp $';
 
 package mySociety::HandleMail;
 
@@ -87,8 +87,7 @@ sub parse_message(@) {
     }
 
     return ( is_bounce_message => $is_bounce_message, lines => \@lines,
-        message => $m, return_path => $return_path );
-        
+        message => $m, return_path => $return_path );   
 }
 
 # process_mailbox FILENAME
@@ -100,13 +99,15 @@ sub process_mailbox($){
     my @emails = ();
     my $line;
     my @lines;
+    my %data;
     while ($line = <FP>) {
         chomp $line;
         # Start of new message
         if ($line =~ /^From /) {
             if (@lines) {
                 print '.';
-                push(@emails, parse_message(@lines));
+                %data = parse_message(@lines);              
+                push(@emails, \%data);
     	    }
             @lines = ();
 
@@ -114,7 +115,8 @@ sub process_mailbox($){
             push @lines, $line;
         }
     }
-    push(@emails, parse_message(@lines));
+    %data = parse_message(@lines);
+    push(@emails, \%data);
     close FP;
     return @emails;
 }
