@@ -6,13 +6,13 @@
 #  Copyright (c) 2009 UK Citizens Online Democracy. All rights reserved.
 # Email: louise@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: HandleMail.t,v 1.9 2009-04-29 12:46:38 louise Exp $
+# $Id: HandleMail.t,v 1.10 2009-04-29 14:40:38 louise Exp $
 #
 
 use strict;
 use warnings; 
 
-use Test::More qw(no_plan);
+use Test::More tests => 247;
 
 # Horrible boilerplate to set up appropriate library paths.
 use FindBin;
