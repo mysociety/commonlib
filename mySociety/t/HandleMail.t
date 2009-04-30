@@ -6,13 +6,13 @@
 #  Copyright (c) 2009 UK Citizens Online Democracy. All rights reserved.
 # Email: louise@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: HandleMail.t,v 1.10 2009-04-29 14:40:38 louise Exp $
+# $Id: HandleMail.t,v 1.11 2009-04-30 15:04:29 louise Exp $
 #
 
 use strict;
 use warnings; 
 
-use Test::More tests => 247;
+use Test::More tests => 256;
 
 # Horrible boilerplate to set up appropriate library paths.
 use FindBin;
@@ -96,20 +96,25 @@ sub test_parse_dsn_bounce(){
       
     $r = parse_ill_formed_dsn_bounce('dsn-with-extra-text-in-status-field.txt');
     %attributes = %{$r};     
-    is($attributes{status}, '5.0.0', 'parse_dsn_bounce should return a status of "5.0.0" for an "Unknown address" bounce that is not well formed');
-    is($attributes{recipient}, 'anon@anon.com', 'parse_dsn_bounce should return a recipient of "anon@anon.com" for an "Unknown address" bounce that is not well formed');
+    is($attributes{status}, '5.0.0', 'parse_ill_formed_dsn_bounce should return a status of "5.0.0" for an "Unknown address" bounce that is not well formed');
+    is($attributes{recipient}, 'anon@anon.com', 'parse_ill_formed_dsn_bounce should return a recipient of "anon@anon.com" for an "Unknown address" bounce that is not well formed');
 
      
     $r = parse_ill_formed_dsn_bounce('mailbox-full-multipart-mixed-dsn.txt');   
     %attributes = %{$r};  
-    is($attributes{status}, '5.2.2', 'parse_dsn_bounce should return a status of "5.2.2" for a DSN message whose content type is multipart/mixed'); 
-    is($attributes{recipient}, 'anon@onmobile.com', 'parse_dsn_bounce should return a recipient of "anon@onmobile.com" for a DSN message whose content type is multipart/mixed'); 
+    is($attributes{status}, '5.2.2', 'parse_ill_formed_dsn_bounce should return a status of "5.2.2" for a DSN message whose content type is multipart/mixed'); 
+    is($attributes{recipient}, 'anon@onmobile.com', 'parse_ill_formed_dsn_bounce should return a recipient of "anon@onmobile.com" for a DSN message whose content type is multipart/mixed'); 
 
     $r = parse_ill_formed_dsn_bounce('yahoo-dsn-bounce.txt');   
     %attributes = %{$r};  
-    is($attributes{status}, '4.4.7', 'parse_dsn_bounce should return a status of "4.4.7" for a DSN message'); 
-    is($attributes{recipient}, 'anon@osu.edu', 'parse_dsn_bounce should return a recipient of "anon@osu.edu" for a DSN message'); 
+    is($attributes{status}, '4.4.7', 'parse_ill_formed_dsn_bounce should return a status of "4.4.7" for a DSN message'); 
+    is($attributes{recipient}, 'anon@osu.edu', 'parse_ill_formed_dsn_bounce should return a recipient of "anon@osu.edu" for a DSN message'); 
 
+    $r = parse_ill_formed_dsn_bounce('exchange-rejected.txt');
+    %attributes = %{$r};
+    is($attributes{status}, '5.1.0', 'parse_ill_formed_dsn_bounce should return a status of "5.1.0" for an embedded DSN message from Exchange');
+    is($attributes{recipient}, 'anon@anon.co.uk', 'parse_ill_formed_dsn_bounce should return a recipient of "anon@co.uk" for an embedded DSN message from Exchange'); 
+    
     return 1;
 }
 
@@ -180,6 +185,11 @@ sub test_parse_bounce(){
                         domain => 'btinternet.com');
     expect_bounce_values('yahoo timeout','yahoo-timeout.txt', %expected_values);
     
+    %expected_values = (problem => mySociety::HandleMail::ERR_OUT_OF_OFFICE, 
+                        message => 'I will be out of the office starting 09/08/2008 and will not return until 09/11/2008. I will respond to your message when I return.');
+                        
+    expect_bounce_values('out of office', 'out-of-office.txt', %expected_values);
+
     return 1;
 }
 
@@ -231,6 +241,14 @@ sub expect_parse_yahoo_values($$%){
     my %data = mySociety::HandleMail::parse_yahoo_error($text);
     for my $key (keys %values) {
         is($data{$key}, $values{$key}, 'parse_yahoo_error can correctly extract ' . $key . ' from ' . $example);
+    }
+}
+
+sub expect_parse_out_of_office_values($$%){
+    my ($example, $text, %values) = @_;
+    my %data = mySociety::HandleMail::parse_out_of_office($text);
+    for my $key (keys %values) {
+        is($data{$key}, $values{$key}, 'parse_out_of_office can correctly extract ' . $key . ' from ' . $example);
     }
 }
 
@@ -527,6 +545,25 @@ sub test_parse_qmail_error(){
     return 1;
 }
 
+sub test_parse_out_of_office(){
+    
+    my $text = '
+
+    I am out of the office from Friday 3rd April to Monday 13th April. Back in on Tuesday 14th.
+
+    If you need an urgent response please contact Someone Else (anon@anon.org.uk) Tel 555 5555 555.
+
+    Regards,
+
+    me';
+    my %expected_values = (domain => undef, 
+                           message => 'I am out of the office from Friday 3rd April to Monday 13th April. Back in on Tuesday 14th. If you need an urgent response please contact Someone Else (anon@anon.org.uk) Tel 555 5555 555. Regards, me', 
+                           problem => mySociety::HandleMail::ERR_OUT_OF_OFFICE,
+                           email_address => undef);
+    expect_parse_out_of_office_values('out of office example', $text, %expected_values);
+    return 1;
+}
+
 sub test_parse_yahoo_error(){
     
     my $text = 'Message from yahoo.co.uk.
@@ -777,5 +814,6 @@ ok(test_parse_remote_host_error() == 1, 'Ran all tests for parse_remote_host_err
 ok(test_parse_qmail_error() == 1, 'Ran all tests for parse_qmail_error');
 ok(test_parse_exim_error() == 1, 'Ran all tests for parse_exim_error');
 ok(test_parse_yahoo_error() == 1, 'Ran all tests for parse_yahoo_error');
+ok(test_parse_out_of_office() == 1, 'Ran all tests for parse_out_of_office');
 ok(test_verp_envelope_sender() == 1, 'Ran all tests for verp_envelope_sender');
 ok(test_get_bounced_address() == 1, 'Ran all tests for get_bounced_address');

@@ -6,7 +6,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 
-my $rcsid = ''; $rcsid .= '$Id: HandleMail.pm,v 1.15 2009-04-29 17:58:29 louise Exp $';
+my $rcsid = ''; $rcsid .= '$Id: HandleMail.pm,v 1.16 2009-04-30 15:04:29 louise Exp $';
 
 package mySociety::HandleMail;
 
@@ -32,6 +32,7 @@ use constant ERR_MESSAGE_REFUSED => 10;
 use constant ERR_AUTH_REQUIRED => 11;
 use constant ERR_BAD_SYNTAX => 12;
 use constant ERR_DELAY => 13;
+use constant ERR_OUT_OF_OFFICE => 14;
 
 # Don't print diagnostics to standard error, as this can result in bounce
 # messages being generated (only in response to non-bounce input, obviously).
@@ -99,14 +100,12 @@ sub process_mailbox($){
     my @emails = ();
     my $line;
     my @lines;
-    my %data;
     while ($line = <FP>) {
         chomp $line;
         # Start of new message
         if ($line =~ /^From /) {
             if (@lines) {
-                print '.';
-                %data = parse_message(@lines);              
+                my %data = parse_message(@lines);              
                 push(@emails, \%data);
     	    }
             @lines = ();
@@ -115,7 +114,7 @@ sub process_mailbox($){
             push @lines, $line;
         }
     }
-    %data = parse_message(@lines);
+    my %data = parse_message(@lines);
     push(@emails, \%data);
     close FP;
     return @emails;
@@ -209,6 +208,11 @@ sub parse_bounce ($){
     }
     if (!$data{message}){
         %data = parse_yahoo_error($mail);
+    }
+    if (!$data{message}){
+        my $message = new Mail::Internet([@$lines]);
+        my $message_body = $message->body;
+        %data = parse_out_of_office(join("\n", @$message_body));
     }
     
     return %data;
@@ -419,6 +423,20 @@ sub parse_aol_error($){
             message => $message);
 }
 
+# parse_out_of_office TEXT
+sub parse_out_of_office($){
+    my $text = shift;
+    my $problem;
+    my $message;
+    if ($text =~ /(out of the (office|country)|on leave|not checking my email)/i){
+        $problem = ERR_OUT_OF_OFFICE;
+        $message = $text;
+        $message = join(' ', split(' ', $message));
+    }
+    return (problem => $problem,
+            message => $message);
+}
+
 # parse_yahoo_error TEXT
 sub parse_yahoo_error($){
     my $text = shift;
@@ -471,6 +489,7 @@ sub is_permanent($){
     return 0 if ($problem == ERR_TIMEOUT);
     return 0 if ($problem == ERR_TEMPORARILY_DEFERRED);
     return 0 if ($problem == ERR_DELAY);
+    return 0 if ($problem == ERR_OUT_OF_OFFICE);
      
     return 1 if ($problem == ERR_NO_USER);
     return 1 if ($problem == ERR_NO_RELAY);
@@ -767,6 +786,28 @@ sub get_dsn_attributes($$){
     }
     return undef;
 }
+
+# find_delivery_status ENTITY
+# Recurse over the subparts of a mime message looking for a delivery status
+# part. Return it if there is one, or undef if not. 
+sub find_delivery_status($){
+    my ($entity) = @_;
+    my $i= 0;
+    my $status_part;
+    $status_part = $entity->parts(0);
+    while($status_part){
+        return $status_part if is_delivery_status($status_part);
+        if ($status_part->parts){
+            $status_part = find_delivery_status($status_part);
+            return $status_part if is_delivery_status($status_part);
+        }
+        $i = $i + 1;
+        $status_part = $entity->parts($i);
+    }
+    return undef;
+}
+
+
 # parse_ill_formed_dsn_bounce TEXT
 # Aggressive attempt to parse TEXT (scalar or reference to list of lines) as an RFC1894
 # delivery status notification email. On success, return the DSN status string
@@ -778,17 +819,19 @@ sub parse_ill_formed_dsn_bounce($){
     my $mime_type = lc($ent->mime_type());
   
     return undef if (!$ent || !$ent->is_multipart() || ($mime_type ne 'multipart/report' &&  $mime_type ne 'multipart/mixed'));
-    # The second part of the multipart entity should be of type
-    # message/delivery-status.
-    my $status_part = $ent->parts(1);
-    
-    # if not, try the second part of the first part of the message
-    if (!$status_part || lc($status_part->mime_type()) ne 'message/delivery-status'){
-        $status_part = $ent->parts(0)->parts(1);
-        return undef if (!$status_part || lc($status_part->mime_type()) ne 'message/delivery-status');
-    }
+    my $status_part = find_delivery_status($ent);
+    return undef unless $status_part;
     my $strict = 0;
     return get_dsn_attributes($status_part, $strict);
+}
+
+# is_delivery_status PART
+# Returns boolean indicating whether or not this Mime message part 
+# is a delivery status message
+sub is_delivery_status($){
+    my ($entity) = @_;
+    return 1 if $entity && lc($entity->mime_type()) eq 'message/delivery-status';
+    return 0;
 }
 
 # parse_dsn_bounce TEXT
