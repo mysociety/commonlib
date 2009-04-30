@@ -6,7 +6,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 
-my $rcsid = ''; $rcsid .= '$Id: HandleMail.pm,v 1.17 2009-04-30 15:41:50 louise Exp $';
+my $rcsid = ''; $rcsid .= '$Id: HandleMail.pm,v 1.18 2009-04-30 16:08:47 louise Exp $';
 
 package mySociety::HandleMail;
 
@@ -382,7 +382,7 @@ sub parse_smtp_error ($){
     my $mail_pattern = '(\S*@(.*?))\s*\n\s*';
     my $smtp_start = 'SMTP error from remote mail(?:er)? (?:server )?after ';
     my $host_pattern = '\s+host [^ ]* \[[^ ]*\]:(?:\n)?';
-    my $message_pattern = '(.*?)\n(((.*\S+.*)\n)*)';
+    my $message_pattern = '\n?\s*(.*?)\n(((.*\S+.*)\n)*)';
     my $error_time_pattern = '(RCPT TO:<.*@.*?>:|end of data:\n|pipelined DATA:\n|initial connection:\n|MAIL FROM:<.*?> SIZE=\d+:)';
     my $error_pattern = $mail_pattern . $smtp_start . $error_time_pattern . $host_pattern . $message_pattern;
  
@@ -629,6 +629,7 @@ sub get_problem_from_message($){
                                         'recipient has left',
                                         'user account is unavailable',
                                         'user account not activated', 
+                                        'user disabled',
                                         'user is inactive');
     my $mailbox_unavailable_pattern = join('|', @mailbox_unavailable_synonyms);
     
@@ -648,6 +649,7 @@ sub get_problem_from_message($){
     my @spam_synonyms = ('blocked',
                          'bounced by server content filter',
                          'delivery not authorized, message refused',
+                         'client host rejected: access denied',
                          'does not have a valid MX DNS record',
                          'does not have permissions to submit to this server',
                          'failed spam test',
@@ -683,7 +685,8 @@ sub get_problem_from_message($){
     my @verification_failed_synonyms = ('sender verify failed');
     my $verification_failed_pattern = join('|', @verification_failed_synonyms);
     
-    my @message_refused_synonyms = ('unable to deliver to');
+    my @message_refused_synonyms = ('unable to deliver to',
+                                    '^Rejected$');
     my $message_refused_pattern = join('|', @message_refused_synonyms);
     
     my @auth_required_synonyms = ('server requires authentication');

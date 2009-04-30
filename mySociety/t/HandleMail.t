@@ -6,13 +6,13 @@
 #  Copyright (c) 2009 UK Citizens Online Democracy. All rights reserved.
 # Email: louise@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: HandleMail.t,v 1.12 2009-04-30 15:41:50 louise Exp $
+# $Id: HandleMail.t,v 1.13 2009-04-30 16:08:48 louise Exp $
 #
 
 use strict;
 use warnings; 
 
-use Test::More tests => 262;
+use Test::More tests => 280;
 
 # Horrible boilerplate to set up appropriate library paths.
 use FindBin;
@@ -495,6 +495,45 @@ sub test_parse_smtp_error(){
                   message => 'Syntax error in parameters or arguments -');
     expect_parse_smtp_values('syntax example', $text, %expected_values);
     
+    $text = 'anon@tiscali.co.uk
+      SMTP error from remote mail server after RCPT TO:<anon@tiscali.co.uk>:
+      host mx2.uk.tiscali.com [212.74.100.148]: 550 5.1.1 <anon@tiscali.co.uk> user disabled
+      ';
+     
+    %expected_values = (domain => 'tiscali.co.uk', 
+                    smtp_code => '550', 
+                    dsn_code => '5.1.1', 
+                    email_address => 'anon@tiscali.co.uk',
+                    problem =>  mySociety::HandleMail::ERR_MAILBOX_UNAVAILABLE,
+                    message => '<anon@tiscali.co.uk> user disabled');
+    expect_parse_smtp_values('tiscali example', $text, %expected_values);
+
+    $text = 'anon@anon.org
+          SMTP error from remote mail server after RCPT TO:<anon@anon.org>:
+          host grey-area.mailhostingserver.com [209.62.85.74]:
+          554 5.7.1 <sponge.ukcod.org.uk[82.111.230.211]>:
+          Client host rejected: Access denied
+          ';
+    %expected_values = (domain => 'anon.org', 
+                  smtp_code => '554', 
+                  dsn_code => '5.7.1', 
+                  email_address => 'anon@anon.org',
+                  problem =>  mySociety::HandleMail::ERR_SPAM,
+                  message => 'Client host rejected: Access denied');
+    expect_parse_smtp_values('grey area example', $text, %expected_values);
+
+          
+    $text = 'anon@anon.com
+           SMTP error from remote mail server after RCPT TO:<anon@anon.com>:
+           host athena.hosts.co.uk [85.233.160.20]: 550 Rejected
+           ';
+    %expected_values = (domain => 'anon.com', 
+                 smtp_code => '550', 
+                 dsn_code => undef, 
+                 email_address => 'anon@anon.com',
+                 problem =>  mySociety::HandleMail::ERR_MESSAGE_REFUSED,
+                 message => 'Rejected');
+    expect_parse_smtp_values('athena example', $text, %expected_values);
     return 1;
 }
 
