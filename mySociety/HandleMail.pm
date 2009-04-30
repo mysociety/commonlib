@@ -6,7 +6,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 
-my $rcsid = ''; $rcsid .= '$Id: HandleMail.pm,v 1.18 2009-04-30 16:08:47 louise Exp $';
+my $rcsid = ''; $rcsid .= '$Id: HandleMail.pm,v 1.19 2009-04-30 16:46:39 louise Exp $';
 
 package mySociety::HandleMail;
 
@@ -33,6 +33,10 @@ use constant ERR_AUTH_REQUIRED => 11;
 use constant ERR_BAD_SYNTAX => 12;
 use constant ERR_DELAY => 13;
 use constant ERR_OUT_OF_OFFICE => 14;
+
+use constant ERR_TYPE_PERMANENT => 1;
+use constant ERR_TYPE_TRANSIENT => 2;
+use constant ERR_TYPE_UNKNOWN => 3;
 
 # Don't print diagnostics to standard error, as this can result in bounce
 # messages being generated (only in response to non-bounce input, obviously).
@@ -509,26 +513,27 @@ sub get_codes_from_message($){
     return ($message, $dsn_code, $smtp_code);
 }
 
-# is_permanent PROBLEM_CODE
-# Return 1 if the problem is permanent, otherwise 0.
-sub is_permanent($){
+# error_type PROBLEM_CODE
+# Return a type indicating if the problem is permanent, transient or unknown.
+sub error_type($){
     my $problem = shift;
     
-    return 0 if ($problem == ERR_MAILBOX_FULL);
-    return 0 if ($problem == ERR_TIMEOUT);
-    return 0 if ($problem == ERR_TEMPORARILY_DEFERRED);
-    return 0 if ($problem == ERR_DELAY);
-    return 0 if ($problem == ERR_OUT_OF_OFFICE);
+    return ERR_TYPE_TRANSIENT if ($problem == ERR_MAILBOX_FULL);
+    return ERR_TYPE_TRANSIENT if ($problem == ERR_TIMEOUT);
+    return ERR_TYPE_TRANSIENT if ($problem == ERR_TEMPORARILY_DEFERRED);
+    return ERR_TYPE_TRANSIENT if ($problem == ERR_DELAY);
+    return ERR_TYPE_TRANSIENT if ($problem == ERR_OUT_OF_OFFICE);
      
-    return 1 if ($problem == ERR_NO_USER);
-    return 1 if ($problem == ERR_NO_RELAY);
-    return 1 if ($problem == ERR_MAILBOX_UNAVAILABLE);
-    return 1 if ($problem == ERR_UNROUTEABLE);
-    return 1 if ($problem == ERR_SPAM);
-    return 1 if ($problem == ERR_VERIFICATION_FAILED);
-    return 1 if ($problem == ERR_MESSAGE_REFUSED);
-    return 1 if ($problem == ERR_AUTH_REQUIRED);
-    return 1 if ($problem == ERR_BAD_SYNTAX);  
+    return ERR_TYPE_PERMANENT if ($problem == ERR_NO_USER);
+    return ERR_TYPE_PERMANENT if ($problem == ERR_MAILBOX_UNAVAILABLE);
+    return ERR_TYPE_PERMANENT if ($problem == ERR_MESSAGE_REFUSED);
+
+    return ERR_TYPE_UNKNOWN if ($problem == ERR_NO_RELAY);
+    return ERR_TYPE_UNKNOWN if ($problem == ERR_UNROUTEABLE);
+    return ERR_TYPE_UNKNOWN if ($problem == ERR_SPAM);
+    return ERR_TYPE_UNKNOWN if ($problem == ERR_VERIFICATION_FAILED);
+    return ERR_TYPE_UNKNOWN if ($problem == ERR_AUTH_REQUIRED);
+    return ERR_TYPE_UNKNOWN if ($problem == ERR_BAD_SYNTAX);  
 
 }
 
