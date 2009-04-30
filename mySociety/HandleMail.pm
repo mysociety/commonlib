@@ -6,7 +6,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 
-my $rcsid = ''; $rcsid .= '$Id: HandleMail.pm,v 1.16 2009-04-30 15:04:29 louise Exp $';
+my $rcsid = ''; $rcsid .= '$Id: HandleMail.pm,v 1.17 2009-04-30 15:41:50 louise Exp $';
 
 package mySociety::HandleMail;
 
@@ -210,6 +210,9 @@ sub parse_bounce ($){
         %data = parse_yahoo_error($mail);
     }
     if (!$data{message}){
+        %data = parse_messagelabs_error($mail);
+    }
+    if (!$data{message}){
         my $message = new Mail::Internet([@$lines]);
         my $message_body = $message->body;
         %data = parse_out_of_office(join("\n", @$message_body));
@@ -309,6 +312,32 @@ sub parse_qmail_error ($){
             problem => $problem,
             dsn_code => $dsn_code, 
             email_address => $email_address);
+}
+
+# parse_messagelabs_error TEXT
+sub parse_messagelabs_error($){
+    my ($text) = @_;
+    my $email_address;
+    my $domain;
+    my $message;
+    my $smtp_code;
+    my $dsn_code;
+    my $problem;
+    # print $text;
+    if ($text =~ /This is the mail delivery agent at messagelabs.com.\n\s*I was not able to deliver your message to the following addresses.\n\s*<(.*@(.*))>:\n\s*(.*)/){
+        $email_address = $1;
+        $domain = $2;
+        $message = $3;
+        $message = join(' ', split(' ', $message));
+        ($message, $dsn_code, $smtp_code) = get_codes_from_message($message);
+        $problem = get_problem_from_message($message);
+    }
+    return (domain => $domain, 
+            message => $message, 
+            problem => $problem,
+            dsn_code => $dsn_code, 
+            email_address => $email_address);
+
 }
 
 # parse_remote_host_error TEXT
@@ -606,7 +635,8 @@ sub get_problem_from_message($){
     my @unrouteable_synonyms = ('all relevant mx records point to non-existent hosts', 
                                 'an mx or srv record indicated no smtp service',
                                 "domain isn't in my list of allowed rcpthosts",
-                                'unrouteable');
+                                'unrouteable', 
+                                'couldn\'t find any host');
     my $unrouteable_pattern = join('|', @unrouteable_synonyms); 
     
     my @timeout_synonyms = ('operation timed out',
@@ -787,6 +817,16 @@ sub get_dsn_attributes($$){
     return undef;
 }
 
+# is_delivery_status PART
+# Returns boolean indicating whether or not this Mime message part 
+# is a delivery status message
+sub is_delivery_status($){
+    my ($entity) = @_;
+    return 1 if $entity && lc($entity->mime_type()) eq 'message/delivery-status';
+    return 0;
+}
+
+sub find_delivery_status($);
 # find_delivery_status ENTITY
 # Recurse over the subparts of a mime message looking for a delivery status
 # part. Return it if there is one, or undef if not. 
@@ -823,15 +863,6 @@ sub parse_ill_formed_dsn_bounce($){
     return undef unless $status_part;
     my $strict = 0;
     return get_dsn_attributes($status_part, $strict);
-}
-
-# is_delivery_status PART
-# Returns boolean indicating whether or not this Mime message part 
-# is a delivery status message
-sub is_delivery_status($){
-    my ($entity) = @_;
-    return 1 if $entity && lc($entity->mime_type()) eq 'message/delivery-status';
-    return 0;
 }
 
 # parse_dsn_bounce TEXT

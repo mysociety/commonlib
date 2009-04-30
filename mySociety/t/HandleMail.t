@@ -6,13 +6,13 @@
 #  Copyright (c) 2009 UK Citizens Online Democracy. All rights reserved.
 # Email: louise@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: HandleMail.t,v 1.11 2009-04-30 15:04:29 louise Exp $
+# $Id: HandleMail.t,v 1.12 2009-04-30 15:41:50 louise Exp $
 #
 
 use strict;
 use warnings; 
 
-use Test::More tests => 256;
+use Test::More tests => 262;
 
 # Horrible boilerplate to set up appropriate library paths.
 use FindBin;
@@ -136,7 +136,15 @@ sub test_parse_bounce(){
                            email_address => 'anon@bigwidetalk.org', 
                            domain => 'bigwidetalk.org');
     expect_bounce_values('messagelabs unknown user mail','messagelabs-unknown-user.txt', %expected_values);
-             
+       
+    %expected_values = (smtp_code => undef, 
+                        message => 'Sorry, I couldn\'t find any host named targetbgt.com.',
+                        dsn_code => '5.1.2', 
+                        problem => mySociety::HandleMail::ERR_UNROUTEABLE,
+                        email_address => 'anon@targetbgt.com', 
+                        domain => 'targetbgt.com');
+    expect_bounce_values('messagelabs no host mail','messagelabs-no-host.txt', %expected_values);
+     
     %expected_values = (smtp_code => '550', 
                         message => 'Requested action not taken: mailbox unavailable', 
                         dsn_code => undef,
