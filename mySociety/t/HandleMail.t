@@ -6,13 +6,13 @@
 #  Copyright (c) 2009 UK Citizens Online Democracy. All rights reserved.
 # Email: louise@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: HandleMail.t,v 1.13 2009-04-30 16:08:48 louise Exp $
+# $Id: HandleMail.t,v 1.14 2009-05-05 11:11:55 louise Exp $
 #
 
 use strict;
 use warnings; 
 
-use Test::More tests => 280;
+use Test::More tests => 282;
 
 # Horrible boilerplate to set up appropriate library paths.
 use FindBin;
@@ -114,6 +114,11 @@ sub test_parse_dsn_bounce(){
     %attributes = %{$r};
     is($attributes{status}, '5.1.0', 'parse_ill_formed_dsn_bounce should return a status of "5.1.0" for an embedded DSN message from Exchange');
     is($attributes{recipient}, 'anon@anon.co.uk', 'parse_ill_formed_dsn_bounce should return a recipient of "anon@co.uk" for an embedded DSN message from Exchange'); 
+ 
+    $r = parse_ill_formed_dsn_bounce('dsn-extra-mime-parts.txt');
+    %attributes = %{$r};
+    is($attributes{status}, '5.0.0', 'parse_ill_formed_dsn_bounce should return a status of "5.0.0" for a DSN message with extra mime parts and no domain given');
+    is($attributes{recipient}, undef, 'parse_ill_formed_dsn_bounce should return a recipient of undef for a DSN message with extra mime parts and no domain given'); 
     
     return 1;
 }
