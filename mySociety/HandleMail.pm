@@ -6,7 +6,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 
-my $rcsid = ''; $rcsid .= '$Id: HandleMail.pm,v 1.22 2009-05-05 10:46:59 louise Exp $';
+my $rcsid = ''; $rcsid .= '$Id: HandleMail.pm,v 1.23 2009-05-05 11:37:53 louise Exp $';
 
 package mySociety::HandleMail;
 
@@ -210,9 +210,6 @@ sub parse_bounce ($){
         %data = parse_smtp_error($mail);
     }
     if (!$data{message}){
-        %data = parse_remote_host_error($mail);
-    }
-    if (!$data{message}){
         %data = parse_qmail_error($mail);
     }
     if (!$data{message}){
@@ -366,12 +363,20 @@ sub parse_remote_host_error ($){
     my $smtp_code;
     my $dsn_code;
     my $problem;
+    
     if ($text =~ /does not like recipient.\n\s*Remote host said: (\d\d\d) (\d\.\d\.\d) <(.*@(.*))>: (.*?)\n/) {
         $smtp_code = $1;
         $dsn_code = $2;
         $email_address = $3;
         $domain = $4;
         $message = $5;
+        $problem = get_problem_from_message($message);
+    }
+    if ($text =~ /does not like recipient.\n\s*Remote host said: (\d\d\d) (.*?) - <(.*@(.*))>\n/) {
+        $smtp_code = $1;
+        $message = $2;
+        $email_address = $3;
+        $domain = $4;
         $problem = get_problem_from_message($message);
     }
     
@@ -472,7 +477,7 @@ sub parse_out_of_office($){
     my $text = shift;
     my $problem;
     my $message;
-    if ($text =~ /(out of the (office|country)|on leave|not checking my email)/i){
+    if ($text =~ /(out of the (office|country)|on leave|not checking my email|out of town|away from the office)/i){
         $problem = ERR_OUT_OF_OFFICE;
         $message = $text;
         $message = join(' ', split(' ', $message));
