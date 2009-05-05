@@ -6,7 +6,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 
-my $rcsid = ''; $rcsid .= '$Id: HandleMail.pm,v 1.23 2009-05-05 11:37:53 louise Exp $';
+my $rcsid = ''; $rcsid .= '$Id: HandleMail.pm,v 1.24 2009-05-05 13:03:28 louise Exp $';
 
 package mySociety::HandleMail;
 
@@ -95,12 +95,13 @@ sub parse_message(@) {
         message => $m, return_path => $return_path );   
 }
 
-# process_mailbox FILENAME
+# process_mailbox FILENAME VERBOSE
 # Process the contents of a mailbox and return them 
 # as an array of hashes as returned by parse_message
-sub process_mailbox($){
+sub process_mailbox($$){
    
     open(FP, shift) or die $!;
+    my $verbose = shift;
     my @emails = ();
     my $line;
     my @lines;
@@ -111,6 +112,7 @@ sub process_mailbox($){
             if (@lines) {
                 my %data = parse_message(@lines);              
                 push(@emails, \%data);
+                print '.' if $verbose;
     	    }
             @lines = ();
 
@@ -120,6 +122,7 @@ sub process_mailbox($){
     }
     my %data = parse_message(@lines);
     push(@emails, \%data);
+    print '.' if $verbose;
     close FP;
     return @emails;
 }
