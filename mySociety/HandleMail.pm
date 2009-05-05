@@ -6,7 +6,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 
-my $rcsid = ''; $rcsid .= '$Id: HandleMail.pm,v 1.21 2009-05-05 10:45:33 louise Exp $';
+my $rcsid = ''; $rcsid .= '$Id: HandleMail.pm,v 1.22 2009-05-05 10:46:59 louise Exp $';
 
 package mySociety::HandleMail;
 
@@ -199,10 +199,10 @@ sub parse_bounce ($){
     if($r){
         %data = %{$r};
         $data{is_dsn} = 1;
+        return %data;
     }
-    if (!$data{is_dsn}){
-        %data = parse_mdn_error($lines);
-    }
+    
+    %data = parse_mdn_error($lines);
     if (!$data{message}){
         %data = parse_remote_host_error($mail);
     }
