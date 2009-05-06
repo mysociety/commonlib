@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: RABX.pm,v 1.26 2009-02-24 14:41:49 francis Exp $
+# $Id: RABX.pm,v 1.27 2009-05-06 16:07:27 francis Exp $
 
 # References:
 #   Netstrings are documented here: http://cr.yp.to/proto/netstrings.txt
@@ -411,7 +411,7 @@ sub return_string_json ($) {
     } else {
         $val = $v;
     }
-    return JSON::to_json($val);
+    return JSON::to_json($val, { allow_nonref => 1 });
 }
 
 
@@ -449,7 +449,7 @@ use HTTP::Response;
 use Data::Dumper;
 use Regexp::Common qw(URI);
 
-my $rcsid = ''; $rcsid .= '$Id: RABX.pm,v 1.26 2009-02-24 14:41:49 francis Exp $';
+my $rcsid = ''; $rcsid .= '$Id: RABX.pm,v 1.27 2009-05-06 16:07:27 francis Exp $';
 
 =back
 
