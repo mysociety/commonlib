@@ -5,7 +5,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: config.py,v 1.9 2009-04-14 18:14:36 francis Exp $
+# $Id: config.py,v 1.10 2009-05-06 18:27:26 francis Exp $
 #
 
 """
@@ -100,10 +100,10 @@ foreach ($a as $k => $v) {
 
     # check that php exited successfully
     status = child.wait()
-    if hasattr(os, 'WIFSIGNALED') and os.WIFSIGNALED(status):
-        raise Exception, "%s: %s: killed by signal %d" % (php_path, f, os.WTERMSIG(status))
-    elif hasattr(os, 'WEXITSTATUS') and os.WEXITSTATUS(status) != 0:
-        raise Exception, "%s: %s: exited with failure status %d" % (php_path, f, os.WEXITSTATUS(status))
+    if status < 0:
+        raise Exception, "%s: %s: killed by signal %d" % (php_path, f, -status)
+    elif status > 0:
+        raise Exception, "%s: %s: exited with failure status %d" % (php_path, f, status)
     
     # parse out config values
     vals = buf.split('\0'); # option values may be empty
