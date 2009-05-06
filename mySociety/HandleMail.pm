@@ -6,7 +6,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 
-my $rcsid = ''; $rcsid .= '$Id: HandleMail.pm,v 1.24 2009-05-05 13:03:28 louise Exp $';
+my $rcsid = ''; $rcsid .= '$Id: HandleMail.pm,v 1.25 2009-05-06 15:21:40 louise Exp $';
 
 package mySociety::HandleMail;
 
@@ -164,6 +164,17 @@ sub get_token {
     my ($token) = ($a->user() =~ m#^\Q$prefix\E(.*)#);
     #print "token $token\n";
     return $token;
+}
+
+# mark_as DESTINATION DATA LOG_PREFIX
+# Append an incoming mail to a log file
+sub mark_as($%$){
+    my ($destination, $data, $prefix) = @_;
+    my %data = %{$data};
+    my $mail = join("\n", @{$data{lines}});
+    open FILE, ">>", $prefix . $destination;
+    print FILE $mail;
+    close FILE; 
 }
 
 # get_bounced_address ADDRESS PREFIX DOMAIN
