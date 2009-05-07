@@ -9,7 +9,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: team@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: DBHandle.pm,v 1.23 2009-01-26 18:12:22 matthew Exp $
+# $Id: DBHandle.pm,v 1.24 2009-05-07 13:04:35 louise Exp $
 #
 
 package mySociety::DBHandle::Error;
@@ -80,6 +80,10 @@ port on which to contact database server;
 reference to code to be executed after the first connection to the database is
 made.
 
+=item DbType
+
+database server to contact (defaults to Postgres);
+
 =back
 
 A key whose value is not defined is treated as if it were not present.
@@ -87,7 +91,7 @@ A key whose value is not defined is treated as if it were not present.
 =cut
 sub configure (%) {
     my %conf = @_;
-    my %allowed = map { $_ => 1 } qw(Host Port Name User Password OnFirstUse);
+    my %allowed = map { $_ => 1 } qw(Host Port Name User Password OnFirstUse DbType);
     foreach (keys %conf) {
         delete($conf{$_}) if (!defined($conf{$_}));
         croak "Unknown key '$_' passed to configure" if (!exists($allowed{$_}));
@@ -107,7 +111,12 @@ Return a new handle open on the database.
 =cut
 sub new_dbh () {
     croak "configure not yet called in new_dbh (pid: $$)" unless ($mySociety::DBHandle::conf_ok);
-    my $connstr = 'dbi:Pg:dbname=' . $mySociety::DBHandle::conf{Name};
+    my $connstr;
+    if (exists($mySociety::DBHandle::conf{DbType})){
+        $connstr = 'dbi:' . $mySociety::DBHandle::conf{DbType} . ':dbname=' . $mySociety::DBHandle::conf{Name};
+    }else{
+        $connstr = 'dbi:Pg:dbname=' . $mySociety::DBHandle::conf{Name};
+    }
     $connstr .= ";host=$mySociety::DBHandle::conf{Host}"
         if (exists($mySociety::DBHandle::conf{Host}));
     $connstr .= ";port=$mySociety::DBHandle::conf{Port}"
@@ -127,7 +136,8 @@ sub new_dbh () {
                             # encoding which should be set to "UNICODE". Just
                             # another day in character-sets trainwreck land,
                             # I suppose.
-                            pg_enable_utf8 => 1
+                            pg_enable_utf8 => 1,
+                            mysql_enable_utf8 => 1
                         });
     $dbh->{HandleError} =
         sub ($$$) {
