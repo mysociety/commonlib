@@ -12,7 +12,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.66 2009-05-07 10:19:16 louise Exp $
+# $Id: WebTestHarness.pm,v 1.67 2009-05-07 13:21:19 louise Exp $
 #
 
 # Overload of WWW::Mechanize
@@ -89,56 +89,44 @@ sub database_connect($$) {
     $self->{dbname}  = mySociety::Config::get($db_option_prefix.'DB_NAME');
     $self->{dbuser} = mySociety::Config::get($db_option_prefix.'DB_USER');
     $self->{dbpass} = mySociety::Config::get($db_option_prefix.'DB_PASS');
+    $self->{dbtype} = mySociety::Config::get($db_option_prefix.'DB_TYPE', undef);
 
     mySociety::DBHandle::configure(Name => $self->{dbname}, 
             User => $self->{dbuser}, Password => $self->{dbpass},
-            Host => $self->{dbhost}, Port => $self->{dbport});
+            Host => $self->{dbhost}, Port => $self->{dbport},
+            DbType => $self->{dbtype});
 }
-=item mysql_database_drop_reload SCHEMA_FILE
+=item _mysql_database_drop_reload SCHEMA_FILE
 
-Drops a mysql database, and reloads it from the given schema.  Checks the database
-has -testharness or _testharness at the end of its name to avoid clobbering
-something important.
+Drops a mysql database, and reloads it from the given schema. 
 
 =cut
-sub mysql_database_drop_reload ($$){
+sub _mysql_database_drop_reload ($$){
     
     my ($self, $schema_file) = @_;
-    # Drop and recreate database from schema
-    die "Database will be dropped, so for safety must have name ending '_testharness' or '-testharness'" if ($self->{dbname} !~ m/[_-]testharness$/);
     # ... make connection with no database name and drop and remake database
     my $connstr = 'dbi:mysql:';
     $connstr .= "host=".$self->{dbhost}.";" if ($self->{dbhost});
     $connstr .= "port=".$self->{dbport}.";" if ($self->{dbport});
-    $connstr .= "dbname=mysql;";
     my $db_remake_db = DBI->connect($connstr, $self->{dbuser}, $self->{dbpass}, {
                             RaiseError => 1, AutoCommit => 1, PrintError => 0, PrintWarn => 1, });
-    $db_remake_db->do("drop database if exists \"$self->{dbname}\"");
-    $db_remake_db->do("create database \"$self->{dbname}\"");
+    $db_remake_db->do("drop database if exists `$self->{dbname}`");
+    $db_remake_db->do("create database `$self->{dbname}`");
     $db_remake_db->disconnect();
-
-    # ... load in schema
-    $self->database_load_schema($schema_file);
+    
 }
 
-=item database_drop_reload SCHEMA_FILE
+=item _psql_database_drop_reload SCHEMA_FILE
 
-Drops the database, and reloads it from the given schema.  Checks the database
-has -testharness or _testharness at the end of its name to avoid clobbering
-something important.
+Drops a postgres database and reloads it from the given schema.
 
 If you get "NOTICE:  CREATE TABLE will create implicit sequence" messages
 and would like to supress them, edit /etc/postgresql/postgresql.conf, setting
-    client_min_messages = warning 
-
+    client_min_messages = warning
 =cut
-sub database_drop_reload ($$)
-{
+sub _psql_database_drop_reload ($$){
+    
     my ($self, $schema_file) = @_;
-
-    # Drop and recreate database from schema
-    die "Database will be dropped, so for safety must have name ending '_testharness' or '-testharness'" if ($self->{dbname} !~ m/[_-]testharness$/);
-
     # ... make connection with no database name and drop and remake database
     my $connstr = 'dbi:Pg:';
     $connstr .= "host=".$self->{dbhost}.";" if ($self->{dbhost});
@@ -153,7 +141,27 @@ sub database_drop_reload ($$)
     $db_remake_db->do("create database \"$self->{dbname}\"");
     $db_remake_db->disconnect();
 
-    # ... load in schema
+} 
+=item database_drop_reload SCHEMA_FILE
+
+Drops the database, and reloads it from the given schema.  Checks the database
+has -testharness or _testharness at the end of its name to avoid clobbering
+something important.
+
+=cut
+sub database_drop_reload ($$)
+{
+    my ($self, $schema_file) = @_;
+
+    # Drop and recreate database from schema
+    die "Database will be dropped, so for safety must have name ending '_testharness' or '-testharness'" if ($self->{dbname} !~ m/[_-]testharness$/);
+
+    if ($self->{dbtype} && $self->{dbtype} eq 'mysql'){
+        _mysql_database_drop_reload($self, $schema_file);
+    }else{ 
+        _psql_database_drop_reload($self, $schema_file);
+    }
+
     $self->database_load_schema($schema_file);
 }
 
@@ -166,8 +174,17 @@ sub database_load_schema ($$) {
     my ($self, $schema_file) = @_;
 
     my $schema = read_file($schema_file);
-    dbh()->do("set client_min_messages to warning"); # So implicit index creation NOTICEs aren't displayed when loading SQL
-    dbh()->do($schema);
+    if ($self->{dbtype} && $self->{dbtype} eq 'mysql'){
+        my @statements = split(';', $schema);
+        foreach $statement (@statements){
+	    if ($statement =~ /\S/){
+	        dbh()->do($statement);
+            }
+        }   
+    }else{	
+        dbh()->do("set client_min_messages to warning"); # So implicit index creation NOTICEs aren't displayed when loading SQL
+        dbh()->do($schema);
+    }
     dbh()->commit();
 }
 
