@@ -12,7 +12,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.64 2009-01-26 14:21:52 matthew Exp $
+# $Id: WebTestHarness.pm,v 1.65 2009-05-07 10:04:36 louise Exp $
 #
 
 # Overload of WWW::Mechanize
@@ -93,6 +93,26 @@ sub database_connect($$) {
     mySociety::DBHandle::configure(Name => $self->{dbname}, 
             User => $self->{dbuser}, Password => $self->{dbpass},
             Host => $self->{dbhost}, Port => $self->{dbport});
+}
+
+sub mysql_database_drop_reload ($$){
+    
+    my ($self, $schema_file) = @_;
+    # Drop and recreate database from schema
+    die "Database will be dropped, so for safety must have name ending '_testharness' or '-testharness'" if ($self->{dbname} !~ m/[_-]testharness$/);
+    # ... make connection with no database name and drop and remake database
+    my $connstr = 'dbi:mysql:';
+    $connstr .= "host=".$self->{dbhost}.";" if ($self->{dbhost});
+    $connstr .= "port=".$self->{dbport}.";" if ($self->{dbport});
+    $connstr .= "dbname=mysql;";
+    my $db_remake_db = DBI->connect($connstr, $self->{dbuser}, $self->{dbpass}, {
+                            RaiseError => 1, AutoCommit => 1, PrintError => 0, PrintWarn => 1, });
+    $db_remake_db->do("drop database if exists \"$self->{dbname}\"");
+    $db_remake_db->do("create database \"$self->{dbname}\"");
+    $db_remake_db->disconnect();
+
+    # ... load in schema
+    $self->database_load_schema($schema_file);
 }
 
 =item database_drop_reload SCHEMA_FILE
