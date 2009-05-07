@@ -12,7 +12,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.65 2009-05-07 10:04:36 louise Exp $
+# $Id: WebTestHarness.pm,v 1.66 2009-05-07 10:19:16 louise Exp $
 #
 
 # Overload of WWW::Mechanize
@@ -94,7 +94,13 @@ sub database_connect($$) {
             User => $self->{dbuser}, Password => $self->{dbpass},
             Host => $self->{dbhost}, Port => $self->{dbport});
 }
+=item mysql_database_drop_reload SCHEMA_FILE
 
+Drops a mysql database, and reloads it from the given schema.  Checks the database
+has -testharness or _testharness at the end of its name to avoid clobbering
+something important.
+
+=cut
 sub mysql_database_drop_reload ($$){
     
     my ($self, $schema_file) = @_;
