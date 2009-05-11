@@ -6,13 +6,13 @@
 # Copyright (c) 2009 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: rabx.py,v 1.3 2009-03-03 16:56:58 matthew Exp $
+# $Id: rabx.py,v 1.4 2009-05-11 09:16:20 matthew Exp $
 #
 
 import os
 import subprocess
 import re
-import json
+import simplejson
 import urllib
 
 class RABXException(Exception):
@@ -38,7 +38,7 @@ def call_rest_rabx(base_url, params_init):
     params_joined = "/".join(params_quoted)
     url = base_url.replace(".cgi", "-rest.cgi") + "?" + params_joined
     content = urllib.urlopen(url).read()
-    result = json.read(content)
+    result = simplejson.loads(content)
     if 'error_value' in result:
         raise RABXException(result['error_value'], result['error_text'], result.get('error_extradata'))
     return result
