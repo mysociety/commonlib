@@ -6,7 +6,7 @@
 # Copyright (c) 2009 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: rabx.py,v 1.4 2009-05-11 09:16:20 matthew Exp $
+# $Id: rabx.py,v 1.5 2009-05-11 22:17:40 matthew Exp $
 #
 
 import os
@@ -17,7 +17,7 @@ import urllib
 
 class RABXException(Exception):
     def __init__(self, value, text, extradata):
-        self.value = value
+        self.value = int(value)
         self.text = text
         self.extradata = extradata
 
