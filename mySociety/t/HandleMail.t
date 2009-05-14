@@ -6,13 +6,13 @@
 #  Copyright (c) 2009 UK Citizens Online Democracy. All rights reserved.
 # Email: louise@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: HandleMail.t,v 1.15 2009-05-05 11:37:53 louise Exp $
+# $Id: HandleMail.t,v 1.16 2009-05-14 13:16:14 louise Exp $
 #
 
 use strict;
 use warnings; 
 
-use Test::More tests => 288;
+use Test::More tests => 306;
 
 # Horrible boilerplate to set up appropriate library paths.
 use FindBin;
@@ -547,6 +547,44 @@ sub test_parse_smtp_error(){
                  problem =>  mySociety::HandleMail::ERR_MESSAGE_REFUSED,
                  message => 'Rejected');
     expect_parse_smtp_values('athena example', $text, %expected_values);
+
+    $text = 'anon@anon.com
+    SMTP error from remote mail server after RCPT TO:<anon@anon.com>:
+    host anon.com [141.163.66.134]:
+    550 Prohibited: Recipient not known at this site
+           ';
+    %expected_values = (domain => 'anon.com', 
+                 smtp_code => '550', 
+                 dsn_code => undef, 
+                 email_address => 'anon@anon.com',
+                 problem =>  mySociety::HandleMail::ERR_NO_USER,
+                 message => 'Prohibited: Recipient not known at this site');
+    expect_parse_smtp_values('recipient not known example', $text, %expected_values);
+
+    $text = 'anon@anon.co.za
+      SMTP error from remote mail server after RCPT TO:<anon@anon.co.za>:
+      host mail.anon.co.za [41.203.18.177]: 550 Unroutable address   
+           ';
+    %expected_values = (domain => 'anon.co.za', 
+                 smtp_code => '550', 
+                 dsn_code => undef, 
+                 email_address => 'anon@anon.co.za',
+                 problem =>  mySociety::HandleMail::ERR_UNROUTEABLE,
+                 message => 'Unroutable address');
+    expect_parse_smtp_values('Unroutable co.za example', $text, %expected_values);
+
+    $text = 'anon@anon.co.uk
+      SMTP error from remote mail server after RCPT TO:<anon@anon.co.uk>:
+      host anon.co.uk [62.172.47.144]: 552 5.2.2 Message would exceed quota for <anon@anon.co.uk> 
+           ';
+    %expected_values = (domain => 'anon.co.uk', 
+                 smtp_code => '552', 
+                 dsn_code => '5.2.2', 
+                 email_address => 'anon@anon.co.uk',
+                 problem =>  mySociety::HandleMail::ERR_MAILBOX_FULL,
+                 message => 'Message would exceed quota for <anon@anon.co.uk>');
+    expect_parse_smtp_values('Quota .co.uk example', $text, %expected_values);
+    
     return 1;
 }
 

@@ -6,7 +6,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 
-my $rcsid = ''; $rcsid .= '$Id: HandleMail.pm,v 1.25 2009-05-06 15:21:40 louise Exp $';
+my $rcsid = ''; $rcsid .= '$Id: HandleMail.pm,v 1.26 2009-05-14 13:16:13 louise Exp $';
 
 package mySociety::HandleMail;
 
@@ -600,6 +600,7 @@ sub get_problem_from_message($){
                             'not our customer',
                             'recipient address unknown',
                             'recipient no longer on server',
+                            'recipient not known',
                             'recipient not recognized',
                             'recipient rejected',
                             'recipient unknown',
@@ -635,6 +636,7 @@ sub get_problem_from_message($){
                                  'mailbox full',
                                  'mailbox is full', 
                                  'mailfolder is over the allowed quota', 
+                                 'message would exceed quota',
                                  'over quota', 
                                  'quota exceeded',
                                  'recipient overquota', 
@@ -672,7 +674,8 @@ sub get_problem_from_message($){
                                 'an mx or srv record indicated no smtp service',
                                 "domain isn't in my list of allowed rcpthosts",
                                 'unrouteable', 
-                                'couldn\'t find any host');
+                                'couldn\'t find any host',
+                                'unroutable address');
     my $unrouteable_pattern = join('|', @unrouteable_synonyms); 
     
     my @timeout_synonyms = ('operation timed out',
