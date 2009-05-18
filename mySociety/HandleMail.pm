@@ -6,7 +6,7 @@
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 
-my $rcsid = ''; $rcsid .= '$Id: HandleMail.pm,v 1.26 2009-05-14 13:16:13 louise Exp $';
+my $rcsid = ''; $rcsid .= '$Id: HandleMail.pm,v 1.27 2009-05-18 11:56:10 louise Exp $';
 
 package mySociety::HandleMail;
 
@@ -765,6 +765,37 @@ sub get_problem_from_message($){
     }
     
     return $problem;
+}
+
+# parse_arf_mail TEXT
+# Attempt to parse TEXT (scalar or reference to list of lines) as an ARF (Abuse Reporting
+# Format) mail as defined in draft form at http://tools.ietf.org/id/draft-shafranovich-feedback-report-06.txt
+sub parse_arf_mail ($){
+    my $P = new MIME::Parser();
+    $P->output_to_core(1); 
+    
+    # Message should be multipart with a mime type of multipart/report
+    my $ent = $P->parse_data(join("\n", @{$_[0]}) . "\n");
+    return undef if (!$ent || !$ent->is_multipart() || lc($ent->mime_type()) ne 'multipart/report');
+ 
+    # Second part should be of type 'message/feedback-report'
+    my $report = $ent->parts(1);
+    return undef if (!$report || lc($report->mime_type()) ne 'message/feedback-report');
+    my $h = $report->bodyhandle()->open('r');
+    my $feedback_type;
+    my $user_agent;
+    my $original_message = $ent->parts(2)->stringify();
+    while (defined($_ = $h->getline())) {
+        chomp();
+        if (/^Feedback-Type:\s+(.*?)\s*$/) {
+            $feedback_type = $1;
+        }elsif (/^User-Agent:\s+(.*?)\s*$/) {
+            $user_agent = $1;
+        }
+    }
+    $h->close();
+    my %attributes = (feedback_type => $feedback_type, user_agent => $user_agent, original_message => $original_message);
+    return \%attributes;
 }
 
 # parse_mdn_bounce TEXT

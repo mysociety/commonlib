@@ -6,13 +6,13 @@
 #  Copyright (c) 2009 UK Citizens Online Democracy. All rights reserved.
 # Email: louise@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: HandleMail.t,v 1.16 2009-05-14 13:16:14 louise Exp $
+# $Id: HandleMail.t,v 1.17 2009-05-18 11:56:10 louise Exp $
 #
 
 use strict;
 use warnings; 
 
-use Test::More tests => 306;
+use Test::More tests => 311;
 
 # Horrible boilerplate to set up appropriate library paths.
 use FindBin;
@@ -55,7 +55,13 @@ sub parse_mdn_bounce($){
     my @lines = create_test_message($message_file);
     return mySociety::HandleMail::parse_mdn_bounce(\@lines);
 }
+#---------------------------------
 
+sub parse_arf_mail($){
+    my $message_file = shift;
+    my @lines = create_test_message($message_file);
+    return mySociety::HandleMail::parse_arf_mail(\@lines);
+}
 #---------------------------------
 
 sub parse_bounce($){
@@ -903,7 +909,22 @@ sub test_get_bounced_address(){
     return 1;
 }
 
- 
+sub test_parse_arf_mail(){
+
+    my $r = parse_arf_mail('messagelabs-unknown-user.txt');   
+    is($r, undef, 'parse_arf_mail should return undef for a "Unknown user" bounce from MessageLabs');
+
+    $r = parse_arf_mail('aol-arf.txt');
+    my %attributes = %{$r};
+    my $expected_original = join("\n", create_test_message('aol-arf-original-message.txt'));
+    is($attributes{original_message}, $expected_original, 'parse_arf_mail should return an original message for an "Abuse Reporting Format" mail from AOL');
+    is($attributes{feedback_type}, 'abuse', 'parse_arf_mail should return a feedback_type of "abuse" for an "Abuse Reporting Format" mail from AOL');
+    is($attributes{user_agent}, 'AOL SComp', 'parse_arf_mail should return a user_agent of "AOL SComp" for an "Abuse Reporting Format" mail from AOL');
+
+    return 1;
+}
+
+ok(test_parse_arf_mail() == 1, 'Ran all tests for parse_arf_mail');  
 ok(test_parse_dsn_bounce() == 1, 'Ran all tests for parse_dsn_bounce');
 ok(test_parse_mdn_bounce() == 1, 'Ran all tests for parse_mdn_bounce');
 ok(test_parse_bounce() == 1, 'Ran all tests for parse_bounce');
