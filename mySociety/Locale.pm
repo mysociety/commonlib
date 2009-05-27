@@ -6,12 +6,12 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Locale.pm,v 1.8 2009-02-16 18:56:45 matthew Exp $
+# $Id: Locale.pm,v 1.9 2009-05-27 11:11:18 matthew Exp $
 
 package mySociety::Locale;
 
 use strict;
-use HTTP::Negotiate;
+use HTTPNegotiate;
 use Locale::gettext;
 use POSIX qw(setlocale LC_ALL);
 
