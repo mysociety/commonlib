@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Alert.pm,v 1.48 2009-02-11 10:37:41 matthew Exp $
+# $Id: Alert.pm,v 1.49 2009-07-10 15:17:29 matthew Exp $
 
 package mySociety::Alert::Error;
 
@@ -31,6 +31,7 @@ use mySociety::Email;
 use mySociety::EmailUtil;
 use mySociety::Gaze;
 use mySociety::GeoUtil;
+use mySociety::Locale;
 use mySociety::MaPit;
 use mySociety::Random qw(random_bytes);
 use mySociety::Sundries qw(ordinal);
@@ -53,15 +54,16 @@ sub create ($$;@) {
     return $already if $already;
 
     my $id = dbh()->selectrow_array("select nextval('alert_id_seq');");
+    my $lang = $mySociety::Locale::lang;
     if (0==@params) {
-        dbh()->do('insert into alert (id, alert_type, email)
-            values (?, ?, ?)', {}, $id, $alert_type, $email);
+        dbh()->do('insert into alert (id, alert_type, email, lang)
+            values (?, ?, ?)', {}, $id, $alert_type, $email, $lang);
     } elsif (1==@params) {
-        dbh()->do('insert into alert (id, alert_type, parameter, email)
-            values (?, ?, ?, ?)', {}, $id, $alert_type, @params, $email);
+        dbh()->do('insert into alert (id, alert_type, parameter, email, lang)
+            values (?, ?, ?, ?)', {}, $id, $alert_type, @params, $email, $lang);
     } elsif (2==@params) {
-        dbh()->do('insert into alert (id, alert_type, parameter, parameter2, email)
-            values (?, ?, ?, ?, ?)', {}, $id, $alert_type, @params, $email);
+        dbh()->do('insert into alert (id, alert_type, parameter, parameter2, email, lang)
+            values (?, ?, ?, ?, ?)', {}, $id, $alert_type, @params, $email, $lang);
     }
     dbh()->commit();
     return $id;
@@ -94,7 +96,7 @@ sub email_alerts () {
         my $ref = $alert_type->{ref};
         my $head_table = $alert_type->{head_table};
         my $item_table = $alert_type->{item_table};
-        my $query = 'select alert.id as alert_id, alert.email as alert_email,
+        my $query = 'select alert.id as alert_id, alert.email as alert_email, alert.lang
             alert.parameter as alert_parameter, alert.parameter2 as alert_parameter2, ';
         if ($head_table) {
             $query .= "
@@ -166,7 +168,7 @@ sub email_alerts () {
         my $d = mySociety::Gaze::get_radius_containing_population($lat, $lon, 200000);
         $d = int($d*10+0.5)/10;
 
-        my %data = ( template => $template, data => '', alert_id => $alert->{id}, alert_email => $alert->{email} );
+        my %data = ( template => $template, data => '', alert_id => $alert->{id}, alert_email => $alert->{email}, lang => $alert->{lang} );
         my $q = "select * from problem_find_nearby(?, ?, ?) as nearby, problem
             where nearby.problem_id = problem.id and problem.state in ('confirmed', 'fixed')
             and problem.created >= ?
@@ -185,13 +187,14 @@ sub email_alerts () {
 
 sub _send_aggregated_alert_email(%) {
     my %data = @_;
+    mySociety::Locale::change($data{lang});
     $data{unsubscribe_url} = mySociety::Config::get('BASE_URL') . '/A/'
         . mySociety::AuthToken::store('alert', { id => $data{alert_id}, type => 'unsubscribe', email => $data{alert_email} } );
     my $template = File::Slurp::read_file("$FindBin::Bin/../templates/emails/$data{template}");
     my $sender = mySociety::Config::get('CONTACT_EMAIL');
     (my $from = $sender) =~ s/team/fms-DO-NOT-REPLY/; # XXX
     my $email = mySociety::Email::construct_email({
-        _template_ => $template,
+        _template_ => _($template),
         _parameters_ => \%data,
         From => [ $from, mySociety::Config::get('CONTACT_NAME') ],
         To => $data{alert_email},
