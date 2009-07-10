@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Alert.pm,v 1.49 2009-07-10 15:17:29 matthew Exp $
+# $Id: Alert.pm,v 1.50 2009-07-10 16:10:22 matthew Exp $
 
 package mySociety::Alert::Error;
 
@@ -57,13 +57,13 @@ sub create ($$;@) {
     my $lang = $mySociety::Locale::lang;
     if (0==@params) {
         dbh()->do('insert into alert (id, alert_type, email, lang)
-            values (?, ?, ?)', {}, $id, $alert_type, $email, $lang);
+            values (?, ?, ?, ?)', {}, $id, $alert_type, $email, $lang);
     } elsif (1==@params) {
         dbh()->do('insert into alert (id, alert_type, parameter, email, lang)
-            values (?, ?, ?, ?)', {}, $id, $alert_type, @params, $email, $lang);
+            values (?, ?, ?, ?, ?)', {}, $id, $alert_type, @params, $email, $lang);
     } elsif (2==@params) {
         dbh()->do('insert into alert (id, alert_type, parameter, parameter2, email, lang)
-            values (?, ?, ?, ?, ?)', {}, $id, $alert_type, @params, $email, $lang);
+            values (?, ?, ?, ?, ?, ?)', {}, $id, $alert_type, @params, $email, $lang);
     }
     dbh()->commit();
     return $id;
