@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Alert.pm,v 1.50 2009-07-10 16:10:22 matthew Exp $
+# $Id: Alert.pm,v 1.51 2009-07-10 16:54:52 matthew Exp $
 
 package mySociety::Alert::Error;
 
@@ -246,13 +246,15 @@ sub generate_rss ($$$;$$) {
         # And we want pretty dates... :-/
         if ($row->{confirmed}) {
             $row->{confirmed} =~ /^(\d\d\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/;
-            $pubDate = strftime("%a, %d %b %Y %H:%M:%S %z", $6, $5, $4, $3, $2-1, $1-1900, -1, -1, 0);
+            $pubDate = mySociety::Locale::in_gb_locale {
+                strftime("%a, %d %b %Y %H:%M:%S %z", $6, $5, $4, $3, $2-1, $1-1900, -1, -1, 0)
+            };
             $row->{confirmed} = ordinal($3+0) . ' ' . $months[$2];
         }
 
-        (my $title = $alert_type->{item_title}) =~ s/{{(.*?)}}/$row->{$1}/g;
+        (my $title = _($alert_type->{item_title})) =~ s/{{(.*?)}}/$row->{$1}/g;
         (my $link = $alert_type->{item_link}) =~ s/{{(.*?)}}/$row->{$1}/g;
-        (my $desc = $alert_type->{item_description}) =~ s/{{(.*?)}}/$row->{$1}/g;
+        (my $desc = _($alert_type->{item_description})) =~ s/{{(.*?)}}/$row->{$1}/g;
         my %item = (
             title => ent($title),
             link => $url . $link,
@@ -285,9 +287,9 @@ sub generate_rss ($$$;$$) {
     foreach (keys %$title_params) {
         $row->{$_} = $title_params->{$_};
     }
-    (my $title = $alert_type->{head_title}) =~ s/{{(.*?)}}/$row->{$1}/g;
+    (my $title = _($alert_type->{head_title})) =~ s/{{(.*?)}}/$row->{$1}/g;
     (my $link = $alert_type->{head_link}) =~ s/{{(.*?)}}/$row->{$1}/g;
-    (my $desc = $alert_type->{head_description}) =~ s/{{(.*?)}}/$row->{$1}/g;
+    (my $desc = _($alert_type->{head_description})) =~ s/{{(.*?)}}/$row->{$1}/g;
     $rss->channel(
         title => ent($title), link => "$url$link$qs", description  => ent($desc),
         language   => 'en-gb'
