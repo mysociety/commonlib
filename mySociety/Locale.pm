@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Locale.pm,v 1.9 2009-05-27 11:11:18 matthew Exp $
+# $Id: Locale.pm,v 1.10 2009-07-10 15:14:49 matthew Exp $
 
 package mySociety::Locale;
 
@@ -102,14 +102,15 @@ sub in_gb_locale(&) {
     return wantarray ? @result : $result;
 }
 
-# gettext_domain DOMAIN
+# gettext_domain DOMAIN [UNICODE]
 # Set gettext domain. e.g. 'PledgeBank'
-sub gettext_domain($) {
-    my $domain = shift;
-    $gettext = Locale::gettext->domain_raw($domain)
-        or die "failed to bind to gettext domain $domain";
+# Set UNICODE if you want Unicode strings returned, not octets.
+sub gettext_domain($;$) {
+    my ($domain, $unicode) = @_;
+    $gettext = $unicode ? Locale::gettext->domain($domain) : Locale::gettext->domain_raw($domain);
+    die "failed to bind to gettext domain $domain" unless $gettext;
     $gettext->dir("../../locale") or die "failed to change to locale directory";
-    $gettext->codeset('UTF-8');
+    $gettext->codeset('UTF-8') unless $unicode;
 }
 
 1;
