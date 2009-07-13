@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Alert.pm,v 1.51 2009-07-10 16:54:52 matthew Exp $
+# $Id: Alert.pm,v 1.52 2009-07-13 17:56:36 matthew Exp $
 
 package mySociety::Alert::Error;
 
@@ -96,7 +96,7 @@ sub email_alerts () {
         my $ref = $alert_type->{ref};
         my $head_table = $alert_type->{head_table};
         my $item_table = $alert_type->{item_table};
-        my $query = 'select alert.id as alert_id, alert.email as alert_email, alert.lang
+        my $query = 'select alert.id as alert_id, alert.email as alert_email, alert.lang,
             alert.parameter as alert_parameter, alert.parameter2 as alert_parameter2, ';
         if ($head_table) {
             $query .= "
