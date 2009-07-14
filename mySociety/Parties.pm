@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Parties.pm,v 1.20 2009-03-16 10:12:57 matthew Exp $
+# $Id: Parties.pm,v 1.21 2009-07-14 16:58:07 dademcron Exp $
 #
 
 package mySociety::Parties;
@@ -39,6 +39,7 @@ display them with.
     'British National Party' => 'BNP',
 
     "Conservative" => "Conservative",
+    "Conservative Party" => "Conservative",
     "Con" => "Conservative",
     "Ind Con" => "Independent Conservative",
     "Scottish Conservative and Unionist Party" => "Conservative",
@@ -54,6 +55,7 @@ display them with.
     "Forward Wales" => "Forward Wales",
 
     "Green" => "Green",
+    "Green Party" => "Green",
     "Greens" => "Green",
     "Scottish Green Party" => "Green",
 
@@ -61,6 +63,7 @@ display them with.
     "Independent Health Coalition" => "Independent Health Coalition",
 
     "Labour" => "Labour",
+    "Labour Party" => "Labour",
     "Lab" => "Labour",
     "Lab/Co-op" => "Labour / Co-operative",
     "Scottish Labour" => "Labour",
@@ -69,6 +72,7 @@ display them with.
     "LDem" => "Liberal Democrat",
     "Dem" => "Liberal Democrat", # House of Lords
     "Liberal Democrat" => "Liberal Democrat",
+    "Liberal Democrats" => "Liberal Democrat",
     "Scottish Liberal Democrats" => "Liberal Democrat",
 
     "One London Group" => "One London Group",
@@ -116,6 +120,7 @@ display them with.
     "UU" => "UUP",
     "UUP" => "UUP",
     "Ulster Unionist Party" => "UUP",
+    "Ulster Conservatives and Unionists" => "UUP",
 
     "UKUP" => "UKUP",
     "United Kingdom Unionist Party" => "UKUP",
