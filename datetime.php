@@ -6,7 +6,7 @@
  * Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: datetime.php,v 1.8 2008-09-19 18:16:11 matthew Exp $
+ * $Id: datetime.php,v 1.9 2009-07-16 10:42:16 matthew Exp $
  * 
  */
 
@@ -20,7 +20,7 @@
 // Stolen from Matthew's railway script.
 function datetime_parse_local_date($date, $now, $language, $country) {
     $error = 0;
-    $date = preg_replace('#((\b([a-z]|on|an|of|in|the|year of our lord))|(?<=\d)(st|nd|rd|th))\b#','',$date);
+    $date = preg_replace('#((\b([a-z]|on|an|of|in|the|year of our lord))|(?<=\d)(st|nd|rd|th))\b#i','', trim($date));
     $date = str_replace(',', ' ', $date);
     if (!$date)
         return null;
@@ -157,7 +157,12 @@ function datetime_parse_local_date($date, $now, $language, $country) {
             }
         }
         $t = strtotime($date,$now);
-        if ($t != -1) {
+	if (version_compare(PHP_VERSION, '5.1.0', '>=')) {
+	    $strtotime_cmp = false;
+	} else {
+	    $strtotime_cmp = -1;
+	}
+        if ($t !== $strtotime_cmp) {
             $day = date('d',$t); $month = date('m',$t); $year = date('Y',$t); $epoch = $t;
         } else {
             $error = 1;
