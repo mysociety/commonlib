@@ -12,7 +12,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.67 2009-05-07 13:21:19 louise Exp $
+# $Id: WebTestHarness.pm,v 1.68 2009-07-16 14:16:17 matthew Exp $
 #
 
 # Overload of WWW::Mechanize
@@ -35,6 +35,7 @@ use File::Slurp;
 use File::Temp;
 use File::stat;
 use Fcntl;
+use Getopt::Long;
 use WWW::Mechanize;
 use Data::Dumper;
 use MIME::QuotedPrint;
@@ -52,6 +53,88 @@ $SIG{__WARN__} = sub { cluck @_ };
 our $mail_sleep_time = 60;
 # How long to wait for a fax to arrive
 our $fax_sleep_time = 5;
+
+############################################################################
+# Shared set-up functions
+
+sub help {
+    my $actions = shift;
+    print <<END;
+
+Usage: test-run [OPTION] [ACTION]...
+
+Actions are a list of tests, run if present in this order:
+END
+    foreach (keys %$actions) {
+        print "    $_ - $actions->{$_}\n";
+    }
+    print <<END;
+If you specify no actions, it will run all of them.
+
+Options are:
+    --verbose=n    Choose 0 (no progress), 1 (basic actions), 2 (full debug)
+    --pause        Pause after displaying URLs read from emails
+    --multispawn=n Test concurrency by calling scripts this many times at once (default 1)
+
+END
+}
+
+sub setup {
+    my $config = shift;
+    # Parse command line
+    my $verbose = 0; # currently 3 levels: 0, 1 and 2
+    my $pause = 0;
+    my $multispawn = 1; # now crontab just runs on one machines anyway, gave up
+    my $help;
+    if (!GetOptions(
+            'verbose=i' => \$verbose,
+            'pause' => \$pause,
+            'multispawn=i' => \$multispawn,
+            'help' => \$help
+        )) {
+        mySociety::WebTestHarness::help($config->{actions});
+        exit(1);
+    }
+    if ($help) {
+        mySociety::WebTestHarness::help($config->{actions});
+        exit(0);
+    }
+    my %action;
+    foreach (@ARGV) {
+        if ($config->{actions}->{$_}) {
+            $action{$_} = 1;
+        } else {
+            mySociety::WebTestHarness::help($config->{actions});
+            print "Action '$_' not known\n";
+            exit(0);
+        }
+    }
+    if (scalar(@ARGV) == 0) { 
+        %action = map { $_ => 1 } keys %{$config->{actions}};
+        $action{'all'} = 1;
+    }
+
+    my $wth = new mySociety::WebTestHarness();
+    $wth->database_connect($config->{dbname} . '_');
+    $wth->database_drop_reload('../db/schema.sql');
+    foreach (@{$config->{sql_extra}}) {
+        $wth->database_load_schema($_);
+    }
+    $wth->database_cycle_sequences(200);
+
+    # XXX As services are deployed now for Ratty, comment this out
+    my $eveld_bin = "$FindBin::Bin/../../services/EvEl/bin/eveld";
+    $eveld_bin = undef if ! -e $eveld_bin; # when running on servers rely on EvEl daemon, rather than calling EvEl binary directly as on Francis'' laptop XXX need more explicit way of distinguishing this case, than just checking evel isn't checked out in the same tree
+    $wth->email_setup({ eveld_bin => $eveld_bin,
+                        eveld_multispawn => $multispawn,
+                        log_mailbox => "log_mailbox" });
+    $wth->browser_set_validator("/usr/bin/validate");
+
+    my $httpd_error_log = mySociety::Config::get('HTTPD_ERROR_LOG');
+    $wth->log_watcher_setup($httpd_error_log);
+
+    return $wth, \%action, $verbose, $pause, $multispawn;
+}
 
 ############################################################################
 # Constructor
@@ -177,11 +260,11 @@ sub database_load_schema ($$) {
     if ($self->{dbtype} && $self->{dbtype} eq 'mysql'){
         my @statements = split(';', $schema);
         foreach $statement (@statements){
-	    if ($statement =~ /\S/){
-	        dbh()->do($statement);
+            if ($statement =~ /\S/){
+                dbh()->do($statement);
             }
         }   
-    }else{	
+    }else{        
         dbh()->do("set client_min_messages to warning"); # So implicit index creation NOTICEs aren't displayed when loading SQL
         dbh()->do($schema);
     }
