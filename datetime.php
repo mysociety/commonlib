@@ -6,7 +6,7 @@
  * Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: datetime.php,v 1.9 2009-07-16 10:42:16 matthew Exp $
+ * $Id: datetime.php,v 1.10 2009-07-16 11:22:52 matthew Exp $
  * 
  */
 
@@ -133,7 +133,7 @@ function datetime_parse_local_date($date, $now, $language, $country) {
         $year = $m[3];
         if ($year<100) 
             $year += 2000;
-    } elseif (preg_match('#(\d{4})/(\d{1,2})/(\d{1,2})#',$date,$m)) {
+    } elseif (preg_match('#(\d{4})[-/](\d{1,2})[/-](\d{1,2})#', $date, $m)) {
         $year = $m[1]; $day = $m[3]; $month = $m[2];
     } elseif (preg_match('#(\d+)/(\d+)#',$date,$m)) {
         if ($country == 'US') {
@@ -168,12 +168,12 @@ function datetime_parse_local_date($date, $now, $language, $country) {
             $error = 1;
         }
     }
-    if (!$epoch && $day && $month && $year) {
+    if (!$epoch && $day && $month && $year && $year >= 1902) {
         $t = mktime(0,0,0,$month,$day,$year);
         $day = date('d',$t); $month = date('m',$t); $year = date('Y',$t); $epoch = $t;
     }
 
-    if ($epoch == 0) 
+    if ($epoch == 0 && (!$year || $year >= 1902))
         return null;
 
     return array('iso'=>"$year-$month-$day", 'epoch'=>$epoch, 'day'=>$day, 'month'=>$month, 'year'=>$year, 'error'=>$error);
