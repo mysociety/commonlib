@@ -12,7 +12,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.70 2009-07-16 15:08:04 matthew Exp $
+# $Id: WebTestHarness.pm,v 1.71 2009-07-16 15:16:35 matthew Exp $
 #
 
 # Overload of WWW::Mechanize
@@ -35,6 +35,7 @@ use File::Slurp;
 use File::Temp;
 use File::stat;
 use Fcntl;
+use FindBin;
 use Getopt::Long;
 use WWW::Mechanize;
 use Data::Dumper;
