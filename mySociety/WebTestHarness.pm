@@ -12,7 +12,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.69 2009-07-16 14:56:02 matthew Exp $
+# $Id: WebTestHarness.pm,v 1.70 2009-07-16 15:08:04 matthew Exp $
 #
 
 # Overload of WWW::Mechanize
@@ -92,11 +92,11 @@ sub setup {
             'multispawn=i' => \$multispawn,
             'help' => \$help
         )) {
-        mySociety::WebTestHarness::help($config->{actions_desc});
+        help($config->{actions_desc});
         exit(1);
     }
     if ($help) {
-        mySociety::WebTestHarness::help($config->{actions_desc});
+        help($config->{actions_desc});
         exit(0);
     }
     my %action;
@@ -104,7 +104,7 @@ sub setup {
         if ($config->{actions_desc}->{$_}) {
             $action{$_} = 1;
         } else {
-            mySociety::WebTestHarness::help($config->{actions_desc});
+            help($config->{actions_desc});
             print "Action '$_' not known\n";
             exit(0);
         }
