@@ -5,7 +5,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: config.py,v 1.11 2009-07-22 11:46:36 louise Exp $
+# $Id: config.py,v 1.12 2009-07-22 11:54:47 louise Exp $
 #
 
 """
@@ -64,7 +64,7 @@ def read_config(f):
         store_environ[k] = os.environ[k]
         del os.environ[k]
     os.environ['MYSOCIETY_CONFIG_FILE_PATH'] = f
-    child = subprocess.Popen(["taskset 0x1 " + php_path],
+    child = subprocess.Popen(["taskset", "0x1", php_path],
                              stdin=subprocess.PIPE,
                              stdout=subprocess.PIPE) # don't capture stderr
     for k,v in store_environ.iteritems():
