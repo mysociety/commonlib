@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: team@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Config.pm,v 1.20 2009-01-26 14:42:37 matthew Exp $
+# $Id: Config.pm,v 1.21 2009-08-11 16:32:58 louise Exp $
 #
 
 package mySociety::Config;
@@ -107,7 +107,7 @@ sub read_config ($;$) {
         $inr->close();
         $outw->close();
 
-        exec($php_path) or throw Error::Simple "$php_path: exec: $!";
+        exec('taskset', '0x1', $php_path) or throw Error::Simple "$php_path: exec: $!";
     }
 
     $inr->close();
