@@ -6,11 +6,12 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Locale.pm,v 1.10 2009-07-10 15:14:49 matthew Exp $
+# $Id: Locale.pm,v 1.11 2009-08-12 14:07:06 matthew Exp $
 
 package mySociety::Locale;
 
 use strict;
+use FindBin;
 use HTTPNegotiate;
 use Locale::gettext;
 use POSIX qw(setlocale LC_ALL);
@@ -109,7 +110,7 @@ sub gettext_domain($;$) {
     my ($domain, $unicode) = @_;
     $gettext = $unicode ? Locale::gettext->domain($domain) : Locale::gettext->domain_raw($domain);
     die "failed to bind to gettext domain $domain" unless $gettext;
-    $gettext->dir("../../locale") or die "failed to change to locale directory";
+    $gettext->dir("$FindBin::Bin/../../locale");
     $gettext->codeset('UTF-8') unless $unicode;
 }
 
