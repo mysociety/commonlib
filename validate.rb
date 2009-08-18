@@ -4,10 +4,33 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: validate.rb,v 1.4 2008-12-31 12:34:56 francis Exp $
+# $Id: validate.rb,v 1.5 2009-08-18 20:44:29 francis Exp $
 
 module MySociety
     module Validate
+
+        # Stop someone writing all in capitals, or all lower case letters.
+        def Validate.uses_mixed_capitals(s)
+            # allow short things (e.g. short titles might be validly all caps)
+            return true if s.length < 20
+
+            capitals = 0
+            lowercase = 0 
+            s.each_char do |c|
+                capitals = capitals + 1 if c.match(/[A-Z]/)
+                lowercase = lowercase + 1 if c.match(/[a-z]/)
+            end
+
+            percent_capitals = capitals.to_f / (capitals + lowercase).to_f * 100
+
+            # anything more than 75% caps, or less than 1% capitals
+            # XXX should check these against database of old FOI requests etc.
+            if percent_capitals > 75.0 || percent_capitals < 1.0
+                return false
+            end
+
+            return true
+        end
 
         def Validate.email_match_regexp
             # This is derived from the grammar in RFC2822.
