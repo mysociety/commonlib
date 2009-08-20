@@ -13,12 +13,12 @@
 # 
 # Email: team@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: HelmertTransform.pm,v 1.12 2009-01-26 14:21:51 matthew Exp $
+# $Id: HelmertTransform.pm,v 1.13 2009-08-20 09:02:43 matthew Exp $
 #
 
 package Geo::HelmertTransform;
 
-($Geo::HelmertTransform::VERSION) = ('$Id: HelmertTransform.pm,v 1.12 2009-01-26 14:21:51 matthew Exp $' =~ /^\$Id: [^\s]+,v (\d+\.\d+) /);
+($Geo::HelmertTransform::VERSION) = ('$Id: HelmertTransform.pm,v 1.13 2009-08-20 09:02:43 matthew Exp $' =~ /^\$Id: [^\s]+,v (\d+\.\d+) /);
 
 use strict;
 
@@ -229,7 +229,7 @@ my %known_datums = (
             # from OS article above
         Airy1830          => [6_377_563.396, 6_356_256.910,  +446.448, -125.157, +542.060, -20.4894, +0.1502, +0.2470, +0.8421],
             # from http://www.osni.gov.uk/downloads/Making%20maps%20GPS%20compatible.pdf
-        Airy1830Modified  => [6_377_340.189, 6_356_034.447,  +482.530, -130.596, +564.557,  +8.150,  +1.042,  +0.214,  +0.631],
+        Airy1830Modified  => [6_377_340.189, 6_356_034.447,  +482.530, -130.596, +564.557,  +8.150,  -1.042,  -0.214,  -0.631],
 #        International1924 => [6_378_388.000, 6_356_911.946,  ??? ],
         WGS84             => [6_378_137.000, 6_356_752.3141,   0.000,    0.000,    0.000,   0.0000,  0.0000,  0.0000,  0.0000]
     );
@@ -298,7 +298,7 @@ the same terms as Perl itself.
 
 =head1 VERSION
 
-$Id: HelmertTransform.pm,v 1.12 2009-01-26 14:21:51 matthew Exp $
+$Id: HelmertTransform.pm,v 1.13 2009-08-20 09:02:43 matthew Exp $
 
 =cut
 
