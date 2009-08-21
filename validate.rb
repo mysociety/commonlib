@@ -4,7 +4,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: validate.rb,v 1.6 2009-08-18 20:52:47 francis Exp $
+# $Id: validate.rb,v 1.7 2009-08-21 17:10:09 francis Exp $
 
 module MySociety
     module Validate
@@ -26,10 +26,10 @@ module MySociety
             # what proportion of roman A-Z letters are capitals?
             percent_capitals = capitals.to_f / (capitals + lowercase).to_f * 100
 
-            # anything more than 75% caps, or less than 1% capitals
+            # anything more than 75% caps, or less than 0.5% capitals
             # XXX should check these against database of old FOI requests etc.
             #raise percent_capitals.to_s
-            if percent_capitals > 75.0 || percent_capitals < 1.0
+            if percent_capitals > 75.0 || percent_capitals < 0.5
                 return false
             end
 
