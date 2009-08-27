@@ -5,7 +5,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: config.py,v 1.12 2009-07-22 11:54:47 louise Exp $
+# $Id: config.py,v 1.13 2009-08-27 16:19:33 matthew Exp $
 #
 
 """
@@ -39,6 +39,7 @@ def find_php():
     raise Exception, "unable to locate PHP binary, needed to read config file"
 
 php_path = None
+debian_version = None
 def read_config(f):
     """read_config(FILE) ->
 
@@ -64,7 +65,21 @@ def read_config(f):
         store_environ[k] = os.environ[k]
         del os.environ[k]
     os.environ['MYSOCIETY_CONFIG_FILE_PATH'] = f
-    child = subprocess.Popen(["taskset", "0x1", php_path],
+
+    global debian_version
+    if not debian_version:
+        fp = open("/etc/debian_version")
+        debian_version = fp.read().strip()
+        fp.close()
+
+    # Using taskset to deal with debian 5 php/mysql extension bug, 
+    # by restricting to one processor
+    # but debian 3 doesn't have the necessary function. 
+    if debian_version == '3.1':
+        args = [php_path]
+    else:
+        args = ["taskset", "0x1", php_path]
+    child = subprocess.Popen(args,
                              stdin=subprocess.PIPE,
                              stdout=subprocess.PIPE) # don't capture stderr
     for k,v in store_environ.iteritems():
