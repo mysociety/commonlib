@@ -12,7 +12,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.71 2009-07-16 15:16:35 matthew Exp $
+# $Id: WebTestHarness.pm,v 1.72 2009-08-27 19:36:22 louise Exp $
 #
 
 # Overload of WWW::Mechanize
@@ -350,6 +350,18 @@ sub browser_form_name {
     return $_;
 }
 
+=item post
+
+Acts as function in WWW:Mechanize, but intercepts HTML pages
+for validating and logging.
+
+=cut
+sub post { 
+   my $self = shift;
+   $_ = $self->{useragent}->field(@_);
+   $self->_browser_html_hook();
+   return $_;
+}
 =item browser_field
 
 Acts as function in WWW::Mechanize, but intercepts HTML pages
