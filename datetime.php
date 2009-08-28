@@ -6,7 +6,7 @@
  * Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: datetime.php,v 1.10 2009-07-16 11:22:52 matthew Exp $
+ * $Id: datetime.php,v 1.11 2009-08-28 11:33:35 matthew Exp $
  * 
  */
 
@@ -133,7 +133,7 @@ function datetime_parse_local_date($date, $now, $language, $country) {
         $year = $m[3];
         if ($year<100) 
             $year += 2000;
-    } elseif (preg_match('#(\d{4})[-/](\d{1,2})[/-](\d{1,2})#', $date, $m)) {
+    } elseif (preg_match('#^(\d{4})[-/](\d{1,2})[/-](\d{1,2})$#', $date, $m)) {
         $year = $m[1]; $day = $m[3]; $month = $m[2];
     } elseif (preg_match('#(\d+)/(\d+)#',$date,$m)) {
         if ($country == 'US') {
