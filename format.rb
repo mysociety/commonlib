@@ -4,7 +4,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: format.rb,v 1.21 2009-04-23 14:07:19 francis Exp $
+# $Id: format.rb,v 1.22 2009-09-07 17:27:59 francis Exp $
 
 # XXX there are some tests in foi/spec/lib/format_spec.rb
 # Really these should be in this rblib directory, and somehow made to run from
@@ -86,7 +86,7 @@ module MySociety
         end
 
         # Simplified a name to something usable in a URL
-        def Format.simplify_url_part(text, max_len = nil)
+        def Format.simplify_url_part(text, default_name, max_len = nil)
             text = text.downcase # this also clones the string, if we use downcase! we modify the original
             text.gsub!(/(\s|-|_)/, "_")
             text.gsub!(/[^a-z0-9_]/, "")
@@ -102,8 +102,9 @@ module MySociety
                 # removing trailing _
                 text.gsub!(/_*$/, "")
             end
-            if text.size < 1
-                text = 'user' # just do user1, user2 etc.
+            # Don't allow short (zero length!), or all numeric (clashes with identifiers)
+            if text.size < 1 || text.match(/^[0-9]+$/)
+                text = default_name # just do "user_1", "user_2" etc.
             end
 
             text
