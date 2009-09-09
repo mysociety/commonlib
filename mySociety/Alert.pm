@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Alert.pm,v 1.53 2009-07-16 11:57:20 matthew Exp $
+# $Id: Alert.pm,v 1.54 2009-09-09 08:32:40 louise Exp $
 
 package mySociety::Alert::Error;
 
@@ -24,6 +24,7 @@ use POSIX qw(strftime);
 use XML::RSS;
 
 use Page;
+use Cobrand;
 use mySociety::AuthToken;
 use mySociety::Config;
 use mySociety::DBHandle qw(dbh);
@@ -38,8 +39,8 @@ use mySociety::Sundries qw(ordinal);
 use mySociety::Web qw(ent);
 
 # Add a new alert
-sub create ($$;@) {
-    my ($email, $alert_type, @params) = @_;
+sub create ($$$;@) {
+    my ($email, $alert_type, $cobrand, @params) = @_;
     my $already = 0;
     if (0==@params) {
         ($already) = dbh()->selectrow_array('select id from alert where alert_type=? and email=? limit 1',
@@ -56,14 +57,14 @@ sub create ($$;@) {
     my $id = dbh()->selectrow_array("select nextval('alert_id_seq');");
     my $lang = $mySociety::Locale::lang;
     if (0==@params) {
-        dbh()->do('insert into alert (id, alert_type, email, lang)
-            values (?, ?, ?, ?)', {}, $id, $alert_type, $email, $lang);
+        dbh()->do('insert into alert (id, alert_type, email, lang, cobrand)
+            values (?, ?, ?, ?, ?)', {}, $id, $alert_type, $email, $lang, $cobrand);
     } elsif (1==@params) {
-        dbh()->do('insert into alert (id, alert_type, parameter, email, lang)
-            values (?, ?, ?, ?, ?)', {}, $id, $alert_type, @params, $email, $lang);
+        dbh()->do('insert into alert (id, alert_type, parameter, email, lang, cobrand)
+            values (?, ?, ?, ?, ?, ?)', {}, $id, $alert_type, @params, $email, $lang, $cobrand);
     } elsif (2==@params) {
-        dbh()->do('insert into alert (id, alert_type, parameter, parameter2, email, lang)
-            values (?, ?, ?, ?, ?, ?)', {}, $id, $alert_type, @params, $email, $lang);
+        dbh()->do('insert into alert (id, alert_type, parameter, parameter2, email, lang, cobrand)
+            values (?, ?, ?, ?, ?, ?, ?)', {}, $id, $alert_type, @params, $email, $lang, $cobrand);
     }
     dbh()->commit();
     return $id;
@@ -119,6 +120,7 @@ sub email_alerts () {
         # XXX Ugh - needs work
         $query =~ s/\?/alert.parameter/ if ($query =~ /\?/);
         $query =~ s/\?/alert.parameter2/ if ($query =~ /\?/);
+        print $query;
         $query = dbh()->prepare($query);
         $query->execute();
         my $last_alert_id;
@@ -175,6 +177,7 @@ sub email_alerts () {
             and (select whenqueued from alert_sent where alert_sent.alert_id = ? and alert_sent.parameter = problem.id) is null
             and problem.email <> ?
             order by created desc";
+        print $q;
         $q = dbh()->prepare($q);
         $q->execute($e, $n, $d, $alert->{whensubscribed}, $alert->{id}, $alert->{email});
         while (my $row = $q->fetchrow_hashref) {
@@ -187,7 +190,8 @@ sub email_alerts () {
 
 sub _send_aggregated_alert_email(%) {
     my %data = @_;
-    mySociety::Locale::change($data{lang});
+    Cobrand::set_lang_and_domain($data{cobrand}, $data{lang});
+
     $data{unsubscribe_url} = mySociety::Config::get('BASE_URL') . '/A/'
         . mySociety::AuthToken::store('alert', { id => $data{alert_id}, type => 'unsubscribe', email => $data{alert_email} } );
     my $template = File::Slurp::read_file("$FindBin::Bin/../templates/emails/$data{template}");
