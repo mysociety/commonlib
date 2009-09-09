@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Alert.pm,v 1.55 2009-09-09 10:19:04 louise Exp $
+# $Id: Alert.pm,v 1.56 2009-09-09 15:29:28 louise Exp $
 
 package mySociety::Alert::Error;
 
@@ -90,14 +90,14 @@ sub delete ($) {
 #   and foreign key to parent must be PARENT_id
 
 sub email_alerts () {
-    my $url = mySociety::Config::get('BASE_URL');
+    my $url; 
     my $q = dbh()->prepare("select * from alert_type where ref != 'local_problems'");
     $q->execute();
     while (my $alert_type = $q->fetchrow_hashref) {
         my $ref = $alert_type->{ref};
         my $head_table = $alert_type->{head_table};
         my $item_table = $alert_type->{item_table};
-        my $query = 'select alert.id as alert_id, alert.email as alert_email, alert.lang, alert.cobrand,
+        my $query = 'select alert.id as alert_id, alert.email as alert_email, alert.lang as alert_lang, alert.cobrand as alert_cobrand,
             alert.parameter as alert_parameter, alert.parameter2 as alert_parameter2, ';
         if ($head_table) {
             $query .= "
@@ -130,6 +130,8 @@ sub email_alerts () {
                 _send_aggregated_alert_email(%data);
                 %data = ( template => $alert_type->{template}, data => '' );
             }
+
+            $url = Cobrand::base_url($row->{alert_cobrand});
             if ($row->{item_text}) {
                 $data{problem_url} = $url . "/report/" . $row->{id};
                 $data{data} .= $row->{item_name} . ' : ' if $row->{item_name};
@@ -148,8 +150,8 @@ sub email_alerts () {
                     $data{ward_name} = $va_info->{name};
                 }
             }
-            $data{cobrand} = $row->{cobrand};
-            $data{lang} = $row->{lang};
+            $data{cobrand} = $row->{alert_cobrand};
+            $data{lang} = $row->{alert_lang};
             $last_alert_id = $row->{alert_id};
         }
         if ($last_alert_id) {
@@ -167,6 +169,7 @@ sub email_alerts () {
         my $y = $alert->{parameter2};
         my $e = Page::tile_to_os($x);
         my $n = Page::tile_to_os($y);
+        $url = Cobrand::base_url($alert->{cobrand});
         my ($lat, $lon) = mySociety::GeoUtil::national_grid_to_wgs84($e, $n, 'G');
         my $d = mySociety::Gaze::get_radius_containing_population($lat, $lon, 200000);
         $d = int($d*10+0.5)/10;
@@ -190,9 +193,9 @@ sub email_alerts () {
 
 sub _send_aggregated_alert_email(%) {
     my %data = @_;
-    Cobrand::set_lang_and_domain($data{cobrand}, $data{lang});
+    Cobrand::set_lang_and_domain($data{cobrand}, $data{lang}, 1);
 
-    $data{unsubscribe_url} = mySociety::Config::get('BASE_URL') . '/A/'
+    $data{unsubscribe_url} = Cobrand::base_url($data{cobrand}) . '/A/'
         . mySociety::AuthToken::store('alert', { id => $data{alert_id}, type => 'unsubscribe', email => $data{alert_email} } );
     my $template_dir = '';
     if ($data{cobrand}){
