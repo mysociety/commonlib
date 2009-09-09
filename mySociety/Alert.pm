@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Alert.pm,v 1.54 2009-09-09 08:32:40 louise Exp $
+# $Id: Alert.pm,v 1.55 2009-09-09 10:19:04 louise Exp $
 
 package mySociety::Alert::Error;
 
@@ -97,15 +97,15 @@ sub email_alerts () {
         my $ref = $alert_type->{ref};
         my $head_table = $alert_type->{head_table};
         my $item_table = $alert_type->{item_table};
-        my $query = 'select alert.id as alert_id, alert.email as alert_email, alert.lang,
+        my $query = 'select alert.id as alert_id, alert.email as alert_email, alert.lang, alert.cobrand,
             alert.parameter as alert_parameter, alert.parameter2 as alert_parameter2, ';
         if ($head_table) {
             $query .= "
                    $item_table.id as item_id, $item_table.name as item_name, $item_table.text as item_text,
                    $head_table.*
             from alert
-                inner join $item_table on alert.parameter = $item_table.${head_table}_id
-                inner join $head_table on alert.parameter = $head_table.id";
+                inner join $item_table on alert.parameter::integer = $item_table.${head_table}_id
+                inner join $head_table on alert.parameter::integer = $head_table.id";
         } else {
             $query .= " $item_table.*,
                    $item_table.id as item_id
@@ -113,14 +113,13 @@ sub email_alerts () {
         }
         $query .= "
             where alert_type='$ref' and whendisabled is null and $item_table.created >= whensubscribed
-             and (select whenqueued from alert_sent where alert_sent.alert_id = alert.id and alert_sent.parameter = $item_table.id) is null
+             and (select whenqueued from alert_sent where alert_sent.alert_id = alert.id and alert_sent.parameter::integer = $item_table.id) is null
             and $item_table.email <> alert.email and $alert_type->{item_where}
             and alert.confirmed = 1
             order by alert.id, $item_table.created";
         # XXX Ugh - needs work
         $query =~ s/\?/alert.parameter/ if ($query =~ /\?/);
         $query =~ s/\?/alert.parameter2/ if ($query =~ /\?/);
-        print $query;
         $query = dbh()->prepare($query);
         $query->execute();
         my $last_alert_id;
@@ -149,6 +148,8 @@ sub email_alerts () {
                     $data{ward_name} = $va_info->{name};
                 }
             }
+            $data{cobrand} = $row->{cobrand};
+            $data{lang} = $row->{lang};
             $last_alert_id = $row->{alert_id};
         }
         if ($last_alert_id) {
@@ -170,14 +171,13 @@ sub email_alerts () {
         my $d = mySociety::Gaze::get_radius_containing_population($lat, $lon, 200000);
         $d = int($d*10+0.5)/10;
 
-        my %data = ( template => $template, data => '', alert_id => $alert->{id}, alert_email => $alert->{email}, lang => $alert->{lang} );
+        my %data = ( template => $template, data => '', alert_id => $alert->{id}, alert_email => $alert->{email}, lang => $alert->{lang}, cobrand => $alert->{cobrand} );
         my $q = "select * from problem_find_nearby(?, ?, ?) as nearby, problem
             where nearby.problem_id = problem.id and problem.state in ('confirmed', 'fixed')
             and problem.created >= ?
-            and (select whenqueued from alert_sent where alert_sent.alert_id = ? and alert_sent.parameter = problem.id) is null
+            and (select whenqueued from alert_sent where alert_sent.alert_id = ? and alert_sent.parameter::integer = problem.id) is null
             and problem.email <> ?
             order by created desc";
-        print $q;
         $q = dbh()->prepare($q);
         $q->execute($e, $n, $d, $alert->{whensubscribed}, $alert->{id}, $alert->{email});
         while (my $row = $q->fetchrow_hashref) {
@@ -194,7 +194,11 @@ sub _send_aggregated_alert_email(%) {
 
     $data{unsubscribe_url} = mySociety::Config::get('BASE_URL') . '/A/'
         . mySociety::AuthToken::store('alert', { id => $data{alert_id}, type => 'unsubscribe', email => $data{alert_email} } );
-    my $template = File::Slurp::read_file("$FindBin::Bin/../templates/emails/$data{template}");
+    my $template_dir = '';
+    if ($data{cobrand}){
+         $template_dir = $data{cobrand} . '/';
+    }
+    my $template = File::Slurp::read_file("$FindBin::Bin/../templates/emails/$template_dir$data{template}");
     my $sender = mySociety::Config::get('CONTACT_EMAIL');
     (my $from = $sender) =~ s/team/fms-DO-NOT-REPLY/; # XXX
     my $email = mySociety::Email::construct_email({
