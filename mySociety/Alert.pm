@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Alert.pm,v 1.56 2009-09-09 15:29:28 louise Exp $
+# $Id: Alert.pm,v 1.57 2009-09-10 12:43:46 louise Exp $
 
 package mySociety::Alert::Error;
 
@@ -202,7 +202,7 @@ sub _send_aggregated_alert_email(%) {
          $template_dir = $data{cobrand} . '/';
     }
     my $template = File::Slurp::read_file("$FindBin::Bin/../templates/emails/$template_dir$data{template}");
-    my $sender = mySociety::Config::get('CONTACT_EMAIL');
+    my $sender = Cobrand::contact_email($data{cobrand});
     (my $from = $sender) =~ s/team/fms-DO-NOT-REPLY/; # XXX
     my $email = mySociety::Email::construct_email({
         _template_ => _($template),
