@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Locale.pm,v 1.11 2009-08-12 14:07:06 matthew Exp $
+# $Id: Locale.pm,v 1.12 2009-09-10 12:16:02 matthew Exp $
 
 package mySociety::Locale;
 
@@ -94,6 +94,10 @@ sub pop() {
     change($l);
 }
 
+# in_gb_locale FUNCTION-REF
+# If you need something to be done in an English locale (for example,
+# generating email headers, or requesting a URL with decimal numbers),
+# this decorator will do that for you.
 sub in_gb_locale(&) {
     my $sub = shift;
     mySociety::Locale::push('en-gb');
