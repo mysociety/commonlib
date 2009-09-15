@@ -36,7 +36,7 @@ Return the ordinal for NUM (e.g. "1st", "2nd", etc.). XXX localisation.
 =cut
 sub ordinal ($) {
     my $num = shift;
-    if ($num == 11 || $num == 12) {
+    if ($num == 11 || $num == 12 || $num == 13) {
         return "${num}th";
     } else {
         my $n = $num % 10;
