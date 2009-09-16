@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Alert.pm,v 1.57 2009-09-10 12:43:46 louise Exp $
+# $Id: Alert.pm,v 1.58 2009-09-16 17:00:36 louise Exp $
 
 package mySociety::Alert::Error;
 
@@ -131,7 +131,7 @@ sub email_alerts () {
                 %data = ( template => $alert_type->{template}, data => '' );
             }
 
-            $url = Cobrand::base_url($row->{alert_cobrand});
+            $url = Cobrand::base_url_for_emails($row->{alert_cobrand});
             if ($row->{item_text}) {
                 $data{problem_url} = $url . "/report/" . $row->{id};
                 $data{data} .= $row->{item_name} . ' : ' if $row->{item_name};
@@ -169,7 +169,7 @@ sub email_alerts () {
         my $y = $alert->{parameter2};
         my $e = Page::tile_to_os($x);
         my $n = Page::tile_to_os($y);
-        $url = Cobrand::base_url($alert->{cobrand});
+        $url = Cobrand::base_url_for_emails($alert->{cobrand});
         my ($lat, $lon) = mySociety::GeoUtil::national_grid_to_wgs84($e, $n, 'G');
         my $d = mySociety::Gaze::get_radius_containing_population($lat, $lon, 200000);
         $d = int($d*10+0.5)/10;
@@ -195,7 +195,7 @@ sub _send_aggregated_alert_email(%) {
     my %data = @_;
     Cobrand::set_lang_and_domain($data{cobrand}, $data{lang}, 1);
 
-    $data{unsubscribe_url} = Cobrand::base_url($data{cobrand}) . '/A/'
+    $data{unsubscribe_url} = Cobrand::base_url_for_emails($data{cobrand}) . '/A/'
         . mySociety::AuthToken::store('alert', { id => $data{alert_id}, type => 'unsubscribe', email => $data{alert_email} } );
     my $template_dir = '';
     if ($data{cobrand}){
