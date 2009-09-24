@@ -5,7 +5,7 @@
 // Copyright (c) 2009 UK Citizens Online Democracy. All rights reserved.
 // Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 //
-// $Id: mysociety_error.h,v 1.3 2009-04-14 16:13:38 francis Exp $
+// $Id: mysociety_error.h,v 1.4 2009-09-24 22:00:29 francis Exp $
 //
 
 #include <string>
@@ -26,10 +26,10 @@
     void do_log(const std::string& str) {
         puts(("DEBUG: " + str).c_str());
     }
-    #define log(message) do_log(message);
+    #define debug_log(message) do_log(message);
     #define debug_assert(thing) assert(thing);
 #else
-    #define log(message) while(0) { };
+    #define debug_log(message) while(0) { };
     #define debug_assert(thing) while(0) { };
 #endif
 
