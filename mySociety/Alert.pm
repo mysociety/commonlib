@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Alert.pm,v 1.58 2009-09-16 17:00:36 louise Exp $
+# $Id: Alert.pm,v 1.59 2009-09-28 15:46:40 louise Exp $
 
 package mySociety::Alert::Error;
 
@@ -39,8 +39,8 @@ use mySociety::Sundries qw(ordinal);
 use mySociety::Web qw(ent);
 
 # Add a new alert
-sub create ($$$;@) {
-    my ($email, $alert_type, $cobrand, @params) = @_;
+sub create ($$$$;@) {
+    my ($email, $alert_type, $cobrand, $cobrand_data, @params) = @_;
     my $already = 0;
     if (0==@params) {
         ($already) = dbh()->selectrow_array('select id from alert where alert_type=? and email=? limit 1',
@@ -57,14 +57,14 @@ sub create ($$$;@) {
     my $id = dbh()->selectrow_array("select nextval('alert_id_seq');");
     my $lang = $mySociety::Locale::lang;
     if (0==@params) {
-        dbh()->do('insert into alert (id, alert_type, email, lang, cobrand)
-            values (?, ?, ?, ?, ?)', {}, $id, $alert_type, $email, $lang, $cobrand);
+        dbh()->do('insert into alert (id, alert_type, email, lang, cobrand, cobrand_data)
+            values (?, ?, ?, ?, ?, ?)', {}, $id, $alert_type, $email, $lang, $cobrand, $cobrand_data);
     } elsif (1==@params) {
-        dbh()->do('insert into alert (id, alert_type, parameter, email, lang, cobrand)
-            values (?, ?, ?, ?, ?, ?)', {}, $id, $alert_type, @params, $email, $lang, $cobrand);
+        dbh()->do('insert into alert (id, alert_type, parameter, email, lang, cobrand, cobrand_data)
+            values (?, ?, ?, ?, ?, ?, ?)', {}, $id, $alert_type, @params, $email, $lang, $cobrand, $cobrand_data);
     } elsif (2==@params) {
-        dbh()->do('insert into alert (id, alert_type, parameter, parameter2, email, lang, cobrand)
-            values (?, ?, ?, ?, ?, ?, ?)', {}, $id, $alert_type, @params, $email, $lang, $cobrand);
+        dbh()->do('insert into alert (id, alert_type, parameter, parameter2, email, lang, cobrand, cobrand_data)
+            values (?, ?, ?, ?, ?, ?, ?, ?)', {}, $id, $alert_type, @params, $email, $lang, $cobrand, $cobrand_data);
     }
     dbh()->commit();
     return $id;
