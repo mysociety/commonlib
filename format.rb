@@ -4,7 +4,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: format.rb,v 1.22 2009-09-07 17:27:59 francis Exp $
+# $Id: format.rb,v 1.23 2009-10-03 10:02:58 francis Exp $
 
 # XXX there are some tests in foi/spec/lib/format_spec.rb
 # Really these should be in this rblib directory, and somehow made to run from
@@ -14,9 +14,9 @@ module MySociety
     module Format
 
         # Word wrap the body of a text email.
-        def Format.wrap_email_body(body, line_width = 67, indent = "     ")
+        def Format.wrap_email_body(body, line_width = 67, indent = "     ", paragraph_split = "\n\n")
             body = body.gsub(/\r\n/, "\n") # forms post with \r\n by default
-            paras = body.split(/\n\n/)
+            paras = body.split(paragraph_split)
 
             result = ''
             for para in paras
@@ -26,7 +26,7 @@ module MySociety
                 # anything non whitespace longer than a line whole.
                 para.gsub!(/(.{1,#{line_width}}|[^\s]{#{line_width+1},})(\s+|$)/, "#{indent}\\1\n")
                 para.strip!
-                result = result + indent + para + "\n\n"
+                result = result + indent + para + paragraph_split
             end
             return result
         end
