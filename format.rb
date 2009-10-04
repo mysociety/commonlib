@@ -4,7 +4,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: format.rb,v 1.23 2009-10-03 10:02:58 francis Exp $
+# $Id: format.rb,v 1.24 2009-10-04 21:42:07 francis Exp $
 
 # XXX there are some tests in foi/spec/lib/format_spec.rb
 # Really these should be in this rblib directory, and somehow made to run from
@@ -14,7 +14,16 @@ module MySociety
     module Format
 
         # Word wrap the body of a text email.
-        def Format.wrap_email_body(body, line_width = 67, indent = "     ", paragraph_split = "\n\n")
+        # ... either taking a blank line as a paragraph seperator.
+        def Format.wrap_email_body_by_paragraphs(body)
+            return Format._wrap_email_internal(body, 67, "     ", "\n\n")
+        end
+        # ... or wrapping each line separately.
+        def Format.wrap_email_body_by_lines(body)
+            return Format._wrap_email_internal(body, 67, "     ", "\n")
+        end
+        # Internal function for above
+        def Format._wrap_email_internal(body, line_width, indent, paragraph_split)
             body = body.gsub(/\r\n/, "\n") # forms post with \r\n by default
             paras = body.split(paragraph_split)
 
