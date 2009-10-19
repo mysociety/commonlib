@@ -4,13 +4,13 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: validate.rb,v 1.7 2009-08-21 17:10:09 francis Exp $
+# $Id: validate.rb,v 1.8 2009-10-19 23:52:40 francis Exp $
 
 module MySociety
     module Validate
 
         # Stop someone writing all in capitals, or all lower case letters.
-        def Validate.uses_mixed_capitals(s)
+        def Validate.uses_mixed_capitals(s, allow_shorter_than = 20)
             # count Roman alphabet lower and upper case letters
             capitals = 0
             lowercase = 0 
@@ -21,7 +21,7 @@ module MySociety
 
             # allow short things (e.g. short titles might be validly all caps)
             # (also avoids division by zero)
-            return true if (capitals + lowercase < 20)
+            return true if (capitals + lowercase < allow_shorter_than)
 
             # what proportion of roman A-Z letters are capitals?
             percent_capitals = capitals.to_f / (capitals + lowercase).to_f * 100
