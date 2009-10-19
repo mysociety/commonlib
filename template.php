@@ -6,7 +6,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: template.php,v 1.9 2006-05-18 15:16:07 matthew Exp $
+ * $Id: template.php,v 1.10 2009-10-19 15:32:50 louise Exp $
  * 
  */
 
@@ -90,11 +90,15 @@ function template_string($template_name, $values = null) {
  * the message to standard output rather than exiting. */
 function template_show_error($message) {
     global $template_style_dir;
+    $host = '';
+    if (defined('$_SERVER') && array_key_exists('HTTP_HOST', $_SERVER)) {
+         $host = $_SERVER['HTTP_HOST'];
+     }
     if (!isset($template_style_dir) || !file_exists(end($template_style_dir) . '/error-general.html'))
         print $message;
     else
         /* Not safe. */
-        template_draw("error-general", array("error_message" => $message));
+        template_draw("error-general", array("error_message" => $message, 'host' => $host));
     exit(1);
 }
 
