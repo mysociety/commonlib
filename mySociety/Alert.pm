@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Alert.pm,v 1.59 2009-09-28 15:46:40 louise Exp $
+# $Id: Alert.pm,v 1.60 2009-10-20 14:37:47 louise Exp $
 
 package mySociety::Alert::Error;
 
@@ -221,18 +221,19 @@ sub _send_aggregated_alert_email(%) {
     }
 }
 
-sub generate_rss ($$$;$$) {
-    my ($type, $xsl, $qs, $db_params, $title_params) = @_;
+sub generate_rss ($$$;$$$) {
+    my ($type, $xsl, $qs, $db_params, $title_params, $cobrand) = @_;
     $db_params ||= [];
-    my $url = mySociety::Config::get('BASE_URL');
+    my $url = Cobrand::base_url($cobrand);
     my $q = dbh()->prepare('select * from alert_type where ref=?');
     $q->execute($type);
     my $alert_type = $q->fetchrow_hashref;
     throw mySociety::Alert::Error('Unknown alert type') unless $alert_type;
 
     # Do our own encoding
+
     my $rss = new XML::RSS( version => '2.0', encoding => 'UTF-8',
-        stylesheet=>$xsl, encode_output => undef );
+        stylesheet=> $xsl, encode_output => undef );
     $rss->add_module(prefix=>'georss', uri=>'http://www.georss.org/georss');
 
     my $query = 'select * from ' . $alert_type->{item_table} . ' where '
@@ -266,17 +267,19 @@ sub generate_rss ($$$;$$) {
         (my $title = _($alert_type->{item_title})) =~ s/{{(.*?)}}/$row->{$1}/g;
         (my $link = $alert_type->{item_link}) =~ s/{{(.*?)}}/$row->{$1}/g;
         (my $desc = _($alert_type->{item_description})) =~ s/{{(.*?)}}/$row->{$1}/g;
+        my $cobrand_url = Cobrand::url($cobrand, $url . $link);
         my %item = (
             title => ent($title),
-            link => $url . $link,
-            guid => $url . $link,
+            link => $cobrand_url,
+            guid => $cobrand_url,
             description => ent(ent($desc)) # Yes, double-encoded, really.
         );
         $item{pubDate} = $pubDate if $pubDate;
 
         # XXX: Not-very-generic extensions
-        if ($row->{photo}) {
-            $item{description} .= ent("\n<br><img src=\"$url/photo?id=$row->{id}\">");
+        my $display_photos = Cobrand::allow_photo_display($cobrand);    
+        if ($display_photos && $row->{photo}) {
+            $item{description} .= ent("\n<br><img src=\"". Cobrand::url($cobrand, $url) . "/photo?id=$row->{id}\">");
         }
         if ($row->{easting} && $row->{northing}) {
             my ($lat,$lon) = mySociety::GeoUtil::national_grid_to_wgs84($row->{easting}, $row->{northing}, 'G');
@@ -302,11 +305,13 @@ sub generate_rss ($$$;$$) {
     (my $link = $alert_type->{head_link}) =~ s/{{(.*?)}}/$row->{$1}/g;
     (my $desc = _($alert_type->{head_description})) =~ s/{{(.*?)}}/$row->{$1}/g;
     $rss->channel(
-        title => ent($title), link => "$url$link$qs", description  => ent($desc),
+        title => ent($title), link =>  "$url$link$qs", description  => ent($desc),
         language   => 'en-gb'
     );
 
     my $out = $rss->as_string;
-    $out =~ s{</link>}{</link><uri>$ENV{SCRIPT_URI}</uri>};
+    my $uri = Cobrand::url($cobrand, $ENV{SCRIPT_URI});
+    $out =~ s{<link>(.*?)</link>}{"<link>" . Cobrand::url($cobrand, $1) . "</link><uri>$uri</uri>"}e;
+ 
     return $out;
 }
