@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Alert.pm,v 1.60 2009-10-20 14:37:47 louise Exp $
+# $Id: Alert.pm,v 1.61 2009-10-21 15:44:00 louise Exp $
 
 package mySociety::Alert::Error;
 
@@ -98,7 +98,7 @@ sub email_alerts () {
         my $head_table = $alert_type->{head_table};
         my $item_table = $alert_type->{item_table};
         my $query = 'select alert.id as alert_id, alert.email as alert_email, alert.lang as alert_lang, alert.cobrand as alert_cobrand,
-            alert.parameter as alert_parameter, alert.parameter2 as alert_parameter2, ';
+            alert.cobrand_data as alert_cobrand_data, alert.parameter as alert_parameter, alert.parameter2 as alert_parameter2, ';
         if ($head_table) {
             $query .= "
                    $item_table.id as item_id, $item_table.name as item_name, $item_table.text as item_text,
@@ -131,7 +131,7 @@ sub email_alerts () {
                 %data = ( template => $alert_type->{template}, data => '' );
             }
 
-            $url = Cobrand::base_url_for_emails($row->{alert_cobrand});
+            $url = Cobrand::base_url_for_emails($row->{alert_cobrand}, $row->{alert_cobrand_data});
             if ($row->{item_text}) {
                 $data{problem_url} = $url . "/report/" . $row->{id};
                 $data{data} .= $row->{item_name} . ' : ' if $row->{item_name};
@@ -169,7 +169,7 @@ sub email_alerts () {
         my $y = $alert->{parameter2};
         my $e = Page::tile_to_os($x);
         my $n = Page::tile_to_os($y);
-        $url = Cobrand::base_url_for_emails($alert->{cobrand});
+        $url = Cobrand::base_url_for_emails($alert->{cobrand}, $alert->{cobrand_data});
         my ($lat, $lon) = mySociety::GeoUtil::national_grid_to_wgs84($e, $n, 'G');
         my $d = mySociety::Gaze::get_radius_containing_population($lat, $lon, 200000);
         $d = int($d*10+0.5)/10;
@@ -221,8 +221,8 @@ sub _send_aggregated_alert_email(%) {
     }
 }
 
-sub generate_rss ($$$;$$$) {
-    my ($type, $xsl, $qs, $db_params, $title_params, $cobrand) = @_;
+sub generate_rss ($$$;$$$$) {
+    my ($type, $xsl, $qs, $db_params, $title_params, $cobrand, $http_q) = @_;
     $db_params ||= [];
     my $url = Cobrand::base_url($cobrand);
     my $q = dbh()->prepare('select * from alert_type where ref=?');
@@ -267,7 +267,7 @@ sub generate_rss ($$$;$$$) {
         (my $title = _($alert_type->{item_title})) =~ s/{{(.*?)}}/$row->{$1}/g;
         (my $link = $alert_type->{item_link}) =~ s/{{(.*?)}}/$row->{$1}/g;
         (my $desc = _($alert_type->{item_description})) =~ s/{{(.*?)}}/$row->{$1}/g;
-        my $cobrand_url = Cobrand::url($cobrand, $url . $link);
+        my $cobrand_url = Cobrand::url($cobrand, $url . $link, $http_q);
         my %item = (
             title => ent($title),
             link => $cobrand_url,
@@ -279,7 +279,7 @@ sub generate_rss ($$$;$$$) {
         # XXX: Not-very-generic extensions
         my $display_photos = Cobrand::allow_photo_display($cobrand);    
         if ($display_photos && $row->{photo}) {
-            $item{description} .= ent("\n<br><img src=\"". Cobrand::url($cobrand, $url) . "/photo?id=$row->{id}\">");
+            $item{description} .= ent("\n<br><img src=\"". Cobrand::url($cobrand, $url, $http_q) . "/photo?id=$row->{id}\">");
         }
         if ($row->{easting} && $row->{northing}) {
             my ($lat,$lon) = mySociety::GeoUtil::national_grid_to_wgs84($row->{easting}, $row->{northing}, 'G');
@@ -310,8 +310,8 @@ sub generate_rss ($$$;$$$) {
     );
 
     my $out = $rss->as_string;
-    my $uri = Cobrand::url($cobrand, $ENV{SCRIPT_URI});
-    $out =~ s{<link>(.*?)</link>}{"<link>" . Cobrand::url($cobrand, $1) . "</link><uri>$uri</uri>"}e;
- 
+    my $uri = Cobrand::url($cobrand, $ENV{SCRIPT_URI}, $http_q);
+    $out =~ s{<link>(.*?)</link>}{"<link>" . Cobrand::url($cobrand, $1, $http_q) . "</link><uri>$uri</uri>"}e;
+             
     return $out;
 }
