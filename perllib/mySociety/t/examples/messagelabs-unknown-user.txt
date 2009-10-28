@@ -1,0 +1,50 @@
+From   Thu Apr  2 16:21:35 2009
+Return-path: <>
+Envelope-to: twfy-live@sponge.ukcod.org.uk
+Delivery-date: Thu, 02 Apr 2009 16:21:34 +0100
+X-VirusChecked: Checked
+X-StarScan-Version: 6.0.0; banners=.,-,-
+Date: 2 Apr 2009 15:21:32 -0000
+From: MAILER-DAEMON@messagelabs.com
+To: twfy-bounce@theyworkforyou.com
+Subject: failure notice
+Status: O
+Content-Length: 4747
+Lines: 104
+
+This is the mail delivery agent at messagelabs.com.
+I was not able to deliver your message to the following addresses.
+
+<anon@bigwidetalk.org>:
+217.112.88.213 does not like recipient.
+Remote host said: 550 5.1.1 <anon@bigwidetalk.org>: Recipient address rejected: User unknown in virtual mailbox table
+
+
+--- Below this line is a copy of the message.
+
+Return-Path: <twfy-bounce@theyworkforyou.com>
+X-VirusChecked: Checked
+X-Env-Sender: twfy-bounce@theyworkforyou.com
+X-Msg-Ref: server-4.tower-78.messagelabs.com!1238685689!28730457!1
+X-StarScan-Version: 6.0.0; banners=.,-,-
+X-Originating-IP: [194.60.38.7]
+X-VirusChecked: Checked
+X-Env-Sender: twfy-bounce@theyworkforyou.com
+X-Msg-Ref: server-10.tower-72.messagelabs.com!1238685686!51634554!1
+X-StarScan-Version: 6.0.0; banners=-,-,-
+X-Originating-IP: [82.111.230.211]
+X-SpamReason: No, hits=0.0 required=7.0 tests=sa_preprocessor: 
+  VHJ1c3RlZCBJUDogODIuMTExLjIzMC4yMTEgPT4gMzE3NDM=\n
+To: anon@parliament.uk
+Subject: Your TheyWorkForYou email alert
+From: TheyWorkForYou <twfy-DO-NOT-REPLY@theyworkforyou.com>
+Content-Type: text/plain; charset=iso-8859-1
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+Precedence: bulk
+X-Mailer: PHP/5.2.0-8+etch13
+Message-Id: <E1LpOjO-0005TX-4F@sponge.ukcod.org.uk>
+Date: Thu, 02 Apr 2009 16:21:26 +0100
+X-OriginalArrivalTime: 02 Apr 2009 15:21:29.0243 (UTC) FILETIME=[B23376B0:01C9B3A6]
+
+Message content

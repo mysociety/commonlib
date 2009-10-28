@@ -1,0 +1,42 @@
+Return-path: <>
+Envelope-to: hm@sandwich.ukcod.org.uk
+Delivery-date: Fri, 12 Sep 2008 09:01:28 +0100
+X-VirusChecked: Checked
+X-StarScan-Version: 5.5.12.14.2; banners=.,-,-
+Received: (qmail 8963 invoked for bounce); 12 Sep 2008 08:01:18 -0000
+Date: 12 Sep 2008 08:01:18 -0000
+From: MAILER-DAEMON@messagelabs.com
+To: hm@sandwich.ukcod.org.uk
+Subject: failure notice
+Status: O
+Content-Length: 2205
+Lines: 61
+
+This is the mail delivery agent at messagelabs.com.
+I was not able to deliver your message to the following addresses.
+
+<anon@portman.co.uk>:
+155.131.31.200 does not like recipient.
+Remote host said: 550 Mailbox unavailable or access denied - <anon@portman.co.uk>
+
+
+--- Below this line is a copy of the message.
+
+Return-Path: <hm@sandwich.ukcod.org.uk>
+X-VirusChecked: Checked
+X-Env-Sender: hm@sandwich.ukcod.org.uk
+X-Msg-Ref: server-3.tower-155.messagelabs.com!1221206477!17453526!1
+X-StarScan-Version: 5.5.12.14.2; banners=-,-,-
+X-Originating-IP: [82.111.230.212]
+X-SpamReason: No, hits=0.0 required=7.0 tests=
+From: Hasslebot <hassle@hassleme.co.uk>
+To: anon@portman.co.uk
+Subject: Don't forget to..
+Message-ID: <1f2feddabb4f805cf@hassleme.co.uk>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+Sender: HassleMe <hm@sandwich.ukcod.org.uk>
+Date: Fri, 12 Sep 2008 09:01:15 +0100
+
+Message content

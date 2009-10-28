@@ -1,0 +1,39 @@
+From MAILER-DAEMON Fri Sep 12 11:11:53 2008
+Return-path: <>
+Envelope-to: hm@sandwich.ukcod.org.uk
+Delivery-date: Fri, 12 Sep 2008 11:11:53 +0100
+Date: 12 Sep 2008 10:11:42 +0000
+From: MAILER-DAEMON@yahoo.com
+To: hm@sandwich.ukcod.org.uk
+Subject: failed delivery
+Status: O
+Content-Length: 2106
+Lines: 54
+
+Message from  yahoo.com.
+Unable to deliver message to the following address(es).
+
+<anon@btinternet.com>:
+unable to connect to remote server [194.73.73.127:25]: Operation timed out
+I'm not going to try again; this message has been in the queue too long.
+
+--- Original message follows.
+
+Return-Path: <hm@sandwich.ukcod.org.uk>
+Return-Path: <hm@sandwich.ukcod.org.uk>
+X-RocketTIP: 82.111.230.212: NO_TIP_HEADER_ALLOWED
+X-RocketSRV: s_ip=82.111.230.212;d_t=1221149157;url=hassleme.co.uk,http://www.hassleme.co.uk/,mysociety.org,http://mysociety.org;SGrn=N;
+X-Rocket-Track: cat=UK; info=ip:GD<ip=82.111.230.212,policy=w-w100,n0,g0,wgn=w-w100,n0,g0,rep=w-w100,n0,g0>;ipsh:UK<ip=82.111.230.212,policy=P=-1,X=-1,S=-1>;sv:UK<ip=217.12.12.165>;sg:UK<size=14,cnt=0>;url2db:UK;urdb:NN
+X-Originating-IP: [82.111.230.212]
+Authentication-Results: mta832.mail.ukl.yahoo.com  from=sandwich.ukcod.org.uk; domainkeys=neutral (no sig)
+From: Hasslebot <hassle@hassleme.co.uk>
+To: anon@btinternet.com
+Subject: Don't forget to...
+Message-ID: <0e27cad36b23bc6cf@hassleme.co.uk>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+Sender: HassleMe <hm@sandwich.ukcod.org.uk>
+Date: Thu, 11 Sep 2008 17:05:33 +0100
+
+Message content

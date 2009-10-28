@@ -1,0 +1,58 @@
+Return-path: <>
+Envelope-to: hm@sandwich.ukcod.org.uk
+Delivery-date: Thu, 11 Sep 2008 11:00:45 +0100
+Date: Thu, 11 Sep 2008 05:00:33 -0500
+From: Mail Delivery System <postmaster@students.niu.edu>
+Message-Id: <1221127233-13870@students.niu.edu>
+To: <hm@sandwich.ukcod.org.uk>
+MIME-Version: 1.0
+Content-Type: multipart/report; report-type=delivery-status;
+	boundary="1221127233-13870-students.niu.edu"
+Subject: Returned mail: User unknown
+Precedence: bulk
+Status: O
+Content-Length: 1847
+Lines: 52
+
+This is a MIME-encapsulated message
+
+--1221127233-13870-students.niu.edu
+Content-type: text/plain; charset=US-ASCII
+
+The original message was received Thu, 11 Sep 2008 05:00:32 -0500
+from -
+
+   ----- The following address(es) had permanent fatal errors -----
+<anon>; originally to anon (unrecoverable error)
+  	The recipient 'anon' is unknown
+
+--1221127233-13870-students.niu.edu
+Content-type: message/delivery-status
+
+Reporting-MTA: dns; students.niu.edu
+Arrival-Date: Thu, 11 Sep 2008 05:00:32 -0500
+
+Original-Recipient: anon
+Final-Recipient: anon
+Action: failed
+Status: 5.0.0
+--1221127233-13870-students.niu.edu
+Content-type: message/rfc822
+
+
+From: Hasslebot <hassle@hassleme.co.uk>
+To: rbenyo@niu.edu
+Subject: Don't forget to...
+Message-ID: <f026e1ae7c04c2c3f@hassleme.co.uk>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+Sender: HassleMe <hm@sandwich.ukcod.org.uk>
+Date: Thu, 11 Sep 2008 11:00:19 +0100
+X-Spam-Score: 0.00 () [Hold at 5.00] 
+X-CanItPRO-Stream: anon redirected to 03_Aggressive
+X-Scanned-By: CanIt (www . roaringpenguin . com) on 131.156.1.15
+
+-- Message body has been omitted --
+
+--1221127233-13870-students.niu.edu--
