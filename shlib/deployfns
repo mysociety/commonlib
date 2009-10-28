@@ -1,0 +1,43 @@
+# deployfns:
+# Functions for deployment scripts.
+#
+# Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
+# Email: francis@mysociety.org; WWW: http://www.mysociety.org/
+#
+# $Id: deployfns,v 1.20 2009-03-24 14:11:09 francis Exp $
+#
+
+# Warnings and errors
+die () {
+    echo "$SCRIPT_COMMAND:" "$@" 1>&2
+    exit 1
+}
+
+warn () {
+    echo "$SCRIPT_COMMAND:" "$@" 1>&2
+}
+
+# Reads in config file
+# Currently doesn't read in numeric values
+# $1 - config file
+read_conf () {
+    # XXX use of mktemp here not safe; should make a temporary directory
+    CONF_SOURCE=`mktemp /tmp/ms-deploy-configsource.XXXXXX`
+    export MYSOCIETY_CONFIG_FILE_PATH=$1
+    cat << END | php >$CONF_SOURCE || die "shlib/deployfns read_conf: error calling PHP to load config file $1"
+<?php
+\$b = get_defined_constants();
+require(getenv("MYSOCIETY_CONFIG_FILE_PATH"));
+\$a = array_diff_assoc(get_defined_constants(), \$b);
+foreach (\$a as \$k => \$v) {
+    print \$k;
+    print "=";
+    print "\"\$v\"";
+    print "\n";
+}
+?>
+END
+    . $CONF_SOURCE
+    rm $CONF_SOURCE
+}
+
