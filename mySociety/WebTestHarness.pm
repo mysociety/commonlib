@@ -12,7 +12,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.72 2009-08-27 19:36:22 louise Exp $
+# $Id: WebTestHarness.pm,v 1.73 2009-10-29 11:09:59 louise Exp $
 #
 
 # Overload of WWW::Mechanize
@@ -724,17 +724,20 @@ sub email_incoming($$) {
 
 }
 
-=item email_check_url URL
+=item email_check_url URL [OPTIONS]
 
 Checks that a URL contains reasonable characters and is short enough to be
-clicked on from even dodgy email clients.
+clicked on from even dodgy email clients. Valid options for the OPTIONS hash are:
+  skip_length_check - don't check the URL length
 
 =cut
 sub email_check_url($) {
-    my ($self, $url) = @_;
+    my ($self, $url, $options) = @_;
     $url =~ m#^.*/[A-Za-z0-9/]*$# or die "URL contains bad characters for an email: $url";
     $url =~ s/testharness\.//; 
-    die "URL is too long for an email: $url" if length($url) > 65;
+    if (!$options or !exists($options->{skip_length_check})) {
+        die "URL is too long for an email: $url" if length($url) > 65;
+    }
 }
 
 ############################################################################
