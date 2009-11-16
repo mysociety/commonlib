@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Alert.pm,v 1.61 2009-10-21 15:44:00 louise Exp $
+# $Id: Alert.pm,v 1.62 2009-11-16 17:14:00 louise Exp $
 
 package mySociety::Alert::Error;
 
@@ -195,7 +195,7 @@ sub _send_aggregated_alert_email(%) {
     my %data = @_;
     Cobrand::set_lang_and_domain($data{cobrand}, $data{lang}, 1);
 
-    $data{unsubscribe_url} = Cobrand::base_url_for_emails($data{cobrand}) . '/A/'
+    $data{unsubscribe_url} = Cobrand::base_url_for_emails($data{cobrand}, $data{cobrand_data}) . '/A/'
         . mySociety::AuthToken::store('alert', { id => $data{alert_id}, type => 'unsubscribe', email => $data{alert_email} } );
     my $template_dir = '';
     if ($data{cobrand}){
