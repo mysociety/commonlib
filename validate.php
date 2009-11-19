@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: validate.php,v 1.5 2009-11-19 10:55:19 matthew Exp $
+ * $Id: validate.php,v 1.6 2009-11-19 11:27:06 matthew Exp $
  * 
  */
 
@@ -88,6 +88,7 @@ function validate_partial_postcode ($postcode) {
  * should already be canonicalised. */
 function validate_easily_mistyped_postcode($pc) {
     $changed = false;
+    if (strlen($pc) < 6) return false;
 
     # First character of postcode can never be a number
     if ($pc[0] == '0') { $pc[0] = 'O'; $changed = true; }
