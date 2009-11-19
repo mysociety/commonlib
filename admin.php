@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin.php,v 1.39 2008-07-08 09:21:52 matthew Exp $
+ * $Id: admin.php,v 1.40 2009-11-19 11:50:36 matthew Exp $
  * 
  */
 
@@ -156,7 +156,7 @@ function admin_render_form($form) {
     $form->setRequiredNote('<font color="#FF0000">*</font> shows the required fields.');
     $form->setJsWarnings('Those fields have errors :', 'Thanks for correcting them.');
 
-    $renderer->setFormTemplate('<table width="100%" border="0" cellpadding="3" cellspacing="2" bgcolor="#CCCC99"><form{attributes}>{content}</form></table>');
+    $renderer->setFormTemplate('<form{attributes}><table width="100%" border="0" cellpadding="3" cellspacing="2" bgcolor="#CCCC99">{content}</table></form>');
     $renderer->setHeaderTemplate('<tr><td style="white-space:nowrap;background:#996;color:#ffc;" align="left" colspan="2"><b>{header}</b></td></tr>');
 
 // Use for labels on specific groups:
