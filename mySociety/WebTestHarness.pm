@@ -12,7 +12,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.74 2009-11-16 12:38:21 louise Exp $
+# $Id: WebTestHarness.pm,v 1.75 2009-11-19 12:36:03 matthew Exp $
 #
 
 # Overload of WWW::Mechanize
@@ -129,7 +129,7 @@ sub setup {
     $wth->email_setup({ eveld_bin => $eveld_bin,
                         eveld_multispawn => $multispawn,
                         log_mailbox => "log_mailbox" });
-    $wth->browser_set_validator("/usr/bin/validate");
+    $wth->browser_set_validator("/usr/bin/validate") unless $config->{no_validate_html};
 
     my $httpd_error_log = mySociety::Config::get('HTTPD_ERROR_LOG');
     $wth->log_watcher_setup($httpd_error_log);
