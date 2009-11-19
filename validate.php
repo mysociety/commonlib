@@ -7,7 +7,7 @@
  * Mainly: Copyright (c) 2003-2004, FaxYourMP Ltd 
  * Parts are: Copyright (c) 2004 UK Citizens Online Democracy
  *
- * $Id: validate.php,v 1.6 2009-11-19 11:27:06 matthew Exp $
+ * $Id: validate.php,v 1.7 2009-11-19 12:47:43 matthew Exp $
  * 
  */
 
@@ -94,9 +94,8 @@ function validate_easily_mistyped_postcode($pc) {
     if ($pc[0] == '0') { $pc[0] = 'O'; $changed = true; }
     elseif ($pc[0] == '1') { $pc[0] = 'I'; $changed = true; }
 
-    # Second character can never be 0 or I
+    # Second character can never be 0
     if ($pc[1] == '0') { $pc[1] = 'O'; $changed = true; }
-    elseif ($pc[1] == 'I') { $pc[1] = '1'; $changed = true; }
 
     # 3rd and 4th characters of postcode can never be O or I
     if ($pc[2] == 'O') { $pc[2] = '0'; $changed = true; }
