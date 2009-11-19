@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Alert.pm,v 1.63 2009-11-19 10:23:41 louise Exp $
+# $Id: Alert.pm,v 1.64 2009-11-19 10:31:06 louise Exp $
 
 package mySociety::Alert::Error;
 
@@ -170,7 +170,6 @@ sub email_alerts () {
         my $e = Page::tile_to_os($x);
         my $n = Page::tile_to_os($y);
         $url = Cobrand::base_url_for_emails($alert->{cobrand}, $alert->{cobrand_data});
-        my ($site_restriction, $site_id) = Cobrand::site_restriction($alert->{cobrand}, $alert->{cobrand_data});
         my ($lat, $lon) = mySociety::GeoUtil::national_grid_to_wgs84($e, $n, 'G');
         my $d = mySociety::Gaze::get_radius_containing_population($lat, $lon, 200000);
         $d = int($d*10+0.5)/10;
@@ -181,7 +180,6 @@ sub email_alerts () {
             and problem.created >= ?
             and (select whenqueued from alert_sent where alert_sent.alert_id = ? and alert_sent.parameter::integer = problem.id) is null
             and problem.email <> ?
-            $site_restriction
             order by created desc";
         $q = dbh()->prepare($q);
         $q->execute($e, $n, $d, $alert->{whensubscribed}, $alert->{id}, $alert->{email});
