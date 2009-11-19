@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Alert.pm,v 1.64 2009-11-19 10:31:06 louise Exp $
+# $Id: Alert.pm,v 1.65 2009-11-19 11:40:32 louise Exp $
 
 package mySociety::Alert::Error;
 
@@ -170,6 +170,7 @@ sub email_alerts () {
         my $e = Page::tile_to_os($x);
         my $n = Page::tile_to_os($y);
         $url = Cobrand::base_url_for_emails($alert->{cobrand}, $alert->{cobrand_data});
+        my ($site_restriction, $site_id) = Cobrand::site_restriction($alert->{cobrand}, $alert->{cobrand_data});
         my ($lat, $lon) = mySociety::GeoUtil::national_grid_to_wgs84($e, $n, 'G');
         my $d = mySociety::Gaze::get_radius_containing_population($lat, $lon, 200000);
         $d = int($d*10+0.5)/10;
@@ -180,6 +181,7 @@ sub email_alerts () {
             and problem.created >= ?
             and (select whenqueued from alert_sent where alert_sent.alert_id = ? and alert_sent.parameter::integer = problem.id) is null
             and problem.email <> ?
+            $site_restriction
             order by created desc";
         $q = dbh()->prepare($q);
         $q->execute($e, $n, $d, $alert->{whensubscribed}, $alert->{id}, $alert->{email});
@@ -225,9 +227,11 @@ sub generate_rss ($$$;$$$$) {
     my ($type, $xsl, $qs, $db_params, $title_params, $cobrand, $http_q) = @_;
     $db_params ||= [];
     my $url = Cobrand::base_url($cobrand);
+    my $cobrand_data = Cobrand::extra_data($cobrand, $http_q);
     my $q = dbh()->prepare('select * from alert_type where ref=?');
     $q->execute($type);
     my $alert_type = $q->fetchrow_hashref;
+    my ($site_restriction, $site_id) = Cobrand::site_restriction($cobrand, $cobrand_data);
     throw mySociety::Alert::Error('Unknown alert type') unless $alert_type;
 
     # Do our own encoding
@@ -238,7 +242,7 @@ sub generate_rss ($$$;$$$$) {
 
     my $query = 'select * from ' . $alert_type->{item_table} . ' where '
         . ($alert_type->{head_table} ? $alert_type->{head_table}.'_id=? and ' : '')
-        . $alert_type->{item_where} . ' order by '
+        . $alert_type->{item_where} . $site_restriction . ' order by '
         . $alert_type->{item_order};
     $query .= ' limit 20' unless $type =~ /^all/;
     $q = dbh()->prepare($query);
