@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Alert.pm,v 1.65 2009-11-19 11:40:32 louise Exp $
+# $Id: Alert.pm,v 1.66 2009-11-23 17:25:43 louise Exp $
 
 package mySociety::Alert::Error;
 
@@ -125,6 +125,8 @@ sub email_alerts () {
         my $last_alert_id;
         my %data = ( template => $alert_type->{template}, data => '' );
         while (my $row = $query->fetchrow_hashref) {
+	    
+            next unless (Cobrand::email_host($row->{alert_cobrand}));
             dbh()->do('insert into alert_sent (alert_id, parameter) values (?,?)', {}, $row->{alert_id}, $row->{item_id});
             if ($last_alert_id && $last_alert_id != $row->{alert_id}) {
                 _send_aggregated_alert_email(%data);
@@ -165,6 +167,7 @@ sub email_alerts () {
     $query = dbh()->prepare($query);
     $query->execute();
     while (my $alert = $query->fetchrow_hashref) {
+        next unless (Cobrand::email_host($alert->{cobrand}));
         my $x = $alert->{parameter};
         my $y = $alert->{parameter2};
         my $e = Page::tile_to_os($x);
