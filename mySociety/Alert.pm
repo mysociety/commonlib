@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Alert.pm,v 1.66 2009-11-23 17:25:43 louise Exp $
+# $Id: Alert.pm,v 1.67 2009-11-30 10:23:09 louise Exp $
 
 package mySociety::Alert::Error;
 
@@ -208,11 +208,12 @@ sub _send_aggregated_alert_email(%) {
     }
     my $template = File::Slurp::read_file("$FindBin::Bin/../templates/emails/$template_dir$data{template}");
     my $sender = Cobrand::contact_email($data{cobrand});
+    my $sender_name = Cobrand::contact_name($data{cobrand});
     (my $from = $sender) =~ s/team/fms-DO-NOT-REPLY/; # XXX
     my $email = mySociety::Email::construct_email({
         _template_ => _($template),
         _parameters_ => \%data,
-        From => [ $from, _(mySociety::Config::get('CONTACT_NAME')) ],
+        From => [ $from, _($sender_name) ],
         To => $data{alert_email},
         'Message-ID' => sprintf('<alert-%s-%s@mysociety.org>', time(), unpack('h*', random_bytes(5, 1))),
     });
