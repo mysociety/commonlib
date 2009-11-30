@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Alert.pm,v 1.67 2009-11-30 10:23:09 louise Exp $
+# $Id: Alert.pm,v 1.68 2009-11-30 15:33:43 louise Exp $
 
 package mySociety::Alert::Error;
 
@@ -244,6 +244,9 @@ sub generate_rss ($$$;$$$$) {
         stylesheet=> $xsl, encode_output => undef );
     $rss->add_module(prefix=>'georss', uri=>'http://www.georss.org/georss');
 
+    # XXX: Not generic
+    # Only apply a site restriction if the alert uses the problem table
+    $site_restriction = '' unless $alert_type->{item_table} eq 'problem';
     my $query = 'select * from ' . $alert_type->{item_table} . ' where '
         . ($alert_type->{head_table} ? $alert_type->{head_table}.'_id=? and ' : '')
         . $alert_type->{item_where} . $site_restriction . ' order by '
