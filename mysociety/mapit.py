@@ -6,7 +6,7 @@
 # Copyright (c) 2009 UK Citizens Online Democracy. All rights reserved.
 # WWW: http://www.mysociety.org
 #
-# $Id: mapit.py,v 1.1 2009-02-24 14:49:41 francis Exp $
+# $Id: mapit.py,v 1.2 2009-11-30 13:11:03 matthew Exp $
 #
 
 import mysociety.config
@@ -75,14 +75,15 @@ def get_voting_areas_info(ary):
     result = do_call_rest_rabx('MaPit.get_voting_areas_info', ary)
     return result
 
-def get_voting_area_by_name(name, type = None):
-    '''* mapit_get_voting_area_by_name NAME [TYPE]
+def get_voting_area_by_name(name, type = None, min_generation = None):
+    '''* mapit_get_voting_area_by_name NAME [TYPE] [MIN_GENERATION]
 
   Given NAME, return the area IDs (and other info) that begin with that
   name, or undef if none found. If TYPE is specified (scalar or array ref),
-  only return areas of those type(s).
+  only return areas of those type(s). If MIN_GENERATION is given, return
+  all areas since then.
     '''
-    result = do_call_rest_rabx('MaPit.get_voting_area_by_name', name, type)
+    result = do_call_rest_rabx('MaPit.get_voting_area_by_name', name, type, min_generation)
     return result
 
 def get_voting_area_geometry(area, polygon_type = None):
@@ -147,21 +148,21 @@ def get_voting_areas_by_location(coordinate, method, types = None, generation = 
     result = do_call_rest_rabx('MaPit.get_voting_areas_by_location', coordinate, method, types, generation)
     return result
 
-def get_areas_by_type(type, all = None):
-    '''* mapit_get_areas_by_type TYPE [ALL]
+def get_areas_by_type(type, min_generation = None):
+    '''* mapit_get_areas_by_type TYPE [MIN_GENERATION]
 
   Returns an array of ids of all the voting areas of type TYPE. TYPE is the
   three letter code such as WMC. By default only gets active areas in
-  current generation, if ALL is true then gets all areas for all
-  generations.
+  current generation, if MIN_GENERATION is provided then returns from that
+  generation on, or if -1 then gets all areas for all generations.
     '''
-    result = do_call_rest_rabx('MaPit.get_areas_by_type', type, all)
+    result = do_call_rest_rabx('MaPit.get_areas_by_type', type, min_generation)
     return result
 
 def get_example_postcode(id):
     '''* mapit_get_example_postcode ID
 
-  Given an area ID, returns one postcode that maps to it.
+  Given an area ID, returns one random postcode that maps to it.
     '''
     result = do_call_rest_rabx('MaPit.get_example_postcode', id)
     return result
