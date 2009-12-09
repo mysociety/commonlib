@@ -4,17 +4,17 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: deployfns,v 1.20 2009-03-24 14:11:09 francis Exp $
+# $Id: deployfns,v 1.21 2009-10-28 19:46:56 francis Exp $
 #
 
 # Warnings and errors
 die () {
-    echo "$SCRIPT_COMMAND:" "$@" 1>&2
+    echo -e "$SCRIPT_COMMAND:" "$@" 1>&2
     exit 1
 }
 
 warn () {
-    echo "$SCRIPT_COMMAND:" "$@" 1>&2
+    echo -e "$SCRIPT_COMMAND:" "$@" 1>&2
 }
 
 # Reads in config file

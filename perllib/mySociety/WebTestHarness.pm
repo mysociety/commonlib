@@ -12,7 +12,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: WebTestHarness.pm,v 1.72 2009-08-27 19:36:22 louise Exp $
+# $Id: WebTestHarness.pm,v 1.75 2009-11-19 12:36:03 matthew Exp $
 #
 
 # Overload of WWW::Mechanize
@@ -129,7 +129,7 @@ sub setup {
     $wth->email_setup({ eveld_bin => $eveld_bin,
                         eveld_multispawn => $multispawn,
                         log_mailbox => "log_mailbox" });
-    $wth->browser_set_validator("/usr/bin/validate");
+    $wth->browser_set_validator("/usr/bin/validate") unless $config->{no_validate_html};
 
     my $httpd_error_log = mySociety::Config::get('HTTPD_ERROR_LOG');
     $wth->log_watcher_setup($httpd_error_log);
@@ -371,6 +371,19 @@ for validating and logging.
 sub browser_field {
     my $self = shift;
     $_ = $self->{useragent}->field(@_);
+    $self->_browser_html_hook();
+    return $_;
+}
+
+=item browser_value
+
+Acts as function in WWW::Mechanize, but intercepts HTML pages
+for validating and logging.
+
+=cut
+sub browser_value {
+    my $self = shift;
+    $_ = $self->{useragent}->value(@_);
     $self->_browser_html_hook();
     return $_;
 }
@@ -724,17 +737,20 @@ sub email_incoming($$) {
 
 }
 
-=item email_check_url URL
+=item email_check_url URL [OPTIONS]
 
 Checks that a URL contains reasonable characters and is short enough to be
-clicked on from even dodgy email clients.
+clicked on from even dodgy email clients. Valid options for the OPTIONS hash are:
+  skip_length_check - don't check the URL length
 
 =cut
 sub email_check_url($) {
-    my ($self, $url) = @_;
+    my ($self, $url, $options) = @_;
     $url =~ m#^.*/[A-Za-z0-9/]*$# or die "URL contains bad characters for an email: $url";
     $url =~ s/testharness\.//; 
-    die "URL is too long for an email: $url" if length($url) > 65;
+    if (!$options or !exists($options->{skip_length_check})) {
+        die "URL is too long for an email: $url" if length($url) > 65;
+    }
 }
 
 ############################################################################
