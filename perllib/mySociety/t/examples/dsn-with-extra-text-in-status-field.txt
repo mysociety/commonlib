@@ -1,0 +1,54 @@
+From MAILER-DAEMON Thu Feb 05 11:01:19 2009
+Return-path: <>
+Envelope-to: hm@sandwich.ukcod.org.uk
+Delivery-date: Thu, 05 Feb 2009 11:01:19 +0000
+Date: 05 Feb 2009 11:55:03 +0000
+To: hm@sandwich.ukcod.org.uk
+From: "Mail Delivery System" <admin@anon.com>
+Subject: Delivery Status Notification (Failure)
+MIME-Version: 1.0
+Content-Type: multipart/report; report-type=delivery-status; boundary="BXZt.4OYgJ9Ffn.8p3Mm.7ZnmA8t"
+Status: O
+Content-Length: 2077
+Lines: 68
+
+--BXZt.4OYgJ9Ffn.8p3Mm.7ZnmA8t
+content-type: text/plain;
+    charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+
+The following message to <anon@anon.com> was undeliverable.
+The reason for the problem:
+5.1.0 - Unknown address error 550-'anon@anon.com... No such u=
+ser'
+
+--BXZt.4OYgJ9Ffn.8p3Mm.7ZnmA8t
+content-type: message/delivery-status
+
+Reporting-MTA: dns; mx1.anon.com
+
+Final-Recipient: rfc822;anon@anon.com
+Action: failed
+Status: 5.0.0 (permanent failure)
+Remote-MTA: dns; [10.5.110.206]
+Diagnostic-Code: smtp; 5.1.0 - Unknown address error 550-'anon@anon.com... No such user' (delivery attempts: 0)
+
+--BXZt.4OYgJ9Ffn.8p3Mm.7ZnmA8t
+content-type: message/rfc822
+
+From: Hasslebot <hassle@hassleme.co.uk>
+To: anon@anon.com
+Subject: Don't forget to... STOP PROCRASTINATING
+Message-ID: <37ccdba8a3d638baf@hassleme.co.uk>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+Sender: HassleMe <hm@sandwich.ukcod.org.uk>
+Date: Thu, 05 Feb 2009 11:01:07 +0000
+
+Message content
+
+--BXZt.4OYgJ9Ffn.8p3Mm.7ZnmA8t--
+
+
+

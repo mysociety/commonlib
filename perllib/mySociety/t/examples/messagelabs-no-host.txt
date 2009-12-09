@@ -1,0 +1,49 @@
+Return-path: <>
+Envelope-to: twfy-live@sponge.ukcod.org.uk
+Delivery-date: Thu, 02 Apr 2009 16:58:29 +0100
+X-VirusChecked: Checked
+X-StarScan-Version: 6.0.0; banners=.,-,-
+Received: (qmail 6997 invoked for bounce); 2 Apr 2009 15:58:26 -0000
+Date: 2 Apr 2009 15:58:26 -0000
+From: MAILER-DAEMON@messagelabs.com
+To: twfy-bounce@theyworkforyou.com
+Subject: failure notice
+Status: O
+Content-Length: 5663
+Lines: 120
+
+This is the mail delivery agent at messagelabs.com.
+I was not able to deliver your message to the following addresses.
+
+<anon@targetbgt.com>:
+Sorry, I couldn't find any host named targetbgt.com. (#5.1.2)
+
+--- Below this line is a copy of the message.
+
+Return-Path: <twfy-bounce@theyworkforyou.com>
+X-VirusChecked: Checked
+X-Env-Sender: twfy-bounce@theyworkforyou.com
+X-Msg-Ref: server-11.tower-140.messagelabs.com!1238687905!13261504!1
+X-StarScan-Version: 6.0.0; banners=.,-,-
+X-Originating-IP: [194.9.189.200]
+X-VirusChecked: Checked
+X-Env-Sender: twfy-bounce@theyworkforyou.com
+X-Msg-Ref: server-3.tower-157.messagelabs.com!1238687896!15003357!1
+X-StarScan-Version: 6.0.0; banners=-,-,-
+X-Originating-IP: [82.111.230.211]
+X-SpamReason: No, hits=0.0 required=7.0 tests=sa_preprocessor: 
+  VHJ1c3RlZCBJUDogODIuMTExLjIzMC4yMTEgPT4gMzE3NDM=\n
+To: anon@Centrica.co.uk
+Subject: Your TheyWorkForYou email alert
+From: TheyWorkForYou <twfy-DO-NOT-REPLY@theyworkforyou.com>
+Content-Type: text/plain; charset=iso-8859-1
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+Precedence: bulk
+X-Mailer: PHP/5.2.0-8+etch13
+Message-Id: <E1LpPJ2-00031c-3N@sponge.ukcod.org.uk>
+Date: Thu, 02 Apr 2009 16:58:16 +0100
+Return-Path: twfy-bounce@theyworkforyou.com
+X-OriginalArrivalTime: 02 Apr 2009 15:59:36.0415 (UTC) FILETIME=[057636F0:01C9B3AC]
+
+Message content

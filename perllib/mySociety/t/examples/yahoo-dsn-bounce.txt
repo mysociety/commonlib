@@ -1,0 +1,87 @@
+Return-path: <>
+Envelope-to: hm@sandwich.ukcod.org.uk
+Delivery-date: Fri, 12 Sep 2008 07:30:18 +0100
+MIME-version: 1.0
+Content-type: multipart/report;
+ boundary="Boundary_(ID_gHS3plW+dfS/sew7V60dOA)"; report-type=delivery-status
+Date: Fri, 12 Sep 2008 00:50:34 -0400 (EDT)
+From: Internet Mail Delivery <postmaster@krc-mta-1.it.ohio-state.edu>
+Subject: Delivery Notification: Delivery has timed out and failed
+To: hm@sandwich.ukcod.org.uk
+Message-id: <0K72005A9G4AUQT0@krc-mta-1.it.ohio-state.edu>
+Status: O
+Content-Length: 4052
+Lines: 109
+
+
+--Boundary_(ID_gHS3plW+dfS/sew7V60dOA)
+Content-type: text/plain; charset=us-ascii
+Content-language: en-US
+Content-transfer-encoding: 7BIT
+
+This report relates to a message you sent with the following header fields:
+
+  Message-id: <595015661e3c174ff@hassleme.co.uk>
+  Date: Thu, 11 Sep 2008 15:00:34 +0100
+  From: Hasslebot <hassle@hassleme.co.uk>
+  To: anon@osu.edu
+  Subject: Don't forget to... 
+
+Your message is being returned; it has been enqueued and undeliverable for
+14 hours to the following recipients:
+
+  Recipient address: anon@osu.edu
+  Reason: unable to deliver this message after 14 hours
+
+
+Delivery attempt history for your mail:
+
+Thu, 11 Sep 2008 21:38:54 -0400 (EDT)
+Too many failures to this host during this run; skipping this host: Couldn't deliver
+
+Thu, 11 Sep 2008 17:36:23 -0400 (EDT)
+Temporary error returned by SMTP partner.
+smtp;421 Message from (140.254.54.15) temporarily deferred - 4.16.50. Please refer to http://help.yahoo.com/help/us/mail/defer/defer-06.html
+
+Thu, 11 Sep 2008 15:15:50 -0400 (EDT)
+Too many failures to this host during this run; skipping this host: Couldn't deliver
+
+Thu, 11 Sep 2008 13:09:09 -0400 (EDT)
+Temporary error returned by SMTP partner.
+smtp;421 Message from (140.254.54.15) temporarily deferred - 4.16.50. Please refer to http://help.yahoo.com/help/us/mail/defer/defer-06.html
+
+Thu, 11 Sep 2008 10:13:26 -0400 (EDT)
+TCP active open: Failed connect() 66.196.97.250:25    Error: Connection timed out
+
+--Boundary_(ID_gHS3plW+dfS/sew7V60dOA)
+Content-type: message/delivery-status
+
+Reporting-MTA: dns;krc-mta-1.it.ohio-state.edu (tcp-daemon)
+
+Original-recipient: rfc822;anon@osu.edu
+Final-recipient: rfc822;anon@osu.edu
+Action: failed
+Status: 4.4.7 (unable to deliver this message after 14 hours)
+
+--Boundary_(ID_gHS3plW+dfS/sew7V60dOA)
+Content-type: message/rfc822
+
+Return-path: <hm@sandwich.ukcod.org.uk>
+Date: Thu, 11 Sep 2008 15:00:34 +0100
+From: Hasslebot <hassle@hassleme.co.uk>
+Subject: Don't forget to... 
+Sender: HassleMe <hm@sandwich.ukcod.org.uk>
+To: anon@osu.edu
+Message-id: <595015661e3c174ff@hassleme.co.uk>
+MIME-version: 1.0
+Content-type: text/plain; charset=utf-8
+Content-transfer-encoding: 7BIT
+X-Bayes-Prob: 0.0001 (Score 0)
+X-Spam-Score: 0.00 () [Tag at 4.50]
+X-CanItPRO-Stream: 30_medium
+X-Canit-Stats-ID: 678835234 - c0ab8268975a
+X-Scanned-By: CanIt (www . roaringpenguin . com) on 128.146.216.82
+
+Message content
+
+--Boundary_(ID_gHS3plW+dfS/sew7V60dOA)--

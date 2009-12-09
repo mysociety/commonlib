@@ -1,0 +1,25 @@
+Return-path: <anon@anon.org>
+Envelope-to: hm@sandwich.ukcod.org.uk
+Delivery-date: Tue, 09 Sep 2008 21:03:29 +0100
+X-IronPort-Anti-Spam-Filtered: true
+X-IronPort-Anti-Spam-Result: AmYBABlzxkisEAYu/2dsb2JhbAAIi0YBhX6md4Fk
+X-IronPort-AV: E=Sophos;i="4.32,367,1217822400"; 
+   d="scan'208";a="358671"
+Received: from s102f280.anon.net (HELO mail.anon.us) ([172.16.6.46])
+  by anon.net with ESMTP; 09 Sep 2008 16:03:14 -0400
+Subject:  is out of the office.
+To: HassleMe <hm@sandwich.ukcod.org.uk>
+Message-ID: <OFA293A746.AC3B94B8-ON852574BF.006E2876-852574BF.006E2876@anon.org>
+Date: Tue, 9 Sep 2008 16:03:13 -0400
+From: anon@anon.org
+MIME-Version: 1.0
+Content-type: text/plain; charset=US-ASCII
+Status: O
+Content-Length: 136
+Lines: 6
+
+
+I will be out of the office starting  09/08/2008 and will not return until
+09/11/2008.
+
+I will respond to your message when I return.
