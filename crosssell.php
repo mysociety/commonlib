@@ -6,7 +6,7 @@
  * Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: crosssell.php,v 1.32 2008-06-24 22:37:46 francis Exp $
+ * $Id: crosssell.php,v 1.33 2009-12-11 16:30:00 matthew Exp $
  * 
  */
 
@@ -85,6 +85,11 @@ function crosssell_display_random_fms_advert($email, $name, $postcode, $text, $t
 
 /* This advert will always display if picked */
 function crosssell_display_random_gny_advert($email, $name, $postcode, $text, $this_site) {
+    echo '<div id="advert_thin">', $text, '</div>';
+    return true;
+}
+
+function crosssell_display_random_demclub_advert($email, $name, $postcode, $text, $this_site) {
     echo '<div id="advert_thin">', $text, '</div>';
     return true;
 }
