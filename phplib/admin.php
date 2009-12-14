@@ -16,7 +16,7 @@ require_once "HTML/QuickForm/Rule.php";
 require_once "HTML/QuickForm/Renderer/Default.php";
 
 // Error display
-require_once "../../phplib/error.php";
+require_once "error.php";
 function admin_display_error($num, $message, $file, $line, $context) {
     print "<p><strong>$message</strong> in $file:$line</p>";
 }
