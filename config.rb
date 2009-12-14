@@ -4,7 +4,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: config.rb,v 1.3 2007-10-24 19:13:07 francis Exp $
+# $Id: config.rb,v 1.4 2009-12-14 16:51:36 francis Exp $
 
 module MySociety
     module Config
@@ -59,7 +59,7 @@ module MySociety
             ENV['MYSOCIETY_CONFIG_FILE_PATH'] = f
 
             buf = nil
-            IO.popen(@php_path, "w+") do |child|
+            IO.popen("/usr/bin/taskset 0x1 " + @php_path, "w+") do |child|
                 child.print('''<?php
             $b = get_defined_constants();
             require(getenv("MYSOCIETY_CONFIG_FILE_PATH"));
