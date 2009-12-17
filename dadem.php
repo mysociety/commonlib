@@ -8,7 +8,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: dadem.php,v 1.59 2008-06-24 11:59:16 francis Exp $
+ * $Id: dadem.php,v 1.60 2009-12-17 13:02:36 louise Exp $
  *
  */
 
@@ -40,6 +40,16 @@ define('DADEM_AREA_WITHOUT_REPS', 3003);        /*    Area ID refers to an area 
 define('DADEM_PERSON_NOT_FOUND', 3004);        /*    Person ID refers to a non-existent person.  */
 define('DADEM_CONTACT_FAX', 101);        /*    Means of contacting representative is fax.  */
 define('DADEM_CONTACT_EMAIL', 102);        /*    Means of contacting representative is email.  */
+
+/* dadem_get_secret 
+
+  Return a generic secret string to be used in generating tokens */
+function dadem_get_secret() {
+    global $dadem_client;
+    $params = func_get_args();
+    $result = $dadem_client->call('DaDem.get_secret', $params);
+    return $result;
+}
 
 /* dadem_get_representatives ID_or_ARRAY [ALL]
 
