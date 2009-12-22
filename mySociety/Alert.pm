@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Alert.pm,v 1.68 2009-11-30 15:33:43 louise Exp $
+# $Id: Alert.pm,v 1.69 2009-12-22 16:16:52 matthew Exp $
 
 package mySociety::Alert::Error;
 
@@ -202,11 +202,12 @@ sub _send_aggregated_alert_email(%) {
 
     $data{unsubscribe_url} = Cobrand::base_url_for_emails($data{cobrand}, $data{cobrand_data}) . '/A/'
         . mySociety::AuthToken::store('alert', { id => $data{alert_id}, type => 'unsubscribe', email => $data{alert_email} } );
-    my $template_dir = '';
-    if ($data{cobrand}){
-         $template_dir = $data{cobrand} . '/';
+    my $template = "$FindBin::Bin/../templates/emails/$data{template}";
+    if ($data{cobrand}) {
+        my $template_cobrand = "$FindBin::Bin/../templates/emails/$data{cobrand}/$data{template}";
+        $template = $template_cobrand if -e $template_cobrand;
     }
-    my $template = File::Slurp::read_file("$FindBin::Bin/../templates/emails/$template_dir$data{template}");
+    $template = File::Slurp::read_file($template);
     my $sender = Cobrand::contact_email($data{cobrand});
     my $sender_name = Cobrand::contact_name($data{cobrand});
     (my $from = $sender) =~ s/team/fms-DO-NOT-REPLY/; # XXX
