@@ -8,7 +8,7 @@
  * Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
  * WWW: http://www.mysociety.org
  *
- * $Id: mapit.php,v 1.61 2008-06-24 11:59:16 francis Exp $
+ * $Id: mapit.php,v 1.62 2009-12-23 17:31:21 matthew Exp $
  *
  */
 
@@ -48,10 +48,11 @@ function mapit_get_generation() {
     return $result;
 }
 
-/* mapit_get_voting_areas POSTCODE
+/* mapit_get_voting_areas POSTCODE [GENERATION]
 
-  Return voting area IDs for POSTCODE. */
-function mapit_get_voting_areas($postcode) {
+  Return voting area IDs for POSTCODE. If GENERATION is given, use that,
+  otherwise use the current generation. */
+function mapit_get_voting_areas($postcode, $generation = null) {
     global $mapit_client;
     $params = func_get_args();
     $result = $mapit_client->call('MaPit.get_voting_areas', $params);
@@ -101,12 +102,13 @@ function mapit_get_voting_areas_info($ary) {
     return $result;
 }
 
-/* mapit_get_voting_area_by_name NAME [TYPE]
+/* mapit_get_voting_area_by_name NAME [TYPE] [MIN_GENERATION]
 
   Given NAME, return the area IDs (and other info) that begin with that
   name, or undef if none found. If TYPE is specified (scalar or array ref),
-  only return areas of those type(s). */
-function mapit_get_voting_area_by_name($name, $type = null) {
+  only return areas of those type(s). If MIN_GENERATION is given, return
+  all areas since then. */
+function mapit_get_voting_area_by_name($name, $type = null, $min_generation = null) {
     global $mapit_client;
     $params = func_get_args();
     $result = $mapit_client->call('MaPit.get_voting_area_by_name', $params);
@@ -133,7 +135,7 @@ function mapit_get_voting_area_by_name($name, $type = null) {
 
   sense - a positive value to include the part, negative to exclude (a
   hole) points - an array of pairs of (eastings, northings) if POLYGON_TYPE
-  is 'ng", or (latitude, longitude) if POLYGON_TYPE is 'wgs84'.
+  is 'ng', or (latitude, longitude) if POLYGON_TYPE is 'wgs84'.
 
   If for some reason any of the values above are not known, they will not
   be present in the array. For example, we currently only have data for
@@ -181,13 +183,13 @@ function mapit_get_voting_areas_by_location($coordinate, $method, $types = null,
     return $result;
 }
 
-/* mapit_get_areas_by_type TYPE [ALL]
+/* mapit_get_areas_by_type TYPE [MIN_GENERATION]
 
   Returns an array of ids of all the voting areas of type TYPE. TYPE is the
   three letter code such as WMC. By default only gets active areas in
-  current generation, if ALL is true then gets all areas for all
-  generations. */
-function mapit_get_areas_by_type($type, $all = null) {
+  current generation, if MIN_GENERATION is provided then returns from that
+  generation on, or if -1 then gets all areas for all generations. */
+function mapit_get_areas_by_type($type, $min_generation = null) {
     global $mapit_client;
     $params = func_get_args();
     $result = $mapit_client->call('MaPit.get_areas_by_type', $params);
@@ -196,7 +198,7 @@ function mapit_get_areas_by_type($type, $all = null) {
 
 /* mapit_get_example_postcode ID
 
-  Given an area ID, returns one postcode that maps to it. */
+  Given an area ID, returns one random postcode that maps to it. */
 function mapit_get_example_postcode($id) {
     global $mapit_client;
     $params = func_get_args();
