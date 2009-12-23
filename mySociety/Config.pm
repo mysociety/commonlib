@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: team@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Config.pm,v 1.22 2009-08-12 10:24:30 louise Exp $
+# $Id: Config.pm,v 1.23 2009-12-23 19:12:30 matthew Exp $
 #
 
 package mySociety::Config;
@@ -48,7 +48,7 @@ sub find_php () {
     $ENV{PATH} ||= '/bin:/usr/bin';
     foreach my $dir (split(/:/, $ENV{PATH}),
         qw(/usr/local/bin /usr/bin /software/bin /opt/bin /opt/php/bin)) {
-        foreach my $name (qw(php4 php php4-cgi php-cgi)) {
+        foreach my $name (qw(php php-cgi)) {
             return "$dir/$name" if (-x "$dir/$name");
         }
     }
