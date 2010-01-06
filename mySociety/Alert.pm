@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Alert.pm,v 1.69 2009-12-22 16:16:52 matthew Exp $
+# $Id: Alert.pm,v 1.70 2010-01-06 14:44:46 louise Exp $
 
 package mySociety::Alert::Error;
 
@@ -125,7 +125,10 @@ sub email_alerts () {
         my $last_alert_id;
         my %data = ( template => $alert_type->{template}, data => '' );
         while (my $row = $query->fetchrow_hashref) {
-	    
+	        # Cobranded and non-cobranded messages can share a database. In this case, the conf file 
+            # should specify a vhost to send the reports for each cobrand, so that they don't get sent 
+            # more than once if there are multiple vhosts running off the same database. The email_host
+            # call checks if this is the host that sends mail for this cobrand.
             next unless (Cobrand::email_host($row->{alert_cobrand}));
             dbh()->do('insert into alert_sent (alert_id, parameter) values (?,?)', {}, $row->{alert_id}, $row->{item_id});
             if ($last_alert_id && $last_alert_id != $row->{alert_id}) {
