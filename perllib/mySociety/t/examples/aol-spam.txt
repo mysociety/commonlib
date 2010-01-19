@@ -1,0 +1,22 @@
+From MAILER-DAEMON Thu Sep 11 09:08:26 2008
+Return-path: <>
+Envelope-to: hm@sandwich.ukcod.org.uk
+Delivery-date: Thu, 11 Sep 2008 09:08:26 +0100
+from: Mail Delivery Subsystem <MAILER-DAEMON@aol.com>
+Date: Thu, 11 Sep 2008 04:04:59 EDT
+To: <hm@sandwich.ukcod.org.uk>
+Subject: Mail Delivery Problem
+Mailer: AIRmail [v121_r2.12]
+X-AOL-IP: 172.19.130.71
+Message-ID: <200809110407.7e0748c8d1dd181@omr-m24.mx.aol.com>
+Status: O
+Content-Length: 145
+Lines: 6
+
+
+
+Your mail to the following recipients could not be delivered because they are not accepting mail from hassle@hassleme.co.uk:
+
+	anon
+
+
