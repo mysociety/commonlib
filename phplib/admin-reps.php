@@ -9,10 +9,10 @@
  * 
  */
 
-require_once "../../phplib/dadem.php";
-require_once "../../phplib/mapit.php";
-require_once "../../phplib/votingarea.php";
-require_once "../../phplib/utility.php";
+require_once "../phplib/dadem.php";
+require_once "../phplib/mapit.php";
+require_once "../phplib/votingarea.php";
+require_once "../phplib/utility.php";
 
 class ADMIN_PAGE_REPS {
     function ADMIN_PAGE_REPS () {
