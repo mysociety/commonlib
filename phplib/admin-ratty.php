@@ -12,7 +12,7 @@
  * 
  */
 
-require_once "../phplib/ratty.php";
+require_once "ratty.php";
 
 class ADMIN_PAGE_RATTY {
     /* ADMIN_PAGE_RATTY SCOPE WHAT DESCRIPTION MESSAGEBLURB
