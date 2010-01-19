@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: team@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Config.pm,v 1.22 2009-08-12 10:24:30 louise Exp $
+# $Id: Config.pm,v 1.24 2010-01-07 11:42:17 louise Exp $
 #
 
 package mySociety::Config;
@@ -48,7 +48,7 @@ sub find_php () {
     $ENV{PATH} ||= '/bin:/usr/bin';
     foreach my $dir (split(/:/, $ENV{PATH}),
         qw(/usr/local/bin /usr/bin /software/bin /opt/bin /opt/php/bin)) {
-        foreach my $name (qw(php4 php php4-cgi php-cgi)) {
+        foreach my $name (qw(php php-cgi)) {
             return "$dir/$name" if (-x "$dir/$name");
         }
     }
@@ -107,19 +107,9 @@ sub read_config ($;$) {
         $inr->close();
         $outw->close();
 
-        open(FILE, "/etc/debian_version");
-        my @data = <FILE>;
-        close(FILE);
         # Using taskset to deal with debian 5 php/mysql extension bug, 
         # by restricting to one processor
-        # but debian 3 doesn't have the necessary function. 
-        my $debian_version = $data[0];
-        chomp($debian_version);
-        if ($debian_version eq '3.1'){
-            exec($php_path) or throw Error::Simple "$php_path: exec: $!";
-        }else{   
-            exec('taskset', '0x1', $php_path) or throw Error::Simple "$php_path: exec: $!";
-        }
+        exec('taskset', '0x1', $php_path) or throw Error::Simple "$php_path: exec: $!";
     }
 
     $inr->close();

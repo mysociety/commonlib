@@ -6,7 +6,7 @@
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Alert.pm,v 1.68 2009-11-30 15:33:43 louise Exp $
+# $Id: Alert.pm,v 1.71 2010-01-06 16:50:27 louise Exp $
 
 package mySociety::Alert::Error;
 
@@ -89,14 +89,17 @@ sub delete ($) {
 # If parent/child, child table must also have name and text
 #   and foreign key to parent must be PARENT_id
 
-sub email_alerts () {
+sub email_alerts ($) {
+    my ($testing_email) = @_;
     my $url; 
     my $q = dbh()->prepare("select * from alert_type where ref != 'local_problems'");
     $q->execute();
+    my $testing_email_clause = '';
     while (my $alert_type = $q->fetchrow_hashref) {
         my $ref = $alert_type->{ref};
         my $head_table = $alert_type->{head_table};
         my $item_table = $alert_type->{item_table};
+        my $testing_email_clause = "and $item_table.email <> '$testing_email'" if $testing_email;
         my $query = 'select alert.id as alert_id, alert.email as alert_email, alert.lang as alert_lang, alert.cobrand as alert_cobrand,
             alert.cobrand_data as alert_cobrand_data, alert.parameter as alert_parameter, alert.parameter2 as alert_parameter2, ';
         if ($head_table) {
@@ -114,7 +117,9 @@ sub email_alerts () {
         $query .= "
             where alert_type='$ref' and whendisabled is null and $item_table.created >= whensubscribed
              and (select whenqueued from alert_sent where alert_sent.alert_id = alert.id and alert_sent.parameter::integer = $item_table.id) is null
-            and $item_table.email <> alert.email and $alert_type->{item_where}
+            and $item_table.email <> alert.email 
+            $testing_email_clause
+            and $alert_type->{item_where}
             and alert.confirmed = 1
             order by alert.id, $item_table.created";
         # XXX Ugh - needs work
@@ -125,7 +130,10 @@ sub email_alerts () {
         my $last_alert_id;
         my %data = ( template => $alert_type->{template}, data => '' );
         while (my $row = $query->fetchrow_hashref) {
-	    
+	    # Cobranded and non-cobranded messages can share a database. In this case, the conf file 
+            # should specify a vhost to send the reports for each cobrand, so that they don't get sent 
+            # more than once if there are multiple vhosts running off the same database. The email_host
+            # call checks if this is the host that sends mail for this cobrand.
             next unless (Cobrand::email_host($row->{alert_cobrand}));
             dbh()->do('insert into alert_sent (alert_id, parameter) values (?,?)', {}, $row->{alert_id}, $row->{item_id});
             if ($last_alert_id && $last_alert_id != $row->{alert_id}) {
@@ -153,6 +161,7 @@ sub email_alerts () {
                 }
             }
             $data{cobrand} = $row->{alert_cobrand};
+            $data{cobrand_data} = $row->{alert_cobrand_data};
             $data{lang} = $row->{alert_lang};
             $last_alert_id = $row->{alert_id};
         }
@@ -177,13 +186,14 @@ sub email_alerts () {
         my ($lat, $lon) = mySociety::GeoUtil::national_grid_to_wgs84($e, $n, 'G');
         my $d = mySociety::Gaze::get_radius_containing_population($lat, $lon, 200000);
         $d = int($d*10+0.5)/10;
-
-        my %data = ( template => $template, data => '', alert_id => $alert->{id}, alert_email => $alert->{email}, lang => $alert->{lang}, cobrand => $alert->{cobrand} );
+        my $testing_email_clause = "and problem.email <> '$testing_email'" if $testing_email;        
+        my %data = ( template => $template, data => '', alert_id => $alert->{id}, alert_email => $alert->{email}, lang => $alert->{lang}, cobrand => $alert->{cobrand}, cobrand_data => $alert->{cobrand_data} );
         my $q = "select * from problem_find_nearby(?, ?, ?) as nearby, problem
             where nearby.problem_id = problem.id and problem.state in ('confirmed', 'fixed')
             and problem.created >= ?
             and (select whenqueued from alert_sent where alert_sent.alert_id = ? and alert_sent.parameter::integer = problem.id) is null
             and problem.email <> ?
+            $testing_email_clause
             $site_restriction
             order by created desc";
         $q = dbh()->prepare($q);
@@ -202,11 +212,12 @@ sub _send_aggregated_alert_email(%) {
 
     $data{unsubscribe_url} = Cobrand::base_url_for_emails($data{cobrand}, $data{cobrand_data}) . '/A/'
         . mySociety::AuthToken::store('alert', { id => $data{alert_id}, type => 'unsubscribe', email => $data{alert_email} } );
-    my $template_dir = '';
-    if ($data{cobrand}){
-         $template_dir = $data{cobrand} . '/';
+    my $template = "$FindBin::Bin/../templates/emails/$data{template}";
+    if ($data{cobrand}) {
+        my $template_cobrand = "$FindBin::Bin/../templates/emails/$data{cobrand}/$data{template}";
+        $template = $template_cobrand if -e $template_cobrand;
     }
-    my $template = File::Slurp::read_file("$FindBin::Bin/../templates/emails/$template_dir$data{template}");
+    $template = File::Slurp::read_file($template);
     my $sender = Cobrand::contact_email($data{cobrand});
     my $sender_name = Cobrand::contact_name($data{cobrand});
     (my $from = $sender) =~ s/team/fms-DO-NOT-REPLY/; # XXX

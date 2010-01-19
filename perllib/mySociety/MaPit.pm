@@ -8,7 +8,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # WWW: http://www.mysociety.org
 #
-# $Id: MaPit.pm,v 1.45 2009-04-01 18:22:48 matthew Exp $
+# $Id: MaPit.pm,v 1.46 2009-12-23 17:31:20 matthew Exp $
 
 package mySociety::MaPit;
 
@@ -62,12 +62,13 @@ sub get_generation () {
     return $rabx_client->call('MaPit.get_generation', @_);
 }
 
-=item MaPit::get_voting_areas POSTCODE
+=item MaPit::get_voting_areas POSTCODE [GENERATION]
 
-  Return voting area IDs for POSTCODE.
+  Return voting area IDs for POSTCODE. If GENERATION is given, use that,
+  otherwise use the current generation.
 
 =cut
-sub get_voting_areas ($) {
+sub get_voting_areas ($;$) {
     configure() if !defined $rabx_client;
     return $rabx_client->call('MaPit.get_voting_areas', @_);
 }
@@ -211,7 +212,7 @@ sub get_areas_by_type ($;$) {
 
 =item MaPit::get_example_postcode ID
 
-  Given an area ID, returns one postcode that maps to it.
+  Given an area ID, returns one random postcode that maps to it.
 
 =cut
 sub get_example_postcode ($) {

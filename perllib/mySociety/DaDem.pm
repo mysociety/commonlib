@@ -8,7 +8,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # WWW: http://www.mysociety.org
 #
-# $Id: DaDem.pm,v 1.42 2009-01-26 14:21:52 matthew Exp $
+# $Id: DaDem.pm,v 1.43 2009-12-17 13:02:35 louise Exp $
 
 package mySociety::DaDem;
 
@@ -72,6 +72,16 @@ use constant CONTACT_FAX => 101;
 
 =cut
 use constant CONTACT_EMAIL => 102;
+
+=item DaDem::get_secret 
+
+  Return a generic secret string to be used in generating tokens
+
+=cut
+sub get_secret () {
+    configure() if !defined $rabx_client;
+    return $rabx_client->call('DaDem.get_secret', @_);
+}
 
 =item DaDem::get_representatives ID_or_ARRAY [ALL]
 
