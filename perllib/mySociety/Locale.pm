@@ -114,7 +114,7 @@ sub gettext_domain($;$) {
     my ($domain, $unicode) = @_;
     $gettext = $unicode ? Locale::gettext->domain($domain) : Locale::gettext->domain_raw($domain);
     die "failed to bind to gettext domain $domain" unless $gettext;
-    $gettext->dir("$FindBin::Bin/../../locale");
+    $gettext->dir("$FindBin::Bin/../locale");
     $gettext->codeset('UTF-8') unless $unicode;
 }
 
