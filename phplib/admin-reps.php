@@ -557,9 +557,9 @@ class ADMIN_PAGE_REPS {
                 admin_render_form($form);
             }
         } else {
+            print '<p><a href="?page=reps&bad_contacts=1">Bad contacts</a> (please fix these!)';
             // General info
             if (OPTION_ADMIN_SERVICES_CGI) {
-                print '<p><a href="?page=reps&bad_contacts=1">Bad contacts</a> (please fix these!)';
                 print '<br><a href="?page=reps&user_corrections=1">User corrections</a> (just for your interest, as sent automatically to GovEval)';
             }
         }
