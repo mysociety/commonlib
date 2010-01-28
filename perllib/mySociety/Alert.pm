@@ -72,7 +72,7 @@ sub create ($$$$;@) {
 
 sub confirm ($) {
     my $id = shift;
-    dbh()->do("update alert set confirmed=1 where id=?", {}, $id);
+    dbh()->do("update alert set confirmed=1, whendisabled=null where id=?", {}, $id);
     dbh()->commit();
 }
 
