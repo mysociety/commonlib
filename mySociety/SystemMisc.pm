@@ -324,7 +324,9 @@ is an error, die with useful diagnostics.
 
 =cut
 sub shell {
-    # print join(" ", @_) . "\n";
+    if ($ENV{MYSOCIETY_DEBUG}) {
+        print STDERR "mySociety::SystemMisc.shell(): " . join(" ", @_) . "\n";
+    }
     system(@_);
     if ($?) {
         die "in " . getcwd() . ": " . join(" ", @_) . ": "
