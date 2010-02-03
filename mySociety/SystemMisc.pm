@@ -324,6 +324,7 @@ is an error, die with useful diagnostics.
 
 =cut
 sub shell {
+    # print join(" ", @_) . "\n";
     system(@_);
     if ($?) {
         die "in " . getcwd() . ": " . join(" ", @_) . ": "
