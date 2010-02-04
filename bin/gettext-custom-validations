@@ -1,0 +1,27 @@
+#!/usr/bin/perl -w
+#
+# bin/gettext-custom-validations
+#
+# Check some extra things are true about a particular gettext file.
+# - That email Subject: lines are followed by a blank line.
+#
+# Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
+# Email: francis@mysociety.org; WWW: http://www.mysociety.org/
+#
+# $Id: gettext-custom-validations,v 1.2 2008/09/09 14:16:13 matthew Exp $
+
+my $last_line_subject = 0;
+while(<>) {
+    if ($last_line_subject) {
+        if (!m/^"\\n"\r?$/) {
+            print STDERR "WARNING: line following email Subject: should be just a \\n, on line $.: $_"
+        }
+    }
+
+    if (m/^"Subject:/) {
+        $last_line_subject = 1;
+    } else {
+        $last_line_subject = 0;
+    }
+}
+

@@ -1,0 +1,22 @@
+#!/bin/bash
+#
+# bin/gettext-merge
+# Update all .po files from new .pot
+#
+# Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
+# Email: francis@mysociety.org; WWW: http://www.mysociety.org/
+#
+# $Id: gettext-merge,v 1.2 2006/03/02 06:46:46 francis Exp $
+
+for X in locale/*.UTF-8
+do
+    if [ -d $X ]
+    then
+        cd $X/LC_MESSAGES
+        echo $X
+        msgmerge --no-wrap -o PledgeBank.poN PledgeBank.po ../../PledgeBank.po
+        mv PledgeBank.poN PledgeBank.po
+        cd - >/dev/null
+    fi
+done
+
