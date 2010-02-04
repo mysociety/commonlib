@@ -12,7 +12,7 @@
 
 cd `dirname $0`
 
-cd ../../mysociety/locale
+cd ../locale
 for X in *.UTF-8
 do
     Y=${X/UTF-8/utf}

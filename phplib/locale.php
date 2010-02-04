@@ -83,7 +83,7 @@ function locale_pop() {
 /* locale_gettext_domain DOMAIN
  * Set gettext domain. e.g. 'PledgeBank' */
 function locale_gettext_domain($domain) {
-    bindtextdomain($domain, '../../locale');
+    bindtextdomain($domain, '../locale');
     textdomain($domain);
     bind_textdomain_codeset($domain, 'UTF-8');
 }

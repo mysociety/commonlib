@@ -18,7 +18,7 @@ then
 fi
 
 # File to write to, clear it to start with
-PO=../mysociety/locale/PledgeBank.po 
+PO=locale/PledgeBank.po 
 rm -f $PO
 
 # Useful functions
