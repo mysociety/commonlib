@@ -31,7 +31,7 @@
 // +---------------------------------------------------------------------------+
 //
 
-require_once '../simplexml44-0_4_4/class/IsterXmlSimpleXMLImpl.php';
+require_once '../commonlib/phplib/simplexml44-0_4_4/class/IsterXmlSimpleXMLImpl.php';
 
 class FacebookRestClient {
   var $secret;
