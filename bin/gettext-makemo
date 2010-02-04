@@ -13,7 +13,7 @@
 # don't expand a glob with no matches to itself
 shopt -s nullglob
 
-ORIGINAL_PATH=$(dirname $0)
+ORIGINAL_PATH=$(dirname $(readlink -f $0))
 if [ $1 = '--help' ]
 then 
     echo "Usage: gettext-makemo [--help] [--verbose|--quiet] [domain]"
