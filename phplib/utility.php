@@ -402,10 +402,15 @@ function prettify($s, $html = true) {
         return prettify_num($s);
     return $s;
 }
+
+# Given a number, try to format it according to the current locale
 function prettify_num($s) {
     if (ctype_digit($s)) {
         $locale_info = localeconv();
-        return number_format($s, 0, $locale_info['decimal_point'], $locale_info['thousands_sep']);
+        # number_format is not multibyte-safe. Who would have thought it?
+        $n = number_format($s);
+        $n = str_replace(',', $locale_info['thousands_sep'], $n);
+        return $n;
     }
     return $s;
 }
