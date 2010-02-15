@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin.php,v 1.40 2009-11-19 11:50:36 matthew Exp $
+ * $Id: admin.php,v 1.41 2010-02-15 18:19:59 matthew Exp $
  * 
  */
 
@@ -37,7 +37,7 @@ project contain examples of this function in the index.php files.
 
 */
 
-function admin_page_display($site_name, $pages, $default = null) {
+function admin_page_display($site_name, $pages, $default = null, $params = array()) {
     $maintitle = "$site_name admin";
     if (get_http_var("page"))  {
         // find page
@@ -53,9 +53,10 @@ function admin_page_display($site_name, $pages, $default = null) {
             header($page->contenttype);
         } else {
             header("Content-Type: text/html; charset=utf-8");
-            $title = $page->navname . " - $maintitle";
-            admin_html_header($title);
-            print "<h1>$title</h1>";
+            if (!isset($params['headfoot'])) {
+                admin_html_header($title);
+                print "<h1>$page->navname - $maintitle</h1>";
+            }
         }
         $self_link = "?page=$id";
         $page->self_link = $self_link;
@@ -65,8 +66,10 @@ function admin_page_display($site_name, $pages, $default = null) {
         }
     } else {
         header("Content-Type: text/html; charset=utf-8");
-        admin_html_header($maintitle);
-        print '<h3>' . $site_name . '</h3>';
+        if (!isset($params['headfoot'])) {
+            admin_html_header($maintitle);
+            print '<h3>' . $site_name . '</h3>';
+        }
         if (!is_null($default)) {
             $default->display();
         }
