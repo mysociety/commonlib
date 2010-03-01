@@ -1,5 +1,5 @@
 //
-// mysociety_config.cpp:
+// mysociety_config.h:
 // Read the terrible mySociety PHP format config files, as similar code for
 // other languages.
 //
@@ -9,7 +9,7 @@
 // $Id: mysociety_error.h,v 1.4 2009-09-24 22:00:29 francis Exp $
 //
 
-#include "error.h"
+#include <boost/format.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -47,7 +47,7 @@ void mysociety_read_conf(const std::string& mysociety_conf_file) {
         }
         std::string key = line.substr(0, found);
         std::string value = line.substr(found + 1, line.size() - found - 2);
-        debug_log(boost::format("mySociety config loaded: %s %s") % key % value);
+        // debug_log(boost::format("mySociety config loaded: %s %s") % key % value);
 
         setenv(key.c_str(), value.c_str(), 1);
     }
