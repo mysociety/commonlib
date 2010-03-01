@@ -40,6 +40,8 @@ class MemoryMappedFile {
         this->f_write = f_write;
         assert(this->ptr == MAP_FAILED);
 
+        this->f_size = f_size;
+
         if (!this->f_write) {
             // check the file is present and the right size
             if (stat(f_name.c_str(), &this->f_stat) < 0) {
@@ -69,7 +71,14 @@ class MemoryMappedFile {
 
     void unmap_file() {
         if (this->ptr != MAP_FAILED) {
-            munmap(this->ptr, this->f_stat.st_size);
+            int ret1 = msync(this->ptr, this->f_size, MS_SYNC);
+            if (ret1 == -1) {
+                throw Exception((boost::format("map_file: failed to msync file: %s") % strerror(errno)).str());
+            }
+            int ret2 = munmap(this->ptr, this->f_size);
+            if (ret2 == -1) {
+                throw Exception((boost::format("map_file: failed to munmap file: %s") % strerror(errno)).str());
+            }
             this->ptr = MAP_FAILED;
         }
         if (this->f_h != -1) {
@@ -85,6 +94,7 @@ class MemoryMappedFile {
     public:
     void *ptr;
     private:
+    unsigned int f_size;
     struct stat f_stat;
     int f_h;
     bool f_write;
