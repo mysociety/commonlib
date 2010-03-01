@@ -51,7 +51,7 @@ class MemoryMappedFile {
         // map it into RAM
         this->f_h = open(f_name.c_str(), this->f_write ? (O_RDWR | O_CREAT) : O_RDONLY, 0644);
         if (this->f_h == -1) {
-            throw Exception((boost::format("map_file: failed to fopen file: %s") % strerror(errno)).str());
+            throw Exception((boost::format("map_file: failed to fopen file %s: %s") % f_name % strerror(errno)).str());
         }
         if (this->f_write) {
             if (lseek(this->f_h, f_size - 1, SEEK_SET) == -1) {
