@@ -40,6 +40,7 @@ class MemoryMappedFile {
         this->f_write = f_write;
         assert(this->ptr == MAP_FAILED);
 
+        this->f_name = f_name;
         this->f_size = f_size;
 
         if (!this->f_write) {
@@ -93,11 +94,12 @@ class MemoryMappedFile {
  
     public:
     void *ptr;
-    private:
+    std::string f_name;
     unsigned int f_size;
+    bool f_write;
+    private:
     struct stat f_stat;
     int f_h;
-    bool f_write;
 };
 
 
