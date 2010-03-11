@@ -19,6 +19,11 @@ bool file_exists(const std::string& file_name) {
     return true;
 }
 
+std::string get_current_directory() {
+    char buf[2048];
+    return std::string(getcwd(buf, 2047));
+}
+
 /////////////////////////////////////////////////////////////////////
 // Memory mapped files
 
