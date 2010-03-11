@@ -16,6 +16,8 @@
 
 #include <stdio.h>
 #include <assert.h>
+/*#include <unwind.h>
+#include <dlfcn.h>*/
 
 /* Logging and debug assertions. Use assert for assertion that matter in release mode,
  * debug_assert for ones that can be stripped. */
@@ -55,3 +57,35 @@ void my_fwrite ( const void * ptr, size_t size, size_t count, FILE * stream ) {
     assert(ret == count);
 }
 
+// Taken from http://gcc.gnu.org/bugzilla/show_bug.cgi?id=33903#c5
+// XXX can't get it to work
+/*std::string mysociety_last_exception_stacktrace;
+_Unwind_Reason_Code helper( struct _Unwind_Context* ctx, void* ) {
+    void* p = reinterpret_cast< void* >( _Unwind_GetIP( ctx ) );
+    Dl_info info;
+    if ( dladdr( p, &info ) ) {
+        if ( info.dli_saddr ) {
+            long d = reinterpret_cast< long >( p )
+                    - reinterpret_cast< long >( info.dli_saddr );
+            std::string line = (boost::format("%p %s+0x%lx\n") % p % info.dli_sname % d).str();
+            fprintf(stderr, line.c_str());
+            mysociety_last_exception_stacktrace += line;
+        }
+    }
+    return _URC_NO_REASON;
+}
+
+extern "C" void __real___cxa_throw( void* thrown_exception,
+        std::type_info* tinfo, void ( *dest )( void* ) )
+        __attribute__(( noreturn ));
+
+extern "C" void __wrap___cxa_throw( void* thrown_exception,
+        std::type_info* tinfo, void ( *dest )( void* ) )
+{
+        _Unwind_Backtrace( helper, 0 );
+        __real___cxa_throw( thrown_exception, tinfo, dest );
+}
+
+Needs these GCC compile flags:
+-Wl,--wrap,__cxa_throw -ldl -rdynamic
+*/
