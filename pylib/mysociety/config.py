@@ -173,7 +173,7 @@ def get (key, default = None):
     
     if key in config:
         return config[key]
-    elif default:
+    elif default != None:
         return default
     else:
         raise Exception, "No value for '%s' in '%s', and no default specified" % (key, config['CONFIG_FILE_NAME'])
