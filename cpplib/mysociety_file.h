@@ -53,7 +53,9 @@ class MemoryMappedFile {
             if (stat(f_name.c_str(), &this->f_stat) < 0) {
                 throw Exception((boost::format("map_file: failed to stat file %s: %s") % f_name.c_str() % strerror(errno)).str());
             }
-            assert((unsigned int)this->f_stat.st_size == f_size);
+            if ((unsigned int)this->f_stat.st_size != f_size) {
+                throw Exception((boost::format("map_file: file size %d doesn't match expected size %d") % (unsigned int)this->f_stat.st_size % f_size).str());
+            }
         }
 
         // map it into RAM
