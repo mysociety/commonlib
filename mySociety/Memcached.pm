@@ -5,7 +5,7 @@
 # Copyright (c) 2010 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Memcached.pm,v 1.1 2010-03-12 00:07:56 matthew Exp $
+# $Id: Memcached.pm,v 1.2 2010-03-12 19:22:31 matthew Exp $
 #
 
 package mySociety::Memcached;
@@ -29,7 +29,7 @@ sub cache_connect {
 }
 
 # Create copies of Cache::Memcached methods that connect on first use
-foreach (qw/get get_multi set add replace delete incr decr/) {
+foreach (qw/get get_multi set add replace delete incr decr flush_all/) {
     eval <<EOF;
 sub $_ {
     cache_connect() unless \$memcache;
