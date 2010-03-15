@@ -385,7 +385,7 @@ class ADMIN_PAGE_REPS {
             $html .= "</table>";
             $form->addElement('static', 'bytype', null, $html);
             admin_render_form($form);
-        } else if ($va_id) {
+        } elseif ($va_id) {
             // One voting area
             $form = new HTML_QuickForm('adminVotingArea', 'get', $self_link);
             $area_info = mapit_get_voting_area_info($va_id);
@@ -399,7 +399,7 @@ class ADMIN_PAGE_REPS {
             $form->addElement('hidden', 'page', $this->id);
             $form->addElement('hidden', 'token', $this->get_token());
             $form->addElement('hidden', 'va_id', $va_id);
-            $form->addElement('select', 'new_status', null, 
+            $select = $form->addElement('select', 'new_status', null, 
                     array(
                         'none' => 'No special status', 
                         'pending_election' => 'Pending election, rep data not valid', 
@@ -409,7 +409,7 @@ class ADMIN_PAGE_REPS {
             );
             $status = dadem_get_area_status($va_id);
             dadem_check_error($status);
-            $form->setDefaults(array('new_status' => $status));
+            $select->setSelected($status);
  
             $form->addElement('submit', 'vaupdate', 'Update');
             admin_render_form($form);
