@@ -5,7 +5,7 @@
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: config.py,v 1.13 2009-08-27 16:19:33 matthew Exp $
+# $Id: config.py,v 1.14 2010-01-28 00:21:16 duncan Exp $
 #
 
 """
@@ -136,13 +136,18 @@ foreach ($a as $k => $v) {
     return config
 
 main_config_filename = None
-def set_file(filename):
+def set_file(filename, abspath=True):
     """set_file FILENAME
        Sets the default configuration file, used by mySociety::Config::get.
+
+       By default this will store an absolute path to the file so things
+       still work after a change of current working directory. If you really
+       want this to be a relative path set the optional argument abspath to
+       something false.
     """
     
     global main_config_filename
-    main_config_filename = filename
+    main_config_filename = os.path.abspath(filename) if abspath else filename
 
 cached_configs = {}
 def load_default():

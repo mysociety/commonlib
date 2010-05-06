@@ -8,7 +8,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-ratty.php,v 1.41 2010-01-18 12:03:03 louise Exp $
+ * $Id: admin-ratty.php,v 1.43 2010-01-19 18:28:14 louise Exp $
  * 
  */
 
