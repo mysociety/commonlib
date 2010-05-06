@@ -1,0 +1,39 @@
+From   Thu Apr  2 16:34:53 2009
+Return-path: <>
+Envelope-to: twfy-live@sponge.ukcod.org.uk
+Delivery-date: Thu, 02 Apr 2009 16:34:52 +0100
+X-Failed-Recipients: anon@lycos.co.uk
+Auto-Submitted: auto-replied
+From: Mail Delivery System <Mailer-Daemon@sponge.ukcod.org.uk>
+To: twfy-bounce@theyworkforyou.com
+Subject: Mail delivery failed: returning message to sender
+Message-Id: <E1LpOwM-0007SW-EW@sponge.ukcod.org.uk>
+Date: Thu, 02 Apr 2009 16:34:50 +0100
+Status: O
+Content-Length: 3471
+Lines: 81
+
+This message was created automatically by mail delivery software.
+
+A message that you sent could not be delivered to one or more of its
+recipients. This is a permanent error. The following address(es) failed:
+
+  anon@lycos.co.uk
+    retry time not reached for any host after a long failure period
+
+------ This is a copy of the message, including all the headers. ------
+
+Return-path: <twfy-bounce@theyworkforyou.com>
+To: anon@lycos.co.uk
+Subject: Your TheyWorkForYou email alert
+From: TheyWorkForYou <twfy-DO-NOT-REPLY@theyworkforyou.com>
+Content-Type: text/plain; charset=iso-8859-1
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+Precedence: bulk
+X-Mailer: PHP/5.2.0-8+etch13
+Message-Id: <E1LpOwL-0007SP-6Z@sponge.ukcod.org.uk>
+Date: Thu, 02 Apr 2009 16:34:49 +0100
+
+
+Mail content

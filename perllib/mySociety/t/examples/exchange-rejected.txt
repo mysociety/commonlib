@@ -1,0 +1,135 @@
+Return-path: <>
+Envelope-to: twfy-live@sponge.ukcod.org.uk
+Delivery-date: Thu, 02 Apr 2009 16:11:32 +0100
+From: System Administrator <postmaster@archant.co.uk>
+To: "twfy-bounce@theyworkforyou.com" <twfy-bounce@theyworkforyou.com>
+Content-Class: urn:content-classes:message
+Date: Thu, 2 Apr 2009 16:11:27 +0100
+Subject: Undeliverable: Your TheyWorkForYou email alert
+Thread-Topic: Undeliverable: Your TheyWorkForYou email alert
+Thread-Index: AcmzpUvkzIM7U9TrREGZSe+7dGEBfA==
+Message-ID: <78F7F0A006C4C74399167DBCA8CDB4110A98F841@snnoex02.archant.co.uk>
+X-MS-Has-Attach: yes
+X-MS-TNEF-Correlator: 
+x-mailer: Internet Mail Service (5.5.2653.19)
+x-ms-embedded-report: 
+x-originalarrivaltime: 02 Apr 2009 15:11:27.0995 (UTC)
+ FILETIME=[4BD44CB0:01C9B3A5]
+x-mc-unique: 109040216113001102
+MIME-Version: 1.0
+Content-Type: multipart/mixed;
+	boundary="_004_78F7F0A006C4C74399167DBCA8CDB4110A98F841snnoex02archant_"
+Status: O
+Content-Length: 9965
+Lines: 258
+
+--_004_78F7F0A006C4C74399167DBCA8CDB4110A98F841snnoex02archant_
+Content-Type: multipart/alternative;
+	boundary="_000_78F7F0A006C4C74399167DBCA8CDB4110A98F841snnoex02archant_"
+
+--_000_78F7F0A006C4C74399167DBCA8CDB4110A98F841snnoex02archant_
+Content-Type: text/plain; charset=WINDOWS-1252
+Content-Transfer-Encoding: quoted-printable
+
+Company footer
+
+--_000_78F7F0A006C4C74399167DBCA8CDB4110A98F841snnoex02archant_
+Content-Type: text/html; charset=WINDOWS-1252
+Content-Transfer-Encoding: quoted-printable
+
+HTML company footer
+
+--_000_78F7F0A006C4C74399167DBCA8CDB4110A98F841snnoex02archant_--
+
+--_004_78F7F0A006C4C74399167DBCA8CDB4110A98F841snnoex02archant_
+Content-Type: message/rfc822
+
+From: System Administrator <postmaster@archant.co.uk>
+To: "Internet Mail Service (SNNOEX02)"
+	<IMCEAEX-_O=ECNG_OU=NORWICH_CN=CONFIGURATION_CN=CONNECTIONS_CN=INTERNET+20MAIL+20CONNECTOR+20+28SNNOEX02+29@mimecast.com>
+Date: Thu, 2 Apr 2009 16:11:27 +0100
+Subject: Undeliverable: Your TheyWorkForYou email alert
+Thread-Topic: Your TheyWorkForYou email alert
+Thread-Index: AcmzpOYpchXfE56iQsiT9eRgxs8aHgAAGUjO
+Message-ID: <78F7F0A006C4C74399167DBCA8CDB4110A98F841@snnoex02.archant.co.uk>
+X-MS-Has-Attach: yes
+X-MS-TNEF-Correlator: 
+MIME-Version: 1.0
+Content-Type: multipart/report;
+	boundary="_000_78F7F0A006C4C74399167DBCA8CDB4110A98F841snnoex02archant_";
+	report-type=delivery-status
+
+--_000_78F7F0A006C4C74399167DBCA8CDB4110A98F841snnoex02archant_
+Content-Type: multipart/alternative;
+	boundary="_002_78F7F0A006C4C74399167DBCA8CDB4110A98F841snnoex02archant_"
+
+--_002_78F7F0A006C4C74399167DBCA8CDB4110A98F841snnoex02archant_
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+
+Delivery has failed to these recipients or distribution lists:
+
+Anon<mailto:anon@anon.co.uk>
+This message was rejected by the recipient's e-mail system. Microsoft Excha=
+nge will not try to redeliver this message for you. Please check the recipi=
+ent's e-mail address and try resending this message, or provide the followi=
+ng diagnostic text to your system administrator.
+
+
+
+
+
+
+
+Diagnostic information for administrators:
+
+Generating server:
+
+anon@anon.co.uk
+#MSEXCH:MSExchangeMTA:IPSWICH:IPSXCHNG1 #SMTP#
+
+--_002_78F7F0A006C4C74399167DBCA8CDB4110A98F841snnoex02archant_
+Content-Type: text/html; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+
+
+--_002_78F7F0A006C4C74399167DBCA8CDB4110A98F841snnoex02archant_--
+
+--_000_78F7F0A006C4C74399167DBCA8CDB4110A98F841snnoex02archant_
+Content-Type: message/delivery-status
+
+Reporting-MTA: dns; IAMIME2
+
+Final-recipient: RFC822; anon@anon.co.uk
+Action: failed
+Status: 5.1.0
+X-Supplementary-Info: MSEXCH:MSExchangeMTA:IPSWICH:IPSXCHNG1
+X-Display-Name: anon
+
+
+
+--_000_78F7F0A006C4C74399167DBCA8CDB4110A98F841snnoex02archant_
+Content-Type: message/rfc822
+
+
+From: TheyWorkForYou <twfy-DO-NOT-REPLY@theyworkforyou.com>
+To: "anon@anon.co.uk"
+	<anon@anon.co.uk>
+Date: Thu, 2 Apr 2009 16:08:34 +0100
+Subject: Your TheyWorkForYou email alert
+Thread-Topic: Your TheyWorkForYou email alert
+Thread-Index: AcmzpOYpchXfE56iQsiT9eRgxs8aHg==
+Message-ID: <E1LpOWw-0002RC-BH@sponge.ukcod.org.uk>
+X-MS-Has-Attach: 
+X-Auto-Response-Suppress: All
+X-MS-TNEF-Correlator: 
+x-mailer: PHP/5.2.0-8+etch13
+MIME-Version: 1.0
+Content-Type: text/plain; charset="Windows-1252"
+Content-Transfer-Encoding: quoted-printable
+
+Message content
+
+--_000_78F7F0A006C4C74399167DBCA8CDB4110A98F841snnoex02archant_--
+
+--_004_78F7F0A006C4C74399167DBCA8CDB4110A98F841snnoex02archant_--

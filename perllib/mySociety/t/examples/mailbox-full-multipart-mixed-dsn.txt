@@ -1,0 +1,75 @@
+From MAILER-DAEMON Wed Sep 10 11:01:47 2008
+Return-path: <>
+Envelope-to: hm@sandwich.ukcod.org.uk
+Delivery-date: Wed, 10 Sep 2008 11:01:47 +0100
+From: postmaster@onmobile.com
+To: hm@sandwich.ukcod.org.uk
+Date: Wed, 10 Sep 2008 15:31:36 +0530
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="----=neXtPaRt_1221041185"
+X-DSNContext: 7ce717b1 - 1158 - 00000002 - 00000000
+Message-ID: <QuTnAgQoM0000132e@newexchangemail.onmobile.com>
+Subject: Delivery Status Notification (Failure)
+Status: O
+Content-Length: 4187
+Lines: 104
+
+
+------=neXtPaRt_1221041185
+Content-Type: multipart/report; report-type=delivery-status;
+	boundary="9B095B5ADSN=_01C90E572A9958EA00031445newexchangemail."
+
+This is a MIME-formatted message.  
+Portions of this message may be unreadable without a MIME-capable mail program.
+
+--9B095B5ADSN=_01C90E572A9958EA00031445newexchangemail.
+Content-Type: text/plain; charset=unicode-1-1-utf-7
+
+This is an automatically generated Delivery Status Notification.
+
+Delivery to the following recipients failed.
+
+       anon@onmobile.com
+
+
+
+
+--9B095B5ADSN=_01C90E572A9958EA00031445newexchangemail.
+Content-Type: message/delivery-status
+
+Reporting-MTA: dns;newexchangemail.onmobile.com
+Received-From-MTA: dns;xmail.onmobile.com
+Arrival-Date: Wed, 10 Sep 2008 15:31:35 +0530
+
+Final-Recipient: rfc822;anon@onmobile.com
+Action: failed
+Status: 5.2.2
+X-Display-Name: 
+
+
+--9B095B5ADSN=_01C90E572A9958EA00031445newexchangemail.
+Content-Type: message/rfc822
+From: Hasslebot <hassle@hassleme.co.uk>
+To: anon@onmobile.com
+Subject: Don't forget to... Drink water 
+Message-ID: <5110b2dfe097fca2f@hassleme.co.uk>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+Sender: HassleMe <hm@sandwich.ukcod.org.uk>
+Date: Wed, 10 Sep 2008 11:01:26 +0100
+Return-Path: hm@sandwich.ukcod.org.uk
+X-OriginalArrivalTime: 10 Sep 2008 10:01:35.0381 (UTC) FILETIME=[357F8C50:01C9132C]
+
+Message content
+
+
+--9B095B5ADSN=_01C90E572A9958EA00031445newexchangemail.--
+
+------=neXtPaRt_1221041185
+Content-Type: text/plain;
+
+Disclaimer
+
+------=neXtPaRt_1221041185--
+

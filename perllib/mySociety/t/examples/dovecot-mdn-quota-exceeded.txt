@@ -1,0 +1,57 @@
+From   Fri Apr  3 11:37:28 2009
+Return-path: <>
+Envelope-to: twfy-live@sponge.ukcod.org.uk
+Delivery-date: Fri, 03 Apr 2009 11:37:27 +0100
+Message-ID: <dovecot-1238755046-13961-0@smtpin02>
+Date: Fri, 03 Apr 2009 10:37:26 +0000
+From: Mail Delivery Subsystem <postmaster@hostedemail.com>
+To: <twfy-bounce@theyworkforyou.com>
+MIME-Version: 1.0
+Content-Type: multipart/report; report-type=disposition-notification;
+	boundary="30100/smtpin02"
+Subject: Automatically rejected mail
+Auto-Submitted: auto-replied (rejected)
+Precedence: bulk
+X-Forwarded-for:  by Tucows
+Status: O
+Content-Length: 1694
+Lines: 46
+
+This is a MIME-encapsulated message
+
+--30100/smtpin02
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+Your message to <anon@virgin.net> was automatically rejected:
+Quota exceeded
+--30100/smtpin02
+Content-Type: message/disposition-notification
+
+Reporting-UA: smtpin02; Dovecot Mail Delivery Agent
+Final-Recipient: rfc822; anon@virgin.net
+Original-Message-ID: <E1Lpgm4-0003V9-Ml@sponge.ukcod.org.uk>
+Disposition: automatic-action/MDN-sent-automatically; deleted
+
+--30100/smtpin02
+Content-Type: message/rfc822
+
+Return-Path: twfy-bounce@theyworkforyou.com
+Delivered-To: anon@virgin.net
+X-FDA: 62085673650
+X-Panda: scanned!
+X-Spam-Summary: 1,0,0,,e562b07f8f0b7a19,twfy-do-not-reply@theyworkforyou.com,anon@virgin.net,RULES_HIT,0,RBL:82.111.230.211-lbl7.mailshell.net-127.0.0.2,CacheIP:none,Bayesian:0.5,0.5,0.5,Netcheck:none,DomainCache:0,MSF:not bulk,SPF:,MSBL:none,DNSBL:none
+To: anon@virgin.net
+Subject: Your TheyWorkForYou email alert
+From: TheyWorkForYou <twfy-DO-NOT-REPLY@theyworkforyou.com>
+MIME-Version: 1.0
+Precedence: bulk
+X-Mailer: PHP/5.2.0-8+etch13
+Message-Id: <E1Lpgm4-0003V9-Ml@sponge.ukcod.org.uk>
+Date: Fri, 03 Apr 2009 11:37:24 +0100
+Content-Transfer-Encoding: quoted-printable
+
+
+
+--30100/smtpin02--

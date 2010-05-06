@@ -1,0 +1,42 @@
+From   Thu Apr  2 16:34:40 2009
+Return-path: <>
+Envelope-to: twfy-live@sponge.ukcod.org.uk
+Delivery-date: Thu, 02 Apr 2009 16:34:38 +0100
+Date: 2 Apr 2009 15:13:20 -0000
+From: MAILER-DAEMON@boltblue.net
+To: twfy-bounce@theyworkforyou.com
+Subject: failure notice
+Status: O
+Content-Length: 3788
+Lines: 92
+
+Hi. This is the qmail-send program at boltblue.net.
+I'm afraid I wasn't able to deliver your message to the following addresses.
+This is a permanent error; I've given up. Sorry it didn't work out.
+*
+* You've experienced some sort of problem sending mail to one of our users.
+* (Please contact us at <support@boltblue.com> if you require assistance)
+*
+* Below is the original mail and the failure reason:
+*
+
+
+<anon@boltblue.com>:
+The users mailfolder is over the allowed quota (size). (#5.2.2)
+
+--- Below this line is a copy of the message.
+
+Return-Path: <twfy-bounce@theyworkforyou.com>
+To: anon@boltblue.com
+Subject: Your TheyWorkForYou email alert
+From: TheyWorkForYou <twfy-DO-NOT-REPLY@theyworkforyou.com>
+Content-Type: text/plain; charset=iso-8859-1
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+Precedence: bulk
+X-Mailer: PHP/5.2.0-8+etch13
+Message-Id: <E1LpObX-00039s-Uy@sponge.ukcod.org.uk>
+Date: Thu, 02 Apr 2009 16:13:19 +0100
+
+
+Message content
