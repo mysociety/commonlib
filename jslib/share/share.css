@@ -1,0 +1,123 @@
+#col1 #share_email {
+    display: block;
+}
+
+#share_form {
+    background: #9c7bbd;
+    border: 1px solid #ddd;
+    display: none;
+    position: absolute;
+    width: 320px;
+    z-index: 999;
+    font-size: 83%;
+}
+#share_form a.share_close {
+    color: #fff;
+    float: right;
+    margin: 5px;
+    font-weight: normal;
+}
+#share_form ul.share_tabs {
+    border: 1px solid #9c7bbd;
+    list-style: none;
+    margin: 10px 10px 0 10px;
+    padding: 0;
+}
+#share_form ul.share_tabs li {
+    background: #c6b5de;
+    border-bottom: 1px solid #999;
+    cursor: pointer;
+    float: left;
+    margin: 0 3px 0 0;
+    padding: 3px 5px 2px 5px;
+}
+#share_form ul.share_tabs li.selected {
+    background: #fff;
+    border-bottom: 1px solid #fff;
+    cursor: default;
+    padding: 4px 5px 1px 5px;
+}
+#share_form div.clear, #share_social div.clear {
+    clear: both;
+    float: none;
+}
+#share_social, #share_email {
+    background: #fff;
+    border: 1px solid #fff;
+    padding: 10px;
+}
+#share_social ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+#share_social ul li {
+    float: left;
+    margin: 0 1em 0 0;
+    padding: 0;
+    width: 45%;
+}
+#share_social ul li a {
+    font-weight: normal;
+    background-position: 0px 2px;
+    background-repeat: no-repeat;
+    display: block;
+    float: left;
+    height: 24px;
+    padding: 0 0 0 22px;
+    vertical-align: middle;
+}
+
+#share_delicious { background-image: url(delicious.gif); }
+#share_digg { background-image: url(digg.gif); }
+#share_furl { background-image: url(furl.gif); }
+#share_netscape { background-image: url(netscape.gif); }
+#share_yahoo_myweb { background-image: url(yahoo_myweb.gif); }
+#share_stumbleupon { background-image: url(stumbleupon.gif); }
+#share_google_bmarks { background-image: url(google_bmarks.gif); }
+#share_technorati { background-image: url(technorati.gif); }
+#share_blinklist { background-image: url(blinklist.gif); }
+#share_newsvine { background-image: url(newsvine.gif); }
+#share_magnolia { background-image: url(magnolia.gif); }
+#share_reddit { background-image: url(reddit.gif); }
+#share_windows_live { background-image: url(windows_live.gif); }
+#share_tailrank { background-image: url(tailrank.gif); }
+#share_facebook { background-image: url(facebook.gif); }
+
+#share_email {
+    display: none;
+    text-align: left;
+}
+#share_email form, #share_email fieldset {
+    border: 0;
+    margin: 0;
+    padding: 0;
+}
+#share_email fieldset legend {
+    display: none;
+}
+#share_email ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+#share_email ul li {
+    margin: 0 0 7px 0;
+    padding: 0;
+}
+#share_email ul li label {
+    display: block;
+    margin-bottom: 3px;
+}
+#share_email ul li input {
+    padding: 3px 10px;
+}
+#share_email ul li input.share_text {
+    padding: 3px;
+    width: 280px;
+}
+.share_link {
+    background: 100% 50% url(share-icon-16x16.gif) no-repeat;
+    padding: 0 22px 0 0;
+    vertical-align: middle;
+}
