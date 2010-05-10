@@ -6,7 +6,7 @@
  * Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
  * Email: chris@mysociety.org; WWW: http://www.mysociety.org/
  *
- * $Id: urls.php,v 1.4 2006-12-20 14:00:48 matthew Exp $
+ * $Id: urls.php,v 1.5 2010-02-15 18:18:57 matthew Exp $
  * 
  */
 
@@ -62,17 +62,16 @@ function url_new($page, $retain) {
         }
     }
     
-    if (count($params) > 0) {
-        $keyvalpairs = array();
-        foreach ($params as $key => $val) {
-            if (is_array($val)) {
-                for ($i = 0; $i < count($val); ++$i)
-                    $keyvalpairs[] = urlencode($key) . '=' . urlencode($val[$i]);
-            } elseif ($val)
-                $keyvalpairs[] = urlencode($key) . '=' . urlencode($val);
-        }
-        $url .= '?' . join('&', $keyvalpairs);
+    $keyvalpairs = array();
+    foreach ($params as $key => $val) {
+        if (is_array($val)) {
+            for ($i = 0; $i < count($val); ++$i)
+                $keyvalpairs[] = urlencode($key) . '=' . urlencode($val[$i]);
+        } elseif ($val)
+            $keyvalpairs[] = urlencode($key) . '=' . urlencode($val);
     }
+    if (count($keyvalpairs))
+        $url .= '?' . join('&', $keyvalpairs);
 
     return $url;
 }

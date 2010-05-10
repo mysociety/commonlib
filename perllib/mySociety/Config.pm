@@ -6,7 +6,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: team@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: Config.pm,v 1.24 2010-01-07 11:42:17 louise Exp $
+# $Id: Config.pm,v 1.25 2010-03-31 17:03:27 matthew Exp $
 #
 
 package mySociety::Config;
@@ -256,6 +256,25 @@ sub get_list {
         return $config;
     }
     return {};
+}
+
+=item test_run/set
+
+set allows you to change config variables at runtime. As this shouldn't
+normally be allowed, and is only for the test suites, you have to call a
+special function test_run first, to confirm you want to do this. set
+then works as you'd expect, but must come after at least one get.
+
+=cut
+my $test_run;
+sub test_run() {
+    $test_run = 1;
+}
+
+sub set($$) {
+    return unless $test_run;
+    my ($key, $value) = @_;
+    $cached_configs{$main_config_filename}{$key} = $value;
 }
 
 1;
