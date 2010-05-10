@@ -29,14 +29,14 @@ module MySociety
       # the prefix defined in ADMIN_BASE_URL in the config
       def admin_url(relative_path)
         admin_url_prefix = MySociety::Config.get("ADMIN_BASE_URL", "/admin/")
-        relative_path = relative_path.gsub(/^\/admin(\/|$)/, '') 
-        return URL.join(admin_url_prefix, relative_path)
+        relative_path = relative_path.gsub(/^\/admin(\/|$)|^\//, '') 
+        return admin_url_prefix + relative_path
       end
 
       # Prefixes a relative URL with the domain definted in DOMAIN in the config
       def main_url(relative_path)
         url_prefix = "http://" + MySociety::Config.get("DOMAIN", '127.0.0.1:3000')
-        return URI.join(url_prefix, relative_path)
+        return url_prefix + relative_path
       end
       
     end
