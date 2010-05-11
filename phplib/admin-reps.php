@@ -225,7 +225,9 @@ class ADMIN_PAGE_REPS {
                     $form->addElement('static', 'note1', null, "Example postcode for testing: " .
                         "<a href='" . OPTION_BASE_URL . '/who?pc=' . urlencode($pc) . "'>"
                         . htmlentities($pc) ."</a> (<a href='?search=" . urlencode($pc) . "&amp;gos=postcode+or+query&amp;page=reps'>all reps here</a>)");
-                    }
+                } else {
+                    $pc = '';
+                }
             }
 
             if ($rep_id) {
