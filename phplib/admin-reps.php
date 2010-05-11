@@ -260,14 +260,16 @@ class ADMIN_PAGE_REPS {
                 has changed delete them and make a new one.  Do not just edit
                 their values, as this would ruin our reponsiveness stats.");
             }
-            if ($rep_id and $sameperson) {
-                $html = '(Note that these representatives are the same person: ';
+            if ($rep_id && $sameperson) {
+                $html = '';
                 foreach ($sameperson as $samerep) {
+                    if ($samerep == $rep_id) continue;
                     $html .= "<a href=\"$self_link&pc=" .  urlencode(get_http_var('pc')). "&rep_id=" . $samerep .  "\">" . $samerep. "</a> \n";
                 }
-                $html = trim($html);
-                $html .= ')';
-                $form->addElement('static', 'sameperson', null, $html);
+                if ($html) {
+                    $html = '(Note that these other representatives are the same person: ' . trim($html) . ')';
+                    $form->addElement('static', 'sameperson', null, $html);
+                }
             }
 
             $form->addElement('static', 'office', 'Office:',
