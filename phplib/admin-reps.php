@@ -221,10 +221,11 @@ class ADMIN_PAGE_REPS {
             // Reverse postcode lookup
             if (!$pc) {
                 $pc = mapit_get_example_postcode($va_id);
-                mapit_check_error($pc);
-                $form->addElement('static', 'note1', null, "Example postcode for testing: " .
-                    "<a href='" . OPTION_BASE_URL . '/who?pc=' . urlencode($pc) . "'>"
+                if (!mapit_get_error($pc)) {
+                    $form->addElement('static', 'note1', null, "Example postcode for testing: " .
+                        "<a href='" . OPTION_BASE_URL . '/who?pc=' . urlencode($pc) . "'>"
                         . htmlentities($pc) ."</a> (<a href='?search=" . urlencode($pc) . "&amp;gos=postcode+or+query&amp;page=reps'>all reps here</a>)");
+                    }
             }
 
             if ($rep_id) {
