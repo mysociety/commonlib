@@ -6,7 +6,7 @@
 # Copyright (c) 2009 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: ServerClass.pm,v 1.1 2009-05-28 15:45:28 francis Exp $
+# $Id: ServerClass.pm,v 1.3 2010-01-26 01:32:54 francis Exp $
 #
 
 package mySociety::ServerClass;
@@ -43,7 +43,7 @@ sub read_config() {
     #print Dumper($class_to_servers);
 }
 
-=item read_config SERVER CLASS
+=item server_in_class SERVER CLASS
 
 Returns 1 if given server is in given class, otherwise 0.
 
@@ -59,5 +59,33 @@ sub server_in_class($$) {
 
     return (grep { $class eq $_ } @$classes) ? 1 : 0;
 }
+
+=item servers_all
+
+Returns list of all servers.
+
+=cut
+sub all_servers() {
+    # Make sure config read
+    read_config(); 
+
+    return keys(%$server_to_classes);
+}
+
+=item servers_in_class CLASS
+
+Returns list of all servers in a given class.
+
+=cut
+sub all_servers_in_class($) {
+    my ($class) = @_;
+
+    # Make sure config read
+    read_config(); 
+
+    my $servers = $class_to_servers->{$class};
+    return @$servers;
+}
+
 
 1;

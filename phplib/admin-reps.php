@@ -5,7 +5,7 @@
  * Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
  * Email: francis@mysociety.org. WWW: http://www.mysociety.org
  *
- * $Id: admin-reps.php,v 1.37 2010-01-18 12:03:03 louise Exp $
+ * $Id: admin-reps.php,v 1.39 2010-01-19 18:28:14 louise Exp $
  * 
  */
 
@@ -221,10 +221,13 @@ class ADMIN_PAGE_REPS {
             // Reverse postcode lookup
             if (!$pc) {
                 $pc = mapit_get_example_postcode($va_id);
-                mapit_check_error($pc);
-                $form->addElement('static', 'note1', null, "Example postcode for testing: " .
-                    "<a href='" . OPTION_BASE_URL . '/who?pc=' . urlencode($pc) . "'>"
+                if (!mapit_get_error($pc)) {
+                    $form->addElement('static', 'note1', null, "Example postcode for testing: " .
+                        "<a href='" . OPTION_BASE_URL . '/who?pc=' . urlencode($pc) . "'>"
                         . htmlentities($pc) ."</a> (<a href='?search=" . urlencode($pc) . "&amp;gos=postcode+or+query&amp;page=reps'>all reps here</a>)");
+                } else {
+                    $pc = '';
+                }
             }
 
             if ($rep_id) {
@@ -257,14 +260,16 @@ class ADMIN_PAGE_REPS {
                 has changed delete them and make a new one.  Do not just edit
                 their values, as this would ruin our reponsiveness stats.");
             }
-            if ($rep_id and $sameperson) {
-                $html = '(Note that these representatives are the same person: ';
+            if ($rep_id && $sameperson) {
+                $html = '';
                 foreach ($sameperson as $samerep) {
+                    if ($samerep == $rep_id) continue;
                     $html .= "<a href=\"$self_link&pc=" .  urlencode(get_http_var('pc')). "&rep_id=" . $samerep .  "\">" . $samerep. "</a> \n";
                 }
-                $html = trim($html);
-                $html .= ')';
-                $form->addElement('static', 'sameperson', null, $html);
+                if ($html) {
+                    $html = '(Note that these other representatives are the same person: ' . trim($html) . ')';
+                    $form->addElement('static', 'sameperson', null, $html);
+                }
             }
 
             $form->addElement('static', 'office', 'Office:',
@@ -385,7 +390,7 @@ class ADMIN_PAGE_REPS {
             $html .= "</table>";
             $form->addElement('static', 'bytype', null, $html);
             admin_render_form($form);
-        } else if ($va_id) {
+        } elseif ($va_id) {
             // One voting area
             $form = new HTML_QuickForm('adminVotingArea', 'get', $self_link);
             $area_info = mapit_get_voting_area_info($va_id);
@@ -399,7 +404,7 @@ class ADMIN_PAGE_REPS {
             $form->addElement('hidden', 'page', $this->id);
             $form->addElement('hidden', 'token', $this->get_token());
             $form->addElement('hidden', 'va_id', $va_id);
-            $form->addElement('select', 'new_status', null, 
+            $select = $form->addElement('select', 'new_status', null, 
                     array(
                         'none' => 'No special status', 
                         'pending_election' => 'Pending election, rep data not valid', 
@@ -409,7 +414,7 @@ class ADMIN_PAGE_REPS {
             );
             $status = dadem_get_area_status($va_id);
             dadem_check_error($status);
-            $form->setDefaults(array('new_status' => $status));
+            $select->setSelected($status);
  
             $form->addElement('submit', 'vaupdate', 'Update');
             admin_render_form($form);
