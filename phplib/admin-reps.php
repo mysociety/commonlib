@@ -221,10 +221,13 @@ class ADMIN_PAGE_REPS {
             // Reverse postcode lookup
             if (!$pc) {
                 $pc = mapit_get_example_postcode($va_id);
-                mapit_check_error($pc);
-                $form->addElement('static', 'note1', null, "Example postcode for testing: " .
-                    "<a href='" . OPTION_BASE_URL . '/who?pc=' . urlencode($pc) . "'>"
+                if (!mapit_get_error($pc)) {
+                    $form->addElement('static', 'note1', null, "Example postcode for testing: " .
+                        "<a href='" . OPTION_BASE_URL . '/who?pc=' . urlencode($pc) . "'>"
                         . htmlentities($pc) ."</a> (<a href='?search=" . urlencode($pc) . "&amp;gos=postcode+or+query&amp;page=reps'>all reps here</a>)");
+                } else {
+                    $pc = '';
+                }
             }
 
             if ($rep_id) {
@@ -257,14 +260,16 @@ class ADMIN_PAGE_REPS {
                 has changed delete them and make a new one.  Do not just edit
                 their values, as this would ruin our reponsiveness stats.");
             }
-            if ($rep_id and $sameperson) {
-                $html = '(Note that these representatives are the same person: ';
+            if ($rep_id && $sameperson) {
+                $html = '';
                 foreach ($sameperson as $samerep) {
+                    if ($samerep == $rep_id) continue;
                     $html .= "<a href=\"$self_link&pc=" .  urlencode(get_http_var('pc')). "&rep_id=" . $samerep .  "\">" . $samerep. "</a> \n";
                 }
-                $html = trim($html);
-                $html .= ')';
-                $form->addElement('static', 'sameperson', null, $html);
+                if ($html) {
+                    $html = '(Note that these other representatives are the same person: ' . trim($html) . ')';
+                    $form->addElement('static', 'sameperson', null, $html);
+                }
             }
 
             $form->addElement('static', 'office', 'Office:',

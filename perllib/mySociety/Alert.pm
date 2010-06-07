@@ -85,7 +85,7 @@ sub delete ($) {
 
 # This makes load of assumptions, but still should be useful
 # 
-# Child must have created, id, email, state(!) columns
+# Child must have confirmed, id, email, state(!) columns
 # If parent/child, child table must also have name and text
 #   and foreign key to parent must be PARENT_id
 
@@ -115,13 +115,14 @@ sub email_alerts ($) {
             from alert, $item_table";
         }
         $query .= "
-            where alert_type='$ref' and whendisabled is null and $item_table.created >= whensubscribed
+            where alert_type='$ref' and whendisabled is null and $item_table.confirmed >= whensubscribed
+            and $item_table.confirmed >= ms_current_timestamp() - '7 days'::interval
              and (select whenqueued from alert_sent where alert_sent.alert_id = alert.id and alert_sent.parameter::integer = $item_table.id) is null
             and $item_table.email <> alert.email 
             $testing_email_clause
             and $alert_type->{item_where}
             and alert.confirmed = 1
-            order by alert.id, $item_table.created";
+            order by alert.id, $item_table.confirmed";
         # XXX Ugh - needs work
         $query =~ s/\?/alert.parameter/ if ($query =~ /\?/);
         $query =~ s/\?/alert.parameter2/ if ($query =~ /\?/);
@@ -190,12 +191,12 @@ sub email_alerts ($) {
         my %data = ( template => $template, data => '', alert_id => $alert->{id}, alert_email => $alert->{email}, lang => $alert->{lang}, cobrand => $alert->{cobrand}, cobrand_data => $alert->{cobrand_data} );
         my $q = "select * from problem_find_nearby(?, ?, ?) as nearby, problem
             where nearby.problem_id = problem.id and problem.state in ('confirmed', 'fixed')
-            and problem.created >= ?
+            and problem.confirmed >= ? and problem.confirmed >= ms_current_timestamp() - '7 days'::interval
             and (select whenqueued from alert_sent where alert_sent.alert_id = ? and alert_sent.parameter::integer = problem.id) is null
             and problem.email <> ?
             $testing_email_clause
             $site_restriction
-            order by created desc";
+            order by confirmed desc";
         $q = dbh()->prepare($q);
         $q->execute($e, $n, $d, $alert->{whensubscribed}, $alert->{id}, $alert->{email});
         while (my $row = $q->fetchrow_hashref) {

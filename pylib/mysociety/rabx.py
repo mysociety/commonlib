@@ -34,7 +34,7 @@ def call_rest_rabx(base_url, params_init):
             params.append('')
         else:
             params.append(p)
-    params_quoted = [ urllib.quote_plus(x) for x in params ]
+    params_quoted = [ urllib.quote_plus(str(x)) for x in params ]
     params_joined = "/".join(params_quoted)
     url = base_url.replace(".cgi", "-rest.cgi") + "?" + params_joined
     content = urllib.urlopen(url).read()
