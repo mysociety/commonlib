@@ -6,7 +6,7 @@
 # Copyright (c) 2010 UK Citizens Online Democracy. All rights reserved.
 # WWW: http://www.mysociety.org
 #
-# $Id: rabxresttorb.pl,v 1.2 2010-06-08 13:57:04 louise Exp $
+# $Id: rabxresttorb.pl,v 1.3 2010-06-08 15:00:04 louise Exp $
 #
 
 require 'config'
@@ -16,7 +16,7 @@ module MySociety
   
   module MaPit
   
-    def do_call_rest_rabx(*params)
+    def MaPit.do_call_rest_rabx(*params)
       base_url = MySociety::Config.get("MAPIT_URL")
       return MySociety::RABX.call_rest_rabx(base_url, params)
     end
@@ -31,7 +31,7 @@ module MySociety
       #
       #  Return current MaPit data generation.
 
-      result = do_call_rest_rabx('MaPit.get_generation')
+      result = MaPit.do_call_rest_rabx('MaPit.get_generation')
       return result
     end
 
@@ -42,7 +42,7 @@ module MySociety
       #  Return voting area IDs for POSTCODE. If GENERATION is given, use that,
       #  otherwise use the current generation.
 
-      result = do_call_rest_rabx('MaPit.get_voting_areas', postcode, generation)
+      result = MaPit.do_call_rest_rabx('MaPit.get_voting_areas', postcode, generation)
       return result
     end
 
@@ -74,7 +74,7 @@ module MySociety
       #    the range of generations of the area database for which this area is to
       #    be used and the current active generation.
 
-      result = do_call_rest_rabx('MaPit.get_voting_area_info', area)
+      result = MaPit.do_call_rest_rabx('MaPit.get_voting_area_info', area)
       return result
     end
 
@@ -85,7 +85,7 @@ module MySociety
       #  As get_voting_area_info, only takes an array of ids, and returns an array
       #  of hashes.
 
-      result = do_call_rest_rabx('MaPit.get_voting_areas_info', ary)
+      result = MaPit.do_call_rest_rabx('MaPit.get_voting_areas_info', ary)
       return result
     end
 
@@ -98,7 +98,7 @@ module MySociety
       #  only return areas of those type(s). If MIN_GENERATION is given, return
       #  all areas since then.
 
-      result = do_call_rest_rabx('MaPit.get_voting_area_by_name', name, type, min_generation)
+      result = MaPit.do_call_rest_rabx('MaPit.get_voting_area_by_name', name, type, min_generation)
       return result
     end
 
@@ -132,7 +132,7 @@ module MySociety
       #  separate Ordnance Survey, from whom we do not have the data. So for
       #  Northern Ireland constituencies an empty hash will be returned.
 
-      result = do_call_rest_rabx('MaPit.get_voting_area_geometry', area, polygon_type)
+      result = MaPit.do_call_rest_rabx('MaPit.get_voting_area_geometry', area, polygon_type)
       return result
     end
 
@@ -143,7 +143,7 @@ module MySociety
       #  As get_voting_area_geometry, only takes an array of ids, and returns an
       #  array of hashes.
 
-      result = do_call_rest_rabx('MaPit.get_voting_areas_geometry', ary, polygon_type)
+      result = MaPit.do_call_rest_rabx('MaPit.get_voting_areas_geometry', ary, polygon_type)
       return result
     end
 
@@ -166,7 +166,7 @@ module MySociety
       #  site). XXX Can this be improved by short-circuiting (only one EUR result
       #  returned, etc.)?
 
-      result = do_call_rest_rabx('MaPit.get_voting_areas_by_location', coordinate, method, types, generation)
+      result = MaPit.do_call_rest_rabx('MaPit.get_voting_areas_by_location', coordinate, method, types, generation)
       return result
     end
 
@@ -179,7 +179,7 @@ module MySociety
       #  current generation, if MIN_GENERATION is provided then returns from that
       #  generation on, or if -1 then gets all areas for all generations.
 
-      result = do_call_rest_rabx('MaPit.get_areas_by_type', type, min_generation)
+      result = MaPit.do_call_rest_rabx('MaPit.get_areas_by_type', type, min_generation)
       return result
     end
 
@@ -189,7 +189,7 @@ module MySociety
       #
       #  Given an area ID, returns one random postcode that maps to it.
 
-      result = do_call_rest_rabx('MaPit.get_example_postcode', id)
+      result = MaPit.do_call_rest_rabx('MaPit.get_example_postcode', id)
       return result
     end
 
@@ -201,7 +201,7 @@ module MySociety
       #  those which are in generation. XXX expand this later with an ALL optional
       #  parameter as get_areas_by_type
 
-      result = do_call_rest_rabx('MaPit.get_voting_area_children', id)
+      result = MaPit.do_call_rest_rabx('MaPit.get_voting_area_children', id)
       return result
     end
 
@@ -233,7 +233,7 @@ module MySociety
       #    Latitude and longitude in the WGS84 coordinate system, expressed as
       #    decimal degrees, north- and east-positive.
 
-      result = do_call_rest_rabx('MaPit.get_location', postcode, partial)
+      result = MaPit.do_call_rest_rabx('MaPit.get_location', postcode, partial)
       return result
     end
 
@@ -244,7 +244,7 @@ module MySociety
       #  Returns a hash of statistics about the database. (Bit slow as count of
       #  postcodes is very slow).
 
-      result = do_call_rest_rabx('MaPit.admin_get_stats')
+      result = MaPit.do_call_rest_rabx('MaPit.admin_get_stats')
       return result
     end
 
