@@ -6,7 +6,7 @@
 # Copyright (c) 2010 UK Citizens Online Democracy. All rights reserved.
 # WWW: http://www.mysociety.org
 #
-# $Id: $
+# $Id: rabxresttorb.pl,v 1.2 2010-06-08 13:57:04 louise Exp $
 #
 
 require 'config'
@@ -27,8 +27,8 @@ def get_generation()
 
   Return current MaPit data generation.
 =end
-    result = do_call_rest_rabx('MaPit.get_generation')
-    return result
+  result = do_call_rest_rabx('MaPit.get_generation')
+  return result
 end
 
 def get_voting_areas(postcode, generation = nil)
@@ -38,8 +38,8 @@ def get_voting_areas(postcode, generation = nil)
   Return voting area IDs for POSTCODE. If GENERATION is given, use that,
   otherwise use the current generation.
 =end
-    result = do_call_rest_rabx('MaPit.get_voting_areas', postcode, generation)
-    return result
+  result = do_call_rest_rabx('MaPit.get_voting_areas', postcode, generation)
+  return result
 end
 
 def get_voting_area_info(area)
@@ -70,8 +70,8 @@ def get_voting_area_info(area)
     the range of generations of the area database for which this area is to
     be used and the current active generation.
 =end
-    result = do_call_rest_rabx('MaPit.get_voting_area_info', area)
-    return result
+  result = do_call_rest_rabx('MaPit.get_voting_area_info', area)
+  return result
 end
 
 def get_voting_areas_info(ary)
@@ -81,8 +81,8 @@ def get_voting_areas_info(ary)
   As get_voting_area_info, only takes an array of ids, and returns an array
   of hashes.
 =end
-    result = do_call_rest_rabx('MaPit.get_voting_areas_info', ary)
-    return result
+  result = do_call_rest_rabx('MaPit.get_voting_areas_info', ary)
+  return result
 end
 
 def get_voting_area_by_name(name, type = nil, min_generation = nil)
@@ -94,8 +94,8 @@ def get_voting_area_by_name(name, type = nil, min_generation = nil)
   only return areas of those type(s). If MIN_GENERATION is given, return
   all areas since then.
 =end
-    result = do_call_rest_rabx('MaPit.get_voting_area_by_name', name, type, min_generation)
-    return result
+  result = do_call_rest_rabx('MaPit.get_voting_area_by_name', name, type, min_generation)
+  return result
 end
 
 def get_voting_area_geometry(area, polygon_type = nil)
@@ -128,8 +128,8 @@ def get_voting_area_geometry(area, polygon_type = nil)
   separate Ordnance Survey, from whom we do not have the data. So for
   Northern Ireland constituencies an empty hash will be returned.
 =end
-    result = do_call_rest_rabx('MaPit.get_voting_area_geometry', area, polygon_type)
-    return result
+  result = do_call_rest_rabx('MaPit.get_voting_area_geometry', area, polygon_type)
+  return result
 end
 
 def get_voting_areas_geometry(ary, polygon_type = nil)
@@ -139,8 +139,8 @@ def get_voting_areas_geometry(ary, polygon_type = nil)
   As get_voting_area_geometry, only takes an array of ids, and returns an
   array of hashes.
 =end
-    result = do_call_rest_rabx('MaPit.get_voting_areas_geometry', ary, polygon_type)
-    return result
+  result = do_call_rest_rabx('MaPit.get_voting_areas_geometry', ary, polygon_type)
+  return result
 end
 
 def get_voting_areas_by_location(coordinate, method, types = nil, generation = nil)
@@ -162,8 +162,8 @@ def get_voting_areas_by_location(coordinate, method, types = nil, generation = n
   site). XXX Can this be improved by short-circuiting (only one EUR result
   returned, etc.)?
 =end
-    result = do_call_rest_rabx('MaPit.get_voting_areas_by_location', coordinate, method, types, generation)
-    return result
+  result = do_call_rest_rabx('MaPit.get_voting_areas_by_location', coordinate, method, types, generation)
+  return result
 end
 
 def get_areas_by_type(type, min_generation = nil)
@@ -175,8 +175,8 @@ def get_areas_by_type(type, min_generation = nil)
   current generation, if MIN_GENERATION is provided then returns from that
   generation on, or if -1 then gets all areas for all generations.
 =end
-    result = do_call_rest_rabx('MaPit.get_areas_by_type', type, min_generation)
-    return result
+  result = do_call_rest_rabx('MaPit.get_areas_by_type', type, min_generation)
+  return result
 end
 
 def get_example_postcode(id)
@@ -185,8 +185,8 @@ def get_example_postcode(id)
 
   Given an area ID, returns one random postcode that maps to it.
 =end
-    result = do_call_rest_rabx('MaPit.get_example_postcode', id)
-    return result
+  result = do_call_rest_rabx('MaPit.get_example_postcode', id)
+  return result
 end
 
 def get_voting_area_children(id)
@@ -197,8 +197,8 @@ def get_voting_area_children(id)
   those which are in generation. XXX expand this later with an ALL optional
   parameter as get_areas_by_type
 =end
-    result = do_call_rest_rabx('MaPit.get_voting_area_children', id)
-    return result
+  result = do_call_rest_rabx('MaPit.get_voting_area_children', id)
+  return result
 end
 
 def get_location(postcode, partial = nil)
@@ -229,8 +229,8 @@ def get_location(postcode, partial = nil)
     Latitude and longitude in the WGS84 coordinate system, expressed as
     decimal degrees, north- and east-positive.
 =end
-    result = do_call_rest_rabx('MaPit.get_location', postcode, partial)
-    return result
+  result = do_call_rest_rabx('MaPit.get_location', postcode, partial)
+  return result
 end
 
 def admin_get_stats()
@@ -240,7 +240,7 @@ def admin_get_stats()
   Returns a hash of statistics about the database. (Bit slow as count of
   postcodes is very slow).
 =end
-    result = do_call_rest_rabx('MaPit.admin_get_stats')
-    return result
+  result = do_call_rest_rabx('MaPit.admin_get_stats')
+  return result
 end
 
