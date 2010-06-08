@@ -14,7 +14,7 @@ module MySociety
 
   module RABX
     
-    class RABXError < Exception
+    class RABXError < StandardError
       
       alias :orig_to_s :to_s
       
@@ -49,7 +49,7 @@ module MySociety
       content = open(url).read
       result = JSON.parse(content)
       if result.has_key? 'error_value'
-        raise RABXError(result['error_value'], result['error_text'], result['error_extradata'])
+        raise RABXError.new(result['error_value'], result['error_text'], result['error_extradata'])
       end
       return result
     end
