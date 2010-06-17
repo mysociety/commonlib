@@ -299,11 +299,13 @@ sub generate_rss ($$$;$$$$) {
         );
         $item{pubDate} = $pubDate if $pubDate;
 
-        # XXX: Not-very-generic extensions
+        # XXX: Not-very-generic extensions, at all
         my $display_photos = Cobrand::allow_photo_display($cobrand);    
         if ($display_photos && $row->{photo}) {
             $item{description} .= ent("\n<br><img src=\"". Cobrand::url($cobrand, $url, $http_q) . "/photo?id=$row->{id}\">");
         }
+        $item{description} .= ent("\n<br><a href='$cobrand_url'>Report on FixMyStreet</a>");
+
         if ($row->{easting} && $row->{northing}) {
             my ($lat,$lon) = mySociety::GeoUtil::national_grid_to_wgs84($row->{easting}, $row->{northing}, 'G');
             $item{georss} = { point => "$lat $lon" };
