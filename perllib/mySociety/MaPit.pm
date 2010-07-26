@@ -39,10 +39,12 @@ sub _call ($$;$) {
     }
     configure() unless $base;
     $params = join(',', @$params) if ref $params;
-    my $after;
-    ($url, $after) = split '/', $url, 2;
-    $url .= "/$params" if $params;
-    $url .= "/$after" if $after;
+    my ($urlp, $after) = split '/', $url, 2;
+    $urlp .= "/$params" if $params;
+    $urlp .= "/$after" if $after;
+    if (length($base . $urlp) > 1024) {
+        $opts->{URL} = $params;
+    }
     my $qs = '';
     foreach my $k (keys %$opts) {
         my $v = $opts->{$k};
@@ -51,10 +53,13 @@ sub _call ($$;$) {
         $qs .= "$k=$v";
     }
     my $r;
-    if (length("$base$url?$qs") > 1024) {
+    if (length($base . $urlp) > 1024) {
         $r = $ua->post($base . $url, Content => $qs);
+    if (length("$base$urlp?$qs") > 1024) {
+        $r = $ua->post($base . $urlp, Content => $qs);
     } else {
-        $r = $ua->get($base . $url . '?' . $qs);
+        $urlp .= "?$qs" if $qs;
+        $r = $ua->get($base . $urlp);
     }
     return $r;
 }
