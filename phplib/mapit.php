@@ -40,7 +40,10 @@ function call($url, $params, $opts = array(), $errors = array()) {
         curl_setopt($mapit_ch, CURLOPT_USERAGENT, 'PHP MaPit client');
     }
     if (is_array($params)) $params = join(',', $params);
-    list ($urlp, $after) = explode('/', $url, 2);
+    if (strpos($url, '/'))
+        list ($urlp, $after) = explode('/', $url, 2);
+    else
+        list ($urlp, $after) = array($url, '');
     if ($params) $urlp .= '/' . rawurlencode($params);
     if ($after) $urlp .= "/$after";
     if (strlen(OPTION_MAPIT_URL . $urlp) > 1024) {
@@ -73,11 +76,12 @@ function call($url, $params, $opts = array(), $errors = array()) {
     }
     $C = curl_getinfo($mapit_ch, CURLINFO_HTTP_CODE);
 
-    $out = json_decode($r);
+    $out = json_decode($r, true);
+
     if ($C == 404 && $errors['404']) {
-        return rabx_error($errors['404'], $out->{error});
+        return rabx_error($errors['404'], $out['error']);
     } elseif ($C == 400 && $errors['400']) {
-        return rabx_error($errors['400'], $out->{error});
+        return rabx_error($errors['400'], $out['error']);
     } elseif ($C != 200) {
         return rabx_error(RABX_ERROR_TRANSPORT, "HTTP error $C calling $url");
     } else {
