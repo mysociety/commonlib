@@ -55,7 +55,7 @@ sub _call ($$;$) {
     my $r;
     if (length($base . $urlp) > 1024) {
         $r = $ua->post($base . $url, Content => $qs);
-    if (length("$base$urlp?$qs") > 1024) {
+    } elsif (length("$base$urlp?$qs") > 1024) {
         $r = $ua->post($base . $urlp, Content => $qs);
     } else {
         $urlp .= "?$qs" if $qs;
