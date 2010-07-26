@@ -47,11 +47,15 @@ sub _call ($$;$) {
     foreach my $k (keys %$opts) {
         my $v = $opts->{$k};
         $v = join(',', @$v) if ref $v;
-        $qs .= $qs ? ';' : '?';
+        $qs .= $qs ? ';' : '';
         $qs .= "$k=$v";
     }
-    $url .= $qs;
-    my $r = $ua->get($base . $url);
+    my $r;
+    if (length("$base$url?$qs") > 1024) {
+        $r = $ua->post($base . $url, Content => $qs);
+    } else {
+        $r = $ua->get($base . $url . '?' . $qs);
+    }
     return $r;
 }
 
