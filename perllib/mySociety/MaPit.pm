@@ -145,7 +145,7 @@ sub get_voting_area_children ($) {
 }
 
 sub get_location ($;$) {
-    return call_old('get_location/partial', $_[0], {}, { 400 => BAD_POSTCODE, 404 => POSTCODE_NOT_FOUND });
+    return call_old('get_location', $_[0], {}, { 400 => BAD_POSTCODE, 404 => POSTCODE_NOT_FOUND });
 }
 
 1;
