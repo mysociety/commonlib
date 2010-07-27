@@ -42,9 +42,13 @@ class ADMIN_PAGE_REPS {
             $rep = $reps[$i];
             $repinfo = $info[$rep];
             $ainfo = $area_info[$repinfo['voting_area']];
-            $html .= "<!-- gen ".$ainfo['generation_low']."-".$ainfo['generation_high']." cur ".$ainfo['generation']." -->";
-            if ($ainfo['generation'] < $ainfo['generation_low'] || $ainfo['generation'] > $ainfo['generation_high'])
-                $html .= "<i>out of generation</i> ";
+            if ($ainfo) {
+                $html .= "<!-- gen ".$ainfo['generation_low']."-".$ainfo['generation_high']." cur ".$ainfo['generation']." -->";
+                if ($ainfo['generation'] < $ainfo['generation_low'] || $ainfo['generation'] > $ainfo['generation_high'])
+                    $html .= "<i>out of generation</i> ";
+            } else {
+                $html .= '<i>area no longer exists</i> ';
+            }
 
             if ($repinfo['deleted'])
                 $html .= "<i>deleted</i> ";
