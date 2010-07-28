@@ -28,6 +28,8 @@ class ADMIN_PAGE_REPS {
     }
 
     function render_reps($self_link, $reps, $bad_link = false) {
+        if (!$reps) return '';
+
         $html = "";
         $info = dadem_get_representatives_info($reps);
         dadem_check_error($info);
