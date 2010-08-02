@@ -178,10 +178,8 @@ sub email_alerts ($) {
     $query->execute();
     while (my $alert = $query->fetchrow_hashref) {
         next unless (Cobrand::email_host($alert->{cobrand}));
-        my $x = $alert->{parameter};
-        my $y = $alert->{parameter2};
-        my $e = Page::tile_to_os($x);
-        my $n = Page::tile_to_os($y);
+        my $e = $alert->{parameter};
+        my $n = $alert->{parameter2};
         $url = Cobrand::base_url_for_emails($alert->{cobrand}, $alert->{cobrand_data});
         my ($site_restriction, $site_id) = Cobrand::site_restriction($alert->{cobrand}, $alert->{cobrand_data});
         my ($lat, $lon) = mySociety::GeoUtil::national_grid_to_wgs84($e, $n, 'G');
