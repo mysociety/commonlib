@@ -11,6 +11,10 @@ module MySociety
 
         # Stop someone writing all in capitals, or all lower case letters.
         def Validate.uses_mixed_capitals(s, allow_shorter_than = 20)
+            # strip any URLs, as they tend to be all lower case and shouldn't count towards penalty
+            s = s.gsub(/(https?):\/\/([^\s<>{}()]+[^\s.,<>{}()])/i, "")
+            s = s.gsub(/(\s)www\.([a-z0-9\-]+)((?:\.[a-z0-9\-\~]+)+)((?:\/[^ <>{}()\n\r]*[^., <>{}()\n\r])?)/i, "")
+
             # count Roman alphabet lower and upper case letters
             capitals = 0
             lowercase = 0 
@@ -25,10 +29,10 @@ module MySociety
 
             # what proportion of roman A-Z letters are capitals?
             percent_capitals = capitals.to_f / (capitals + lowercase).to_f * 100
+            #STDOUT.puts("percent_capitals " + percent_capitals.to_s)
 
             # anything more than 75% caps, or less than 0.5% capitals
             # XXX should check these against database of old FOI requests etc.
-            #raise percent_capitals.to_s
             if percent_capitals > 75.0 || percent_capitals < 0.5
                 return false
             end
