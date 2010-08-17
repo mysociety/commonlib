@@ -9,6 +9,9 @@
 
 require 'config'
 require 'rabx'
+require 'json'
+require 'net/http'
+require 'uri'
 
 module MySociety
   
@@ -18,7 +21,13 @@ module MySociety
       base_url = MySociety::Config.get("MAPIT_URL")
       return MySociety::RABX.call_rest_rabx(base_url, params)
     end
-
+    
+    # Call the new MaPit, parse returned JSON
+    def MaPit.call(function, params, options={})
+      response = self.do_call(function, params, options)
+      return JSON.parse(response.body)
+    end
+    
     BAD_POSTCODE = 2001        #    String is not in the correct format for a postcode. 
     POSTCODE_NOT_FOUND = 2002        #    The postcode was not found in the database. 
     AREA_NOT_FOUND = 2003        #    The area ID refers to a non-existent area. 
@@ -178,6 +187,45 @@ module MySociety
 
       result = MaPit.do_call_rest_rabx('MaPit.get_location', postcode, partial)
       return result
+    end
+    
+    private
+
+    def MaPit.do_call(url, params, options={})
+      max_url_length = 1024
+      base_url = MySociety::Config.get("MAPIT_URL")
+      # path should start with a slash
+      url = "/#{url}" unless /^\//.match(url)
+      base_url = URI.parse(base_url)
+      response = Net::HTTP.start(base_url.host, base_url.port) { |http|
+        params = params.join(',') if params.is_a? Array
+        empty, url_path, suffix = url.split('/', 3)
+        # preserve the starting slash
+        url_path = "/#{url_path}"
+        url_path += "/#{params}" if params
+        url_path += "/#{suffix}" if suffix
+        
+        # assemble a ";" delimited query string
+        query_string = options.map do |key, value|
+          value = value.join(',') if value.is_a? Array
+          "#{key}=#{value}"
+        end.join(";")
+        
+        # Use POST if the GET url would be too long
+        if "#{base_url}#{url_path}".size > max_url_length
+          options['URL'] = params
+          url = URI.parse(url)
+          request = Net::HTTP::Post.new(url)
+          request.set_form_data(options)
+        elsif "#{base_url}#{url_path}?#{query_string}".size > max_url_length
+          request = Net::HTTP::Post.new(url_path)
+          request.set_form_data(options)
+        else
+          url_path += "?#{query_string}" if query_string && !query_string.empty?
+          request = Net::HTTP::Get.new(url_path)
+        end
+        http.request(request)
+      }
     end
 
   end
