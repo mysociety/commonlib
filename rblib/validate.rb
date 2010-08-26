@@ -84,19 +84,50 @@ module MySociety
         end
 
 
-        # validate_postcode POSTCODE
-        # Return true is POSTCODE is in the proper format for a UK postcode. Does not
+        # is_valid_postcode POSTCODE
+        # Return true if POSTCODE is in the proper format for a UK postcode. Does not
         # require spaces in the appropriate place.
         def Validate.is_valid_postcode(postcode)
             return Validate.postcode_match_internal(postcode, "^", "$")
         end
+        
+        # is_valid_partial_postcode POSTCODE
+        # Returns true if POSTCODE is in the proper format for the first part of a UK
+        # postcode. Expects a stripped string.
+        def Validate.is_valid_partial_postcode(postcode)
+        
+            # Our test postcode
+            if (postcode.match(/^zz9$/i))
+                return true 
+            end
+            
+            fst = 'ABCDEFGHIJKLMNOPRSTUWYZ'
+            sec = 'ABCDEFGHJKLMNOPQRSTUVWXY'
+            thd = 'ABCDEFGHJKSTUW'
+            fth = 'ABEHMNPRVWXY'
+            num0 = '123456789' # Technically allowed in spec, but none exist
+            num = '0123456789'
+            
+            if (postcode.match(/^[#{fst}][#{num0}]$/i) ||
+                postcode.match(/^[#{fst}][#{num0}][#{num}]$/i) ||
+                postcode.match(/^[#{fst}][#{sec}][#{num}]$/i) ||
+                postcode.match(/^[#{fst}][#{sec}][#{num0}][#{num}]$/i) ||
+                postcode.match(/^[#{fst}][#{num0}][#{thd}]$/i) ||
+                postcode.match(/^[#{fst}][#{sec}][#{num0}][#{fth}]$/i
+                ))
+                return true
+            else
+                return false
+            end
+        end
+        
         def Validate.contains_postcode?(postcode)
             return Validate.postcode_match_internal(postcode, "\\b", "\\b")
         end
 
         def Validate.postcode_match_internal(postcode, pre, post)
             # Our test postcode
-            if (postcode.match("/#{pre}zz9\s*9z[zy]$/i"))
+            if (postcode.match(/#{pre}zz9\s*9z[zy]#{post}/i))
                 return true 
             end
             
