@@ -25,6 +25,8 @@ module MySociety
     # Call the new MaPit, parse returned JSON
     def MaPit.call(function, params, options={})
       response = self.do_call(function, params, options)
+      return :bad_request if response.code == '400'
+      return :not_found if response.code == '404'
       return JSON.parse(response.body)
     end
     
