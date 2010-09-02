@@ -119,8 +119,9 @@ function mapit_get_voting_area_children($id) {
     return call('get_voting_area_children', $id);
 }
 
-function mapit_get_location($postcode, $partial = array()) {
-    return call('get_location', $postcode, $partial,
+function mapit_get_location($postcode, $partial = 0) {
+    $url = $partial ? 'get_location/partial' : 'get_location';
+    return call($url, $postcode, array(),
         array( 400 => MAPIT_BAD_POSTCODE, 404 => MAPIT_POSTCODE_NOT_FOUND )
     );
 }
