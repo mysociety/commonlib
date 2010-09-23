@@ -31,7 +31,7 @@ define('MAPIT_POSTCODE_NOT_FOUND', 2002);        /*    The postcode was not foun
 define('MAPIT_AREA_NOT_FOUND', 2003);        /*    The area ID refers to a non-existent area.  */
 
 $mapit_ch = null;
-function call($url, $params, $opts = array(), $errors = array()) {
+function mapit_call($url, $params, $opts = array(), $errors = array()) {
     global $mapit_ch;
     if (is_null($mapit_ch)) {
         $mapit_ch = curl_init();
@@ -78,9 +78,9 @@ function call($url, $params, $opts = array(), $errors = array()) {
 
     $out = json_decode($r, true);
 
-    if ($C == 404 && $errors['404']) {
+    if ($C == 404 && isset($errors['404'])) {
         return rabx_error($errors['404'], $out['error']);
-    } elseif ($C == 400 && $errors['400']) {
+    } elseif ($C == 400 && isset($errors['400'])) {
         return rabx_error($errors['400'], $out['error']);
     } elseif ($C != 200) {
         return rabx_error(RABX_ERROR_TRANSPORT, "HTTP error $C calling $url");
@@ -90,37 +90,38 @@ function call($url, $params, $opts = array(), $errors = array()) {
 }
 
 function mapit_get_voting_areas($postcode, $generation = null) {
-    return call('get_voting_areas', $postcode, array( 'generation' => $generation),
+    return mapit_call('get_voting_areas', $postcode, array( 'generation' => $generation),
         array( 400 => MAPIT_BAD_POSTCODE, 404 => MAPIT_POSTCODE_NOT_FOUND )
     );
 }
 
 function mapit_get_voting_area_info($area) {
-    return call('get_voting_area_info', $area, array(), array( 404 => MAPIT_AREA_NOT_FOUND ));
+    return mapit_call('get_voting_area_info', $area, array(), array( 404 => MAPIT_AREA_NOT_FOUND ));
 }
 
 function mapit_get_voting_areas_info($ary) {
-    return call('get_voting_areas_info', $ary, array(), array( 404 => MAPIT_AREA_NOT_FOUND ));
+    return mapit_call('get_voting_areas_info', $ary, array(), array( 404 => MAPIT_AREA_NOT_FOUND ));
 }
 
 function mapit_get_voting_area_by_name($name, $type = null, $min_generation = null) {
-    return call('get_voting_area_by_name', $name, array( 'type' => $type, 'min_generation' => $min_generation ) );
+    return mapit_call('get_voting_area_by_name', $name, array( 'type' => $type, 'min_generation' => $min_generation ) );
 }
 
 function mapit_get_areas_by_type($type, $min_generation = null) {
-    return call('get_areas_by_type', $type, array( 'min_generation' => $min_generation ) );
+    return mapit_call('get_areas_by_type', $type, array( 'min_generation' => $min_generation ) );
 }
 
 function mapit_get_example_postcode($id) {
-    return call('get_example_postcode', $id);
+    return mapit_call('get_example_postcode', $id);
 }
 
 function mapit_get_voting_area_children($id) {
-    return call('get_voting_area_children', $id);
+    return mapit_call('get_voting_area_children', $id);
 }
 
-function mapit_get_location($postcode, $partial = array()) {
-    return call('get_location', $postcode, $partial,
+function mapit_get_location($postcode, $partial = 0) {
+    $url = $partial ? 'get_location/partial' : 'get_location';
+    return mapit_call($url, $postcode, array(),
         array( 400 => MAPIT_BAD_POSTCODE, 404 => MAPIT_POSTCODE_NOT_FOUND )
     );
 }
