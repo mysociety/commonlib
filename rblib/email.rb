@@ -520,6 +520,13 @@ module MySociety
 
       return text
     end
+    
+    def self.clean_linebreaks(text)
+      text.strip!
+      text = text.gsub(/\n/, '<br>')
+      text = text.gsub(/(?:<br>\s*){2,}/, '<br><br>') # remove excess linebreaks that unnecessarily space it out
+      return text
+    end
   
     # A subclass of TMail that adds some extra attributes
     class Mail < TMail::Mail
