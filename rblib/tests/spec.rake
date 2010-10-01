@@ -1,3 +1,4 @@
+# Rake task for running commonlib/rblib tests within rspec
 require 'rubygems'
 require 'spec/rake/spectask'
 

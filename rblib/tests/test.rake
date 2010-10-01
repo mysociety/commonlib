@@ -1,3 +1,4 @@
+# Rake task for running commonlib/rblib tests
 namespace :test do 
   desc "Run the ruby tests in commonlib"
   task :commonlib do 
