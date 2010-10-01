@@ -3,11 +3,18 @@
 # Copyright (c) 2010 UK Citizens Online Democracy. All rights reserved.
 # Email: louise@mysociety.org; WWW: http://www.mysociety.org/
 #
+require 'rubygems'
 require 'tmail'
 require 'mahoro'
 require 'mapi/msg'
+require 'mapi/convert'
 require 'tmpdir'
+require 'zip/zip'
 
+# Dir.mktmpdir only in backports for 1.8.6
+if RUBY_VERSION == '1.8.6'
+  require 'backports'
+end
 module MySociety
 
   module Email
@@ -40,7 +47,7 @@ module MySociety
 
     # Returns part of an email which contains main body text, or nil if there isn't one
     def self.get_main_body_text_part(mail)
-      leaves = get_attachment_leaves(mail)
+      leaves = get_leaves(mail)
       
       # Find first part which is text/plain or text/html
       # (We have to include HTML, as increasingly there are mail clients that
@@ -90,22 +97,69 @@ module MySociety
       best_part
     end
     
-    def self.get_attachment_leaves(mail)
+    # Get a list of Attachments suitable for display
+    # Accepts a block to allow alteration of the attachment filenames 
+    # e.g in order to remove text
+    # attachments = MySociety::Email.get_display_attachments(@mail) do |filename|
+    #   return nil unless filename
+    #   return "custom_#{filename}"
+    # end
+    def self.get_display_attachments(mail, &filename_block)
+      main_part = get_main_body_text_part(mail)
+      leaves = get_leaves(mail)
+    
+      attachments = []
+      leaves.each do |leaf|
+        next if leaf == main_part
+        attachment = Attachment.new(:body => leaf.body, 
+                                    :filename => Mail.get_part_file_name(leaf, &filename_block),
+                                    :content_type => leaf.content_type,
+                                    :url_part_number => leaf.url_part_number)
+                                    
+        if leaf.within_attached_email
+          attachment.is_email = true
+          attachment.subject = leaf.within_attached_email.subject
+          
+          # Test to see if we are in the first part of the attached
+          # RFC822 message and it is text, if so add headers.
+          # XXX should probably use hunting algorithm to find main text part, rather than
+          # just expect it to be first. This will do for now though.
+          if leaf.within_attached_email == leaf && leaf.content_type == 'text/plain'
+            headers = ""
+            for header in [ 'Date', ' ', 'From', 'To', 'Cc' ]
+              if leaf.within_attached_email.header.include?(header.downcase)
+                header_value = leaf.within_attached_email.header[header.downcase]
+                if !header_value.blank?
+                  headers = headers + header + ": " + header_value.to_s + "\n"
+                end
+              end
+            end
+            # XXX call _convert_part_body_to_text here, but need to get charset somehow
+            # e.g. http://www.whatdotheyknow.com/request/1593/response/3088/attach/4/Freedom%20of%20Information%20request%20-%20car%20oval%20sticker:%20Article%2020,%20Convention%20on%20Road%20Traffic%201949.txt
+            attachment.body = headers + "\n" + attachment.body
+          end
+        end
+        attachments << attachment
+      end
+      attachments
+    end 
+    
+    def self.get_leaves(mail)
       @count_parts_count = 0
-      return _get_attachment_leaves_recursive(mail)
+      return _get_leaves_recursive(mail)
     end
     
-    def self._get_attachment_leaves_recursive(mail, within_rfc822_attachment = nil)
+    def self._get_leaves_recursive(mail, within_attached_email = nil)
       leaves_found = []
       if mail.multipart?
         # pick best part
         if mail.sub_type == 'alternative'
           best_part = get_best_part_for_display(mail)
-          leaves_found += _get_attachment_leaves_recursive(best_part, within_rfc822_attachment)
+          leaves_found += _get_leaves_recursive(best_part, within_attached_email)
         else
           # add all parts
           mail.parts.each do |part|
-            leaves_found += _get_attachment_leaves_recursive(part, within_rfc822_attachment)
+            leaves_found += _get_leaves_recursive(part, within_attached_email)
           end
         end
       else
@@ -115,10 +169,10 @@ module MySociety
 
         # If the part is an attachment of email
         if is_attachment?(mail)
-          leaves_found += _get_attachment_leaves_recursive(mail.rfc822_attachment, mail.rfc822_attachment)
+          leaves_found += _get_leaves_recursive(mail.attached_email, mail.attached_email)
         else
           # Store leaf
-          mail.within_rfc822_attachment = within_rfc822_attachment
+          mail.within_attached_email = within_attached_email
           @count_parts_count += 1
           mail.url_part_number = @count_parts_count
           leaves_found += [mail]
@@ -139,32 +193,30 @@ module MySociety
       part_filename = Mail.get_part_file_name(part)
       if part.content_type == 'message/rfc822'
         # An email attached as text
-        # e.g. http://www.whatdotheyknow.com/request/64/response/102
         begin
-          part.rfc822_attachment = Mail.parse(part.body)
+          part.attached_email = Mail.parse(part.body)
         rescue
-          part.rfc822_attachment = nil
+          part.attached_email = nil
           part.content_type = 'text/plain'
         end
       elsif part.content_type == 'application/vnd.ms-outlook' || 
           part_filename && filename_to_mimetype(part_filename) == 'application/vnd.ms-outlook'
         # An email attached as an Outlook file
-        # e.g. http://www.whatdotheyknow.com/request/chinese_names_for_british_politi
         begin
           msg = Mapi::Msg.open(StringIO.new(part.body))
-          part.rfc822_attachment = Mail.parse(msg.to_mime.to_s)
+          part.attached_email = Mail.parse(msg.to_mime.to_s)
         rescue
-          part.rfc822_attachment = nil
+          part.attached_email = nil
           part.content_type = 'application/octet-stream'
         end
       elsif part.content_type == 'application/ms-tnef' 
         # A set of attachments in a TNEF file
         begin
-          part.rfc822_attachment = TNEF.as_tmail(part.body)
+          part.attached_email = TNEF.as_mail(part.body)
         rescue
-          part.rfc822_attachment = nil
+          part.attached_email = nil
           # Attached mail didn't parse, so treat as binary
-          mail.content_type = 'application/octet-stream'
+          part.content_type = 'application/octet-stream'
         end
       end
     end
@@ -387,7 +439,6 @@ module MySociety
       name = Regexp.escape(name)
 
       # To end of message sections
-      # http://www.whatdotheyknow.com/request/university_investment_in_the_arm
       text.gsub!(/^#{name}[^\n]+\nSent by:[^\n]+\n.*/ims, "\n\n" + replacement)
 
       # Some other sort of forwarding quoting
@@ -493,8 +544,8 @@ module MySociety
     # A subclass of TMail that adds some extra attributes
     class Mail < TMail::Mail
       attr_accessor :url_part_number
-      attr_accessor :rfc822_attachment # when a whole email message is attached as text
-      attr_accessor :within_rfc822_attachment # for parts within a message attached as text (for getting subject mainly)
+      attr_accessor :attached_email # when a whole email message is attached as text
+      attr_accessor :within_attached_email # for parts within a message attached as text (for getting subject mainly)
     
       # Hack round bug in TMail's MIME decoding. Example request which provokes it:
       # http://rubyforge.org/tracker/index.php?func=detail&aid=21810&group_id=4512&atid=17370
@@ -502,20 +553,77 @@ module MySociety
         TMail::Mail.parse(raw_data.gsub(/; boundary=\s+"/ims,'; boundary="'))
       end
   
-      def Mail.get_part_file_name(part)
+      def Mail.get_part_file_name(part, &block)
         file_name = (part['content-location'] &&
-                      part['content-location'].body) ||
-                    part.sub_header("content-type", "name") ||
-                    part.sub_header("content-disposition", "filename")
+                     part['content-location'].body) ||
+                     part.sub_header("content-type", "name") ||
+                     part.sub_header("content-disposition", "filename")
+        if block_given?
+          file_name = yield file_name
+        end
+        file_name
       end
+      
     end
-  
+    
+    class Attachment 
+      attr_accessor :body, :content_type, :filename, :is_email, :subject
+
+      def initialize(attributes)
+        @body = attributes[:body]
+        @content_type = attributes[:content_type]
+        @filename = attributes[:filename]
+      end
+      
+      def display_filename
+        filename = self._internal_display_filename
+
+        # Sometimes filenames have e.g. %20 in - no point butchering that
+        # (without unescaping it, this would remove the % and leave 20s in there)
+        filename = CGI.unescape(filename)
+
+        # Remove weird spaces
+        filename = filename.gsub(/\s+/, " ")
+        # Remove non-alphabetic characters
+        filename = filename.gsub(/[^A-Za-z0-9.]/, " ")
+        # Remove spaces near dots
+        filename = filename.gsub(/\s*\.\s*/, ".")
+        # Compress adjacent spaces down to a single one
+        filename = filename.gsub(/\s+/, " ")
+        filename = filename.strip
+
+        return filename
+      end
+      
+      def _internal_display_filename
+        calc_ext = MySociety::Email.mimetype_to_extension(@content_type)
+        if @filename 
+          # Put right extension on if missing
+          if !filename.match(/\.#{calc_ext}$/) && calc_ext
+            filename + "." + calc_ext
+          else
+            filename
+          end
+        else
+          if !calc_ext
+            calc_ext = "bin"
+          end
+          if self.subject
+            self.subject + "." + calc_ext
+          else
+            "attachment." + calc_ext
+          end
+        end
+      end
+
+    end
+    
     class TNEF
 
-      # Extracts all attachments from the given TNEF file as a TMail::Mail object
+      # Extracts all attachments from the given TNEF file as a Mail object
       # The TNEF file also contains the message body, but in general this is the
       # same as the message body in the message proper.
-      def self.as_tmail(content)
+      def self.as_mail(content)
         main = TMail::Mail.new
         main.set_content_type 'multipart', 'mixed', { 'boundary' => TMail.new_boundary }
         Dir.mktmpdir do |dir|
@@ -533,7 +641,7 @@ module MySociety
           Dir.new(dir).sort.each do |file| # sort for deterministic behaviour
             if file != "." && file != ".."
               file_content = File.open("#{dir}/#{file}", "r").read
-              attachment = TMail::Mail.new
+              attachment = MySociety::Email::Mail.new
               attachment['content-location'] = file
               attachment.body = file_content
               main.parts << attachment
