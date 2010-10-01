@@ -59,7 +59,7 @@ module MySociety
             ENV['MYSOCIETY_CONFIG_FILE_PATH'] = f
 
             buf = nil
-            IO.popen(@php_path, "w+") do |child|
+            IO.popen("/usr/bin/taskset 0x1 " + @php_path, "w+") do |child|
                 child.print('''<?php
             $b = get_defined_constants();
             require(getenv("MYSOCIETY_CONFIG_FILE_PATH"));
