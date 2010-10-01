@@ -369,44 +369,6 @@ module MySociety
         end
       end
 
-      # Charset conversion, turn everything into UTF-8
-      if not text_charset.nil?
-        begin
-          # XXX specially convert unicode pound signs, was needed here
-          # http://www.whatdotheyknow.com/request/88/response/352
-          text = text.gsub("£", Iconv.conv(text_charset, 'utf-8', '£')) 
-          # Try proper conversion
-          text = Iconv.conv('utf-8', text_charset, text)
-        rescue Iconv::IllegalSequence, Iconv::InvalidEncoding
-          # Clearly specified charset was nonsense
-          text_charset = nil
-        end
-      end
-      if text_charset.nil?
-        # No specified charset, so guess
-      
-        # Could use rchardet here, but it had trouble with 
-        #   http://www.whatdotheyknow.com/request/107/response/144
-        # So I gave up - most likely in UK we'll only get windows-1252 anyway.
-
-        begin
-          # See if it is good UTF-8 anyway
-          text = Iconv.conv('utf-8', 'utf-8', text)
-        rescue Iconv::IllegalSequence
-          begin
-            # Or is it good windows-1252, most likely
-            text = Iconv.conv('utf-8', 'windows-1252', text)
-          rescue Iconv::IllegalSequence
-            # Text looks like unlabelled nonsense, strip out anything that isn't UTF-8
-            text = Iconv.conv('utf-8//IGNORE', 'utf-8', text) + "\n\n[ WhatDoTheyKnow note: The above text was badly encoded, and has had strange characters removed. ]"
-          end
-        end
-      end
-    
-      # An assertion that we have ended up with UTF-8 XXX can remove as this should
-      # always be fine if code above is
-      Iconv.conv('utf-8', 'utf-8', text)
-
       # Fix DOS style linefeeds to Unix style ones (or other later regexps won't work)
       # Needed for e.g. http://www.whatdotheyknow.com/request/60/response/98
       text = text.gsub(/\r\n/, "\n")

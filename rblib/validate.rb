@@ -9,6 +9,17 @@
 module MySociety
     module Validate
 
+        # This method should become part of ruby as of 1.8.7
+        def Validate.each_char(s)
+            if block_given?
+                s.scan(/./m) do |x|
+                    yield x
+                end
+            else
+                s.scan(/./m)
+            end
+        end
+        
         # Stop someone writing all in capitals, or all lower case letters.
         def Validate.uses_mixed_capitals(s, allow_shorter_than = 20)
             # strip any URLs, as they tend to be all lower case and shouldn't count towards penalty
@@ -18,7 +29,7 @@ module MySociety
             # count Roman alphabet lower and upper case letters
             capitals = 0
             lowercase = 0 
-            s.each_char do |c|
+            Validate.each_char(s) do |c|
                 capitals = capitals + 1 if c.match(/[A-Z]/)
                 lowercase = lowercase + 1 if c.match(/[a-z]/)
             end
