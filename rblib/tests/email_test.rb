@@ -99,7 +99,7 @@ class TestOftAttachments < Test::Unit::TestCase
   def setup
     @mail = example_mail('oft_attachments')
   end
-
+  
   def test_oft_attachments_flattened
     attachments = MySociety::Email.get_display_attachments(@mail)
     assert_equal(2,attachments.size)

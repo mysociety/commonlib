@@ -3,18 +3,16 @@
 # Copyright (c) 2010 UK Citizens Online Democracy. All rights reserved.
 # Email: louise@mysociety.org; WWW: http://www.mysociety.org/
 #
+
 require 'rubygems'
+require 'cgi'
 require 'tmail'
 require 'mahoro'
+$:.push(File.join(File.dirname(__FILE__), 'ruby-msg/lib'))
 require 'mapi/msg'
 require 'mapi/convert'
-require 'tmpdir'
 require 'zip/zip'
 
-# Dir.mktmpdir only in backports for 1.8.6
-if RUBY_VERSION == '1.8.6'
-  require 'backports'
-end
 module MySociety
 
   module Email
@@ -55,10 +53,10 @@ module MySociety
       # instead use the first text attachment 
       text_types = ['text/plain', 'text/html']
       leaves.each{ |part| return part if text_types.include?(part.content_type) }
-
+    
       # Otherwise first part which is any sort of text
       leaves.each{ |part| return part if part.main_type == 'text' }
-
+    
       # ... or if none, consider first part 
       part = leaves[0]
       # if it is a known type then don't use it, return no body (nil)
@@ -166,7 +164,7 @@ module MySociety
         
         normalise_content_type(mail)
         expand_single_attachment(mail)
-
+    
         # If the part is an attachment of email
         if is_attachment?(mail)
           leaves_found += _get_leaves_recursive(mail.attached_email, mail.attached_email)
@@ -205,7 +203,7 @@ module MySociety
         begin
           msg = Mapi::Msg.open(StringIO.new(part.body))
           part.attached_email = Mail.parse(msg.to_mime.to_s)
-        rescue
+        rescue 
           part.attached_email = nil
           part.content_type = 'application/octet-stream'
         end
@@ -228,7 +226,7 @@ module MySociety
       if !ret.nil?
         return ret
       end
-
+    
       # Otherwise look inside the file to work out the type.
       # Mahoro is a Ruby binding for libmagic.
       m = Mahoro.new(Mahoro::MIME)
@@ -254,7 +252,7 @@ module MySociety
       # otherwise we got junk back from mahoro
       return nil
     end
-
+    
     def self.filename_to_mimetype(filename)
       if !filename
         return nil
@@ -308,13 +306,13 @@ module MySociety
       if mail_part.content_type == 'application/x-zip-compressed'
         mail_part.content_type = 'application/zip'
       end
-
+    
       if mail_part.content_type == 'application/acrobat'
         mail_part.content_type = 'application/pdf'
       end
       
     end
-
+    
     def self._get_attachment_text_internal_one_file(content_type, body)
       text = ''
       # XXX - tell all these command line tools to return utf-8
@@ -401,10 +399,10 @@ module MySociety
         end
         tempfile.close
       end
-
+    
       return text
     end
-  
+      
     # Given a main text part, converts it to text
     def self.convert_part_body_to_text(part)
       if part.nil?
@@ -420,46 +418,46 @@ module MySociety
           text = _get_attachment_text_internal_one_file(part.content_type, text)
         end
       end
-
+    
       # Fix DOS style linefeeds to Unix style ones (or other later regexps won't work)
       # Needed for e.g. http://www.whatdotheyknow.com/request/60/response/98
       text = text.gsub(/\r\n/, "\n")
-
+    
       # Compress extra spaces down to save space, and to stop regular expressions
       # breaking in strange extreme cases. e.g. for
       # http://www.whatdotheyknow.com/request/spending_on_consultants
       text = text.gsub(/ +/, " ")
-
+    
       return text
     end
-  
+      
     # Lotus notes quoting yeuch!
     def self.remove_lotus_quoting(text, name, replacement = "FOLDED_QUOTED_SECTION")
       text = text.dup
       name = Regexp.escape(name)
-
+    
       # To end of message sections
       text.gsub!(/^#{name}[^\n]+\nSent by:[^\n]+\n.*/ims, "\n\n" + replacement)
-
+    
       # Some other sort of forwarding quoting
       # http://www.whatdotheyknow.com/request/224/response/326
       text.gsub!(/^#{name}[^\n]+\n[0-9\/:\s]+\s+To\s+FOI requests at.*/ims, "\n\n" + replacement)
-
+    
       # http://www.whatdotheyknow.com/request/how_do_the_pct_deal_with_retirin_33#incoming-930
       # http://www.whatdotheyknow.com/request/229/response/809
       text.gsub!(/^From: [^\n]+\nSent: [^\n]+\nTo:\s+['"?]#{name}['"]?\nSubject:.*/ims, "\n\n" + replacement)
-
+    
       return text
     end
-  
-  
+      
+      
     # Remove quoted sections from emails (eventually the aim would be for this
     # to do as good a job as GMail does) XXX bet it needs a proper parser
     # XXX and this FOLDED_QUOTED_SECTION stuff is a mess
     def self.remove_quoted_sections(text, replacement = "FOLDED_QUOTED_SECTION")
       text = text.dup
       replacement = "\n" + replacement + "\n"
-
+    
       # First do this peculiar form of quoting, as the > single line quoting
       # further below messes with it. Note the carriage return where it wraps -
       # this can happen anywhere according to length of the name/email. e.g.
@@ -470,11 +468,11 @@ module MySociety
       # http://www.whatdotheyknow.com/request/secured_convictions_aided_by_cct
       multiline_original_message = '(' + '''>>>.* \d\d/\d\d/\d\d\d\d\s+\d\d:\d\d(?::\d\d)?\s*>>>''' + ')'
       text.gsub!(/^(#{multiline_original_message}\n.*)$/ms, replacement)
-
+    
       # Single line sections
       text.gsub!(/^(>.*\n)/, replacement)
       text.gsub!(/^(On .+ (wrote|said):\n)/, replacement)
-
+    
       # Multiple line sections
       # http://www.whatdotheyknow.com/request/identity_card_scheme_expenditure
       # http://www.whatdotheyknow.com/request/parliament_protest_actions
@@ -493,7 +491,7 @@ module MySociety
                       )
                      /imx, replacement)
       end
-
+    
       # Special paragraphs
       # http://www.whatdotheyknow.com/request/identity_card_scheme_expenditure
       text.gsub!(/^[^\n]+Government\s+Secure\s+Intranet\s+virus\s+scanning
@@ -509,8 +507,8 @@ module MySociety
                   .*?
                   Further\s+communication\s+will\s+signify\s+your\s+consent\s+to\s+this\.
                   /imx, replacement)
-
-
+    
+    
       # To end of message sections
       # http://www.whatdotheyknow.com/request/123/response/192
       # http://www.whatdotheyknow.com/request/235/response/513
@@ -524,13 +522,13 @@ module MySociety
       # Could have a ^ at start here, but see messed up formatting here:
       # http://www.whatdotheyknow.com/request/refuse_and_recycling_collection#incoming-842
       text.gsub!(/(#{original_message}\n.*)$/mi, replacement)
-
-
+    
+    
       # Some silly Microsoft XML gets into parts marked as plain text.
       # e.g. http://www.whatdotheyknow.com/request/are_traffic_wardens_paid_commiss#incoming-401
       # Don't replace with "replacement" as it's pretty messy
       text.gsub!(/<\?xml:namespace[^>]*\/>/, " ")
-
+    
       return text
     end
     
@@ -540,7 +538,7 @@ module MySociety
       text = text.gsub(/(?:<br>\s*){2,}/, '<br><br>') # remove excess linebreaks that unnecessarily space it out
       return text
     end
-  
+      
     # A subclass of TMail that adds some extra attributes
     class Mail < TMail::Mail
       attr_accessor :url_part_number
@@ -552,7 +550,7 @@ module MySociety
       def parse(raw_data)
         TMail::Mail.parse(raw_data.gsub(/; boundary=\s+"/ims,'; boundary="'))
       end
-  
+      
       def Mail.get_part_file_name(part, &block)
         file_name = (part['content-location'] &&
                      part['content-location'].body) ||
@@ -568,7 +566,7 @@ module MySociety
     
     class Attachment 
       attr_accessor :body, :content_type, :filename, :is_email, :subject
-
+      
       def initialize(attributes)
         @body = attributes[:body]
         @content_type = attributes[:content_type]
@@ -577,11 +575,11 @@ module MySociety
       
       def display_filename
         filename = self._internal_display_filename
-
+    
         # Sometimes filenames have e.g. %20 in - no point butchering that
         # (without unescaping it, this would remove the % and leave 20s in there)
         filename = CGI.unescape(filename)
-
+    
         # Remove weird spaces
         filename = filename.gsub(/\s+/, " ")
         # Remove non-alphabetic characters
@@ -591,7 +589,7 @@ module MySociety
         # Compress adjacent spaces down to a single one
         filename = filename.gsub(/\s+/, " ")
         filename = filename.strip
-
+    
         return filename
       end
       
@@ -615,11 +613,11 @@ module MySociety
           end
         end
       end
-
+    
     end
     
     class TNEF
-
+    
       # Extracts all attachments from the given TNEF file as a Mail object
       # The TNEF file also contains the message body, but in general this is the
       # same as the message body in the message proper.
