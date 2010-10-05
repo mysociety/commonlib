@@ -152,3 +152,14 @@ Jennifer James <request@example.com>"
   end
 
 end
+
+class TestAttachmentText < Test::Unit::TestCase
+  
+  def test_extracts_text_from_html
+    html_text = "some <b>HTML</b> for decoding"
+    text = MySociety::Email._get_attachment_text_internal_one_file("text/html", html_text)
+    assert_equal("   some HTML for decoding\n\n\n", text)
+  end
+  
+  
+end

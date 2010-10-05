@@ -142,38 +142,43 @@ module MySociety
       attachments
     end 
     
-    def self.get_leaves(mail)
-      @count_parts_count = 0
-      return _get_leaves_recursive(mail)
+    # Look up by URL part number to get an attachment
+    def self.get_attachment_by_url_part_number(attachments, url_part_number)
+      attachments.detect{ |attachment| attachment.url_part_number == url_part_number }
     end
     
-    def self._get_leaves_recursive(mail, within_attached_email = nil)
+    def self.get_leaves(mail)
+      mail.total_part_count = 0
+      return _get_leaves_recursive(mail, mail)
+    end
+    
+    def self._get_leaves_recursive(mail, mail_part, within_attached_email = nil)
       leaves_found = []
-      if mail.multipart?
+      if mail_part.multipart?
         # pick best part
-        if mail.sub_type == 'alternative'
-          best_part = get_best_part_for_display(mail)
-          leaves_found += _get_leaves_recursive(best_part, within_attached_email)
+        if mail_part.sub_type == 'alternative'
+          best_part = get_best_part_for_display(mail_part)
+          leaves_found += _get_leaves_recursive(mail, best_part, within_attached_email)
         else
           # add all parts
-          mail.parts.each do |part|
-            leaves_found += _get_leaves_recursive(part, within_attached_email)
+          mail_part.parts.each do |part|
+            leaves_found += _get_leaves_recursive(mail, part, within_attached_email)
           end
         end
       else
         
-        normalise_content_type(mail)
-        expand_single_attachment(mail)
+        normalise_content_type(mail_part)
+        expand_single_attachment(mail_part)
     
         # If the part is an attachment of email
-        if is_attachment?(mail)
-          leaves_found += _get_leaves_recursive(mail.attached_email, mail.attached_email)
+        if is_attachment?(mail_part)
+          leaves_found += _get_leaves_recursive(mail, mail_part.attached_email, mail_part.attached_email)
         else
           # Store leaf
-          mail.within_attached_email = within_attached_email
-          @count_parts_count += 1
-          mail.url_part_number = @count_parts_count
-          leaves_found += [mail]
+          mail_part.within_attached_email = within_attached_email
+          mail.total_part_count += 1
+          mail_part.url_part_number = mail.total_part_count
+          leaves_found += [mail_part]
         end
       end
       return leaves_found
@@ -541,6 +546,7 @@ module MySociety
       
     # A subclass of TMail that adds some extra attributes
     class Mail < TMail::Mail
+      attr_accessor :total_part_count
       attr_accessor :url_part_number
       attr_accessor :attached_email # when a whole email message is attached as text
       attr_accessor :within_attached_email # for parts within a message attached as text (for getting subject mainly)
@@ -565,12 +571,13 @@ module MySociety
     end
     
     class Attachment 
-      attr_accessor :body, :content_type, :filename, :is_email, :subject
+      attr_accessor :body, :content_type, :filename, :is_email, :subject, :url_part_number
       
       def initialize(attributes)
         @body = attributes[:body]
         @content_type = attributes[:content_type]
         @filename = attributes[:filename]
+        @url_part_number = attributes[:url_part_number]
       end
       
       def display_filename
