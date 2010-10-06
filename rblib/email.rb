@@ -95,6 +95,39 @@ module MySociety
       best_part
     end
     
+    # Convert a mail part into an attachment object
+    def self.attachment_from_leaf(leaf, &filename_block)
+      attachment = Attachment.new(:body => leaf.body, 
+                                  :filename => Mail.get_part_file_name(leaf, &filename_block),
+                                  :content_type => leaf.content_type,
+                                  :url_part_number => leaf.url_part_number)
+                                  
+      if leaf.within_attached_email
+        attachment.is_email = true
+        attachment.subject = leaf.within_attached_email.subject
+        
+        # Test to see if we are in the first part of the attached
+        # RFC822 message and it is text, if so add headers.
+        # XXX should probably use hunting algorithm to find main text part, rather than
+        # just expect it to be first. This will do for now though.
+        if leaf.within_attached_email == leaf && leaf.content_type == 'text/plain'
+          headers = ""
+          for header in [ 'Date', ' ', 'From', 'To', 'Cc' ]
+            if leaf.within_attached_email.header.include?(header.downcase)
+              header_value = leaf.within_attached_email.header[header.downcase]
+              if !header_value.blank?
+                headers = headers + header + ": " + header_value.to_s + "\n"
+              end
+            end
+          end
+          # XXX call _convert_part_body_to_text here, but need to get charset somehow
+          # e.g. http://www.whatdotheyknow.com/request/1593/response/3088/attach/4/Freedom%20of%20Information%20request%20-%20car%20oval%20sticker:%20Article%2020,%20Convention%20on%20Road%20Traffic%201949.txt
+          attachment.body = headers + "\n" + attachment.body
+        end
+      end
+      attachment
+    end
+    
     # Get a list of Attachments suitable for display
     # Accepts a block to allow alteration of the attachment filenames 
     # e.g in order to remove text
@@ -105,42 +138,63 @@ module MySociety
     def self.get_display_attachments(mail, &filename_block)
       main_part = get_main_body_text_part(mail)
       leaves = get_leaves(mail)
-    
       attachments = []
       leaves.each do |leaf|
         next if leaf == main_part
-        attachment = Attachment.new(:body => leaf.body, 
-                                    :filename => Mail.get_part_file_name(leaf, &filename_block),
-                                    :content_type => leaf.content_type,
-                                    :url_part_number => leaf.url_part_number)
-                                    
-        if leaf.within_attached_email
-          attachment.is_email = true
-          attachment.subject = leaf.within_attached_email.subject
-          
-          # Test to see if we are in the first part of the attached
-          # RFC822 message and it is text, if so add headers.
-          # XXX should probably use hunting algorithm to find main text part, rather than
-          # just expect it to be first. This will do for now though.
-          if leaf.within_attached_email == leaf && leaf.content_type == 'text/plain'
-            headers = ""
-            for header in [ 'Date', ' ', 'From', 'To', 'Cc' ]
-              if leaf.within_attached_email.header.include?(header.downcase)
-                header_value = leaf.within_attached_email.header[header.downcase]
-                if !header_value.blank?
-                  headers = headers + header + ": " + header_value.to_s + "\n"
-                end
-              end
-            end
-            # XXX call _convert_part_body_to_text here, but need to get charset somehow
-            # e.g. http://www.whatdotheyknow.com/request/1593/response/3088/attach/4/Freedom%20of%20Information%20request%20-%20car%20oval%20sticker:%20Article%2020,%20Convention%20on%20Road%20Traffic%201949.txt
-            attachment.body = headers + "\n" + attachment.body
-          end
-        end
-        attachments << attachment
+        attachments << attachment_from_leaf(leaf, &filename_block)
+      end
+      
+      # get attachments encoded in the body
+      uudecode_attachments = get_main_body_text_uudecode_attachments(mail, main_part, &filename_block)
+      uudecode_attachments.each do |uudecode_attachment|
+        attachments << uudecode_attachment
       end
       attachments
     end 
+    
+    # Returns attachments that are uuencoded in main body part
+    # Accepts a block to allow alteration of the attachment filenames 
+    # e.g in order to remove text
+    def self.get_main_body_text_uudecode_attachments(mail, main_part, &filename_block)
+      # we get the text ourselves as we want to avoid charset
+      # conversions, since /usr/bin/uudecode needs to deal with those.
+      # e.g. for https://secure.mysociety.org/admin/foi/request/show_raw_email/24550
+      return [] if main_part.nil?
+      text = main_part.body
+
+      # Find any uudecoded things buried in it, yeuchly
+      uus = text.scan(/^begin.+^`\n^end\n/sm)
+      attachments = []
+      uus.each do |uu|
+        # Decode the string
+        content = nil
+        tempfile = Tempfile.new('emailuu')
+        tempfile.print uu
+        tempfile.flush
+        IO.popen("/usr/bin/uudecode " + tempfile.path + " -o -", "r") do |child|
+          content = child.read()
+        end
+        tempfile.close
+        filename = uu.match(/^begin\s+[0-9]+\s+(.*)$/)[1]
+        if block_given?
+          filename = yield filename
+        end
+        mail.total_part_count += 1
+        # Make attachment type from it, working out filename and mime type
+        attachment = Attachment.new(:body => content, 
+                                    :filename => filename, 
+                                    :content_type => nil,
+                                    :url_part_number => mail.total_part_count)
+        normalise_content_type(attachment, filename)     
+        attachments << attachment
+      end
+      return attachments
+    end
+    
+    # Strip the uudecode parts from a piece of text
+    def self.strip_uudecode_attachments(text)
+      text.split(/^begin.+^`\n^end\n/sm).join(" ")
+    end
     
     # Look up by URL part number to get an attachment
     def self.get_attachment_by_url_part_number(attachments, url_part_number)
@@ -167,7 +221,7 @@ module MySociety
         end
       else
         
-        normalise_content_type(mail_part)
+        normalise_content_type(mail_part, Mail.get_part_file_name(mail_part))
         expand_single_attachment(mail_part)
     
         # If the part is an attachment of email
@@ -280,7 +334,7 @@ module MySociety
     
     # Normalise a mail part's content_type for display
     # Use standard content types for Word documents etc.
-    def self.normalise_content_type(mail_part)
+    def self.normalise_content_type(mail_part, part_file_name)
       
       # Don't allow nil content_types
       if mail_part.content_type.nil?
@@ -289,7 +343,6 @@ module MySociety
       
       # PDFs often come with this mime type, fix it up for view code
       if mail_part.content_type == 'application/octet-stream'
-        part_file_name = Mail.get_part_file_name(mail_part)
         calc_mime = filename_and_content_to_mimetype(part_file_name, mail_part.body)
         if calc_mime
           mail_part.content_type = calc_mime
@@ -436,6 +489,13 @@ module MySociety
       return text
     end
       
+    def self.remove_quoting(text, replacement)
+      folded_quoted_text = remove_lotus_quoting(text, replacement)
+      folded_quoted_text = remove_quoted_sections(folded_quoted_text, replacement)
+      # merge contiguous quoted sections
+      folded_quoted_text = folded_quoted_text.gsub(/(\s*#{replacement}\s*)+/m, replacement)
+    end
+      
     # Lotus notes quoting yeuch!
     def self.remove_lotus_quoting(text, name, replacement = "FOLDED_QUOTED_SECTION")
       text = text.dup
@@ -454,7 +514,6 @@ module MySociety
     
       return text
     end
-      
       
     # Remove quoted sections from emails (eventually the aim would be for this
     # to do as good a job as GMail does) XXX bet it needs a proper parser

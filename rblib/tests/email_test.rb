@@ -140,7 +140,7 @@ class TestFolding < Test::Unit::TestCase
     assert_equal("\n\nFOLDED_QUOTED_SECTION", text)
   end
   
-  def test_handles_lotus_quoting_in_html
+  def test_removes_lotus_quoting_in_html
     text = "Jennifer James <request@example.com>
 Sent by: Jennifer James <request@example.com>
 06/03/08 10:00
@@ -161,5 +161,19 @@ class TestAttachmentText < Test::Unit::TestCase
     assert_equal("   some HTML for decoding\n\n\n", text)
   end
   
+  
+end
+
+class TestUudecoding < Test::Unit::TestCase
+  
+  def setup
+    @mail = example_mail('bad_uuencoding')
+  end
+  
+  def test_decode_bad_encoding
+    attachments = MySociety::Email.get_display_attachments(@mail)
+    assert_equal(1, attachments.size)
+    assert_equal('moo.txt', attachments[0].filename)
+  end
   
 end
