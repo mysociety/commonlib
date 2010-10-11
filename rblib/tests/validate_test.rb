@@ -73,4 +73,8 @@ class TestValidate < Test::Unit::TestCase
 
   end
   
+  def test_is_valid_email
+    assert(MySociety::Validate.is_valid_email("mr.example@example.com"))
+  end
+  
 end
