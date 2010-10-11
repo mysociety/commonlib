@@ -1,0 +1,18 @@
+A tiny Django app to do stand-alone email confirmation with no users,
+no dependencies, just an object that has an email address.
+
+1. Stick emailconfirmation in your INSTALLED_APPS.
+
+2. Add (r'^', include('emailconfirmation.urls')) to your urls.py.
+
+3. Anywhere you want an object that has an email field to be confirmed via
+   email, say just after it's been created, simply call:
+       EmailConfirmation.objects.confirm(request, object, page_after)
+   and return a "Please check your email" page.
+   'page_after' should be the name of a URL that we will redirect to after
+   successful confirmation, and should have (\d+) somewhere in the URL where
+   the ID of the confirmed object will go.
+
+Override emailconfirmation/email.txt to supply your own confirmation email.
+'object' will refer to the object being confirmed.
+
