@@ -124,6 +124,10 @@ module MySociety
         def Format.lcfirst(text)
             text[0,1].downcase + text[1,text.size]
         end
+        
+        def Format.ucfirst(text)
+            text[0,1].upcase + text[1,text.size]
+        end
 
     end
 end
