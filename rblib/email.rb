@@ -171,7 +171,7 @@ module MySociety
         tempfile = Tempfile.new('emailuu')
         tempfile.print uu
         tempfile.flush
-        IO.popen("/usr/bin/uudecode " + tempfile.path + " -o -", "r") do |child|
+        IO.popen("/usr/bin/uudecode #{tempfile.path}", "r") do |child|
           content = child.read()
         end
         tempfile.close
@@ -691,7 +691,7 @@ module MySociety
         main = TMail::Mail.new
         main.set_content_type 'multipart', 'mixed', { 'boundary' => TMail.new_boundary }
         Dir.mktmpdir do |dir|
-          IO.popen("/usr/bin/tnef -K -C #{dir}", "w") do |f|
+          IO.popen("/usr/bin/tnef -K -C #{dir} 2> /dev/null", "w") do |f|
             f.write(content)
             f.close
             if $?.signaled?
