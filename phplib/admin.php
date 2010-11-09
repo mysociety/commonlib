@@ -81,7 +81,7 @@ function admin_page_display($site_name, $pages, $default = null, $params = array
             if (isset($page)) {
                 if (isset($page->url)) {
                     $navlinks .= "<li><a href=\"". $page->url."\">" . $page->navname. "</a>";
-                } elseif (!$page->noindex) {
+                } elseif (!property_exists($page, 'noindex') || !$page->noindex) {
                     $navlinks .= "<li><a href=\"?page=". $page->id."\">" . $page->navname. "</a>";
                 }
             } else {
