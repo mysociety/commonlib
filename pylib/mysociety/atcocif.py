@@ -251,10 +251,11 @@ class ATCO:
                             raise Exception("Inconsistent vehicle type codes; previously had " + self.vehicle_type_to_code[self.file_loading_number][current_item.vehicle_type] + " for type " + current_item.vehicle_type + " when this line has " + current_item.type_code() + ", line is: " + line)
                     else:
                         self.vehicle_type_to_code[self.file_loading_number][current_item.vehicle_type] = current_item.type_code()
-
                 # Other
                 elif record_identity in [
-                    'QD'  # Route description record
+                    'QP',  # Operator record
+                    'QD',  # Route description record
+                    'QN'  # Journey note
                 ]:
                     logging.debug("Ignoring record type '" + record_identity + "'")
                 else:
@@ -472,7 +473,10 @@ def parse_date_time(date_string, time_string):
     datetime.datetime(2009, 2, 4, 15, 59, 1)
     '''
     assert len(date_string) == 8
+    if len(time_string) == 4: 
+        time_string = "%s00" % time_string 
     assert len(time_string) == 6
+ 
     return datetime.datetime(
         int(date_string[0:4]), int(date_string[4:6]), int(date_string[6:8]),
         int(time_string[0:2]), int(time_string[2:4]), int(time_string[4:6]), 0
@@ -582,7 +586,7 @@ class FileHeader(CIFRecord):
     def __init__(self, line):
         CIFRecord.__init__(self, line, "AT")
 
-        matches = re.match('^ATCO-CIF(\d\d)(\d\d)(.{32})(.{16})(\d{8})(\d{6})$', line) 
+        matches = re.match('^ATCO-CIF(\d\d)(\d\d)(.{32})(.{16})(\d{8})(\d{4,6})$', line) 
         if not matches:
             raise Exception("ATCO-CIF header line incorrectly formatted: " + line)
         self.version_major = int(matches.group(1))
@@ -984,7 +988,7 @@ class JourneyIntermediate(CIFRecord):
 
         # BPSN are documented values for activity_flag in CIF file, other train ones are documented
         # in http://www.atoc.org/rsp/_downloads/RJIS/20040601.pdf
-        matches = re.match('^QI(.{12})(\d{4})(\d{4})([BPSNACDORTUX-])(.{3})(T[01])(F0|F1|  )$', line)
+        matches = re.match('^QI(.{12})(\d{4})(\d{4})([BPSNACDORTUXL-])(.{3})(T[01])(F0|F1|  )$', line)
         if not matches:
             raise Exception("Journey intermediate line incorrectly formatted: " + line)
 
@@ -1023,17 +1027,18 @@ class JourneyIntermediate(CIFRecord):
     # T - both pick up and set down (Train)
     # U - pick Up only (train)
     # X - pass another train at Xing point on single line
+    # L - Undocumented
     # - - stop to attach/detach vehicles
     def is_set_down(self):
         if self.activity_flag in ['B', 'S', 'T', 'D', 'R']:
             return True
-        if self.activity_flag in ['N', 'P', 'O', 'U', 'A', 'C', 'X', '-']:
+        if self.activity_flag in ['N', 'P', 'O', 'U', 'A', 'C', 'X', '-', 'L']:
             return False
         assert False, "activity_flag %s not supported (location %s) " % (self.activity_flag, self.location)
     def is_pick_up(self):
         if self.activity_flag in ['B', 'P', 'T', 'U', 'R']:
             return True
-        if self.activity_flag in ['N', 'S', 'O', 'D', 'A', 'C', 'X', '-']:
+        if self.activity_flag in ['N', 'S', 'O', 'D', 'A', 'C', 'X', '-', 'L']:
             return False
         assert False, "activity_flag %s not supported (location %s)" % (self.activity_flag, self.location)
 
@@ -1215,7 +1220,13 @@ class VehicleType(CIFRecord):
     'F'
     '''
 
-    types = { 'Bus' : 'B', 'Coach' : 'C', 'Ferry/River Bus' : 'F', 'Metro' : 'M', 'Heavy Rail' : 'T', 'Air' : 'A' }
+    types = { 'Bus' : 'B', 
+              'Coach' : 'C', 
+              'Ferry' : 'F', 
+              'Ferry/River Bus' : 'F', 
+              'Metro' : 'M', 
+              'Heavy Rail' : 'T', 
+              'Air' : 'A' }
 
     def __init__(self, line):
         CIFRecord.__init__(self, line, "QV")
@@ -1228,7 +1239,6 @@ class VehicleType(CIFRecord):
         assert self.transaction_type == 'N' # code doesn't handle other types yet
         self.vehicle_type = matches.group(2).strip().upper()
         self.vehicle_long_type = matches.group(3).strip()
-
         assert self.vehicle_long_type in VehicleType.types
 
     def type_code(self):
