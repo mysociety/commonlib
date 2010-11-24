@@ -150,6 +150,12 @@ Jennifer James <request@example.com>"
     text = MySociety::Email.remove_lotus_quoting(text, 'Jennifer James')
     assert_equal("\n\nFOLDED_QUOTED_SECTION", text)
   end
+  
+  def test_leaves_space_between_main_and_quoted
+    text = "www.some.gov.uk\n \n  \n \n  \n \n -----Original Message-----\n From: [x]\n [mailto:x]"
+    folded_text = MySociety::Email.remove_quoting(text, "FOLDED_QUOTED_SECTION")
+    assert_equal("www.some.gov.uk FOLDED_QUOTED_SECTION", folded_text)
+  end
 
 end
 
@@ -174,6 +180,11 @@ class TestUudecoding < Test::Unit::TestCase
     attachments = MySociety::Email.get_display_attachments(@mail)
     assert_equal(1, attachments.size)
     assert_equal('moo.txt', attachments[0].filename)
+  end
+  
+  def test_main_body_textuudecode_attachments
+    main_part = MySociety::Email.get_main_body_text_part(@mail)
+    attachments = MySociety::Email.get_main_body_text_uudecode_attachments(@mail, main_part)
   end
   
 end

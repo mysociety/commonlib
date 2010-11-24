@@ -493,7 +493,7 @@ module MySociety
       folded_quoted_text = remove_lotus_quoting(text, replacement)
       folded_quoted_text = remove_quoted_sections(folded_quoted_text, replacement)
       # merge contiguous quoted sections
-      folded_quoted_text = folded_quoted_text.gsub(/(\s*#{replacement}\s*)+/m, replacement)
+      folded_quoted_text = folded_quoted_text.gsub(/(\s*#{replacement}\s*)+/m, " #{replacement}")
     end
       
     # Lotus notes quoting yeuch!
