@@ -133,6 +133,16 @@ class TestTnefAttachments < Test::Unit::TestCase
 
 end
 
+class TestAddress < Test::Unit::TestCase
+  
+  def test_basic_construction
+    address = MySociety::Email::Address.address_from_name_and_email("Example Name", "email@example.com")
+    assert_equal("Example Name", address.name)
+    assert_equal("email@example.com", address.address)
+  end
+  
+end
+
 class TestFolding < Test::Unit::TestCase
 
   def test_handles_left_square_bracket_in_names

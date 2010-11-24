@@ -12,6 +12,7 @@ $:.push(File.join(File.dirname(__FILE__), 'ruby-msg/lib'))
 require 'mapi/msg'
 require 'mapi/convert'
 require 'zip/zip'
+require 'validate'
 
 module MySociety
 
@@ -603,7 +604,7 @@ module MySociety
       return text
     end
       
-    # A subclass of TMail that adds some extra attributes
+    # A subclass of TMail::Mail that adds some extra attributes
     class Mail < TMail::Mail
       attr_accessor :total_part_count
       attr_accessor :url_part_number
@@ -627,6 +628,23 @@ module MySociety
         file_name
       end
       
+    end
+    
+    # A subclass of TMail::Address that can be constructed from a 
+    # name and email
+    class Address < TMail::Address
+      
+      def Address.address_from_name_and_email(name, email)
+        if !MySociety::Validate.is_valid_email(email)
+          raise "invalid email " + email + " passed to address_from_name_and_email"    
+        end
+        if name.nil?
+          return TMail::Address.parse(email)
+        end
+        # Botch an always quoted RFC address, then parse it
+        name = name.gsub(/(["\\])/, "\\\\\\1")
+        return TMail::Address.parse('"' + name + '" <' + email + '>')
+      end
     end
     
     class Attachment 
