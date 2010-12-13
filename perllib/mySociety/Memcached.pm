@@ -13,15 +13,16 @@ package mySociety::Memcached;
 use strict;
 use Cache::Memcached;
 
-my ($memcache, $namespace);
+my ($memcache, $server, $namespace);
 
-sub set_namespace {
+sub set_config {
+    $server = shift;
     $namespace = shift;
 }
 
 sub cache_connect {
     $memcache = new Cache::Memcached {
-        'servers' => [ '127.0.0.1:11211' ],
+        'servers' => [ "$server:11211" ],
         'namespace' => $namespace,
         'debug' => 0,
         'compress_threshold' => 10_000,
