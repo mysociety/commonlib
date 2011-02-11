@@ -81,6 +81,10 @@ sub wgs84_to_national_grid($$$) {
     my $height;
     ($lat, $lon, $height) = Geo::HelmertTransform::convert_datum($wgs84, $d, $lat, $lon, 0); # 0 is altitude
 
+    # Geography::NationalGrid dies if given exponent notation
+    $lat = sprintf("%.15f", $lat);
+    $lon = sprintf("%.15f", $lon);
+
     my $p;
     if ($coordsyst eq 'G') {
         $p = new Geography::NationalGrid('GB', Latitude => $lat, Longitude => $lon, DefaultResolution=>1);
