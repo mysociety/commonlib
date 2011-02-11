@@ -15,6 +15,13 @@ class EmailConfirmationManager(models.Manager):
         )
         conf.send_email(request)
 
+    def path_for_unsubscribe(self, object):
+        obj = EmailConfirmation.objects.get(content_object=object)
+        return reverse('emailconfirmation-unsubscribe', kwargs={
+            'id': int_to_base32(obj.id),
+            'token': obj.make_token(random.randint(0,32767)),
+        })
+
 class EmailConfirmation(models.Model):
     confirmed = models.BooleanField(default=False)
     content_type = models.ForeignKey(ContentType)
