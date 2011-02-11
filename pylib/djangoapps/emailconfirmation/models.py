@@ -15,13 +15,6 @@ class EmailConfirmationManager(models.Manager):
         )
         conf.send_email(request)
 
-    def path_for_unsubscribe(self, object):
-        obj = EmailConfirmation.objects.get(content_object=object)
-        return reverse('emailconfirmation-unsubscribe', kwargs={
-            'id': int_to_base32(obj.id),
-            'token': obj.make_token(random.randint(0,32767)),
-        })
-
 class EmailConfirmation(models.Model):
     confirmed = models.BooleanField(default=False)
     content_type = models.ForeignKey(ContentType)
@@ -53,6 +46,12 @@ class EmailConfirmation(models.Model):
     @models.permalink
     def url_after_unsubscribe(self):
         return (self.after_unsubscribe, [ self.content_object.id ])
+
+    def path_for_unsubscribe(self):
+        return reverse('emailconfirmation-unsubscribe', kwargs={
+            'id': int_to_base32(self.id),
+            'token': self.make_token(random.randint(0,32767)),
+        })
 
     def check_token(self, token):
         try:
