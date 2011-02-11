@@ -7,8 +7,12 @@ from django.core.urlresolvers import reverse
 from utils import int_to_base32, base32_to_int, send_email
 
 class EmailConfirmationManager(models.Manager):
-    def confirm(self, request, object, page_after):
-        conf = EmailConfirmation(content_object=object, page_after=page_after)
+    def confirm(self, request, object, after_confirm, after_unsubscribe):
+        conf = EmailConfirmation(
+            content_object=object,
+            after_confirm=after_confirm,
+            after_unsubscribe=after_unsubscribe,
+        )
         conf.send_email(request)
 
 class EmailConfirmation(models.Model):
@@ -16,7 +20,8 @@ class EmailConfirmation(models.Model):
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()
     content_object = generic.GenericForeignKey('content_type', 'object_id')
-    page_after = models.CharField(max_length=100)
+    after_confirm = models.CharField(max_length=100)
+    after_unsubscribe = models.CharField(max_length=100)
 
     objects = EmailConfirmationManager()
 
@@ -35,8 +40,12 @@ class EmailConfirmation(models.Model):
         )
 
     @models.permalink
-    def url_after(self):
-        return (self.page_after, [ self.content_object.id ])
+    def url_after_confirm(self):
+        return (self.after_confirm, [ self.content_object.id ])
+
+    @models.permalink
+    def url_after_unsubscribe(self):
+        return (self.after_unsubscribe, [ self.content_object.id ])
 
     def check_token(self, token):
         try:
