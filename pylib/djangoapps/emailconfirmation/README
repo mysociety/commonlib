@@ -14,6 +14,7 @@ no dependencies, just an object that has an email address.
    where the ID of the confirmed object will go. 'after_unsubscribe' is
    similarly the name of a urls.py entry to redirect to after unsubscribing.
 
-Override emailconfirmation/email.txt to supply your own confirmation email.
+Override emailconfirmation/email.txt to supply your own confirmation email, or
+pass a Template or template path into confirm().
 'object' will refer to the object being confirmed.
 
