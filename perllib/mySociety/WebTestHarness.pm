@@ -454,6 +454,17 @@ sub browser_reload {
     return $self->{useragent}->reload(@_);
 }
 
+
+=item browser_find_link
+
+Acts as function in WWW::Mechanize.
+
+=cut
+sub browser_find_link {
+    my $self = shift;
+    return $self->{useragent}->find_link(@_);
+}
+
 =item browser_credentials
 
 Acts as function in WWW::Mechanize.
