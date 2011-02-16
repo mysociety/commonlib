@@ -45,7 +45,7 @@ sub ms_make_clickable {
     if ($contract) {
         $ret =~ s#(<a href='[^']*'>)([^<]{40})[^<]*?</a>#$1$2...</a>#g;
     }
-    $ret =~ s#(\s)([a-z0-9\-_.]+)@([^,< \n\r]*[^.,< \n\r])#$1<a href=\"mailto:$2@$3\">$2@$3</a>#gi;
+    $ret =~ s#(\s)([a-z0-9\-_.]+)@([^,< \n\r]*[^.,< \n\r])#$1<a href=\"mailto:$2\@$3\">$2\@$3</a>#gi;
     
     # trim
     $ret =~ s#^\s+##;

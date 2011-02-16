@@ -6,9 +6,9 @@
 #
 # $Id: format.rb,v 1.24 2009-10-04 21:42:07 francis Exp $
 
-# XXX there are some tests in foi/spec/lib/format_spec.rb
-# Really these should be in this rblib directory, and somehow made to run from
+# the tests in tests/format.rb should somehow made to run from
 # the foi app.
+require 'cgi'
 
 module MySociety
     module Format
@@ -123,6 +123,10 @@ module MySociety
         # lowercases the whole of the rest of the string, yeuch)
         def Format.lcfirst(text)
             text[0,1].downcase + text[1,text.size]
+        end
+        
+        def Format.ucfirst(text)
+            text[0,1].upcase + text[1,text.size]
         end
 
     end

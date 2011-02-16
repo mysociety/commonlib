@@ -54,7 +54,7 @@ sub encode_string ($) {
         return ($encoding, $octets) if ($octets);
     }
 
-    die "Unable to encode STRING in any supported encoding (shouldn't happen)";
+    die "Unable to encode STRING in any supported encoding (shouldn't happen, but probably means a blank string has been passed to this function)";
 }
 
 my $qpchars = '\x00-\x1f\x7f-\xff?_="(),.:;<>@[\\]';

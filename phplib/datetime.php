@@ -144,6 +144,9 @@ function datetime_parse_local_date($date, $now, $language, $country) {
         $year = date('Y');
     } elseif (preg_match('#^([0123][0-9])([01][0-9])([0-9][0-9])$#',$date,$m)) {
         $day = $m[1]; $month = $m[2]; $year = $m[3];
+        if ($year <= 39) $year += 2000; else $year += 1900;
+    } elseif (preg_match('#^([0123][0-9])([01][0-9])([0-9]{4})$#',$date,$m)) {
+        $day = $m[1]; $month = $m[2]; $year = $m[3];
     } else {
         $dayofweek = date('w'); # 0 Sunday, 6 Saturday
         if (preg_match('#next\s+(sun|sunday|mon|monday|tue|tues|tuesday|wed|wednes|wednesday|thu|thur|thurs|thursday|fri|friday|sat|saturday)\b#i',$date,$m)) {
@@ -157,11 +160,11 @@ function datetime_parse_local_date($date, $now, $language, $country) {
             }
         }
         $t = strtotime($date,$now);
-	if (version_compare(PHP_VERSION, '5.1.0', '>=')) {
-	    $strtotime_cmp = false;
-	} else {
-	    $strtotime_cmp = -1;
-	}
+        if (version_compare(PHP_VERSION, '5.1.0', '>=')) {
+            $strtotime_cmp = false;
+        } else {
+            $strtotime_cmp = -1;
+        }
         if ($t !== $strtotime_cmp) {
             $day = date('d',$t); $month = date('m',$t); $year = date('Y',$t); $epoch = $t;
         } else {

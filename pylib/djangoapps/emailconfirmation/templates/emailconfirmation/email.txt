@@ -1,0 +1,9 @@
+Hello,
+
+Thanks for signing up. To confirm, please follow the following link:
+
+http://{{ host }}{% url emailconfirmation-confirm id=id, token=token %}
+
+Yours,
+The Team
+

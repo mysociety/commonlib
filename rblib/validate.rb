@@ -9,6 +9,17 @@
 module MySociety
     module Validate
 
+        # This method should become part of ruby as of 1.8.7
+        def Validate.each_char(s)
+            if block_given?
+                s.scan(/./m) do |x|
+                    yield x
+                end
+            else
+                s.scan(/./m)
+            end
+        end
+        
         # Stop someone writing all in capitals, or all lower case letters.
         def Validate.uses_mixed_capitals(s, allow_shorter_than = 20)
             # strip any URLs, as they tend to be all lower case and shouldn't count towards penalty
@@ -18,7 +29,7 @@ module MySociety
             # count Roman alphabet lower and upper case letters
             capitals = 0
             lowercase = 0 
-            s.each_char do |c|
+            Validate.each_char(s) do |c|
                 capitals = capitals + 1 if c.match(/[A-Z]/)
                 lowercase = lowercase + 1 if c.match(/[a-z]/)
             end
@@ -84,19 +95,50 @@ module MySociety
         end
 
 
-        # validate_postcode POSTCODE
-        # Return true is POSTCODE is in the proper format for a UK postcode. Does not
+        # is_valid_postcode POSTCODE
+        # Return true if POSTCODE is in the proper format for a UK postcode. Does not
         # require spaces in the appropriate place.
         def Validate.is_valid_postcode(postcode)
             return Validate.postcode_match_internal(postcode, "^", "$")
         end
+        
+        # is_valid_partial_postcode POSTCODE
+        # Returns true if POSTCODE is in the proper format for the first part of a UK
+        # postcode. Expects a stripped string.
+        def Validate.is_valid_partial_postcode(postcode)
+        
+            # Our test postcode
+            if (postcode.match(/^zz9$/i))
+                return true 
+            end
+            
+            fst = 'ABCDEFGHIJKLMNOPRSTUWYZ'
+            sec = 'ABCDEFGHJKLMNOPQRSTUVWXY'
+            thd = 'ABCDEFGHJKSTUW'
+            fth = 'ABEHMNPRVWXY'
+            num0 = '123456789' # Technically allowed in spec, but none exist
+            num = '0123456789'
+            
+            if (postcode.match(/^[#{fst}][#{num0}]$/i) ||
+                postcode.match(/^[#{fst}][#{num0}][#{num}]$/i) ||
+                postcode.match(/^[#{fst}][#{sec}][#{num}]$/i) ||
+                postcode.match(/^[#{fst}][#{sec}][#{num0}][#{num}]$/i) ||
+                postcode.match(/^[#{fst}][#{num0}][#{thd}]$/i) ||
+                postcode.match(/^[#{fst}][#{sec}][#{num0}][#{fth}]$/i
+                ))
+                return true
+            else
+                return false
+            end
+        end
+        
         def Validate.contains_postcode?(postcode)
             return Validate.postcode_match_internal(postcode, "\\b", "\\b")
         end
 
         def Validate.postcode_match_internal(postcode, pre, post)
             # Our test postcode
-            if (postcode.match("/#{pre}zz9\s*9z[zy]$/i"))
+            if (postcode.match(/#{pre}zz9\s*9z[zy]#{post}/i))
                 return true 
             end
             
