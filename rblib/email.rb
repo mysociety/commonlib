@@ -7,7 +7,6 @@
 require 'rubygems'
 require 'cgi'
 require 'tmail'
-require 'mahoro'
 $:.push(File.join(File.dirname(__FILE__), 'ruby-msg/lib'))
 require 'mapi/msg'
 require 'mapi/convert'
@@ -281,12 +280,20 @@ module MySociety
     
     # Given file name and its content, return most likely type
     def self.filename_and_content_to_mimetype(filename, content)
+      
       # Try filename
       ret = filename_to_mimetype(filename)
       if !ret.nil?
         return ret
       end
-    
+
+      # If mahoro isn't installed, don't try and use it
+      begin
+        require 'mahoro'
+      rescue 
+        return nil
+      end
+  
       # Otherwise look inside the file to work out the type.
       # Mahoro is a Ruby binding for libmagic.
       m = Mahoro.new(Mahoro::MIME)
