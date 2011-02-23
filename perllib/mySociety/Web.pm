@@ -13,6 +13,7 @@ package mySociety::Web;
 
 use strict;
 
+use Encode;
 use HTML::Entities;
 
 use Carp;
@@ -23,10 +24,9 @@ eval {
     $have_cgi_fast = 1;
 };
 
-use HTML::Entities;
 use HTTP::Date qw();
 
-use fields qw(q scratch site);
+use fields qw(q scratch site unicode);
 @mySociety::Web::ISA = qw(Exporter); # for the Import* methods
 
 BEGIN {
@@ -47,9 +47,10 @@ Construct a new mySociety::Web object, optionally from an existing QUERY. Uses
 mySociety::CGIFast if available, or CGI otherwise.
 
 =cut
-sub new ($;$) {
+sub new ($;%) {
     my mySociety::Web $self = shift;
-    my $q = shift;
+    my %params = @_;
+    my $q = $params{q};
     if (!defined($q)) {
         $q = $have_cgi_fast ? new mySociety::CGIFast() : new CGI();
         return undef if (!defined($q)); # reproduce mySociety::CGIFast behaviour
@@ -58,6 +59,7 @@ sub new ($;$) {
     $self = fields::new($self) unless ref $self;
     $self->{q} = $q;
     $self->{scratch} = { };
+    $self->{unicode} = $params{unicode};
     return $self;
 }
 
@@ -86,6 +88,22 @@ sub AUTOLOAD {
     goto(&$mySociety::Web::AUTOLOAD);
 }
 
+=item param
+
+Calls underlying CGI param, and perhaps decode_utf8 the return value.
+
+=cut
+sub param {
+    my mySociety::Web $self = shift;
+    if (wantarray) {
+        return $self->{q}->param(@_);
+    } elsif ($self->{unicode}) {
+        return decode_utf8($self->{q}->param(@_));
+    } else {
+        return $self->{q}->param(@_);
+    }
+}
+
 =item ParamValidate PARAMETER CHECK [DEFAULT]
 
 Return the value of the named PARAMETER, assuming it passes CHECK, or DEFAULT
@@ -97,7 +115,7 @@ return 1 if it is valid; or a regexp.
 sub ParamValidate ($$$;$) {
     my mySociety::Web $self = shift;
     my ($name, $check, $default) = @_;
-    my $val = $self->{q}->param($name);
+    my $val = $self->param($name);
     return $default if (!defined($val));
     if (ref($check) eq 'CODE') {
         return $default unless (&$check($self, $val));
@@ -136,7 +154,7 @@ sub Import ($$%) {
     my $p = ($what eq 'p');
 
     while (my ($name, $x) = each(%p)) {
-        my $val = $p ? $q->param($name) : $q->cookie($name);
+        my $val = $p ? $self->param($name) : $q->cookie($name);
         if (ref($x) eq 'ARRAY') {
             croak("PARAMS->{$name} should be a 2-element list") unless (@$x == 2);
             my ($check, $dfl) = @$x;
@@ -187,9 +205,9 @@ sub ImportMulti ($%) {
     while (my ($name, $check) = each(%p)) {
         my @val;
         if (ref($check) eq 'CODE') {
-            @val = grep { &$check($self, $_) } $q->param('name');
+            @val = grep { &$check($self, $_) } $self->param('name');
         } elsif (ref($check) eq 'Regexp') {
-            @val = grep($check, $q->param('name'));
+            @val = grep($check, $self->param('name'));
         } else {
             croak("PARAMS->{$_} should be a code reference or regexp");
         }

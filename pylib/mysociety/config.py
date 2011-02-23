@@ -68,9 +68,12 @@ def read_config(f):
 
     global debian_version
     if not debian_version:
-        fp = open("/etc/debian_version")
-        debian_version = fp.read().strip()
-        fp.close()
+        try:
+            fp = open("/etc/debian_version")
+            debian_version = fp.read().strip()
+            fp.close()
+        except IOError:
+            debian_version = 'unknown'
 
     # Using taskset to deal with debian 5 php/mysql extension bug, 
     # by restricting to one processor

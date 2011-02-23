@@ -100,10 +100,10 @@ sub pop() {
 # this decorator will do that for you.
 sub in_gb_locale(&) {
     my $sub = shift;
-    mySociety::Locale::push('en-gb');
+    mySociety::Locale::push('en-gb') if $lang;
     my (@result, $result);
     wantarray ? @result = $sub->() : $result = $sub->();
-    mySociety::Locale::pop();
+    mySociety::Locale::pop() if $lang;
     return wantarray ? @result : $result;
 }
 
