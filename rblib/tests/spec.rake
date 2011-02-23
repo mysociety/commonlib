@@ -1,7 +1,10 @@
 # Rake task for running commonlib/rblib tests within rspec
 require 'rubygems'
-require 'spec/rake/spectask'
-
+begin 
+  require 'spec/rake/spectask'
+rescue
+  exit 0
+end
 namespace :spec do 
     
   desc "Run the ruby test in commonlib in rspec format"
