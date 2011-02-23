@@ -2,7 +2,7 @@
 require 'rubygems'
 begin 
   require 'spec/rake/spectask'
-rescue
+rescue Exception
   exit 0
 end
 namespace :spec do 
