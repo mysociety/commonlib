@@ -107,14 +107,15 @@ sub in_gb_locale(&) {
     return wantarray ? @result : $result;
 }
 
-# gettext_domain DOMAIN [UNICODE]
+# gettext_domain DOMAIN [UNICODE] [DIR]
 # Set gettext domain. e.g. 'PledgeBank'
 # Set UNICODE if you want Unicode strings returned, not octets.
-sub gettext_domain($;$) {
-    my ($domain, $unicode) = @_;
+# Set DIR to the path of your 'locale' directory - defaults to "$FindBin::Bin/../locale"
+sub gettext_domain($;$$) {
+    my ($domain, $unicode, $dir) = @_;
     $gettext = $unicode ? Locale::gettext->domain($domain) : Locale::gettext->domain_raw($domain);
     die "failed to bind to gettext domain $domain" unless $gettext;
-    $gettext->dir("$FindBin::Bin/../locale");
+    $gettext->dir( $dir || "$FindBin::Bin/../locale" );
     $gettext->codeset('UTF-8') unless $unicode;
 }
 
