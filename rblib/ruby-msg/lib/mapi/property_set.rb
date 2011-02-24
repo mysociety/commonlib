@@ -259,7 +259,7 @@ module Mapi
 			@body_html = (RTF.rtf2html body_rtf rescue nil) if !@body_html or @body_html.strip.empty?
 			# last resort
 			if !@body_html or @body_html.strip.empty?
-				Log.warn 'creating html body from rtf'
+				#Log.warn 'creating html body from rtf'
 				@body_html = (::RTF::Converter.rtf2text body_rtf, :html rescue nil)
 			end
 			@body_html

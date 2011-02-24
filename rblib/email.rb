@@ -8,6 +8,7 @@ require 'rubygems'
 require 'cgi'
 require 'tmail'
 $:.push(File.join(File.dirname(__FILE__), 'ruby-msg/lib'))
+$:.push(File.join(File.dirname(__FILE__), 'ruby-ole/lib'))
 require 'mapi/msg'
 require 'mapi/convert'
 require 'zip/zip'
