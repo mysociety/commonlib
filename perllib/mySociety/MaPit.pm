@@ -11,6 +11,7 @@ package mySociety::MaPit;
 
 use strict;
 
+use Encode;
 use JSON;
 use LWP::UserAgent;
 use RABX;
@@ -53,6 +54,8 @@ sub _call ($$;$) {
         $qs .= "$k=$v";
     }
     my $r;
+    $qs = encode_utf8($qs) if utf8::is_utf8($qs);
+    $urlp = encode_utf8($urlp) if utf8::is_utf8($urlp);
     if (length($base . $urlp) > 1024) {
         $r = $ua->post($base . $url, Content => $qs);
     } elsif (length("$base$urlp?$qs") > 1024) {
