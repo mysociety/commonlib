@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 1000;
+use Test::More tests => 8;
 
 # locate the sample file to use for testing
 my $sample_vhosts = __FILE__;

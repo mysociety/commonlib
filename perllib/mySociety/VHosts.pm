@@ -5,7 +5,7 @@ use warnings;
 
 use Carp;
 use File::Slurp;
-use Path::Class;
+use Path::Class qw(dir);
 
 =head2 new
 
