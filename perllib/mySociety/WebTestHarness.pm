@@ -151,7 +151,7 @@ sub new ($$) {
     my $self = {};
 
     $self->{tempdir} = File::Temp::tempdir( CLEANUP => 0 );
-    $self->{useragent} = new mySociety::WebTestHarness::Mechanize(autocheck => 1);
+    $self->{useragent} = new mySociety::WebTestHarness::Mechanize(autocheck => 1, onerror => undef);
 
     return bless($self, $class);
 }
