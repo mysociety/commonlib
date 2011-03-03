@@ -291,7 +291,7 @@ module MySociety
       # If mahoro isn't installed, don't try and use it
       begin
         require 'mahoro'
-      rescue 
+      rescue LoadError
         return nil
       end
   
