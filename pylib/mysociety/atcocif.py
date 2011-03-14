@@ -988,7 +988,7 @@ class JourneyIntermediate(CIFRecord):
 
         # BPSN are documented values for activity_flag in CIF file, other train ones are documented
         # in http://www.atoc.org/rsp/_downloads/RJIS/20040601.pdf
-        matches = re.match('^QI(.{12})(\d{4})(\d{4})([BPSNACDORTUXL-])(.{3})(T[01])(F0|F1|  )$', line)
+        matches = re.match('^QI(.{12})(\d{4})(\d{4})([BPSNACDORTUKXL -])(.{3})(T[01])(F0|F1|  )$', line)
         if not matches:
             raise Exception("Journey intermediate line incorrectly formatted: " + line)
 
@@ -1028,17 +1028,19 @@ class JourneyIntermediate(CIFRecord):
     # U - pick Up only (train)
     # X - pass another train at Xing point on single line
     # L - Undocumented
+    # K - Undocumented
+    # [space] - Undocumented
     # - - stop to attach/detach vehicles
     def is_set_down(self):
         if self.activity_flag in ['B', 'S', 'T', 'D', 'R']:
             return True
-        if self.activity_flag in ['N', 'P', 'O', 'U', 'A', 'C', 'X', '-', 'L']:
+        if self.activity_flag in ['N', 'P', 'O', 'U', 'A', 'C', 'X', '-', 'L', 'K', ' ']:
             return False
         assert False, "activity_flag %s not supported (location %s) " % (self.activity_flag, self.location)
     def is_pick_up(self):
         if self.activity_flag in ['B', 'P', 'T', 'U', 'R']:
             return True
-        if self.activity_flag in ['N', 'S', 'O', 'D', 'A', 'C', 'X', '-', 'L']:
+        if self.activity_flag in ['N', 'S', 'O', 'D', 'A', 'C', 'X', '-', 'L', 'K', ' ']:
             return False
         assert False, "activity_flag %s not supported (location %s)" % (self.activity_flag, self.location)
 
