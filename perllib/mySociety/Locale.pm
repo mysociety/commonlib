@@ -12,7 +12,7 @@ package mySociety::Locale;
 
 use strict;
 use FindBin;
-use HTTPNegotiate;
+use HTTP::Negotiate;
 use Locale::gettext;
 use POSIX qw(setlocale LC_ALL);
 
