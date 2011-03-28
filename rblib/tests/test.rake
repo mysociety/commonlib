@@ -3,7 +3,6 @@ namespace :test do
   desc "Run the ruby tests in commonlib"
   task :commonlib do 
     Dir.glob(File.join(File.dirname(__FILE__), '*_test.rb')).each do |filename|
-      next if File.basename(filename) == 'email_test.rb'
       sh "ruby #{filename} " 
     end
   end
