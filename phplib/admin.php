@@ -135,6 +135,17 @@ img.creatorpicture { float: left; display: inline; margin-right: 10px; }
 .timeline dt {   clear: left; float: left; font-weight: bold; }
 .timeline dd { margin-left: 8em; }
 #pledge { border: solid 2px #522994; background-color: #f6e5ff; margin-bottom: 1em; margin-left: 1em; padding: 10px; text-align: center; width: 30%; float: right; margin: 1em auto; }
+/* admin- classes introduced for pledgebank */
+.admin-even, .admin-odd { padding:6px 4px; background-color: #ffffff; margin:0; clear:left;}
+.admin-odd { background-color: #eeeeee; }
+.admin-name { width:8em; float:left; color:#666666; }
+.admin-value  { 
+    margin-left:8em; 
+    min-height: 1em;
+    height: auto !important; /* this line and the next: hack for ie6*/ 
+    height: 1em;
+}
+.admin-value h2  { margin-top:0; font-size:1em; }
 //--></style>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title><?=$title?></title>
