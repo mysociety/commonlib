@@ -56,6 +56,9 @@ function admin_page_display($site_name, $pages, $default = null, $params = array
             if (!isset($params['headfoot'])) {
                 $title = $page->navname . " - $maintitle";
                 admin_html_header($title);
+                if (isset($params['shownavbar']) && $params['shownavbar']){
+                    print admin_navigation_bar($pages, $page->id, $params['shownavbar']);
+                }
                 print "<h1>$title</h1>";
             }
         }
@@ -75,21 +78,7 @@ function admin_page_display($site_name, $pages, $default = null, $params = array
             $default->display();
         }
 
-        // generate navigation bar
-        $navlinks = "<ul>";
-        foreach ($pages as $page) {
-            if (isset($page)) {
-                if (isset($page->url)) {
-                    $navlinks .= "<li><a href=\"". $page->url."\">" . $page->navname. "</a>";
-                } elseif (!property_exists($page, 'noindex') || !$page->noindex) {
-                    $navlinks .= "<li><a href=\"?page=". $page->id."\">" . $page->navname. "</a>";
-                }
-            } else {
-                $navlinks .= '</ul> <ul>';
-            }
-        }
-        $navlinks .= '</ul>';
-        print $navlinks;
+        print admin_navigation_bar($pages);
 ?>
 <p><a href="http://www.mysociety.org/"><img class="mslogo" src="https://secure.mysociety.org/mysociety_sm.gif" border="0" alt="mySociety"></a></p>
 <?
@@ -97,6 +86,36 @@ function admin_page_display($site_name, $pages, $default = null, $params = array
     } 
 }
 
+// generate navigation bar
+function admin_navigation_bar($pages, $currentPageId = null, $wantStyling = false) {
+    $need_separator = false; # start a new <ul> when one or more nulls are found
+    // ignoring actual value of wantStyling, but one day perhaps it could be a CSS class name?
+    $navlinks = $wantStyling? "<div class='admin-page-nav'>" : "<div>";
+    $navlinks .= "<ul>";
+    foreach ($pages as $page) {
+        if (isset($page)) {
+            if ($need_separator) {
+                $navlinks .= '</ul> <ul>';
+                $need_separator = false;
+            }
+            if ($currentPageId && isset($page->id) && $currentPageId == $page->id) {
+                $navlinks .= "<li><span class='admin-no-link'>" . $page->navname. "</span></li>";
+            } elseif (isset($page->url)) {
+                $navlinks .= "<li><a href=\"". $page->url."\">" . $page->navname. "</a></li>";
+            } elseif (!property_exists($page, 'noindex') || !$page->noindex) {
+                $navlinks .= "<li><a href=\"?page=". $page->id."\">" . $page->navname. "</a></li>";
+            }
+        } else {
+            $need_separator = true;
+        }
+    }
+    $navlinks .= '</ul>';
+    if ($wantStyling) {
+        $navlinks .= '<div class="admin-nav-clear"></div>';
+    }
+    $navlinks .= '</div>';
+    return $navlinks;
+}
 
 // Header at start of page
 function admin_html_header($title) {
@@ -146,6 +165,14 @@ img.creatorpicture { float: left; display: inline; margin-right: 10px; }
     height: 1em;
 }
 .admin-value h2  { margin-top:0; font-size:1em; }
+/* slightly fancy admin nav introduced for pledgebank pages: enable by setting param "shownavbar" */
+.admin-page-nav { margin:0 0 1em 0;padding:4px 1em 4px 0; border-bottom:2px solid #eeeeee;}
+.admin-page-nav ul { list-type: none; float:left; width: auto; margin: 4px 1em 0 0; padding:8px 0 0 0;}
+.admin-page-nav ul li { display: inline; padding: 4px 0 0 0; margin: 0 4px 0 0;}
+.admin-page-nav ul li a {padding: 4px 8px; background-color:#dddddd; color:black;}
+.admin-page-nav ul li span.admin-no-link {padding: 4px 8px; background-color:#999999; color:#ffffff;}
+.admin-page-nav ul li a:hover {background-color:#000; color: #fff; text-decoration:none;}
+.admin-nav-clear { clear:both; margin: 0; padding:0; width:100%; height: 1px; }
 //--></style>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title><?=$title?></title>
