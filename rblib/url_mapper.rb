@@ -34,8 +34,13 @@ module MySociety
       end
 
       # Prefixes a relative URL with the domain definted in DOMAIN in the config
-      def main_url(relative_path)
-        url_prefix = "http://" + MySociety::Config.get("DOMAIN", '127.0.0.1:3000')
+      def main_url(relative_path, options={})
+        if options[:skip_protocol]
+          url_prefix = ''
+        else
+          url_prefix = 'http://'
+        end
+        url_prefix += MySociety::Config.get("DOMAIN", '127.0.0.1:3000')
         return url_prefix + relative_path
       end
       
