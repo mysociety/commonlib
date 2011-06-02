@@ -1,0 +1,7 @@
+Hello,
+
+Email address {{ email }} has been unsubscribed.
+
+Yours,
+The Team
+
