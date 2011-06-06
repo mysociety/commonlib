@@ -1,14 +1,17 @@
 from django.template import loader, Context, Template
 from django.core.mail import send_mail
 from django.conf import settings
+from django.contrib import sites
 
-def send_email(request, subject, template, context, to):
+def send_email(subject, template, context, to):
     if not isinstance(template, Template):
         template = loader.get_template(template)
-    if request:
-        context.update({
-            'host': request.META['HTTP_HOST'],
-        })
+
+    # If host has already been set in context, leave it as it is,
+    # otherwise, we'll add it in.
+    if not context.get('host'):
+        context['host'] = sites.models.Site.objects.get_current()
+
     mail = template.render(Context(context))
     send_mail(subject, mail, settings.DEFAULT_FROM_EMAIL, [to])
 
