@@ -7,12 +7,8 @@ from django.core.urlresolvers import reverse
 from utils import int_to_base32, base32_to_int, send_email
 
 class EmailConfirmationManager(models.Manager):
-    def confirm(self, content_object, after_confirm, after_unsubscribe, email_template='emailconfirmation/email.txt'):
-        conf = EmailConfirmation(
-            content_object=content_object,
-            after_confirm=after_confirm,
-            after_unsubscribe=after_unsubscribe,
-        )
+    def confirm(self, content_object, email_template='emailconfirmation/email.txt'):
+        conf = EmailConfirmation(content_object=content_object)
         conf.send_email(email_template)
 
 class EmailConfirmation(models.Model):
@@ -20,10 +16,12 @@ class EmailConfirmation(models.Model):
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()
     content_object = generic.GenericForeignKey('content_type', 'object_id')
-    after_confirm = models.CharField(max_length=100)
-    after_unsubscribe = models.CharField(max_length=100)
 
     objects = EmailConfirmationManager()
+
+    # Override these in the models file which foreign keys to here.
+    after_confirm = None
+    after_unsubscribe = None
 
     def __unicode__(self):
         return 'Confirming of %s, %s' % (self.content_object.email, self.confirmed)

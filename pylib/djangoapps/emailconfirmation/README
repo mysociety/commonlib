@@ -5,16 +5,17 @@ no dependencies, just an object that has an email address.
 
 2. Add (r'^', include('emailconfirmation.urls')) to your urls.py.
 
+3. Set EmailConfirmation.after_confirm and
+   EmailConfirmation.after_unsubscribe to the name of urls.py entries that
+   we will redirect to after successful confirmation and unsubscription.
+   These should have a (\d+) somewhere in the URL where the ID of the
+   confirmed object will go.
+
 3. Anywhere you want an object that has an email field to be confirmed via
    email, say just after it's been created, simply call:
-       EmailConfirmation.objects.confirm(request, object, after_confirm, after_unsubscribe)
-   and return a "Please check your email" page.
-   'after_confirm' should be the name of a urls.py entry that we will redirect
-   to after successful confirmation, and should have (\d+) somewhere in the URL
-   where the ID of the confirmed object will go. 'after_unsubscribe' is
-   similarly the name of a urls.py entry to redirect to after unsubscribing.
+       EmailConfirmation.objects.confirm(object)
+   and return a "Please check your email" page. 'object' here refers 
+   to the object being confirmed (which has a foreign key to EmailConfirmation).
 
-Override emailconfirmation/email.txt to supply your own confirmation email, or
-pass a Template or template path into confirm().
-'object' will refer to the object being confirmed.
-
+   Override emailconfirmation/email.txt to supply your own confirmation email, 
+   or pass a Template or template path into confirm().
