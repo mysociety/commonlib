@@ -16,7 +16,7 @@ class EmailConfirmation(models.Model):
     after_confirm = None
     after_unsubscribe = None
 
-    def confirm(self, email_template):
+    def confirm(self, email_template='emailconfirmation/email.txt'):
         send_email(
             "Alert confirmation",
             email_template,
