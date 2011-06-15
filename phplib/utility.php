@@ -40,7 +40,7 @@ function unfck_gpc() {
 if (get_magic_quotes_gpc()) unfck_gpc();
 
 /* Make some vague effort to turn off the "magic quotes" nonsense. */
-set_magic_quotes_runtime(0);
+ini_set('magic_quotes_runtime', 0);
 
 /*
  * Actually useful functions begin below here.
