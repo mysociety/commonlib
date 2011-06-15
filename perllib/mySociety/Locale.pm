@@ -102,7 +102,7 @@ sub in_gb_locale(&) {
     my $sub = shift;
     mySociety::Locale::push('en-gb') if $lang;
     my (@result, $result);
-    wantarray ? @result = $sub->() : $result = $sub->();
+    wantarray ? ( @result = $sub->() ) : ( $result = $sub->() );
     mySociety::Locale::pop() if $lang;
     return wantarray ? @result : $result;
 }
