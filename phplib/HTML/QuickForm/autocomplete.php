@@ -24,7 +24,7 @@
 /**
  * HTML class for a text field
  */ 
-require_once 'HTML/QuickForm/text.php';
+require_once preg_replace('/HTML\/QuickForm.*$/', '', __FILE__ ) . 'HTML/QuickForm/text.php';
 
 /**
  * HTML class for an autocomplete element

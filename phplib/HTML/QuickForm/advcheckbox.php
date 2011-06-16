@@ -25,7 +25,7 @@
 /**
  * HTML class for a checkbox type field
  */
-require_once 'HTML/QuickForm/checkbox.php';
+require_once preg_replace('/HTML\/QuickForm.*$/', '', __FILE__ ) . 'HTML/QuickForm/checkbox.php';
 
 /**
  * HTML class for an advanced checkbox type field

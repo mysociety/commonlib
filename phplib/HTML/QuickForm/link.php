@@ -25,7 +25,7 @@
 /**
  * HTML class for static data
  */ 
-require_once 'HTML/QuickForm/static.php';
+require_once preg_replace('/HTML\/QuickForm.*$/', '', __FILE__ ) . 'HTML/QuickForm/static.php';
 
 /**
  * HTML class for a link type field

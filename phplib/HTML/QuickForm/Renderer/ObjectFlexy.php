@@ -24,7 +24,7 @@
 /**
  * A concrete renderer for HTML_QuickForm, makes an object from form contents
  */ 
-require_once 'HTML/QuickForm/Renderer/Object.php';
+require_once preg_replace('/HTML\/QuickForm.*$/', '', __FILE__ ) . 'HTML/QuickForm/Renderer/Object.php';
 
 /**
  * QuickForm renderer for Flexy template engine, static version.
@@ -34,9 +34,9 @@ require_once 'HTML/QuickForm/Renderer/Object.php';
  *
  * Usage:
  * <code>
- * $form =& new HTML_QuickForm('form', 'POST');
- * $template =& new HTML_Template_Flexy();
- * $renderer =& new HTML_QuickForm_Renderer_ObjectFlexy(&$template);
+ * $form = new HTML_QuickForm('form', 'POST');
+ * $template = new HTML_Template_Flexy();
+ * $renderer = new HTML_QuickForm_Renderer_ObjectFlexy(&$template);
  * $renderer->setHtmlTemplate("html.html");
  * $renderer->setLabelTemplate("label.html");
  * $form->accept($renderer);

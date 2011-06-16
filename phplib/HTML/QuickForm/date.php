@@ -24,11 +24,11 @@
 /**
  * Class for a group of form elements
  */
-require_once 'HTML/QuickForm/group.php';
+require_once preg_replace('/HTML\/QuickForm.*$/', '', __FILE__ ) . 'HTML/QuickForm/group.php';
 /**
  * Class for <select></select> elements
  */
-require_once 'HTML/QuickForm/select.php';
+require_once preg_replace('/HTML\/QuickForm.*$/', '', __FILE__ ) . 'HTML/QuickForm/select.php';
 
 /**
  * Class for a group of elements used to input dates (and times).
@@ -419,7 +419,7 @@ class HTML_QuickForm_date extends HTML_QuickForm_group
                             $options = array($this->_options['emptyOptionValue'] => $this->_options['emptyOptionText']) + $options;
                         }
                     }
-                    $this->_elements[] =& new HTML_QuickForm_select($sign, null, $options, $this->getAttributes());
+                    $this->_elements[] = new HTML_QuickForm_select($sign, null, $options, $this->getAttributes());
                 }
             }
         }
@@ -506,8 +506,8 @@ class HTML_QuickForm_date extends HTML_QuickForm_group
 
     function toHtml()
     {
-        include_once('HTML/QuickForm/Renderer/Default.php');
-        $renderer =& new HTML_QuickForm_Renderer_Default();
+        include_once( preg_replace('/HTML\/QuickForm.*$/', '', __FILE__ ) . 'HTML/QuickForm/Renderer/Default.php');
+        $renderer = new HTML_QuickForm_Renderer_Default();
         $renderer->setElementTemplate('{element}');
         parent::accept($renderer);
         return $this->_wrap[0] . $renderer->toHtml() . $this->_wrap[1];

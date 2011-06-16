@@ -26,11 +26,11 @@
 /**
  * Class for a group of form elements
  */
-require_once 'HTML/QuickForm/group.php';
+require_once preg_replace('/HTML\/QuickForm.*$/', '', __FILE__ ) . 'HTML/QuickForm/group.php';
 /**
  * Class for <select></select> elements
  */
-require_once 'HTML/QuickForm/select.php';
+require_once preg_replace('/HTML\/QuickForm.*$/', '', __FILE__ ) . 'HTML/QuickForm/select.php';
 
 /**
  * Hierarchical select element
@@ -164,7 +164,7 @@ class HTML_QuickForm_hierselect extends HTML_QuickForm_group
             // check if all elements have been created
             $totalNbElements = count($this->_options);
             for ($i = $this->_nbElements; $i < $totalNbElements; $i ++) {
-                $this->_elements[] =& new HTML_QuickForm_select($i, null, array(), $this->getAttributes());
+                $this->_elements[] = new HTML_QuickForm_select($i, null, array(), $this->getAttributes());
                 $this->_nbElements++;
             }
         }
@@ -219,7 +219,7 @@ class HTML_QuickForm_hierselect extends HTML_QuickForm_group
             // check if all elements have been created
             $totalNbElements = 2;
             for ($i = $this->_nbElements; $i < $totalNbElements; $i ++) {
-                $this->_elements[] =& new HTML_QuickForm_select($i, null, array(), $this->getAttributes());
+                $this->_elements[] = new HTML_QuickForm_select($i, null, array(), $this->getAttributes());
                 $this->_nbElements++;
             }
         }
@@ -286,7 +286,7 @@ class HTML_QuickForm_hierselect extends HTML_QuickForm_group
     function _createElements()
     {
         for ($i = 0; $i < $this->_nbElements; $i++) {
-            $this->_elements[] =& new HTML_QuickForm_select($i, null, array(), $this->getAttributes());
+            $this->_elements[] = new HTML_QuickForm_select($i, null, array(), $this->getAttributes());
         }
     } // end func _createElements
 
@@ -463,8 +463,8 @@ JAVASCRIPT;
             $this->_js .= "_hs_defaults['" . $this->_escapeString($this->getName()) . "'] = " .
                           $this->_convertArrayToJavascript($values) . ";\n";
         }
-        include_once('HTML/QuickForm/Renderer/Default.php');
-        $renderer =& new HTML_QuickForm_Renderer_Default();
+        include_once( preg_replace('/HTML\/QuickForm.*$/', '', __FILE__ ) . 'HTML/QuickForm/Renderer/Default.php');
+        $renderer = new HTML_QuickForm_Renderer_Default();
         $renderer->setElementTemplate('{element}');
         parent::accept($renderer);
 

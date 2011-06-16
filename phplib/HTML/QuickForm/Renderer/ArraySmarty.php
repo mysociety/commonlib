@@ -27,7 +27,7 @@
 /**
  * A concrete renderer for HTML_QuickForm, makes an array of form contents
  */ 
-require_once 'HTML/QuickForm/Renderer/Array.php';
+require_once preg_replace('/HTML\/QuickForm.*$/', '', __FILE__ ) . 'HTML/QuickForm/Renderer/Array.php';
 
 /**
  * A static renderer for HTML_QuickForm, makes an array of form content

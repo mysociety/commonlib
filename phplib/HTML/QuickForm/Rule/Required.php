@@ -24,7 +24,7 @@
 /**
  * Abstract base class for QuickForm validation rules 
  */
-require_once 'HTML/QuickForm/Rule.php';
+require_once preg_replace('/HTML\/QuickForm.*$/', '', __FILE__ ) . 'HTML/QuickForm/Rule.php';
 
 /**
  * Required elements validation

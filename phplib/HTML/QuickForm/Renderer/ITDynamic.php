@@ -24,7 +24,7 @@
 /**
  * An abstract base class for QuickForm renderers
  */
-require_once 'HTML/QuickForm/Renderer.php';
+require_once preg_replace('/HTML\/QuickForm.*$/', '', __FILE__ ) . 'HTML/QuickForm/Renderer.php';
 
 /**
  * A concrete renderer for HTML_QuickForm, using Integrated Templates.

@@ -123,9 +123,9 @@ class HTML_QuickForm_RuleRegistry
 
         if (!isset($this->_rules[$class])) {
             if (!empty($path)) {
-                include_once($path);
+                include_once( preg_replace('/HTML\/QuickForm.*$/', '', __FILE__ ) . $path );
             }
-            $this->_rules[$class] =& new $class();
+            $this->_rules[$class] = new $class();
         }
         $this->_rules[$class]->setName($ruleName);
         return $this->_rules[$class];
