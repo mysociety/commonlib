@@ -1,6 +1,7 @@
 #
 # config.py:
-# Very simple config parser. Our config files are sort of cod-PHP.
+# Very simple config parser.
+# Our config files are either YAML or a sort of cod-PHP.
 #
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
@@ -9,9 +10,14 @@
 #
 
 """
-Parse config files (written in a sort of cod-php, using
+Parse config files.
+
+Traditional mySociety config files are written in a sort of cod-php, using
     define(OPTION_VALUE_NAME, "value of option");
 to define individual elements.
+
+This library also supports YAML format: if there is a file that has the
+specified name concatenated with ".yml", that will be used in preference.
 
 Example use:
     mysociety.config.set_file('../conf/general')
@@ -20,7 +26,44 @@ Example use:
 
 import os
 import subprocess
-import re
+import yaml
+
+def read_config(f):
+    """Read configuration from the specified file.
+
+    If the filename ends in .yml, or FILE.yml exists, that file is parsed as
+    a YAML object which is returned. Otherwise FILE is parsed by PHP, and any defines
+    are extracted as config values.
+
+    For PHP configuration files only, "OPTION_" is removed from any names
+    beginning with that.
+
+    If specified, values from DEFAULTS are merged.
+    """
+    if f.endswith(".yml"):
+        config = read_config_from_yaml(f)
+    elif os.path.isfile(f + ".yml"):
+        if os.path.exists(f):
+            raise Exception("Configuration error: both %s and %s.yml exist (remove one)" % (f, f + ".yml"))
+        config = read_config_from_yaml(f + ".yml")
+    else:
+        config = read_config_from_php(f)
+    
+    config["CONFIG_FILE_NAME"] = f
+    return config
+
+def read_config_from_yaml(filename):
+    fh = open(filename, 'r')
+    try:
+        try:
+            config = yaml.load(fh)
+        except ValueError, e:
+            raise Exception("Failed to parse YAML: " + e.args[0])
+        if not isinstance(config, dict):
+            raise Exception("The YAML file must represent an object (a.k.a. hash, dict, map)")
+        return config
+    finally:
+        fh.close()
 
 def find_php():
     """find_php() -> php_binary
@@ -40,14 +83,7 @@ def find_php():
 
 php_path = None
 debian_version = None
-def read_config(f):
-    """read_config(FILE) ->
-
-       Read configuration from FILE, which should be the name of a PHP config
-       file.  This is parsed by PHP, and any defines are extracted as config
-       values. "OPTION_" is removed from any names beginning with that.
-    """
-
+def read_config_from_php(f):
     # We need to find the PHP binary.
     global php_path
     if not php_path:
@@ -135,7 +171,6 @@ foreach ($a as $k => $v) {
     config = {}
     for i in range(len(vals) // 2):
         config[vals[i*2]] = vals[i*2+1]
-    config["CONFIG_FILE_NAME"] = f
     return config
 
 main_config_filename = None
@@ -181,7 +216,7 @@ def get (key, default = None):
     
     if key in config:
         return config[key]
-    elif default != None:
+    elif default is not None:
         return default
     else:
-        raise Exception, "No value for '%s' in '%s', and no default specified" % (key, config['CONFIG_FILE_NAME'])
+        raise Exception("No value for '%s' in '%s', and no default specified" % (key, config['CONFIG_FILE_NAME']))

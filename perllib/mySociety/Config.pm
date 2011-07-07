@@ -18,6 +18,7 @@ use IO::Pipe;
 use Error qw(:try);
 use Data::Dumper;
 use POSIX ();
+use YAML ();
 
 =head1 NAME
 
@@ -42,6 +43,8 @@ to define individual elements.
 
 =cut
 
+my $php_path;
+
 # find_php
 # Try to locate the PHP binary in various sensible places.
 sub find_php () {
@@ -55,17 +58,27 @@ sub find_php () {
     throw Error::Simple "unable to locate PHP binary, needed to read config file";
 }
 
-=item read_config FILE [DEFAULTS]
+# read_config_from_yaml
+# Read configuration data from the named YAML configuration file
+sub read_config_from_yaml($) {
+    my ($f) = @_;
 
-Read configuration from FILE, which should be the name of a PHP config file.
-This is parsed by PHP, and any defines are extracted as config values.
-"OPTION_" is removed from any names beginning with that. If specified, values
-from DEFAULTS are merged.
+    open my $fh, "<", $f or throw Error::Simple "$f: failed to open config file: $!";
+    my $file_contents = join("", <$fh>);
+    my $conf = YAML::Load($file_contents);
 
-=cut
-my $php_path;
-sub read_config ($;$) {
-    my ($f, $defaults) = @_;
+    if (ref($conf) ne "HASH") {
+        throw Error::Simple "$f: The YAML file must represent an object (a.k.a. hash, dict, map)";
+    }
+
+    close $fh;
+    return $conf;
+}
+
+# read_config_from_php
+# Read configuration data from the named PHP configuration file
+sub read_config_from_php($) {
+    my ($f) = @_;
 
     if (! -r $f) {
         throw Error::Simple "$f: read permissions not OK for config file";
@@ -154,13 +167,7 @@ EOF
                 # at the end of the buffer. I love perl! Perl is my friend!
 
     throw Error::Simple "$php_path: $f: bad option output from subprocess" if (scalar(@vals) % 2);
-
-    my %config = @vals;
-
-    if ($defaults) {
-        $config{$_} = $defaults->{$_} foreach (keys %$defaults);
-    }
-
+    
     waitpid($pid, 0);
 
     if ($?) {
@@ -171,13 +178,49 @@ EOF
         }
     }
 
-    $config{"CONFIG_FILE_NAME"} = $f;
-
     # Restore signal handler.
     $old_SIGCHLD ||= 'DEFAULT';
     $SIG{CHLD} = $old_SIGCHLD;
 
+    my %config = @vals;
     return \%config;
+}
+
+=item read_config FILE [DEFAULTS]
+
+Read configuration from FILE.
+
+If the filename ends in .yml, or FILE.yml exists, that file is parsed as
+a YAML object which is returned. Otherwise FILE is parsed by PHP, and any defines
+are extracted as config values.
+
+For PHP configuration files only, "OPTION_" is removed from any names
+beginning with that.
+
+If specified, values from DEFAULTS are merged.
+
+=cut
+sub read_config ($;$) {
+    my ($f, $defaults) = @_;
+
+    my $config;
+    if ($f =~ /\.yml$/) {
+        $config = read_config_from_yaml($f);
+    } elsif (-f "$f.yml") {
+        if (-e $f) {
+            throw Error::Simple "Configuration error: both $f and $f.yml exist (remove one)";
+        }
+        $config = read_config_from_yaml("$f.yml");
+    } else {
+        $config = read_config_from_php($f);
+    }
+    if ($defaults) {
+        $config->{$_} = $defaults->{$_} foreach (keys %$defaults);
+    }
+
+    $config->{"CONFIG_FILE_NAME"} = $f;
+
+    return $config;
 }
 
 =item set_file FILENAME

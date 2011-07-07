@@ -18,13 +18,33 @@ warn () {
 }
 
 # Reads in config file
-# Currently doesn't read in numeric values
+# If $1 ends with .yml, it is loaded as YAML. Otherwise
+# if there is a file named "$1.yml", then that is loaded.
+# If not, the file "$1" is interpreted as a PHP file.
 # $1 - config file
 read_conf () {
     # XXX use of mktemp here not safe; should make a temporary directory
     CONF_SOURCE=`mktemp /tmp/ms-deploy-configsource.XXXXXX`
-    export MYSOCIETY_CONFIG_FILE_PATH=$1
-    cat << END | php >$CONF_SOURCE || die "shlib/deployfns read_conf: error calling PHP to load config file $1"
+    
+    case "$1" in
+      *.yaml|*.yml)
+          /data/mysociety/bin/yaml2sh "$1" >$CONF_SOURCE || \
+              die "shlib/deployfns read_conf: error loading config file $1"
+          ;;
+      *)
+          if [ -f "$1.yml" ]
+          then
+              if [ -e "$1" ]
+              then
+                  die "Configuration error: both $1 and %1.yml exist (remove one)"
+              fi
+
+              /data/mysociety/bin/yaml2sh "$1.yml" >$CONF_SOURCE || \
+                  die "shlib/deployfns read_conf: error loading config file $1.yml"
+          else
+              export MYSOCIETY_CONFIG_FILE_PATH=$1
+              cat << END | php >$CONF_SOURCE || \
+                  die "shlib/deployfns read_conf: error calling PHP to load config file $1"
 <?php
 \$b = get_defined_constants();
 require(getenv("MYSOCIETY_CONFIG_FILE_PATH"));
@@ -37,6 +57,10 @@ foreach (\$a as \$k => \$v) {
 }
 ?>
 END
+          fi
+          ;;
+    esac
+
     . $CONF_SOURCE
     rm $CONF_SOURCE
 }

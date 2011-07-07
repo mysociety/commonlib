@@ -1,0 +1,61 @@
+#!/usr/bin/python
+
+"""
+Read in a YAML-formatted file, either named on the command-line or supplied
+on standard input, and write it to standard output as a series of variable
+assignments in Bourne-shell format.
+"""
+
+import optparse, sys, re, yaml
+
+def die(message):
+  print >>sys.stderr, "%s: %s" % (sys.argv[0], message)
+  sys.exit(1)
+
+def is_valid_varname(s):
+  return re.match(r"^\w+$", s) is not None
+  
+def shell_quote(s):
+  """Return a quoted string that will be interpreted by a Bourne-like shell
+  as representing the string that was passed in.
+  """
+  return "'" + re.sub(r"'", "'\\''", s) + "'"
+
+def process(fh=None, data=None, prefix=[]):
+  assert fh is not None or data is not None
+  
+  if data is None:
+    try:
+      data = yaml.load(fh)
+    except ValueError, e:
+      die("Failed to parse YAML: " + e.args[0])
+  
+  if not isinstance(data, dict):
+    die("The YAML file must represent an object (a.k.a. hash, dict, map)")
+  for k, v in data.iteritems():
+    if not is_valid_varname(k):
+      die("The key '%s' is not a valid shell variable name" % (k,))
+    
+    if isinstance(v, dict):
+      process(data = v, prefix = prefix + [str(k)])
+    else:
+      print "%s=%s" % ("__".join(prefix + [k]), shell_quote(str(v)))
+
+def main(clargs):
+  parser = optparse.OptionParser(usage = "usage: %prog [file.json]")
+  (options, args) = parser.parse_args(clargs)
+  if len(args) > 1:
+    parser.error("Too many arguments")
+  
+  if args:
+    f = open(args[0], 'r')
+    try:
+      process(fh = f)
+    finally:
+      f.close()
+  else:
+    process(fh = sys.stdin)
+    
+
+if __name__ == "__main__":
+  main(sys.argv[1:])

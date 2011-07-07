@@ -6,10 +6,22 @@
 #
 # $Id: config.rb,v 1.4 2009-12-14 16:51:36 francis Exp $
 
+require "yaml"
+
 module MySociety
     module Config
 
-        # Parse config files (written in a sort of cod-php, using
+        # Parse config files
+        #
+        # The config files are written either in YAML or PHP,
+        # with the former preferred for new projects.
+        #
+        # If the filename ends in .yml, or if a file is found
+        # called filename.yml (where "filename" is the specified
+        # file name) then it is treated as a YAML config file.
+        #
+        # Otherwise the file "filename" (with no extension added)
+        # is treated as written in a sort of cod-php, using
         #     define(OPTION_VALUE_NAME, "value of option");
         # to define individual elements.
         # 
@@ -35,11 +47,46 @@ module MySociety
         end
 
         # read_config(FILE) ->
-        # Read configuration from FILE, which should be the name of a PHP config
-        # file.  This is parsed by PHP, and any defines are extracted as config
-        # values. "OPTION_" is removed from any names beginning with that.
-        attr :php_path
+        # Read configuration from FILE.
+        # 
+        # If the filename ends in .yml, or FILE.yml exists, that file is parsed as
+        # a YAML object which is returned. Otherwise FILE is parsed by PHP, and any defines
+        # are extracted as config values.
+        # 
+        # For PHP configuration files only, "OPTION_" is removed from any names
+        # beginning with that.
         def Config.read_config(f)
+            if f =~ /\.yml$/
+                config = read_config_from_yaml(f)
+            elsif File.exists?(f + ".yml")
+                if File.exists?(f)
+                    raise "Configuration error: both #{f} and #{f}.yml exist (remove one)"
+                end
+                config = read_config_from_yaml(f + ".yml")
+            else
+                config = read_config_from_php(f)
+            end
+
+            config["CONFIG_FILE_NAME"] = f
+            return config
+        end
+
+        # read_config_from_yaml(FILE) ->
+        # read a YAML-format configuration file
+        def Config.read_config_from_yaml(f)
+            File.open(f, "r") do |fh|
+                config = YAML.load(fh)
+                if config.class != Hash
+                    raise "#{f}: The YAML file must represent an object (a.k.a. hash, dict, map)"
+                end
+                return config
+            end
+        end
+
+        # read_config_from_php(FILE) ->
+        # read a PHP-format configuration file
+        attr :php_path
+        def Config.read_config_from_php(f)
             # We need to find the PHP binary.
             if @php_path.nil?
                 @php_path = find_php()
@@ -106,7 +153,6 @@ module MySociety
             for i in 0..(vals.size / 2 - 1)
                 config[vals[i*2]] = vals[i*2+1]
             end
-            config["CONFIG_FILE_NAME"] = f
             return config
         end
 
