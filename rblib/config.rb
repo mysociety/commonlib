@@ -176,7 +176,7 @@ module MySociety
             if not filename
                 raise "Please call MySociety::Config.set_file to specify config file" 
             end
-            if not File.exists?(filename)
+            if ! File.exists?(filename) and ! File.exists?(filename + ".yml")
                 if @ignore_missing_file
                     return {"CONFIG_FILE_NAME" => filename + " (missing file)"}
                 else
