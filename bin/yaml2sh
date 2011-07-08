@@ -21,7 +21,7 @@ def shell_quote(s):
   """
   return "'" + re.sub(r"'", "'\\''", s) + "'"
 
-def process(fh=None, data=None, prefix=[]):
+def process(fh=None, data=None, prefix=[], output_prefix=""):
   assert fh is not None or data is not None
   
   if data is None:
@@ -37,12 +37,14 @@ def process(fh=None, data=None, prefix=[]):
       die("The key '%s' is not a valid shell variable name" % (k,))
     
     if isinstance(v, dict):
-      process(data = v, prefix = prefix + [str(k)])
+      process(data = v, prefix = prefix + [str(k)], output_prefix = output_prefix)
     else:
-      print "%s=%s" % ("__".join(prefix + [k]), shell_quote(str(v)))
+      print "%s%s=%s" % (output_prefix, "__".join(prefix + [k]), shell_quote(str(v)))
 
 def main(clargs):
   parser = optparse.OptionParser(usage = "usage: %prog [file.json]")
+  parser.add_option("--prefix", action="store", default="",
+                    help="A prefix to prepend to the variable names returned (default '%default')")
   (options, args) = parser.parse_args(clargs)
   if len(args) > 1:
     parser.error("Too many arguments")
@@ -50,7 +52,7 @@ def main(clargs):
   if args:
     f = open(args[0], 'r')
     try:
-      process(fh = f)
+      process(fh = f, output_prefix=options.prefix)
     finally:
       f.close()
   else:

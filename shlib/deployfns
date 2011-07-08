@@ -4,7 +4,7 @@
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: deployfns,v 1.21 2009-10-28 19:46:56 francis Exp $
+# $Id: deployfns,v 1.23 2011-07-08 00:38:50 robin Exp $
 #
 
 # Warnings and errors
@@ -28,7 +28,7 @@ read_conf () {
     
     case "$1" in
       *.yaml|*.yml)
-          /data/mysociety/bin/yaml2sh "$1" >$CONF_SOURCE || \
+          /data/mysociety/bin/yaml2sh --prefix=OPTION_ "$1" >$CONF_SOURCE || \
               die "shlib/deployfns read_conf: error loading config file $1"
           ;;
       *)
