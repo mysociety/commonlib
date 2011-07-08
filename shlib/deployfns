@@ -39,7 +39,7 @@ read_conf () {
                   die "Configuration error: both $1 and %1.yml exist (remove one)"
               fi
 
-              /data/mysociety/bin/yaml2sh "$1.yml" >$CONF_SOURCE || \
+              /data/mysociety/bin/yaml2sh --prefix=OPTION_ "$1.yml" >$CONF_SOURCE || \
                   die "shlib/deployfns read_conf: error loading config file $1.yml"
           else
               export MYSOCIETY_CONFIG_FILE_PATH=$1
