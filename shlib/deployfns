@@ -17,6 +17,14 @@ warn () {
     echo -e "$SCRIPT_COMMAND:" "$@" 1>&2
 }
 
+_mysociety_commonlib_directory() {
+    (
+      cd "$(dirname "${BASH_SOURCE[0]}")"/..
+      pwd
+    )
+}
+MYSOCIETY_COMMONLIB_DIR=$(_mysociety_commonlib_directory)
+
 # Reads in config file
 # If $1 ends with .yml, it is loaded as YAML. Otherwise
 # if there is a file named "$1.yml", then that is loaded.
@@ -28,7 +36,7 @@ read_conf () {
     
     case "$1" in
       *.yaml|*.yml)
-          /data/mysociety/bin/yaml2sh --prefix=OPTION_ "$1" >$CONF_SOURCE || \
+          "$MYSOCIETY_COMMONLIB_DIR/bin/yaml2sh" --prefix=OPTION_ "$1" >$CONF_SOURCE || \
               die "shlib/deployfns read_conf: error loading config file $1"
           ;;
       *)
@@ -39,7 +47,7 @@ read_conf () {
                   die "Configuration error: both $1 and %1.yml exist (remove one)"
               fi
 
-              /data/mysociety/bin/yaml2sh --prefix=OPTION_ "$1.yml" >$CONF_SOURCE || \
+              "$MYSOCIETY_COMMONLIB_DIR/bin/yaml2sh" --prefix=OPTION_ "$1.yml" >$CONF_SOURCE || \
                   die "shlib/deployfns read_conf: error loading config file $1.yml"
           else
               export MYSOCIETY_CONFIG_FILE_PATH=$1
