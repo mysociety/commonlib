@@ -49,7 +49,7 @@ def read_config(f):
     elif os.path.exists(f):
         config = read_config_from_php(f)
     else:
-        raise Exception("Neither %s nor %s.yml can be found")
+        raise Exception("Neither %s nor %s.yml can be found" % (f, f + ".yml"))
     
     config["CONFIG_FILE_NAME"] = f
     return config
