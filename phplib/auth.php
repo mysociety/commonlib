@@ -60,7 +60,7 @@ function auth_token_retrieve($scope, $token) {
     $data = pg_unescape_bytea($data);
 
     $pos = 0;
-    $res = rabx_wire_rd(&$data, &$pos);
+    $res = rabx_wire_rd($data, $pos);
     if (rabx_is_error($res)) {
         $res = unserialize($data);
         if (is_null($res))
