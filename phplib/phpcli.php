@@ -12,7 +12,7 @@
  */
 
 # from http://www.sitepoint.com/print/php-command-line-1 adapted for FCGI
-if (version_compare(phpversion(), '4.3.0', '<') || php_sapi_name() == 'cgi' || php_sapi_name() == 'cgi-fcgi') {
+if (php_sapi_name() == 'cgi' || php_sapi_name() == 'cgi-fcgi') {
     @ob_end_flush();
     ob_implicit_flush(TRUE);
     set_time_limit(0);
