@@ -13,18 +13,22 @@
 # 
 # Email: team@mysociety.org; WWW: http://www.mysociety.org/
 #
-# $Id: HelmertTransform.pm,v 1.13 2009-08-20 09:02:43 matthew Exp $
+# $Id: HelmertTransform.pm,v 1.15 2011-08-10 09:38:42 evdb Exp $
 #
 
 package Geo::HelmertTransform;
 
-($Geo::HelmertTransform::VERSION) = ('$Id: HelmertTransform.pm,v 1.13 2009-08-20 09:02:43 matthew Exp $' =~ /^\$Id: [^\s]+,v (\d+\.\d+) /);
+$Geo::HelmertTransform::VERSION = '1.14';
 
 use strict;
 
 =head1 NAME
 
 Geo::HelmertTransform
+
+=head1 VERSION
+
+1.14
 
 =head1 SYNOPSIS
 
@@ -295,10 +299,6 @@ Copyright (c) UK Citizens Online Democracy.
 
 This module is free software; you can redistribute it and/or modify it under
 the same terms as Perl itself.
-
-=head1 VERSION
-
-$Id: HelmertTransform.pm,v 1.13 2009-08-20 09:02:43 matthew Exp $
 
 =cut
 
