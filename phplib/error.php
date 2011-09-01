@@ -11,8 +11,7 @@
  */
 
 # Tip of the Day:  This code grabs a backtrace into a string, and 
-# writes it to the Apache error log.  print_r can only do this
-# in PHP 4.3.0 and above.
+# writes it to the Apache error log.
 #       error_log(print_r(debug_backtrace(), TRUE));
 
 /* Make sure register globals is turned off */
@@ -22,14 +21,9 @@ if (ini_get("register_globals")) {
 }
 
 /*
- * PHP error handling is, you will not be surprised to hear, completely
- * amateurish. It doesn't have exceptions and it doesn't have nonlocal jumps
- * either, so we can't emulate exceptions. (Exception: PHP 5 has exceptions,
- * but we're not using that.)
- * 
  * There is the notion of an "error handler", which is a function called when
  * an "error" occurs (generated either by PHP or raised by code via the
- * trigger_error function. Note that trigger_error and the error handler
+ * trigger_error function). Note that trigger_error and the error handler
  * functions are not a control flow mechanism -- the default behaviour is for
  * the error handler to do its stuff, and then return control to the calling
  * code. Observe that this is exactly like handling the error, except that it
@@ -123,9 +117,6 @@ function err_global_handler($num, $str, $file, $line, $context) {
     global $err_handler_display;
     global $err_handling_error;
 
-    // PHP5.1RC* a bit overzealous about strict errors, even if not set to display:
-    if (version_compare(phpversion(), "5.0") >= 0 && $num == E_STRICT) { return; }
-
     $err_handling_error = true;
 
     if (isset($err_handler_log) && $num != E_USER_NOTICE)
@@ -192,6 +183,6 @@ error_reporting(E_ALL);
 
 /* Finally, set our error handler to be the default. Most classes of errors
  * cannot be trapped by a user error-handler, of course. */
-set_error_handler('err_global_handler');
+set_error_handler('err_global_handler', E_ALL);
 
 ?>

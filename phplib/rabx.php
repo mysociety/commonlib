@@ -83,7 +83,7 @@ function rabx_is_error($e) {
 function rabx_netstring_wr(&$string, &$buffer) {
     $l = setlocale(LC_NUMERIC, "0");
     setlocale(LC_NUMERIC, "C");
-    $buffer .= sprintf("%d:%s,", strlen(&$string), &$string);
+    $buffer .= sprintf("%d:%s,", strlen($string), $string);
     setlocale(LC_NUMERIC, $l);
     return TRUE;
 }
@@ -92,11 +92,11 @@ function rabx_netstring_wr(&$string, &$buffer) {
  * Read a netstring from BUFFER starting at position POS. Returns the string
  * read on success, or an error on failure. */
 function rabx_netstring_rd(&$buffer, &$pos) {
-    $avail = strlen(&$buffer) - $pos;
+    $avail = strlen($buffer) - $pos;
     if ($avail < 3)
         return rabx_error(RABX_ERROR_PROTOCOL, "not enough space for a netstring at position $pos");
     $m = array();
-    if (!preg_match('/(\d+):/', &$buffer, &$m, 0, $pos))
+    if (!preg_match('/(\d+):/', $buffer, $m, 0, $pos))
         return rabx_error(RABX_ERROR_PROTOCOL, "bad netstring leader at position $pos");
     $len = $m[1];
     $pos += ($n = strlen($m[0]));
@@ -105,10 +105,10 @@ function rabx_netstring_rd(&$buffer, &$pos) {
     if ($avail < $len + 1)
         return rabx_error(RABX_ERROR_PROTOCOL, "not enough space for netstring payload at position $pos");
 
-    $res = substr(&$buffer, $pos, $len);
+    $res = substr($buffer, $pos, $len);
     $pos += $len;
     
-    if (substr(&$buffer, $pos, 1) != ",")
+    if (substr($buffer, $pos, 1) != ",")
         return rabx_error(RABX_ERROR_PROTOCOL, "no trailing \",\" after netstring at position $pos");
 
     ++$pos;
@@ -148,11 +148,11 @@ function rabx_wire_wr(&$x, &$buffer) {
             /* "Associative array" */
             $buffer .= 'A';
             $cnx = count($x);
-            if (rabx_is_error($e = rabx_netstring_wr($cnx, &$buffer)))
+            if (rabx_is_error($e = rabx_netstring_wr($cnx, $buffer)))
                 return $e;
             foreach ($x as $k => $v) {
-                if (rabx_is_error($e = rabx_wire_wr($k, &$buffer))
-                    || rabx_is_error($e = rabx_wire_wr($v, &$buffer)))
+                if (rabx_is_error($e = rabx_wire_wr($k, $buffer))
+                    || rabx_is_error($e = rabx_wire_wr($v, $buffer)))
                     return $e;
             }
             return TRUE;
@@ -171,7 +171,7 @@ function rabx_wire_wr(&$x, &$buffer) {
             $buffer .= 'R';
         elseif (is_string($x))
             $buffer .= 'T';     /* XXX should check for UTF-8 */
-        return rabx_netstring_wr($x, &$buffer);
+        return rabx_netstring_wr($x, $buffer);
     }
 }
 
@@ -179,9 +179,9 @@ function rabx_wire_wr(&$x, &$buffer) {
  * Read the on-the-wire representation of some data from BUFFER beginning at
  * position POS. On error, returns an error. */
 function rabx_wire_rd(&$buffer, &$pos) {
-    if ($pos >= strlen(&$buffer))
+    if ($pos >= strlen($buffer))
         return rabx_error(RABX_ERROR_PROTOCOL, "attempt to read beyond end of buffer at position $pos");
-    $type = substr(&$buffer, $pos, 1);
+    $type = substr($buffer, $pos, 1);
     ++$pos;
 
     /* Check for valid type. */
@@ -194,7 +194,7 @@ function rabx_wire_rd(&$buffer, &$pos) {
     
     /* All other types now encode a string, which is either the value or a
      * length. */
-    if (rabx_is_error($x = rabx_netstring_rd(&$buffer, $pos)))
+    if (rabx_is_error($x = rabx_netstring_rd($buffer, $pos)))
         return $x;
     if ($type == 'I') {
         if (!is_numeric($x))
@@ -213,7 +213,7 @@ function rabx_wire_rd(&$buffer, &$pos) {
             return rabx_error(RABX_ERROR_PROTOCOL, "list length is not an integer at position $pos");
         $a = array();
         for ($i = 0; $i < intval($x); ++$i) {
-            array_push($a, $e = rabx_wire_rd(&$buffer, $pos));
+            array_push($a, $e = rabx_wire_rd($buffer, $pos));
             if (rabx_is_error($e))
                 return $e;
         }
@@ -223,9 +223,9 @@ function rabx_wire_rd(&$buffer, &$pos) {
             return rabx_error(RABX_ERROR_PROTOCOL, "associative array length is not an integer at position $pos");
         $a = array();
         for ($i = 0; $i < intval($x); ++$i) {
-            if (rabx_is_error($k = rabx_wire_rd(&$buffer, $pos)))
+            if (rabx_is_error($k = rabx_wire_rd($buffer, $pos)))
                 return $k;
-            if (rabx_is_error($v = rabx_wire_rd(&$buffer, $pos)))
+            if (rabx_is_error($v = rabx_wire_rd($buffer, $pos)))
                 return $v;
             $a[$k] = $v;
         }
@@ -241,9 +241,9 @@ function rabx_wire_rd(&$buffer, &$pos) {
 function rabx_call_string($function, &$args) {
     $str = 'R';
     $ver = '0';
-    rabx_netstring_wr($ver, &$str); /* 0 == version */
-    rabx_netstring_wr($function, &$str); /* XXX errors */
-    rabx_wire_wr($args, &$str);
+    rabx_netstring_wr($ver, $str); /* 0 == version */
+    rabx_netstring_wr($function, $str); /* XXX errors */
+    rabx_wire_wr($args, $str);
     return $str;
 }
 
@@ -251,28 +251,28 @@ function rabx_call_string($function, &$args) {
  * Parse a function return out of STRING, returning corresponding PHP data
  * structures, or a RABX_Error on error. */
 function rabx_return_string_parse (&$string) {
-    $t = substr(&$string, 0, 1);
-    if (strlen(&$string) < 1)
+    $t = substr($string, 0, 1);
+    if (strlen($string) < 1)
         return rabx_error(RABX_ERROR_PROTOCOL, "return string is too short");
     else if (!($t == 'S' || $t == 'E'))
         return rabx_error(RABX_ERROR_PROTOCOL, "first byte of return string should be \"S\" or \"E\", not \"$t\"");
     $off = 1;
-    if (rabx_is_error($v = rabx_netstring_rd(&$string, $off)))
+    if (rabx_is_error($v = rabx_netstring_rd($string, $off)))
         return $v;
     else if ($v != 0)
         return rabx_error(RABX_ERROR_PROTOCOL, "unknown protocol version \"$ver\"");
 
     if ($t == "S")
-        return rabx_wire_rd(&$string, $off);
+        return rabx_wire_rd($string, $off);
     else {
-        if (rabx_is_error($code = rabx_netstring_rd(&$string, $off)))
+        if (rabx_is_error($code = rabx_netstring_rd($string, $off)))
             return $code;
-        else if (rabx_is_error($text = rabx_netstring_rd(&$string, $off)))
+        else if (rabx_is_error($text = rabx_netstring_rd($string, $off)))
             return $text;
         $code = intval($code);
         $extra = null;
-        if ($off < strlen(&$string)) {
-            if (rabx_is_error($extra = rabx_wire_rd(&$string, $off)))
+        if ($off < strlen($string)) {
+            if (rabx_is_error($extra = rabx_wire_rd($string, $off)))
                 return $extra;
         }
         return rabx_error($code, $text, $extra);
@@ -342,7 +342,7 @@ class RABX_Client {
     function call($function, $args, $force_post = 0) {
         debug("RABX", "RABX calling $function via $this->url, arguments:", $args);
 
-        $callstr = rabx_call_string($function, &$args);
+        $callstr = rabx_call_string($function, $args);
         debug("RABXWIRE", "RABX raw send:", $callstr);
         if (rabx_is_error($callstr))
             return $callstr;
