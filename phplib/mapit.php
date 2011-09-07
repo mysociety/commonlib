@@ -8,7 +8,7 @@
  *
  */
 
-require_once('rabx.php');
+require_once dirname(__FILE__) . '/rabx.php';
 
 /* mapit_get_error R
  * Return FALSE if R indicates success, or an error string otherwise. */

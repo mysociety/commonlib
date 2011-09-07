@@ -11,7 +11,7 @@
  */
 
 require_once('XML/RPC.php');
-require_once('utility.php');
+require_once dirname(__FILE__) . '/utility.php';
 
 $sxr_clients = array( );
 

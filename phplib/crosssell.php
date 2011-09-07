@@ -14,10 +14,10 @@
 // OPTION_AUTH_SHARED_SECRET
 // MaPit and DaDem
 
-require_once 'auth.php';
-require_once 'mapit.php';
-require_once 'dadem.php';
-require_once 'debug.php'; # for getmicrotime()
+require_once dirname(__FILE__) . '/auth.php';
+require_once dirname(__FILE__) . '/mapit.php';
+require_once dirname(__FILE__) . '/dadem.php';
+require_once dirname(__FILE__) . '/debug.php'; # for getmicrotime()
 
 # Global
 $crosssell_voting_areas = array();

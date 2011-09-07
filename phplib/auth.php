@@ -11,8 +11,8 @@
  * 
  */
 
-require_once 'random.php';
-require_once 'BaseN.php';
+require_once dirname(__FILE__) . '/random.php';
+require_once dirname(__FILE__) . '/BaseN.php';
 
 /* auth_ab64_encode DATA
  * Return an encoding of DATA, using email-client-friendly characters;

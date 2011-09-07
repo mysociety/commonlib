@@ -10,8 +10,8 @@
  * 
  */
 
-require_once('error.php');
-require_once('rabx.php');
+require_once dirname(__FILE__) . '/error.php';
+require_once dirname(__FILE__) . '/rabx.php';
 
 $ratty_client = new RABX_Client(OPTION_RATTY_URL);
 

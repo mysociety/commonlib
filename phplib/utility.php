@@ -49,10 +49,10 @@ ini_set('magic_quotes_runtime', 0);
 /* XXX These functions used to be in utility.php, but have been separated so
  * that they can be called from TWFY (which has namespace clashes with the
  * functions in this file). So we include it here for compatibility. */
-require_once('urls.php');
-require_once('random.php');
-require_once('debug.php');
-require_once('validate.php');
+require_once dirname(__FILE__) . '/urls.php';
+require_once dirname(__FILE__) . '/random.php';
+require_once dirname(__FILE__) . '/debug.php';
+require_once dirname(__FILE__) . '/validate.php';
 
 /* canonicalise_postcode
  * Convert UK postcode, to a unique form. That is, remove all

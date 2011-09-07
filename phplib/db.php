@@ -14,8 +14,8 @@
 //
 // $Id: db.php,v 1.32 2006-11-13 22:52:42 francis Exp $
 
-require_once('error.php');
-require_once('random.php');
+require_once dirname(__FILE__) . '/error.php';
+require_once dirname(__FILE__) . '/random.php';
 
 $db_log_queries = false; # set to true to log all queries to Apache error log
 function _db_pg_query($db_h, $q) {

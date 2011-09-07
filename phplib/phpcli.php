@@ -44,7 +44,7 @@ if (PEAR::isError($options)) {
     exit(INVALID_OPTION);
 }
 
-require_once('error.php');
+require_once dirname(__FILE__) . '/error.php';
 
 /* error display to standard error */
 function err_display_stderr($num, $str, $file, $line, $context) {
