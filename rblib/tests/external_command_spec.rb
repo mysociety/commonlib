@@ -4,6 +4,7 @@ script_dir = File.join(File.dirname(__FILE__), 'external_command_scripts')
 true_script = File.join(script_dir, "true.sh")
 false_script = File.join(script_dir, "false.sh")
 output_script = File.join(script_dir, "output.sh")
+cat_script = File.join(script_dir, "cat.sh")
 
 require 'external_command'
 
@@ -37,5 +38,10 @@ describe "when running ExternalCommand" do
         f.err.should == (0..9999).map {|i| "a longer error line #{i}\n"}.join("")
     end
 
+    it "should handle stdin" do
+        f = ExternalCommand.new(cat_script).run("Here we are\nThis part will be ignored")
+        f.status.should == 0
+        f.out.should == "Here we are\n"
+    end
 end
 
