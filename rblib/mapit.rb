@@ -24,10 +24,22 @@ module MySociety
     
     # Call the new MaPit, parse returned JSON
     def MaPit.call(function, params, options={})
-      response = self.do_call(function, params, options)
+      begin
+        response = self.do_call(function, params, options)
+      rescue Timeout::Error
+        return :service_unavailable
+      rescue
+        return :service_unavailable
+      end
       return :bad_request if response.code == '400'
       return :not_found if response.code == '404'
-      return JSON.parse(response.body)
+      return :service_unavailable if response.code == '503'
+      begin
+        json = JSON.parse(response.body)
+      rescue
+        return :service_unavailable
+      end
+      return json
     end
     
     BAD_POSTCODE = 2001        #    String is not in the correct format for a postcode. 

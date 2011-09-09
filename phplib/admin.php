@@ -9,14 +9,14 @@
  * 
  */
 
-require_once "utility.php";
+require_once dirname(__FILE__) . "/utility.php";
 
 require_once "HTML/QuickForm.php";
 require_once "HTML/QuickForm/Rule.php";
 require_once "HTML/QuickForm/Renderer/Default.php";
 
 // Error display
-require_once "error.php";
+require_once dirname(__FILE__) . "/error.php";
 function admin_display_error($num, $message, $file, $line, $context) {
     print "<p><strong>$message</strong> in $file:$line</p>";
 }

@@ -10,10 +10,10 @@
  * 
  */
 
-require_once 'utility.php';
-require_once 'stash.php';
-require_once 'rabx.php';
-require_once 'auth.php';
+require_once dirname(__FILE__) . '/utility.php';
+require_once dirname(__FILE__) . '/stash.php';
+require_once dirname(__FILE__) . '/rabx.php';
+require_once dirname(__FILE__) . '/auth.php';
 
 /* person_cookie_domain
  * Return the domain to use for cookies. This is computed from HTTP_HOST

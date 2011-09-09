@@ -14,7 +14,7 @@
  * 
  */
 
-require_once('debug.php');
+require_once dirname(__FILE__) . '/debug.php';
 
 /*
  * Errors and error codes.

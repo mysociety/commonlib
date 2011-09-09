@@ -10,10 +10,10 @@
  * 
  */
 
-require_once 'rabx.php';   /* for serialise/unserialise */
-require_once 'utility.php';
+require_once dirname(__FILE__) . '/rabx.php';   /* for serialise/unserialise */
+require_once dirname(__FILE__) . '/utility.php';
 
-require_once 'db.php';
+require_once dirname(__FILE__) . '/db.php';
 
 /* stash_request [EXTRA] [EMAIL]
  * Stash details of the request (i.e., method, URL, and any URL-encoded form

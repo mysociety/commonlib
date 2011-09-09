@@ -9,10 +9,10 @@
  * 
  */
 
-require_once "dadem.php";
-require_once "mapit.php";
-require_once "votingarea.php";
-require_once "utility.php";
+require_once dirname(__FILE__) . "/dadem.php";
+require_once dirname(__FILE__) . "/mapit.php";
+require_once dirname(__FILE__) . "/votingarea.php";
+require_once dirname(__FILE__) . "/utility.php";
 
 class ADMIN_PAGE_REPS {
     function ADMIN_PAGE_REPS () {

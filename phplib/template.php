@@ -10,7 +10,7 @@
  * 
  */
 
-require_once('error.php');
+require_once dirname(__FILE__) . '/error.php';
 
 $template_style_dir = null;
 $real_template_name = null;

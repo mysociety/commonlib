@@ -10,8 +10,8 @@
  * 
  */
 
-require_once("error.php");
-require_once("utility.php");
+require_once dirname(__FILE__) . '/error.php';
+require_once dirname(__FILE__) . '/utility.php';
 
 /* importparams SPEC ...
  * Each argument to this function is a array SPEC containing the elements

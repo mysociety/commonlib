@@ -10,7 +10,7 @@
  * 
  */
 
-require_once('urls.php');
+require_once dirname(__FILE__) . '/urls.php';
 
 /* track_code [EXTRA]
  * Return some HTML which will cause the page visit to be

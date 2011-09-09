@@ -11,7 +11,7 @@
  */
 
 if (!file_exists('/dev/random') || !file_exists('/dev/urandom'))
-    require_once 'db.php';
+    require_once dirname(__FILE__) . '/db.php';
 
 /* random_bytes NUM
  * Return NUM bytes of random data from /dev/random. */
