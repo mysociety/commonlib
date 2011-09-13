@@ -14,6 +14,10 @@
 
 require_once dirname(__FILE__) . "/ratty.php";
 
+require_once "HTML/QuickForm.php";
+require_once "HTML/QuickForm/Rule.php";
+require_once "HTML/QuickForm/Renderer/Default.php";
+
 class ADMIN_PAGE_RATTY {
     /* ADMIN_PAGE_RATTY SCOPE WHAT DESCRIPTION MESSAGEBLURB
      * Create a new Ratty administration interface object. SCOPE is the Ratty

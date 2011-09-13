@@ -15,28 +15,15 @@ class ADMIN_PAGE_CONFIGINFO {
         $this->navname = "Configuration Values";
     }
 
-    function run($command) {
-        ob_start();
-        passthru($command);
-        $ret = ob_get_contents();
-        ob_end_clean();
-        return "<tr><td><p><pre>$ret</pre></td></tr>";
-    }
-
     function display($self_link) {
-        $form = new HTML_QuickForm('adminConfigInfoForm', 'get', $self_link);
-
+        print '<ul>';
         $consts = get_defined_constants();
-
-        $form->addElement('header', '', 'Configuration Settings (from conf/general)');
         foreach ($consts as $const => $value) {
             if (preg_match("/^OPTION_/", $const)) {
-                $form->addElement('static', "static$const", null, "$const = $value");
+                print "<li>$const = $value";
             }
         }
-
-        admin_render_form($form);
+        print '</ul>';
      }
 }
 
-?>
