@@ -165,6 +165,9 @@ module MySociety
             end
         end
 
+        def Validate.is_valid_lon_lat(lon, lat)
+          return (lon.match(/^\s*-?\d+\.?\d*\s*$/) && lat.match(/^\s*-?\d+\.?\d*\s*$/))
+        end
     end
 end
 
