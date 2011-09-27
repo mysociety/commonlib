@@ -1,4 +1,5 @@
 # This is a test of the external_command library
+$:.push(File.join(File.dirname(__FILE__), '..'))
 
 script_dir = File.join(File.dirname(__FILE__), 'external_command_scripts')
 true_script = File.join(script_dir, "true.sh")
