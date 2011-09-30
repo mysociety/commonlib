@@ -6,45 +6,34 @@ from django.contrib.contenttypes import generic
 from django.core.urlresolvers import reverse
 from utils import int_to_base32, base32_to_int, send_email
 
-class EmailConfirmationManager(models.Manager):
-    def confirm(self, content_object, email_template='emailconfirmation/email.txt'):
-        conf = EmailConfirmation(content_object=content_object)
-        conf.send_email(email_template)
-
 class EmailConfirmation(models.Model):
+    class Meta:
+        abstract = True
+
     confirmed = models.BooleanField(default=False)
-    content_type = models.ForeignKey(ContentType)
-    object_id = models.PositiveIntegerField()
-    content_object = generic.GenericForeignKey('content_type', 'object_id')
 
-    objects = EmailConfirmationManager()
-
-    # Override these in the models file which foreign keys to here.
+    # Override these in the superclass
     after_confirm = None
     after_unsubscribe = None
 
-    def __unicode__(self):
-        return 'Confirming of %s, %s' % (self.content_object.email, self.confirmed)
-
-    def send_email(self, email_template):
-        self.save()
+    def confirm(self, email_template='emailconfirmation/email.txt'):
         send_email(
             "Alert confirmation",
             email_template,
             {
-                'object': self.content_object,
+                'object': self,
                 'id': int_to_base32(self.id),
                 'token': self.make_token(random.randint(0,32767)),
-            }, self.content_object.email
+            }, self.email # The superclass must have an email field
         )
 
     @models.permalink
     def url_after_confirm(self):
-        return (self.after_confirm, [ self.content_object.id ])
+        return (self.after_confirm, [ self.id ])
 
     @models.permalink
     def url_after_unsubscribe(self):
-        return (self.after_unsubscribe, [ self.content_object.id ])
+        return (self.after_unsubscribe, [ self.id ])
 
     def path_for_unsubscribe(self):
         return reverse('emailconfirmation-unsubscribe', kwargs={
