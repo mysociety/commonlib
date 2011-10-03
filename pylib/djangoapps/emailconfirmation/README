@@ -12,10 +12,9 @@ no dependencies, just an object that has an email address.
    confirmed object will go.
 
 3. Anywhere you want an object that has an email field to be confirmed via
-   email, say just after it's been created, simply call:
-       EmailConfirmation.objects.confirm(object)
-   and return a "Please check your email" page. 'object' here refers 
-   to the object being confirmed (which has a foreign key to EmailConfirmation).
+   email, make that object a subclass of emailconfirmation.models.EmailConfirmation.
+   When you want to send the confirmation email, say just after the object has been
+   created, call the confirm() method.
 
    Override emailconfirmation/email.txt to supply your own confirmation email, 
    or pass a Template or template path into confirm().
