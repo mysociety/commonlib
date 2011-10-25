@@ -14,9 +14,9 @@ require_once dirname(__FILE__) . "/mapit.php";
 require_once dirname(__FILE__) . "/votingarea.php";
 require_once dirname(__FILE__) . "/utility.php";
 
-require_once "HTML/QuickForm.php";
-require_once "HTML/QuickForm/Rule.php";
-require_once "HTML/QuickForm/Renderer/Default.php";
+require_once "./HTML/QuickForm.php";
+require_once "./HTML/QuickForm/Rule.php";
+require_once "./HTML/QuickForm/Renderer/Default.php";
 
 class ADMIN_PAGE_REPS {
     function ADMIN_PAGE_REPS () {
