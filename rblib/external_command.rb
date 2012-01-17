@@ -57,7 +57,7 @@ class ExternalCommand
         @in = ""
     end
 
-    def run(stdin_string=nil)
+    def run(stdin_string=nil, env={})
         # Pipes for parent-child communication
         @out_read, @out_write = IO::pipe
         @err_read, @err_write = IO::pipe
@@ -68,6 +68,7 @@ class ExternalCommand
         else
             @in_read, @in_write = nil, nil
         end
+        @env = env
 
         @pid = fork do
             # Here we’re in the child process.
@@ -96,8 +97,14 @@ class ExternalCommand
             fh.close unless (
                 dont_close.include?(fh) || fh.closed?)
         end
+        
+        # Override the environment as specified
+        ENV.update @env
 
+        # Spawn the grandchild, and wait for it to finish.
         Process::waitpid(fork { grandchild_process })
+        
+        # Write the grandchild’s exit status to the 'fin' pipe.
         @fin_write.puts($?.exitstatus.to_s)
 
         exit! 0

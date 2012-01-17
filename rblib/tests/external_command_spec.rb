@@ -6,6 +6,7 @@ true_script = File.join(script_dir, "true.sh")
 false_script = File.join(script_dir, "false.sh")
 output_script = File.join(script_dir, "output.sh")
 cat_script = File.join(script_dir, "cat.sh")
+env_cmd = "/usr/bin/env"
 
 require 'external_command'
 
@@ -43,6 +44,29 @@ describe "when running ExternalCommand" do
         f = ExternalCommand.new(cat_script).run("Here we are\nThis part will be ignored")
         f.status.should == 0
         f.out.should == "Here we are\n"
+    end
+    
+    it "should pass on the existing environment" do
+        ENV["FOO"] = "frumious"
+        f = ExternalCommand.new(env_cmd).run("Here we are\nThis part will be ignored")
+        f.status.should == 0
+        f.out.should =~ /^FOO=frumious$/
+    end
+    
+    it "should be able to set environment variables" do
+        env = { "FOO" => "barbie" }
+        f = ExternalCommand.new(env_cmd).run("Here we are\nThis part will be ignored", env)
+        f.status.should == 0
+        f.out.should =~ /^FOO=barbie$/
+    end
+
+    
+    it "should be able to override environment variables" do
+        ENV["FOO"] = "frumious"
+        env = { "FOO" => "barbie" }
+        f = ExternalCommand.new(env_cmd).run("Here we are\nThis part will be ignored", env)
+        f.status.should == 0
+        f.out.should =~ /^FOO=barbie$/
     end
 end
 
