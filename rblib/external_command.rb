@@ -64,7 +64,7 @@ class ExternalCommand
         @fin_read, @fin_write = IO::pipe
         if !stdin_string.nil?
             @in_read, @in_write = IO::pipe
-            @in = stdin_string
+            @in = stdin_string.dup
         else
             @in_read, @in_write = nil, nil
         end
