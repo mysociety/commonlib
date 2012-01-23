@@ -36,6 +36,8 @@
 #   the parent’s select() for this purpose.
 # </rant>
 
+require 'fcntl'
+
 class ExternalCommand
     attr_accessor :out, :err
     attr_reader :status
@@ -84,6 +86,13 @@ class ExternalCommand
     private
 
     def child_process()
+        # If you ever need to print debugging information,
+        # uncomment the following line, add original_out
+        # to the dont_close array below, then you can use
+        # original_out.puts to print messages to the original
+        # stdout.
+        # original_out = IO.new STDOUT.fcntl Fcntl::F_DUPFD
+        
         # Reopen stdout and stderr to point at the pipes
         STDOUT.reopen(@out_write)
         STDERR.reopen(@err_write)
@@ -94,8 +103,12 @@ class ExternalCommand
         dont_close.push(STDIN) if !@in_read.nil?
         
         ObjectSpace.each_object(IO) do |fh|
-            fh.close unless (
-                dont_close.include?(fh) || fh.closed?)
+            begin
+                fh.close unless dont_close.include?(fh)
+            rescue => e
+                # Perhaps it is already closed, or closing it
+                # would raise an "unitialized stream" exception
+            end
         end
         
         # Override the environment as specified
