@@ -10,9 +10,7 @@ require 'uri'
 module MySociety
     class Survey
         def initialize(site, email)
-            # XXXX It’s not right to hard-code this, but I can’t think of a good general
-            #      solution.
-            MySociety::Config.set_file File.join(File.dirname(__FILE__), "..", "..", "config", "general")
+            # Assume you have called MySociety::Config.set_file
             
             @site = site
             
@@ -23,14 +21,18 @@ module MySociety
             @auth_signature = generate_auth_signature
         end
         
+        def submit(results)
+            return do_command results
+        end
+        
         # Return whether or not survey was already done for this user
         def already_done?
-            return do_command "querydone"
+            return do_command "querydone" => 1
         end
 
         # Clears memory that this survey was done, allowing a new one
         def allow_new_survey
-            return do_command "allownewsurvey"
+            return do_command "allownewsurvey" => 1
         end
         
         private
@@ -40,17 +42,19 @@ module MySociety
             return "#{sha}-#{salt}"
         end
         
-        def do_command(command)
+        def do_command(params = {})
             useragent = "Ruby survey client, version 1"
             
-            result = Net::HTTP.post_form(URI.parse(@survey_url), {
-                command => 1,
+            params.update({
                 "sourceidentifier" => @site,
                 "user_code" => @user_code,
                 "auth_signature" => @auth_signature,
             })
+            result = Net::HTTP.post_form(URI.parse(@survey_url), params)
             
-            if result.code != "200"
+            if result.code == "302"
+                return result.header["Location"]
+            elsif result.code != "200"
                 raise "Failed to post to #{@survey_url}: #{result.code} #{result.message}"
             end
             
