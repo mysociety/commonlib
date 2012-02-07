@@ -35,6 +35,9 @@ module MySociety
             return do_command "allownewsurvey" => 1
         end
         
+        # Expose the URL via a method
+        attr_reader :survey_url
+        
         # The parameters that are required to communicate with
         # the survey service. If you’re submitting a form
         # directly, you need to include these and return_url;
