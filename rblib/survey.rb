@@ -35,6 +35,19 @@ module MySociety
             return do_command "allownewsurvey" => 1
         end
         
+        # The parameters that are required to communicate with
+        # the survey service. If you’re submitting a form
+        # directly, you need to include these and return_url;
+        # the survey service will issue a 302 redirect to
+        # return_url once the results have been stored.
+        def required_params
+            return {
+                "sourceidentifier" => @site,
+                "user_code" => @user_code,
+                "auth_signature" => @auth_signature,
+            }
+        end
+        
         private
         def generate_auth_signature
             salt = SecureRandom.hex(8)
@@ -45,11 +58,7 @@ module MySociety
         def do_command(params = {})
             useragent = "Ruby survey client, version 1"
             
-            params.update({
-                "sourceidentifier" => @site,
-                "user_code" => @user_code,
-                "auth_signature" => @auth_signature,
-            })
+            params.update(self.required_params)
             result = Net::HTTP.post_form(URI.parse(@survey_url), params)
             
             if result.code == "302"
