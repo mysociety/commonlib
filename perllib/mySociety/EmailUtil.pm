@@ -12,10 +12,12 @@ use Net::SMTP;
 
 use mySociety::Config;
 
+
+
 BEGIN {
     use Exporter ();
     our @ISA = qw(Exporter);
-    our @EXPORT_OK = qw(&is_valid_email &send_email);
+    our @EXPORT_OK = qw(&is_valid_email &send_email &set_smarthost);
 }
 our @EXPORT_OK;
 
@@ -201,6 +203,19 @@ sub send_email_smtp ($$$@) {
     return EMAIL_SUCCESS;
 }
 
+=item set_smarthost SMARTHOST
+
+Set the SMTP Smarhost to use. If this is not set then this will fall
+back to fetching it using mySociety::Config.
+
+=cut
+
+my $smtp_smarthost;
+sub set_smarthost ($) {
+    $smtp_smarthost = shift;
+}
+
+
 =item send_email TEXT SENDER RECIPIENT ...
 
 Send an email. TEXT is the full, already-formatted, with-headers, on-the-wire
@@ -215,7 +230,7 @@ occurred.
 =cut
 sub send_email ($$@) {
     my ($text, $sender, @recips) = @_;
-    my $smarthost = mySociety::Config::get('SMTP_SMARTHOST', undef);
+    my $smarthost = $smtp_smarthost || mySociety::Config::get('SMTP_SMARTHOST', undef);
     if ($smarthost) {
         return send_email_smtp($smarthost, $text, $sender, @recips);
     } else {
