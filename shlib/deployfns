@@ -19,7 +19,13 @@ warn () {
 
 _mysociety_commonlib_directory() {
     (
-      cd "$(dirname "${BASH_SOURCE[0]}")"/..
+      unset CDPATH  # Restore cd to its default behaviour, in case the
+                    # environment has a CDPATH defined.
+                    #
+                    # Also ignore the stdout output of cd, just in case
+                    # there is some other reason than having a CDPATH that
+                    # cd might produce output.
+      cd "$(dirname "${BASH_SOURCE[0]}")"/.. > /dev/null
       pwd
     )
 }
