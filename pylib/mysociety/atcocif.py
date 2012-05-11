@@ -440,8 +440,8 @@ def parse_time(time_string):
     hour = int(time_string[0:2])
     # Some authorities use 24 for journeys that cross midnight, some wrap round
     # to 0. We change 24 so that it always wraps to 0.
-    if hour == 24:
-        hour = 0
+    if hour >= 24 and hour < 28:
+        hour = hour - 24
     minute = int(time_string[2:4])
     return datetime.time(hour, minute, 0)
 
