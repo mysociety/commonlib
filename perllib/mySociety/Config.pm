@@ -120,9 +120,7 @@ sub read_config_from_php($) {
         $inr->close();
         $outw->close();
 
-        # Using taskset to deal with debian 5 php/mysql extension bug, 
-        # by restricting to one processor
-        exec('taskset', '0x1', $php_path) or throw Error::Simple "$php_path: exec: $!";
+        exec($php_path) or throw Error::Simple "$php_path: exec: $!";
     }
 
     $inr->close();

@@ -113,13 +113,7 @@ def read_config_from_php(f):
         except IOError:
             debian_version = 'unknown'
 
-    # Using taskset to deal with debian 5 php/mysql extension bug, 
-    # by restricting to one processor
-    # but debian 3 doesn't have the necessary function. 
-    if debian_version == '3.1':
-        args = [php_path]
-    else:
-        args = ["taskset", "0x1", php_path]
+    args = [php_path]
     child = subprocess.Popen(args,
                              stdin=subprocess.PIPE,
                              stdout=subprocess.PIPE) # don't capture stderr

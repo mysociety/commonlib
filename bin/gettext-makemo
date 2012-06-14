@@ -13,7 +13,7 @@
 # don't expand a glob with no matches to itself
 shopt -s nullglob
 
-ORIGINAL_PATH=$(dirname $(readlink -f $0))
+ORIGINAL_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 if [ "$1" = "--help" ]
 then 
     echo "Usage: gettext-makemo [--help] [--verbose|--quiet] [domain]"
@@ -61,12 +61,12 @@ do
             SUBJECT_COUNT_ORIG=0
             if [ -f $ORIG ]
             then
-                SUBJECT_COUNT_ORIG=`grep '^"Subject: ' "../../$PO" "../../$PO" | egrep -v "^#" | wc --lines`
+                SUBJECT_COUNT_ORIG=`grep '^"Subject: ' "../../$PO" "../../$PO" | egrep -v "^#" | wc -l`
             fi
             MO=${PO/.po/.mo}
             [ "$1" != "--quiet" ] && echo -n "$X $PO: " 
             msgfmt -c $MSGFMT_PARAMS -o $MO $PO
-            SUBJECT_COUNT=`grep '^"Subject: ' $PO  | egrep -v "^#" | wc --lines`
+            SUBJECT_COUNT=`grep '^"Subject: ' $PO  | egrep -v "^#" | wc -l`
             if [ "$SUBJECT_COUNT" != "$SUBJECT_COUNT_ORIG" ] && [ "$SUBJECT_COUNT_ORIG" != 0 ] 
             then
                 echo "WARNING: Email 'Subject: ' lines have probably been translated in $X' (got $SUBJECT_COUNT, $SUBJECT_COUNT_ORIG expected from locale/$PO)"

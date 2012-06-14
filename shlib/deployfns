@@ -19,11 +19,20 @@ warn () {
 
 _mysociety_commonlib_directory() {
     (
-      cd "$(dirname "${BASH_SOURCE[0]}")"/..
-      pwd
+      unset CDPATH  # Restore cd to its default behaviour, in case the
+                    # environment has a CDPATH defined.
+                    # Do this in the subshell, to avoid messing with the
+                    # caller’s environment.
+      cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd
     )
 }
 MYSOCIETY_COMMONLIB_DIR=$(_mysociety_commonlib_directory)
+if [ $? -ne 0 ]
+then
+    # If cd or pwd failed for some reason, they will have already
+    # printed an error message to stderr.
+    exit $?
+fi
 
 # Reads in config file
 # If $1 ends with .yml, it is loaded as YAML. Otherwise
