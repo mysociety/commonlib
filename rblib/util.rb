@@ -7,7 +7,7 @@
 #
 require 'openssl'
 module MySociety
-  
+
   module Util
     # Makes a random token, suitable for using in URLs e.g confirmation messages.
     def Util.generate_token
@@ -30,7 +30,14 @@ module MySociety
         else
           descriptor = item.to_s
         end
-        first = descriptor[0].chr
+        # Strip non-alphanumeric characters
+        clean_descriptor = descriptor.gsub(/^[^a-zA-Z0-9]+/, '')
+
+        # If there are no non-alphanumeric characters, use the original descriptor
+        if clean_descriptor.empty?
+          clean_descriptor = descriptor
+        end
+        first = clean_descriptor[0].chr
         case force_case
           when :upcase
             first.upcase!
@@ -40,8 +47,8 @@ module MySociety
         items_by_first[first] << item
       end
       items_by_first
-    end  
-    
+    end
+
   end
 
 end
