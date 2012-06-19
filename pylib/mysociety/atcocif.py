@@ -50,7 +50,7 @@ import progressbar
 ###########################################################
 # Main class
 
-class ATCO:
+class ATCO(object):
     def __init__(self, assume_no_holidays = True, show_progress = False):
         '''Assume_no_holidays assumes there are no school or bank holidays on the days
         you are quering for.'''
