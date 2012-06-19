@@ -259,6 +259,7 @@ class ATCO(object):
                 ]:
                     logging.debug("Ignoring record type '" + record_identity + "'")
                 else:
+                    import pdb;pdb.set_trace()
                     raise Exception("Unknown record type '" + record_identity + "'")
             except:
                 # Show what line we were on, and reraise exception
@@ -443,7 +444,10 @@ def parse_time(time_string):
     if hour >= 24 and hour < 28:
         hour = hour - 24
     minute = int(time_string[2:4])
-    return datetime.time(hour, minute, 0)
+    try:
+        return datetime.time(hour, minute, 0)
+    except:
+        import pdb;pdb.set_trace()
 
 def parse_date(date_string):
     '''Converts a date string from an ATCO-CIF field into a Python date object.
