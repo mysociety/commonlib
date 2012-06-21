@@ -27,9 +27,9 @@ $crosssell_voting_areas = array();
 function crosssell_display_advert($this_site, $email = '', $name = '', $postcode = '', $adverts = array()) {
 
     # Always try and display a HearFromYourCouncillor Cheltenham advert if possible
-    if ($this_site != 'hfyc')
-        if ($ad = crosssell_display_hfyc_cheltenham_advert($email, $name, $postcode))
-            return $ad;
+    #if ($this_site != 'hfyc')
+    #    if ($ad = crosssell_display_hfyc_cheltenham_advert($email, $name, $postcode))
+    #        return $ad;
 
     # If we've been sent an array of adverts, pick one at random to display
     while (count($adverts)) {
@@ -167,6 +167,7 @@ Meanwhile...<br>
     return true;
 }
 
+/*
 function crosssell_display_hfyc_cheltenham_advert($email, $name, $postcode) {
     if (!defined('OPTION_AUTH_SHARED_SECRET') || !$postcode)
         return false;
@@ -216,6 +217,7 @@ function crosssell_display_hfyc_cheltenham_advert($email, $name, $postcode) {
 <?
     return "cheltenhamhfyc$rand";
 }
+*/
 
 # XXX: Needs to say "Lord" when the WTT message was to a Lord!
 function crosssell_display_twfy_alerts_advert($this_site, $email, $postcode) {
@@ -298,13 +300,13 @@ function crosssell_check_twfy($email, $postcode) {
     // Look up who the MP is
     global $crosssell_voting_areas;
     if (!$crosssell_voting_areas)
-        $crosssell_voting_areas = mapit_get_voting_areas($postcode);
+        $crosssell_voting_areas = mapit_call('postcode', $postcode);
     mapit_check_error($crosssell_voting_areas);
-    if (!array_key_exists('WMC', $crosssell_voting_areas)) {
+    if (!array_key_exists('WMC', $crosssell_voting_areas['shortcuts'])) {
         $crosssell_check_twfy_checked = false;
         return false;
     }
-    $reps = dadem_get_representatives($crosssell_voting_areas['WMC']);
+    $reps = dadem_get_representatives($crosssell_voting_areas['shortcuts']['WMC']);
     dadem_check_error($reps);
     if (count($reps) != 1) {
         $crosssell_check_twfy_checked = false;
