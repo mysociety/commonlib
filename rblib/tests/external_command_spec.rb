@@ -7,6 +7,7 @@ false_script = File.join(script_dir, "false.sh")
 output_script = File.join(script_dir, "output.sh")
 cat_script = File.join(script_dir, "cat.sh")
 env_cmd = "/usr/bin/env"
+sleep_cmd = "/bin/sleep"
 
 require 'external_command'
 
@@ -59,7 +60,6 @@ describe "when running ExternalCommand" do
         f.status.should == 0
         f.out.should =~ /^FOO=barbie$/
     end
-
     
     it "should be able to override environment variables" do
         ENV["FOO"] = "frumious"
@@ -67,6 +67,13 @@ describe "when running ExternalCommand" do
         f = ExternalCommand.new(env_cmd).run("Here we are\nThis part will be ignored", env)
         f.status.should == 0
         f.out.should =~ /^FOO=barbie$/
+    end
+    
+    it "should handle timeouts" do
+        start_time = Time.now
+        f = ExternalCommand.new(sleep_cmd, "30", :timeout => 2).run
+        (Time.now - start_time).should < 5
+        f.timed_out.should == true
     end
 end
 

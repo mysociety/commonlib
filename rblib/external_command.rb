@@ -41,10 +41,18 @@ require 'fcntl'
 class ExternalCommand
     attr_accessor :out, :err
     attr_reader :status
+    attr_reader :timed_out
 
     def initialize(cmd, *args)
+        if !args.empty? && args[-1].is_a?(Hash)
+            options = args.pop
+        else
+            options = {}
+        end
+        
         @cmd = cmd
         @args = args
+        @timeout = options[:timeout]
 
         # Strings to collect stdout and stderr from the child process
         # These may be replaced by the caller, to append to existing strings.
@@ -78,7 +86,7 @@ class ExternalCommand
         end
 
         # Here we’re in the parent process.
-        parent_process
+        @timed_out = parent_process
 
         return self
     end
@@ -144,10 +152,23 @@ class ExternalCommand
             @fhs_write[@in_write] = @in
         end
 
-        while @fin.empty?
-           ok = read_and_write_data
-           if !ok
-               raise "select() timed out even with a nil (infinite) timeout"
+        if @timeout.nil?
+            while @fin.empty?
+               ok = read_and_write_data
+               if !ok
+                   raise "select() timed out even with a nil (infinite) timeout"
+                end
+            end
+        else
+            time_to_give_up = Time.now.to_f + @timeout
+            while @fin.empty?
+                remaining_time = time_to_give_up - Time.now.to_f
+                ok = remaining_time > 0 && read_and_write_data(remaining_time)
+                if !ok
+                    # Timed out
+                    @status = 1
+                    return true
+                end
             end
         end
 
@@ -160,6 +181,7 @@ class ExternalCommand
         @out_read.close
         @err_read.close
         @in_write.close if !@in_write.nil? && !@in_write.closed?
+        return false
     end
 
     def read_and_write_data(timeout=nil)
