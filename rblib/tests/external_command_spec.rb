@@ -74,6 +74,7 @@ describe "when running ExternalCommand" do
         f = ExternalCommand.new(sleep_cmd, "30", :timeout => 2).run
         (Time.now - start_time).should < 5
         f.timed_out.should == true
+        f.status.should_not == 0
     end
 end
 

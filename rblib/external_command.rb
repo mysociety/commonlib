@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # Run an external command, capturing its stdout and stderr
 # streams into variables.
 #
@@ -131,6 +133,24 @@ class ExternalCommand
         exit! 0
     end
 
+    def try_to_kill(signal, pid)
+        begin
+            Process.kill(signal, pid)
+        rescue Errno::ESRCH
+            # already dead
+            return true
+        end
+    
+        sleep 0.1
+        begin
+            exit_status = Process.waitpid(pid, Process::WNOHANG)
+        rescue Errno::ECHILD
+            # already dead – not ordinarily possible unless we’re ignoring SIGCHLD
+            return true
+        end
+        return !exit_status.nil?
+    end
+
     def grandchild_process()
         exec(@cmd, *@args)
 
@@ -166,6 +186,17 @@ class ExternalCommand
                 ok = remaining_time > 0 && read_and_write_data(remaining_time)
                 if !ok
                     # Timed out
+                    
+                    # Try to kill the process gently
+                    if !try_to_kill("TERM", @pid)
+                        # If that fails, wait a second and try again
+                        sleep 1
+                        if !try_to_kill("TERM", @pid)
+                            # If THAT fails, terminate with extreme prejudice
+                            try_to_kill("KILL", @pid)
+                            # (If even that fails, we’re out of luck. Carry on.)
+                        end
+                    end
                     @status = 1
                     return true
                 end
