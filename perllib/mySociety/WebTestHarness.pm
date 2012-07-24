@@ -757,7 +757,7 @@ clicked on from even dodgy email clients. Valid options for the OPTIONS hash are
 =cut
 sub email_check_url($) {
     my ($self, $url, $options) = @_;
-    $url =~ m#^.*/[A-Za-z0-9/]*$# or die "URL contains bad characters for an email: $url";
+    $url =~ m#^.*/[A-Za-z0-9/_]*$# or die "URL contains bad characters for an email: $url";
     $url =~ s/testharness\.//; 
     $url =~ s/test\.mysociety\.org/com/;
     if (!$options or !exists($options->{skip_length_check})) {
