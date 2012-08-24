@@ -67,7 +67,12 @@ module MySociety
 
             specials = '()<>@,;:\\\\".\\[\\]'
             controls = '\\000-\\037\\177'
-            highbit = '\\200-\\377'
+            # To add MacRuby support, see https://github.com/nex3/sass/pull/432
+            highbit = if RUBY_VERSION.to_f < 1.9
+                '\\200-\\377'
+            else
+                '\\u{80}-\\u{D7FF}\\u{E000}-\\u{FFFD}\\u{10000}-\\u{10FFFF}'
+            end
             atext = "[^#{specials} #{controls}#{highbit}]"
             atom = "#{atext}+"
             dot_string = "#{atom}(\\s*\\.\\s*#{atom})*"
