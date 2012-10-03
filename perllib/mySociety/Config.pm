@@ -4,10 +4,7 @@
 # Very simple config parser. Our config files are sort of cod-PHP.
 #
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
-# Email: team@mysociety.org; WWW: http://www.mysociety.org/
-#
-# $Id: Config.pm,v 1.25 2010-03-31 17:03:27 matthew Exp $
-#
+# WWW: http://www.mysociety.org/
 
 package mySociety::Config;
 

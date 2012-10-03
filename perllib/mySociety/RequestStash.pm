@@ -4,10 +4,7 @@
 # Save and restore details of requests.
 #
 # Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
-# Email: team@mysociety.org; WWW: http://www.mysociety.org/
-#
-# $Id: RequestStash.pm,v 1.5 2009-01-26 14:21:52 matthew Exp $
-#
+# WWW: http://www.mysociety.org/
 
 package mySociety::RequestStash::Error;
 

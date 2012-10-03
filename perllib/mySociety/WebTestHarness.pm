@@ -10,10 +10,7 @@
 # - Miscellaneous other functions (multi_spawn)
 #
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
-# Email: francis@mysociety.org; WWW: http://www.mysociety.org/
-#
-# $Id: WebTestHarness.pm,v 1.75 2009-11-19 12:36:03 matthew Exp $
-#
+# WWW: http://www.mysociety.org/
 
 # Overload of WWW::Mechanize
 package mySociety::WebTestHarness::Mechanize;

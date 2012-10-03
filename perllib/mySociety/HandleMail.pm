@@ -4,9 +4,7 @@
 # Functions for dealing with incoming mail messages
 #
 # Copyright (c) 2008 UK Citizens Online Democracy. All rights reserved.
-# Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
-
-my $rcsid = ''; $rcsid .= '$Id: HandleMail.pm,v 1.27 2009-05-18 11:56:10 louise Exp $';
+# WWW: http://www.mysociety.org/
 
 package mySociety::HandleMail;
 

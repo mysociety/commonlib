@@ -4,10 +4,7 @@
 # Email utilities.
 #
 # Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
-# Email: team@mysociety.org; WWW: http://www.mysociety.org/
-#
-# $Id: Email.pm,v 1.28 2009-01-26 14:21:52 matthew Exp $
-#
+# WWW: http://www.mysociety.org/
 
 package mySociety::Email::Error;
 

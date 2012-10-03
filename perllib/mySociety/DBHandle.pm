@@ -7,10 +7,7 @@
 # database.
 #
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
-# Email: team@mysociety.org; WWW: http://www.mysociety.org/
-#
-# $Id: DBHandle.pm,v 1.24 2009-05-07 13:04:35 louise Exp $
-#
+# WWW: http://www.mysociety.org/
 
 package mySociety::DBHandle::Error;
 

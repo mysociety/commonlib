@@ -4,10 +4,7 @@
 # Various miscellaneous geography related routines.
 #
 # Copyright (c) 2006 UK Citizens Online Democracy. All rights reserved.
-# Email: francis@mysociety.org; WWW: http://www.mysociety.org/
-#
-# $Id: GeoUtil.pm,v 1.6 2009-01-26 14:21:52 matthew Exp $
-#
+# WWW: http://www.mysociety.org/
 
 package mySociety::GeoUtil;
 

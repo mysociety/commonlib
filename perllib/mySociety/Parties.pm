@@ -4,10 +4,7 @@
 # Political party definitions.
 #
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
-# Email: francis@mysociety.org; WWW: http://www.mysociety.org/
-#
-# $Id: Parties.pm,v 1.21 2009-07-14 16:58:07 dademcron Exp $
-#
+# WWW: http://www.mysociety.org/
 
 package mySociety::Parties;
 

@@ -3,10 +3,7 @@
 # Slight subclass of Memcached to simplify namespacing.
 #
 # Copyright (c) 2010 UK Citizens Online Democracy. All rights reserved.
-# Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
-#
-# $Id: Memcached.pm,v 1.2 2010-03-12 19:22:31 matthew Exp $
-#
+# WWW: http://www.mysociety.org/
 
 package mySociety::Memcached;
 

@@ -11,10 +11,7 @@
 # software; you can redistribute it and/or modify it under the same terms as
 # Perl itself.
 # 
-# Email: team@mysociety.org; WWW: http://www.mysociety.org/
-#
-# $Id: HelmertTransform.pm,v 1.15 2011-08-10 09:38:42 evdb Exp $
-#
+# WWW: http://www.mysociety.org/
 
 package Geo::HelmertTransform;
 
@@ -293,7 +290,7 @@ http://www.osni.gov.uk/downloads/Making%20maps%20GPS%20compatible.pdf
 
 =head1 AUTHOR AND COPYRIGHT
 
-Written by Chris Lightfoot, team@mysociety.org
+Written by Chris Lightfoot
 
 Copyright (c) UK Citizens Online Democracy.
 

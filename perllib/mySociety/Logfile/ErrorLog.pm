@@ -3,10 +3,7 @@
 # mySociety/Logfile/ErrorLog.pm:
 #
 # Copyright (c) 2005 UK Citizens Online Democracy. All rights reserved.
-# Email: team@mysociety.org; WWW: http://www.mysociety.org/
-#
-# $Id: ErrorLog.pm,v 1.2 2009-01-26 14:21:55 matthew Exp $
-#
+# WWW: http://www.mysociety.org/
 
 package mySociety::Logfile::ErrorLog;
 

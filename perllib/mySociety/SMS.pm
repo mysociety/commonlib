@@ -4,9 +4,7 @@
 # mySociety SMS send.
 #
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
-# Email:angie@mysociety.org; WWW: http://www.mysociety.org/
-#
-my $rcsid = ''; $rcsid .= '$Id: SMS.pm,v 1.3 2009-01-26 14:21:52 matthew Exp $';
+# WWW: http://www.mysociety.org/
 
 package mySociety::SMS;
 

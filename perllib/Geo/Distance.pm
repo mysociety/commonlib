@@ -7,10 +7,7 @@
 # software; you can redistribute it and/or modify it under the same terms as
 # Perl itself.
 #
-# Email: team@mysociety.org; WWW: http://www.mysociety.org/
-#
-# $Id: Distance.pm,v 1.6 2009-01-26 14:21:51 matthew Exp $
-#
+# WWW: http://www.mysociety.org/
 
 package Geo::Distance;
 
@@ -74,7 +71,7 @@ http://www.ga.gov.au/geodesy/datums/distance.jsp
 
 =head1 AUTHOR AND COPYRIGHT
 
-Written by Chris Lightfoot, team@mysociety.org
+Written by Chris Lightfoot
 
 Copyright (c) UK Citizens Online Democracy.
 

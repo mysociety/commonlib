@@ -4,10 +4,7 @@
 # Implementation of locked PID files.
 #
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
-# Email: team@mysociety.org; WWW: http://www.mysociety.org/
-#
-# $Id: PIDFile.pm,v 1.4 2009-01-26 14:21:52 matthew Exp $
-#
+# WWW: http://www.mysociety.org/
 
 package mySociety::PIDFile::Error;
 

@@ -4,7 +4,7 @@
 # Various miscellaneous utilities, split into modules
 #
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
-# Email: team@mysociety.org; WWW: http://www.mysociety.org/
+# WWW: http://www.mysociety.org/
 #
 
 

@@ -4,10 +4,7 @@
 # Parse /data/servers/serverclass
 #
 # Copyright (c) 2009 UK Citizens Online Democracy. All rights reserved.
-# Email: francis@mysociety.org; WWW: http://www.mysociety.org/
-#
-# $Id: ServerClass.pm,v 1.3 2010-01-26 01:32:54 francis Exp $
-#
+# WWW: http://www.mysociety.org/
 
 package mySociety::ServerClass;
 

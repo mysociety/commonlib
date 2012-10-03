@@ -4,9 +4,7 @@
 # I18n with Perl
 #
 # Copyright (c) 2007 UK Citizens Online Democracy. All rights reserved.
-# Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
-#
-# $Id: Locale.pm,v 1.12 2009-09-10 12:16:02 matthew Exp $
+# WWW: http://www.mysociety.org/
 
 package mySociety::Locale;
 
