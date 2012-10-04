@@ -12,7 +12,7 @@ use strict;
 use FindBin;
 use HTTP::Negotiate;
 use Locale::gettext;
-use POSIX qw(setlocale LC_ALL);
+use POSIX qw(setlocale);
 
 my $gettext;
 
@@ -70,7 +70,7 @@ sub change(;$) {
     my $os_locale = $langmap{$l}.'.UTF-8';
     delete $ENV{LANGUAGE}; # clear this if set
     $ENV{LANG} = $os_locale;
-    my $ret = setlocale(LC_ALL, $os_locale);
+    my $ret = setlocale(POSIX::LC_ALL, $os_locale);
     #die "setlocale failed for $os_locale" if $ret ne $os_locale;
     $current = $l;
     # Clear gettext's cache - you have to do this when
