@@ -30,14 +30,16 @@ our %langmap = ();
 our %langs = ();
 our $lang;
 
-# negotiate_language CONFIG OVERRIDE
+# negotiate_language CONFIG OVERRIDE HEADERS
 # Sets $lang to negotiated language.
 # CONFIG is string from config file containing list of available languages.
 #        e.g. 'en-gb,English,en_GB|pt-br,Portugu&ecirc;s (Brasil),pt_BR'
 # OVERRIDE is override language, such as from cookie or domain name.  Set to
-# null to force negotiation of language from browser, using HTTP headers. */
-sub negotiate_language($;$) {
-    my ($available_language_config, $override_language) = @_;
+# null to force negotiation of language from browser, using HTTP headers,
+# supplied as HTTP::Headers object in HEADERS, or fetched from environment
+# variables.
+sub negotiate_language($;$$) {
+    my ($available_language_config, $override_language, $headers) = @_;
     my @opt_langs = split /\|/, $available_language_config;
     my $variants = [];
     foreach my $opt_lang (@opt_langs) {
@@ -50,7 +52,7 @@ sub negotiate_language($;$) {
         $lang = $override_language;
     } else {
         local $^W = 0;
-        $lang = HTTP::Negotiate::choose($variants);
+        $lang = HTTP::Negotiate::choose($variants, $headers);
         if (!$lang || !$langmap{$lang}) {
             $lang = 'en-gb'; # Default override
         }
