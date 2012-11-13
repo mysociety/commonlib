@@ -41,7 +41,7 @@
 require 'fcntl'
 
 class ExternalCommand
-    attr_accessor :out, :err
+    attr_accessor :out, :err, :binary_mode
     attr_reader :status
     attr_reader :timed_out
 
@@ -51,7 +51,7 @@ class ExternalCommand
         else
             options = {}
         end
-        
+
         @cmd = cmd
         @args = args
         @timeout = options[:timeout]
@@ -60,13 +60,19 @@ class ExternalCommand
         # These may be replaced by the caller, to append to existing strings.
         @out = ""
         @err = ""
-        
+
         # String to collect the grandchild’s exit status from the child.
         @fin = ""
-        
+
         # String to write to the stdin of the child process.
         # This may be set by passing an argument to the run method.
         @in = ""
+
+        # By default, the strings returned for stdout and sterr will
+        # be treated as binary, so will have the encoding ASCII-8BIT.
+        # Set binary_mode to false in order to have strings transcoded
+        # in Ruby 1.9 using the default internal and external encodings.
+        @binary_mode = true
     end
 
     def run(stdin_string=nil, env={})
@@ -102,7 +108,7 @@ class ExternalCommand
         # original_out.puts to print messages to the original
         # stdout.
         # original_out = IO.new STDOUT.fcntl Fcntl::F_DUPFD
-        
+
         # Reopen stdout and stderr to point at the pipes
         STDOUT.reopen(@out_write)
         STDERR.reopen(@err_write)
@@ -111,7 +117,7 @@ class ExternalCommand
         # Close all the filehandles other than the ones we intend to use.
         dont_close = [STDOUT, STDERR, @fin_write]
         dont_close.push(STDIN) if !@in_read.nil?
-        
+
         ObjectSpace.each_object(IO) do |fh|
             begin
                 fh.close unless dont_close.include?(fh)
@@ -120,13 +126,13 @@ class ExternalCommand
                 # would raise an "unitialized stream" exception
             end
         end
-        
+
         # Override the environment as specified
         ENV.update @env
 
         # Spawn the grandchild, and wait for it to finish.
         Process::waitpid(fork { grandchild_process })
-        
+
         # Write the grandchild’s exit status to the 'fin' pipe.
         @fin_write.puts($?.exitstatus.to_s)
 
@@ -140,7 +146,7 @@ class ExternalCommand
             # already dead
             return true
         end
-    
+
         sleep 0.1
         begin
             exit_status = Process.waitpid(pid, Process::WNOHANG)
@@ -186,7 +192,7 @@ class ExternalCommand
                 ok = remaining_time > 0 && read_and_write_data(remaining_time)
                 if !ok
                     # Timed out
-                    
+
                     # Try to kill the process gently
                     if !try_to_kill("TERM", @pid)
                         # If that fails, wait a second and try again
@@ -209,6 +215,16 @@ class ExternalCommand
 
         Process::waitpid(@pid)
         @status = @fin.to_i
+
+        # Transcode strings as if they were retrieved using default
+        # internal and external encodings
+        if RUBY_VERSION.to_f >= 1.9 && ! binary_mode
+            outstreams = { @out_read => @out, @err_read => @err }
+            outstreams.keys.each do |io|
+                outstreams[io].force_encoding(io.external_encoding)
+                outstreams[io].encode(Encoding.default_internal)
+            end
+        end
         @out_read.close
         @err_read.close
         @in_write.close if !@in_write.nil? && !@in_write.closed?
