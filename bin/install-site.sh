@@ -57,6 +57,7 @@ case "$SITE" in
 esac
 
 # Install some packages that we will definitely need:
+apt-get update
 apt-get install -y git-core lockfile-progs rubygems curl dnsutils lsb-release
 
 # If we're not running on an EC2 instance, an empty body is returned
