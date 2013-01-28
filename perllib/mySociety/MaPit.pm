@@ -72,7 +72,11 @@ sub _call ($$;$) {
 sub call ($$;%) {
     my ($fn, $params, %opts) = @_;
     my $r = _call($fn, $params, \%opts);
-    return JSON->new->utf8->allow_nonref->decode($r->content);
+    my $j = JSON->new->utf8->allow_nonref->decode($r->content);
+    if (ref($j) eq 'HASH') {
+        delete $j->{debug_db_queries};
+    }
+    return $j;
 }
 
 # Calling code still needs these, although now MaPit will return HTTP
