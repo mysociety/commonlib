@@ -169,8 +169,10 @@ list context the subject and body of the email. This operates on and returns
 Unicode strings.
 
 =cut
-sub do_template_substitution ($$) {
-    my ($body, $params) = @_;
+sub do_template_substitution ($$;$) {
+    my ($body, $params, $line_indent) = @_;
+    $line_indent = '     ' unless defined $line_indent;
+
     $body =~ s#<\?=\$values\['([^']+)'\]\?>#do_one_substitution($params, $1)#ges;
 
     my $subject;
@@ -193,7 +195,7 @@ sub do_template_substitution ($$) {
     local($Text::Wrap::columns) = 69;
     local($Text::Wrap::huge) = 'overflow';
     local($Text::Wrap::unexpand) = 0;
-    my $wrapped = Text::Wrap::wrap('     ', '     ', $body);
+    my $wrapped = Text::Wrap::wrap($line_indent, $line_indent, $body);
     $wrapped =~ s/^\s+$//mg; # Do it again because of wordwrapping indented lines
 
     return ($subject, $wrapped);
@@ -261,6 +263,7 @@ body, unwrapped body or a templated body; or From or Subject.
 =cut
 sub construct_email ($) {
     my $p = shift;
+    $p->{_line_indent} = '     ' unless defined $p->{_line_indent};
 
     if (!exists($p->{_body_}) && !exists($p->{_unwrapped_body_})
         && (!exists($p->{_template_}) || !exists($p->{_parameters_}))) {
@@ -276,7 +279,7 @@ sub construct_email ($) {
         local($Text::Wrap::columns) = 69;
         local($Text::Wrap::huge) = 'overflow';
         local($Text::Wrap::unexpand) = 0;
-        $p->{_body_} = Text::Wrap::wrap('     ', '     ', $t);
+        $p->{_body_} = Text::Wrap::wrap($p->{_line_indent}, $p->{_line_indent}, $t);
         $p->{_body_} =~ s/^\s+$//mg;
         if ($sig) {
             $sig = Text::Wrap::wrap('', '', $sig);
@@ -289,7 +292,7 @@ sub construct_email ($) {
         throw mySociety::Email::Error("Template parameters '_parameters_' must be an associative array")
             if (ref($p->{_parameters_}) ne 'HASH');
         
-        (my $subject, $p->{_body_}) = mySociety::Email::do_template_substitution($p->{_template_}, $p->{_parameters_});
+        (my $subject, $p->{_body_}) = mySociety::Email::do_template_substitution($p->{_template_}, $p->{_parameters_}, $p->{_line_indent});
         delete($p->{_template_});
         delete($p->{_parameters_});
 
