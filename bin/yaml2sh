@@ -39,9 +39,9 @@ def process(fh=None, data=None, prefix=[], output_prefix=""):
     if isinstance(v, dict):
       process(data = v, prefix = prefix + [str(k)], output_prefix = output_prefix)
     elif isinstance(v, list):
-      print "%s%s=(%s)" % (output_prefix, "__".join(prefix + [k]), " ".join([shell_quote(unicode(x)) for x in v]))
+      print "%s%s=(%s)" % (output_prefix, "__".join(prefix + [k]), " ".join([shell_quote(unicode(x).encode('utf-8')) for x in v]))
     else:
-      print "%s%s=%s" % (output_prefix, "__".join(prefix + [k]), shell_quote(unicode(v)))
+      print "%s%s=%s" % (output_prefix, "__".join(prefix + [k]), shell_quote(unicode(v).encode('utf-8')))
 
 def main(clargs):
   parser = optparse.OptionParser(usage = "usage: %prog [file.json]")
