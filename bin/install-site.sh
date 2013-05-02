@@ -201,6 +201,15 @@ clone_or_update_repository() {
     fi
 }
 
+install_postfix() {
+    # Make sure debconf-set-selections is available
+    apt-get install -y debconf
+    # Set the things so that we can do this non-interactively
+    echo postfix postfix/main_mailer_type select 'Internet Site' | debconf-set-selections
+    echo postfix postfix/mail_name string "$HOST" | debconf-set-selections
+    DEBIAN_FRONTEND=noninteractive apt-get -y install postfix
+}
+
 install_nginx() {
     apt-get install -y nginx libfcgi-procmanager-perl
 }
