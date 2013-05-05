@@ -91,7 +91,7 @@ REPOSITORY_URL=git://github.com/mysociety/$SITE.git
 BRANCH=master
 
 DISTRIBUTION="$(lsb_release -i -s  | tr A-Z a-z)"
-VERSION="$(lsb_release -c -s)"
+DISTVERSION="$(lsb_release -c -s)"
 
 IP_ADDRESS_FOR_HOST="$(dig +short $HOST)"
 
@@ -145,7 +145,7 @@ add_postgresql_user() {
 }
 
 update_apt_sources() {
-    if [ x"$DISTRIBUTION" = x"ubuntu" ] && [ x"$VERSION" = x"precise" ]
+    if [ x"$DISTRIBUTION" = x"ubuntu" ] && [ x"$DISTVERSION" = x"precise" ]
     then
         cat > /etc/apt/sources.list.d/mysociety-extra.list <<EOF
 deb http://eu-west-1.ec2.archive.ubuntu.com/ubuntu/ precise multiverse
@@ -153,7 +153,7 @@ deb-src http://eu-west-1.ec2.archive.ubuntu.com/ubuntu/ precise multiverse
 deb http://eu-west-1.ec2.archive.ubuntu.com/ubuntu/ precise-updates multiverse
 deb-src http://eu-west-1.ec2.archive.ubuntu.com/ubuntu/ precise-updates multiverse
 EOF
-    elif [ x"$DISTRIBUTION" = x"debian" ] && [ x"$VERSION" = x"squeeze" ]
+    elif [ x"$DISTRIBUTION" = x"debian" ] && [ x"$DISTVERSION" = x"squeeze" ]
     then
         # Install the basic packages we require:
         cat > /etc/apt/sources.list.d/mysociety-extra.list <<EOF
@@ -170,7 +170,7 @@ deb http://backports.debian.org/debian-backports squeeze-backports main contrib 
 deb-src http://backports.debian.org/debian-backports squeeze-backports main contrib non-free
 EOF
     else
-        echo Unsupport distribution and version combination $DISTRIBUTION $VERSION
+        echo Unsupport distribution and version combination $DISTRIBUTION $DISTVERSION
         exit 1
     fi
     apt-get update
@@ -275,7 +275,7 @@ install_sysvinit_script() {
 }
 
 install_website_packages() {
-    EXACT_PACKAGES="$REPOSITORY/conf/packages.$DISTRIBUTION-$VERSION"
+    EXACT_PACKAGES="$REPOSITORY/conf/packages.$DISTRIBUTION-$DISTVERSION"
     PRECISE_PACKAGES="$REPOSITORY/conf/packages.ubuntu-precise"
     SQUEEZE_PACKAGES="$REPOSITORY/conf/packages.debian-squeeze"
     GENERIC_PACKAGES="$REPOSITORY/conf/packages"
