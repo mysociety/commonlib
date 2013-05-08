@@ -10,7 +10,7 @@ package mySociety::AuthToken;
 
 use strict;
 
-use Digest::SHA1 qw(sha1_hex);
+use Digest::SHA qw(sha1_hex);
 use IO::String;
 use MIME::Base64 qw(encode_base64);
 
