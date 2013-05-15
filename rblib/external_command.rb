@@ -77,7 +77,7 @@ class ExternalCommand
         # Maximum memory available to the child process (in bytes) before
         # it is killed by the kernel.  This value is used as both the soft
         # and hard limit.
-        @memory_limit = :INFINITY
+        @memory_limit = Process.getrlimit(Process::RLIMIT_AS)[0]
     end
 
     def run(stdin_string=nil, env={})
@@ -135,8 +135,10 @@ class ExternalCommand
         # Override the environment as specified
         ENV.update @env
 
-        # Set resource limits
-        Process::setrlimit(AS, @memory_limit)
+        # Set resource limits (if we can)
+        if @memory_limit < Process.getrlimit(Process::RLIMIT_AS)[0]
+            Process.setrlimit(Process::RLIMIT_AS, @memory_limit)
+        end
 
         # Spawn the grandchild, and wait for it to finish.
         Process::waitpid(fork { grandchild_process })
