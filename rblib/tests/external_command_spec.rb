@@ -6,6 +6,7 @@ true_script = File.join(script_dir, "true.sh")
 false_script = File.join(script_dir, "false.sh")
 output_script = File.join(script_dir, "output.sh")
 cat_script = File.join(script_dir, "cat.sh")
+malloc_script = File.join(script_dir, "malloc.pl")
 env_cmd = "/usr/bin/env"
 sleep_cmd = "/bin/sleep"
 
@@ -76,5 +77,21 @@ describe "when running ExternalCommand" do
         f.timed_out.should == true
         f.status.should_not == 0
     end
+
+    it "should be able to run a script which allocates lots of memory" do
+        f = ExternalCommand.new(malloc_script).run
+        f.status.should == 0
+        f.out.should == "OK\n"
+        f.err.should == ""
+    end
+
+    it "should be able to limit memory available to its children" do
+        f = ExternalCommand.new(malloc_script)
+        f.memory_limit = 1048576 * 128
+        f.run
+        f.out.should == ""
+        f.err.should == "Out of memory!\n"
+    end
+        
 end
 
