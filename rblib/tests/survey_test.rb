@@ -2,12 +2,6 @@ $:.push(File.join(File.dirname(__FILE__), '..'))
 require 'config'
 require 'survey'
 require 'test/unit'
-# Use rspec if loadable 
-begin 
-  require 'spec/test/unit'
-rescue LoadError
-  puts "Not using rspec"
-end
 
 # We should really use a synthetic config file for testing, but the survey
 # module requires a real running instance of the mySociety survey service
@@ -21,7 +15,7 @@ class TestSurvey < Test::Unit::TestCase
   def setup
     @survey = MySociety::Survey.new "survey_test.rb", "robin@mysociety.org"
   end
-  
+
   def test_submit_ok
       # Just check we can submit with no exceptions
       return_url = "http://localhost/"
@@ -37,14 +31,14 @@ class TestSurvey < Test::Unit::TestCase
       @survey.submit("foo" => "bar", "return_url" => "")
       assert @survey.already_done?
   end
-  
+
   def test_allow_new_survey
       @survey.submit("foo" => "bar", "return_url" => "")
       assert @survey.already_done?
-      
+
       @survey.allow_new_survey
       assert !@survey.already_done?
-      
+
       @survey.submit("foo" => "bar", "return_url" => "")
       assert @survey.already_done?
   end

@@ -2,12 +2,6 @@
 $:.push(File.join(File.dirname(__FILE__), '..'))
 require 'validate'
 require 'test/unit'
-# Use rspec if loadable
-begin
-  require 'spec/test/unit'
-rescue LoadError
-  puts "Not using rspec"
-end
 class TestValidate < Test::Unit::TestCase
 
   def test_is_valid_postcode
