@@ -41,7 +41,7 @@
 require 'fcntl'
 
 class ExternalCommand
-    attr_accessor :out, :err, :binary_mode
+    attr_accessor :out, :err, :binary_mode, :memory_limit
     attr_reader :status
     attr_reader :timed_out
 
@@ -73,6 +73,11 @@ class ExternalCommand
         # Set binary_mode to false in order to have strings transcoded
         # in Ruby 1.9 using the default internal and external encodings.
         @binary_mode = true
+
+        # Maximum memory available to the child process (in bytes) before
+        # it is killed by the kernel.  This value is used as both the soft
+        # and hard limit.
+        @memory_limit = Process.getrlimit(Process::RLIMIT_AS)[0]
     end
 
     def run(stdin_string=nil, env={})
@@ -129,6 +134,11 @@ class ExternalCommand
 
         # Override the environment as specified
         ENV.update @env
+
+        # Set resource limits (if we can)
+        if @memory_limit < Process.getrlimit(Process::RLIMIT_AS)[0]
+            Process.setrlimit(Process::RLIMIT_AS, @memory_limit)
+        end
 
         # Spawn the grandchild, and wait for it to finish.
         Process::waitpid(fork { grandchild_process })
