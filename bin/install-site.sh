@@ -20,6 +20,10 @@
 # if you are installing onto an EC2 instance.
 
 set -e
+error_msg() { printf "\033[31m%s\033[0m\n" "$*"; }
+notice_msg() { printf "\033[33m%s\033[0m " "$*"; }
+done_msg() { printf "\033[32m%s\033[0m\n" "$*"; }
+DONE_MSG=$(done_msg done)
 
 DEFAULT_SERVER=false
 DEFAULT_PARAMETER=
@@ -49,7 +53,7 @@ SITE="$1"
 UNIX_USER="$2"
 
 case "$SITE" in
-    fixmystreet | mapit)
+    fixmystreet | mapit | theyworkforyou)
         echo ==== Installing $SITE;;
     *)
         echo Installing $SITE with this script is not currently supported.
@@ -57,12 +61,19 @@ case "$SITE" in
 esac
 
 # Install some packages that we will definitely need:
-apt-get update
-apt-get install -y git-core lockfile-progs rubygems curl dnsutils lsb-release
+echo -n "Updating package lists... "
+apt-get -qq update
+echo $DONE_MSG
+echo "Installing some core packages..."
+for package in git-core lockfile-progs rubygems curl dnsutils lsb-release; do
+    echo -n "  $package... "; apt-get -qq install -y $package >/dev/null; echo $DONE_MSG
+done
 
 # If we're not running on an EC2 instance, an empty body is returned
 # by this request:
-EC2_HOSTNAME=`curl -s http://169.254.169.254/latest/meta-data/public-hostname || true`
+echo -n "Testing for being on EC2... "
+EC2_HOSTNAME=`curl --max-time 10 -s http://169.254.169.254/latest/meta-data/public-hostname || true`
+echo $DONE_MSG
 
 if [ $# = 2 ]
 then
@@ -93,36 +104,37 @@ BRANCH=master
 DISTRIBUTION="$(lsb_release -i -s  | tr A-Z a-z)"
 DISTVERSION="$(lsb_release -c -s)"
 
+echo -n "Testing $HOST's IP address... "
 IP_ADDRESS_FOR_HOST="$(dig +short $HOST)"
 
 if [ x = x"$IP_ADDRESS_FOR_HOST" ]
 then
-    echo "The hostname $HOST didn't resolve to an IP address"
+    error_msg "The hostname $HOST didn't resolve to an IP address"
     exit 1
 fi
+echo $DONE_MSG
 
 generate_locales() {
+    echo -n "Generating locales... "
     # If language-pack-en is present, install that:
-    apt-get install -y language-pack-en || true
+    apt-get -qq install -y language-pack-en >/dev/null || true
 
     # We get lots of locale errors if the en_GB.UTF-8 locale isn't
     # present.  (This is from Kagee's script.)
     if [ "$(locale -a | egrep -i '^en_GB.utf-?8$' | wc -l)" = "1" ]
     then
-        echo "en_GB.utf8 activated and generated"
+        notice_msg already
     else
-        echo "en_GB.utf8 not generated"
         if [ x"$(grep -c '^en_GB.UTF-8 UTF-8' /etc/locale.gen)" = x1 ]
         then
-            echo "'en_GB.UTF-8 UTF-8' already in /etc/locale.gen we will only generate"
+            notice_msg generating...
         else
-            echo "Appending 'en_GB.UTF-8 UTF-8' and 'cy_GB.UTF-8 UTF-8'"
-            echo "to /etc/locale.gen for generation"
+            notice_msg adding and generating...
             echo "\nen_GB.UTF-8 UTF-8\ncy_GB.UTF-8 UTF-8" >> /etc/locale.gen
         fi
-        echo "Generating new locales"
         locale-gen
     fi
+    echo $DONE_MSG
 }
 
 set_locale() {
@@ -131,13 +143,15 @@ set_locale() {
 }
 
 add_unix_user() {
+    echo -n "Adding unix user... "
     # Create the required user if it doesn't already exist:
     if id "$UNIX_USER" 2> /dev/null > /dev/null
     then
-        echo "The user $UNIX_USER already exists."
+        notice_msg already
     else
-        adduser --disabled-password --gecos "A user for the site $SITE" "$UNIX_USER"
+        adduser --quiet --disabled-password --gecos "A user for the site $SITE" "$UNIX_USER"
     fi
+    echo $DONE_MSG
 }
 
 add_postgresql_user() {
@@ -145,6 +159,7 @@ add_postgresql_user() {
 }
 
 update_apt_sources() {
+    echo -n "Updating APT sources... "
     if [ x"$DISTRIBUTION" = x"ubuntu" ] && [ x"$DISTVERSION" = x"precise" ]
     then
         cat > /etc/apt/sources.list.d/mysociety-extra.list <<EOF
@@ -170,18 +185,20 @@ deb http://backports.debian.org/debian-backports squeeze-backports main contrib 
 deb-src http://backports.debian.org/debian-backports squeeze-backports main contrib non-free
 EOF
     else
-        echo Unsupport distribution and version combination $DISTRIBUTION $DISTVERSION
+        error_msg "Unsupported distribution and version combination $DISTRIBUTION $DISTVERSION"
         exit 1
     fi
-    apt-get update
+    apt-get -qq update
+    echo $DONE_MSG
 }
 
 clone_or_update_repository() {
+    echo -n "Cloning or updating repository... "
     # Clone the repository into place if the directory isn't already
     # present:
     if [ -d $REPOSITORY ]
     then
-        echo the directory $REPOSITORY already exists
+        notice_msg updating...
         cd $REPOSITORY
         git remote set-url origin "$REPOSITORY_URL"
         git fetch origin
@@ -190,31 +207,37 @@ clone_or_update_repository() {
         git diff --quiet || { echo "There were changes in the working tree in $REPOSITORY; exiting."; exit 1; }
         git diff --cached --quiet || { echo "There were staged but uncommitted changes in $REPOSITORY; exiting."; exit 1; }
         # If that was fine, carry on:
-        git reset --hard origin/"$BRANCH"
-        git submodule sync
-        git submodule update --recursive
+        git reset --quiet --hard origin/"$BRANCH"
+        git submodule --quiet sync
+        git submodule --quiet update --recursive
     else
         PARENT="$(dirname $REPOSITORY)"
-        echo creating $PARENT
+        notice_msg cloning...
         mkdir -p $PARENT
         git clone --recursive --branch "$BRANCH" "$REPOSITORY_URL" "$REPOSITORY"
     fi
+    echo $DONE_MSG
 }
 
 install_postfix() {
+    echo -n "Installing postfix... "
     # Make sure debconf-set-selections is available
-    apt-get install -y debconf
+    apt-get -qq install -y debconf >/dev/null
     # Set the things so that we can do this non-interactively
     echo postfix postfix/main_mailer_type select 'Internet Site' | debconf-set-selections
     echo postfix postfix/mail_name string "$HOST" | debconf-set-selections
-    DEBIAN_FRONTEND=noninteractive apt-get -y install postfix
+    DEBIAN_FRONTEND=noninteractive apt-get -qq -y install postfix >/dev/null
+    echo $DONE_MSG
 }
 
 install_nginx() {
-    apt-get install -y nginx libfcgi-procmanager-perl
+    echo -n "Installing nginx... "
+    apt-get install -qq -y nginx libfcgi-procmanager-perl >/dev/null
+    echo $DONE_MSG
 }
 
 install_postgis() {
+    echo -n "Installing PostGIS... "
     POSTGIS_SCRIPT='https://docs.djangoproject.com/en/dev/_downloads/create_template_postgis-debian.sh'
     su -l -c "curl '$POSTGIS_SCRIPT' | bash -s" postgres
     # According to Matthew's installation instructions, these two SRID
@@ -233,6 +256,7 @@ install_postgis() {
             echo "UPDATE spatial_ref_sys SET proj4text = '$NEW_VALUE' WHERE srid = '$SRID'" | su -l -c 'psql template_postgis' postgres
         fi
     done
+    echo $DONE_MSG
 }
 
 make_log_directory() {
@@ -242,6 +266,7 @@ make_log_directory() {
 }
 
 add_website_to_nginx() {
+    echo -n "Adding site to nginx... "
     NGINX_SITE="$HOST"
     if [ $DEFAULT_SERVER = true ]
     then
@@ -261,7 +286,8 @@ add_website_to_nginx() {
     fi
     ln -nsf "$NGINX_SITE_FILENAME" "$NGINX_SITE_LINK"
     make_log_directory
-    /etc/init.d/nginx restart
+    /etc/init.d/nginx restart >/dev/null
+    echo $DONE_MSG
 }
 
 install_sysvinit_script() {
@@ -275,6 +301,7 @@ install_sysvinit_script() {
 }
 
 install_website_packages() {
+    echo -n "Installing packages from repository packages file... "
     EXACT_PACKAGES="$REPOSITORY/conf/packages.$DISTRIBUTION-$DISTVERSION"
     PRECISE_PACKAGES="$REPOSITORY/conf/packages.ubuntu-precise"
     SQUEEZE_PACKAGES="$REPOSITORY/conf/packages.debian-squeeze"
@@ -296,7 +323,8 @@ install_website_packages() {
     else
         PACKAGES_FILE="$GENERIC_PACKAGES"
     fi
-    xargs -a "$PACKAGES_FILE" apt-get -y install
+    xargs -a "$PACKAGES_FILE" apt-get -qq -y install >/dev/null
+    echo $DONE_MSG
 }
 
 overwrite_rc_local() {
@@ -320,7 +348,7 @@ add_unix_user
 update_apt_sources
 
 # And remove one crippling package, if it's installed:
-apt-get remove -y --purge apt-xapian-index || true
+apt-get -qq remove -y --purge apt-xapian-index >/dev/null || true
 
 clone_or_update_repository
 
