@@ -301,7 +301,7 @@ install_sysvinit_script() {
 }
 
 install_website_packages() {
-    echo -n "Installing packages from repository packages file... "
+    echo "Installing packages from repository packages file... "
     EXACT_PACKAGES="$REPOSITORY/conf/packages.$DISTRIBUTION-$DISTVERSION"
     PRECISE_PACKAGES="$REPOSITORY/conf/packages.ubuntu-precise"
     SQUEEZE_PACKAGES="$REPOSITORY/conf/packages.debian-squeeze"
@@ -324,7 +324,7 @@ install_website_packages() {
         PACKAGES_FILE="$GENERIC_PACKAGES"
     fi
     xargs -a "$PACKAGES_FILE" apt-get -qq -y install >/dev/null
-    echo $DONE_MSG
+    echo "  $DONE_MSG"
 }
 
 overwrite_rc_local() {
