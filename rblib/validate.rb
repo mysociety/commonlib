@@ -52,6 +52,7 @@ module MySociety
         end
 
         def Validate.email_match_regexp
+
             # This is derived from the grammar in RFC2822.
             # mailbox = local-part "@" domain
             # local-part = dot-string | quoted-string
@@ -65,6 +66,8 @@ module MySociety
             # sub-domain = [A-Za-z0-9][A-Za-z0-9-]*
             # XXX ignore address-literal because nobody uses those...
             # XXX Update this for http://tools.ietf.org/html/rfc6530
+            # N.B. intended for validating email addresses in their canonical form,
+            # so does not allow folding whitespace
 
             specials = '()<>@,;:\\\\".\\[\\]'
             controls = '\\000-\\037\\177'
@@ -76,15 +79,15 @@ module MySociety
             end
             atext = "[^#{specials} #{controls}#{highbit}]"
             atom = "#{atext}+"
-            dot_string = "#{atom}(\\s*\\.\\s*#{atom})*"
+            dot_string = "#{atom}(\\.#{atom})*"
             qtext = "[^\"\\\\\\r\\n#{highbit}]"
             quoted_pair = '\\.'
             quoted_string = "\"(#{qtext}|#{quoted_pair})*\""
             local_part = "(#{dot_string}|#{quoted_string})"
             sub_domain = '[A-Za-z0-9][A-Za-z0-9-]*'
-            domain = "#{sub_domain}(\\s*\\.\\s*#{sub_domain})*"
+            domain = "#{sub_domain}(\\.#{sub_domain})*"
 
-            return "#{local_part}\\s*@\\s*#{domain}"
+            return "#{local_part}@#{domain}"
         end
 
         def Validate.is_valid_email(addr)
