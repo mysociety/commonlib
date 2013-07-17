@@ -35,7 +35,7 @@ class FullyQualifiedRedirectMiddleware(object):
 
         return response
 
-    def request_is_secure(request):
+    def request_is_secure(self, request):
         """Check if a request is secure"""
         # From Django 1.4 onwards request.is_secure() takes care of identifying
         # secure requests forwarded via a proxy, by checking the header given
