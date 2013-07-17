@@ -5,6 +5,8 @@ import logging
 
 from django.http import HttpResponseRedirect
 from django.contrib.sites.models import Site
+from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 
 
 class FullyQualifiedRedirectMiddleware(object):
@@ -25,7 +27,6 @@ class FullyQualifiedRedirectMiddleware(object):
             if not (parsed_location.scheme and parsed_location.netloc):
                 new_location = list(parsed_location)
 
-                # FIXME - we can do better than hardcoding this
                 new_location[0] = 'https' if self.request_is_secure(request) else 'http'
                 new_location[1] = Site.objects.get_current().domain
                 new_location[2] = urlparse.urljoin(request.META['PATH_INFO'], parsed_location.path)
@@ -36,7 +37,22 @@ class FullyQualifiedRedirectMiddleware(object):
 
     def request_is_secure(request):
         """Check if a request is secure"""
-
-        # It might not be secure, but it might be forwarded for a secure request
-        forwarded_https = request.META.get('HTTP_X_FORWARDED_PROTO', '') == 'https'
-        return forwarded_https or request.is_secure()
+        # From Django 1.4 onwards request.is_secure() takes care of identifying
+        # secure requests forwarded via a proxy, by checking the header given
+        # in the SECURE_PROXY_SSL_HEADER setting.
+        # See: https://docs.djangoproject.com/en/1.4/ref/settings/#secure-proxy-ssl-header
+        # Older versions would always return false if the request was being
+        # forwarded by a proxy, since they would see only http.
+        # Therefore, we duplicate the functionality from:
+        # https://github.com/django/django/blob/master/django/http/request.py
+        # here, so that older versions can use the setting too.
+        # Remember to set it correctly!
+        if settings.SECURE_PROXY_SSL_HEADER:
+            try:
+                header, value = settings.SECURE_PROXY_SSL_HEADER
+            except ValueError:
+                raise ImproperlyConfigured('The SECURE_PROXY_SSL_HEADER setting must be a tuple containing two values.')
+            if request.META.get(header, None) == value:
+                return True
+        else:
+            return request.is_secure()
