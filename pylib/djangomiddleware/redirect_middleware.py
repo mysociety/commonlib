@@ -26,10 +26,17 @@ class FullyQualifiedRedirectMiddleware(object):
                 new_location = list(parsed_location)
 
                 # FIXME - we can do better than hardcoding this
-                new_location[0] = 'http'
+                new_location[0] = 'https' if self.request_is_secure(request) else 'http'
                 new_location[1] = Site.objects.get_current().domain
                 new_location[2] = urlparse.urljoin(request.META['PATH_INFO'], parsed_location.path)
 
                 response['Location'] = urlparse.urlunparse(new_location)
 
         return response
+
+    def request_is_secure(request):
+        """Check if a request is secure"""
+
+        # It might not be secure, but it might be forwarded for a secure request
+        forwarded_https = request.META.get('HTTP_X_FORWARDED_PROTO', '') == 'https'
+        return forwarded_https or request.is_secure()
