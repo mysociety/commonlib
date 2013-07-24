@@ -139,7 +139,9 @@ generate_locales() {
 
 set_locale() {
     echo 'LANG="en_GB.UTF-8"' > /etc/default/locale
+    echo 'LC_ALL="en_GB.UTF-8"' >> /etc/default/locale
     export LANG="en_GB.UTF-8"
+    export LC_ALL="en_GB.UTF-8"
 }
 
 add_unix_user() {
