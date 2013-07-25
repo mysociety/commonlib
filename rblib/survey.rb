@@ -69,6 +69,8 @@ module MySociety
             http = Net::HTTP.new(url.host, url.port)
             if url.scheme == 'https'
                 http.use_ssl = true
+                http.ca_path = MySociety::Config.get("SSL_CA_PATH", "/etc/ssl/certs/")
+                http.verify_mode = OpenSSL::SSL::VERIFY_PEER
             end
             result = http.request(request)
 
