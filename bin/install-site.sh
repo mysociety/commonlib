@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # This script can be used to install mySociety sites on a clean
-# install of Debian squeeze or Ubuntu precise.  It contains common
+# install of Debian squeeze/wheezy or Ubuntu precise. It contains common
 # code that is used in installing sites, and sources a site specific
 # script called bin/site-specific-install.sh in each.
 
@@ -185,6 +185,18 @@ deb-src http://security.debian.org/ squeeze/updates main non-free
 # Debian Backports
 deb http://backports.debian.org/debian-backports squeeze-backports main contrib non-free
 deb-src http://backports.debian.org/debian-backports squeeze-backports main contrib non-free
+EOF
+    elif [ x"$DISTRIBUTION" = x"debian" ] && [ x"$DISTVERSION" = x"wheezy" ]
+    then
+        # Install the basic packages we require:
+        cat > /etc/apt/sources.list.d/mysociety-extra.list <<EOF
+# Debian mirror to use, including contrib and non-free:
+deb http://the.earth.li/debian/ wheezy main contrib non-free
+deb-src http://the.earth.li/debian/ wheezy main contrib non-free
+
+# Security Updates:
+deb http://security.debian.org/ wheezy/updates main non-free
+deb-src http://security.debian.org/ wheezy/updates main non-free
 EOF
     else
         error_msg "Unsupported distribution and version combination $DISTRIBUTION $DISTVERSION"
