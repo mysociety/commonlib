@@ -9,6 +9,8 @@
 # the tests in tests/format.rb should somehow made to run from
 # the foi app.
 require 'cgi'
+require 'unicode'
+require 'unidecode'
 
 module MySociety
     module Format
@@ -97,6 +99,9 @@ module MySociety
         # Simplified a name to something usable in a URL
         def Format.simplify_url_part(text, default_name, max_len = nil)
             text = text.downcase # this also clones the string, if we use downcase! we modify the original
+            text = Unicode.normalize_KD(text)
+            text = Unidecoder.decode(text).downcase
+
             text.gsub!(/(\s|-|_)/, "_")
             text.gsub!(/[^a-z0-9_]/, "")
             text.gsub!(/_+/, "_")
