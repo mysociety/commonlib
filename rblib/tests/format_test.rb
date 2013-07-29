@@ -75,6 +75,15 @@ information on our website at
     text = 'Siméon'
     expected = 'simeon'
     assert MySociety::Format.simplify_url_part(text, default_name) == expected
+
+    text = "محمود"
+    expected = 'mhmwd'
+    assert MySociety::Format.simplify_url_part(text, default_name) == expected
+
+    text = "بلدية سيدي بو سعيد"
+    expected = "bldy_sydy_bw_syd"
+    assert MySociety::Format.simplify_url_part(text, default_name) == expected
+
   end
 
 end
