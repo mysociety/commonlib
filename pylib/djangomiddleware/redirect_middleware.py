@@ -4,7 +4,6 @@ import urlparse
 import logging
 
 from django.http import HttpResponseRedirect
-from django.contrib.sites.models import Site
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
@@ -28,7 +27,7 @@ class FullyQualifiedRedirectMiddleware(object):
                 new_location = list(parsed_location)
 
                 new_location[0] = 'https' if self.request_is_secure(request) else 'http'
-                new_location[1] = Site.objects.get_current().domain
+                new_location[1] = request.get_host()
                 new_location[2] = urlparse.urljoin(request.META['PATH_INFO'], parsed_location.path)
 
                 response['Location'] = urlparse.urlunparse(new_location)
