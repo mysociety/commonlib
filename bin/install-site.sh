@@ -229,6 +229,21 @@ EOF
     echo $DONE_MSG
 }
 
+update_mysociety_apt_sources() {
+    echo -n "Updating mySociety APT source... "
+    cat > /etc/apt/sources.list.d/mysociety-debian.list <<EOF
+deb http://debian.mysociety.org squeeze main
+EOF
+    cat > /etc/apt/preferences <<EOF
+Package: *
+Pin: origin debian.mysociety.org
+Pin-Priority: 50
+EOF
+    curl -s https://debian.mysociety.org/debian.mysociety.org.gpg.key | sudo apt-key add -
+    apt-get -qq update
+    echo $DONE_MSG
+}
+
 clone_or_update_repository() {
     echo -n "Cloning or updating repository... "
     # Clone the repository into place if the directory isn't already
