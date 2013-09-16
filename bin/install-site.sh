@@ -330,7 +330,7 @@ add_website_to_nginx() {
     fi
     NGINX_SITE_FILENAME=/etc/nginx/sites-available/"$NGINX_SITE"
     NGINX_SITE_LINK=/etc/nginx/sites-enabled/"$NGINX_SITE"
-    cp $REPOSITORY/conf/nginx.conf.example $NGINX_SITE_FILENAME
+    cp $CONF_DIRECTORY/nginx.conf.example $NGINX_SITE_FILENAME
     sed -i "s,/var/www/$SITE,$DIRECTORY," $NGINX_SITE_FILENAME
     if [ $DEFAULT_SERVER = true ]
     then
@@ -348,7 +348,7 @@ add_website_to_nginx() {
 
 install_sysvinit_script() {
     SYSVINIT_FILENAME=/etc/init.d/$SITE
-    cp $REPOSITORY/conf/sysvinit.example $SYSVINIT_FILENAME
+    cp $CONF_DIRECTORY/sysvinit.example $SYSVINIT_FILENAME
     sed -i "s,/var/www/$SITE,$DIRECTORY,g" $SYSVINIT_FILENAME
     sed -i "s/^ *USER=.*/USER=$UNIX_USER/" $SYSVINIT_FILENAME
     chmod a+rx $SYSVINIT_FILENAME
@@ -358,10 +358,10 @@ install_sysvinit_script() {
 
 install_website_packages() {
     echo "Installing packages from repository packages file... "
-    EXACT_PACKAGES="$REPOSITORY/conf/packages.$DISTRIBUTION-$DISTVERSION"
-    PRECISE_PACKAGES="$REPOSITORY/conf/packages.ubuntu-precise"
-    SQUEEZE_PACKAGES="$REPOSITORY/conf/packages.debian-squeeze"
-    GENERIC_PACKAGES="$REPOSITORY/conf/packages"
+    EXACT_PACKAGES="$CONF_DIRECTORY/packages.$DISTRIBUTION-$DISTVERSION"
+    PRECISE_PACKAGES="$CONF_DIRECTORY/packages.ubuntu-precise"
+    SQUEEZE_PACKAGES="$CONF_DIRECTORY/packages.debian-squeeze"
+    GENERIC_PACKAGES="$CONF_DIRECTORY/packages"
     # If there's an exact match for the distribution and release, use that:
     if [ -e "$EXACT_PACKAGES" ]
     then
@@ -410,4 +410,27 @@ clone_or_update_repository
 
 chown -R "$UNIX_USER"."$UNIX_USER" "$DIRECTORY"
 
-. $REPOSITORY/bin/site-specific-install.sh
+# Check that we have a conf or config directory:
+if [ -d "$REPOSITORY/conf" ]
+then
+    CONF_DIRECTORY="$REPOSITORY/conf"
+elif [ -d "$REPOSITORY/config" ]
+then
+    CONF_DIRECTORY="$REPOSITORY/config"
+else
+    error_msg "No conf or config directory was found in $REPOSITORY"
+    exit 1
+fi
+
+# Check that we can find the bin or script directory:
+if [ -d "$REPOSITORY/bin" ]
+then
+    BIN_DIRECTORY="$REPOSITORY/bin"
+elif [ -d "$REPOSITORY/script" ]
+then
+    BIN_DIRECTORY="$REPOSITORY/script"
+else
+    error_msg "No bin or script directory was found in $REPOSITORY"
+fi
+
+. "$BIN_DIRECTORY/site-specific-install.sh"
