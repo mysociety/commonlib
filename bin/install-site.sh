@@ -83,7 +83,7 @@ SITE="$1"
 UNIX_USER="$2"
 
 case "$SITE" in
-    fixmystreet | mapit | theyworkforyou | pombola)
+    fixmystreet | mapit | theyworkforyou | pombola | alaveteli)
         echo ==== Installing $SITE;;
     *)
         echo Installing $SITE with this script is not currently supported.
