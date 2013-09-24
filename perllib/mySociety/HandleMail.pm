@@ -166,7 +166,7 @@ sub get_token {
 
 # mark_as DESTINATION DATA LOG_PREFIX
 # Append an incoming mail to a log file
-sub mark_as($%$){
+sub mark_as($$$){
     my ($destination, $data, $prefix) = @_;
     my %data = %{$data};
     my $mail = join("\n", @{$data{lines}});
