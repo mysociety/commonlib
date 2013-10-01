@@ -359,6 +359,15 @@ make_log_directory() {
 
 add_website_to_nginx() {
     echo -n "Adding site to nginx... "
+    NGINX_VERSION="$(/usr/sbin/nginx -v 2>&1 | sed 's,^nginx version: nginx/,,')"
+    # The 'default_server' option is just 'default' in earlier
+    # versions of nginx:
+    if dpkg --compare-versions "$NGINX_VERSION" lt 0.8.21
+    then
+        DEFAULT_SERVER_OPTION=default
+    else
+        DEFAULT_SERVER_OPTION=default_server
+    fi
     NGINX_SITE="$HOST"
     if [ $DEFAULT_SERVER = true ]
     then
@@ -370,7 +379,7 @@ add_website_to_nginx() {
     sed -i "s,/var/www/$SITE,$DIRECTORY," $NGINX_SITE_FILENAME
     if [ $DEFAULT_SERVER = true ]
     then
-        sed -i "s/^.*listen 80.*$/    listen 80 default_server;/" $NGINX_SITE_FILENAME
+        sed -i "s/^.*listen 80.*$/    listen 80 $DEFAULT_SERVER_OPTION;/" $NGINX_SITE_FILENAME
     else
         sed -i "/listen 80/a\
 \    server_name $HOST;
