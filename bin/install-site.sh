@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # This script can be used to install mySociety sites on a clean
-# install of Debian squeeze or Ubuntu precise.  It contains common
+# install of Debian squeeze/wheezy or Ubuntu precise. It contains common
 # code that is used in installing sites, and sources a site specific
 # script called bin/site-specific-install.sh in each.
 
@@ -13,17 +13,29 @@
 
 # The usage is:
 #
-#   install-site.sh [--default] SITE-NAME UNIX-USER [HOST]
+#   install-site.sh [--dev] [--default] SITE-NAME UNIX-USER [HOST]
 #
 # ... where --default means to install as the default site for this
 # server, rather than a virtualhost for HOST.  HOST is only optional
 # if you are installing onto an EC2 instance.
+#
+# --dev will work from a checkout of the repository in your current directory,
+# (it will check it out if not present, do nothing if it is), and will be
+# passed down to site specific scripts so they can e.g. not install nginx.
 
 set -e
 error_msg() { printf "\033[31m%s\033[0m\n" "$*"; }
 notice_msg() { printf "\033[33m%s\033[0m " "$*"; }
 done_msg() { printf "\033[32m%s\033[0m\n" "$*"; }
 DONE_MSG=$(done_msg done)
+
+DEVELOPMENT_INSTALL=false
+if [ x"$1" = x"--dev" -o x"$1" = x"--development" ]
+then
+    error_msg DEVELOPMENT INSTALL
+    DEVELOPMENT_INSTALL=true
+    shift
+fi
 
 DEFAULT_SERVER=false
 DEFAULT_PARAMETER=
@@ -53,7 +65,7 @@ SITE="$1"
 UNIX_USER="$2"
 
 case "$SITE" in
-    fixmystreet | mapit | theyworkforyou)
+    fixmystreet | mapit | theyworkforyou | pombola)
         echo ==== Installing $SITE;;
     *)
         echo Installing $SITE with this script is not currently supported.
@@ -90,8 +102,9 @@ else
     usage_and_exit
 fi
 
-if [ $DEFAULT_SERVER = true ]
-then
+if [ $DEVELOPMENT_INSTALL = true ]; then
+    DIRECTORY=$(cd "."; pwd)
+elif [ $DEFAULT_SERVER = true ]; then
     DIRECTORY="/var/www/$SITE"
 else
     DIRECTORY="/var/www/$HOST"
@@ -114,26 +127,36 @@ then
 fi
 echo $DONE_MSG
 
-generate_locales() {
-    echo -n "Generating locales... "
-    # If language-pack-en is present, install that:
-    apt-get -qq install -y language-pack-en >/dev/null || true
+add_locale() {
+    # Adds a specific UTF-8 locale (with Ubuntu you can provide it on the
+    # command line, but Debian requires a file edit)
 
-    # We get lots of locale errors if the en_GB.UTF-8 locale isn't
-    # present.  (This is from Kagee's script.)
-    if [ "$(locale -a | egrep -i '^en_GB.utf-?8$' | wc -l)" = "1" ]
+    echo -n "Generating locale $1... "
+    if [ "$(locale -a | egrep -i "^$1.utf-?8$" | wc -l)" = "1" ]
     then
         notice_msg already
     else
-        if [ x"$(grep -c '^en_GB.UTF-8 UTF-8' /etc/locale.gen)" = x1 ]
-        then
-            notice_msg generating...
-        else
-            notice_msg adding and generating...
-            echo "\nen_GB.UTF-8 UTF-8\ncy_GB.UTF-8 UTF-8" >> /etc/locale.gen
+        if [ x"$DISTRIBUTION" = x"ubuntu" ]; then
+            locale-gen "$1.UTF-8"
+        elif [ x"$DISTRIBUTION" = x"debian" ]; then
+            if [ x"$(grep -c "^$1.UTF-8 UTF-8" /etc/locale.gen)" = x1 ]
+            then
+                notice_msg generating...
+            else
+                notice_msg adding and generating...
+                echo "\n$1.UTF-8 UTF-8" >> /etc/locale.gen
+            fi
+            locale-gen
         fi
-        locale-gen
     fi
+    echo $DONE_MSG
+}
+
+generate_locales() {
+    echo "Generating locales... "
+    # If language-pack-en is present, install that:
+    apt-get -qq install -y language-pack-en >/dev/null || true
+    add_locale en_GB
     echo $DONE_MSG
 }
 
@@ -186,6 +209,18 @@ deb-src http://security.debian.org/ squeeze/updates main non-free
 deb http://backports.debian.org/debian-backports squeeze-backports main contrib non-free
 deb-src http://backports.debian.org/debian-backports squeeze-backports main contrib non-free
 EOF
+    elif [ x"$DISTRIBUTION" = x"debian" ] && [ x"$DISTVERSION" = x"wheezy" ]
+    then
+        # Install the basic packages we require:
+        cat > /etc/apt/sources.list.d/mysociety-extra.list <<EOF
+# Debian mirror to use, including contrib and non-free:
+deb http://the.earth.li/debian/ wheezy main contrib non-free
+deb-src http://the.earth.li/debian/ wheezy main contrib non-free
+
+# Security Updates:
+deb http://security.debian.org/ wheezy/updates main non-free
+deb-src http://security.debian.org/ wheezy/updates main non-free
+EOF
     else
         error_msg "Unsupported distribution and version combination $DISTRIBUTION $DISTVERSION"
         exit 1
@@ -198,20 +233,24 @@ clone_or_update_repository() {
     echo -n "Cloning or updating repository... "
     # Clone the repository into place if the directory isn't already
     # present:
-    if [ -d $REPOSITORY ]
+    if [ -d "$REPOSITORY/.git" ]
     then
-        notice_msg updating...
-        cd $REPOSITORY
-        git remote set-url origin "$REPOSITORY_URL"
-        git fetch origin
-        # Check that there are no uncommitted changes before doing a
-        # git reset --hard:
-        git diff --quiet || { echo "There were changes in the working tree in $REPOSITORY; exiting."; exit 1; }
-        git diff --cached --quiet || { echo "There were staged but uncommitted changes in $REPOSITORY; exiting."; exit 1; }
-        # If that was fine, carry on:
-        git reset --quiet --hard origin/"$BRANCH"
-        git submodule --quiet sync
-        git submodule --quiet update --recursive
+        if [ $DEVELOPMENT_INSTALL = true ]; then
+            notice_msg skipping as development install...
+        else
+            notice_msg updating...
+            cd $REPOSITORY
+            git remote set-url origin "$REPOSITORY_URL"
+            git fetch origin
+            # Check that there are no uncommitted changes before doing a
+            # git reset --hard:
+            git diff --quiet || { echo "There were changes in the working tree in $REPOSITORY; exiting."; exit 1; }
+            git diff --cached --quiet || { echo "There were staged but uncommitted changes in $REPOSITORY; exiting."; exit 1; }
+            # If that was fine, carry on:
+            git reset --quiet --hard origin/"$BRANCH"
+            git submodule --quiet sync
+            git submodule --quiet update --recursive
+        fi
     else
         PARENT="$(dirname $REPOSITORY)"
         notice_msg cloning...

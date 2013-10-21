@@ -758,7 +758,7 @@ sub email_check_url($) {
     $url =~ s/testharness\.//; 
     $url =~ s/test\.mysociety\.org/com/;
     if (!$options or !exists($options->{skip_length_check})) {
-        die "URL is too long for an email: $url" if length($url) > 65;
+        die "URL is too long for an email: $url" if length($url) > 70;
     }
 }
 
