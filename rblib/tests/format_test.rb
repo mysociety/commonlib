@@ -52,37 +52,20 @@ information on our website at
 
   def test_unicode_transliteration
     default_name = 'body'
-    text = 'Državno sodišče'
-    expected = 'drzavno_sodisce'
-    assert MySociety::Format.simplify_url_part(text, default_name) == expected
 
-    text = 'Реактор Большой Мощности Канальный'
-    expected = 'rieaktor_bolshoi_moshchnosti_kanalnyi'
-    assert MySociety::Format.simplify_url_part(text, default_name) == expected
-
-    text = 'Prefeitura de Curuçá - PA '
-    expected = 'prefeitura_de_curuca_pa'
-    assert MySociety::Format.simplify_url_part(text, default_name) == expected
-
-    text = 'Prefeitura de Curuá - PA '
-    expected = 'prefeitura_de_curua_pa'
-    assert MySociety::Format.simplify_url_part(text, default_name) == expected
-
-    text = 'Prefeitura de Pirajuí - SP'
-    expected = 'prefeitura_de_pirajui_sp'
-    assert MySociety::Format.simplify_url_part(text, default_name) == expected
-
-    text = 'Siméon'
-    expected = 'simeon'
-    assert MySociety::Format.simplify_url_part(text, default_name) == expected
-
-    text = "محمود"
-    expected = 'mhmwd'
-    assert MySociety::Format.simplify_url_part(text, default_name) == expected
-
-    text = "بلدية سيدي بو سعيد"
-    expected = "bldy_sydy_bw_syd"
-    assert MySociety::Format.simplify_url_part(text, default_name) == expected
+    examples = [['Državno sodišče', 'drzavno_sodisce'],
+                ['Реактор Большой Мощности Канальный', 'rieaktor_bolshoi_moshchnosti_kanalnyi'],
+                ['Prefeitura de Curuçá - PA ', 'prefeitura_de_curuca_pa'],
+                ['Prefeitura de Curuá - PA ', 'prefeitura_de_curua_pa'],
+                ['Prefeitura de Pirajuí - SP', 'prefeitura_de_pirajui_sp'],
+                ['Siméon', 'simeon'],
+                ["Nordic æøå", "nordic_aeoa"],
+                ["بلدية سيدي بو سعيد","bldy_sydy_bw_syd"],
+                ["محمود",'mhmwd'],
+            ]
+    examples.each do |name, url_part|
+        assert MySociety::Format.simplify_url_part(name, default_name) == url_part
+    end
 
   end
 

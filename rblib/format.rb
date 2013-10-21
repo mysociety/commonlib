@@ -10,7 +10,7 @@
 # the foi app.
 require 'cgi'
 require 'unicode'
-require 'unidecode'
+require 'unidecoder'
 
 module MySociety
     module Format
@@ -75,7 +75,7 @@ module MySociety
             return ret
         end
 
-        # Simplify bracketed URLs like: www.liverpool.gov.uk <http://www.liverpool.gov.uk> 
+        # Simplify bracketed URLs like: www.liverpool.gov.uk <http://www.liverpool.gov.uk>
         # (so that the URL appears only once, and so that the escaping of the < > doesn't
         # get &gt; contaminated into the linked URL)
         def Format.simplify_angle_bracketed_urls(text)
@@ -100,7 +100,7 @@ module MySociety
         def Format.simplify_url_part(text, default_name, max_len = nil)
             text = text.downcase # this also clones the string, if we use downcase! we modify the original
             text = Unicode.normalize_KD(text)
-            text = Unidecoder.decode(text).downcase
+            text = text.to_ascii.downcase
 
             text.gsub!(/(\s|-|_)/, "_")
             text.gsub!(/[^a-z0-9_]/, "")
@@ -129,7 +129,7 @@ module MySociety
         def Format.lcfirst(text)
             text[0,1].downcase + text[1,text.size]
         end
-        
+
         def Format.ucfirst(text)
             text[0,1].upcase + text[1,text.size]
         end
