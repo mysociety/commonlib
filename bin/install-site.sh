@@ -29,6 +29,24 @@ notice_msg() { printf "\033[33m%s\033[0m " "$*"; }
 done_msg() { printf "\033[32m%s\033[0m\n" "$*"; }
 DONE_MSG=$(done_msg done)
 
+# Write out the script arguments separated by NUL, so that the script can
+# be re-invoked, exactly the same, with:
+#   xargs -0 -a arguments-file script-file
+
+ARGUMENTS_FILE="$(tempfile)"
+truncate --size=0 "$ARGUMENTS_FILE"
+FIRST=true
+for ARG in "$@"
+do
+    if [ $FIRST = true ]
+    then
+	FIRST=false
+    else
+	printf '\0' >> "$ARGUMENTS_FILE"
+    fi
+    echo -n "$ARG" >> "$ARGUMENTS_FILE"
+done
+
 DEVELOPMENT_INSTALL=false
 if [ x"$1" = x"--dev" -o x"$1" = x"--development" ]
 then
@@ -109,6 +127,23 @@ elif [ $DEFAULT_SERVER = true ]; then
 else
     DIRECTORY="/var/www/$HOST"
 fi
+
+# Make sure that that directory exists:
+mkdir -p "$DIRECTORY"
+
+# Preserve a copy of this script, as used when last run:
+COPIED_SCRIPT="$DIRECTORY/install-site.sh"
+# If the files are the same, copying it over itself will fail:
+if [ "$(readlink -f "$0")" != "$(readlink -f "$COPIED_SCRIPT")" ]
+then
+    cp "$0" "$COPIED_SCRIPT"
+fi
+chmod a+rx "$COPIED_SCRIPT"
+
+COPIED_ARGUMENTS="$DIRECTORY/install-arguments"
+mv "$ARGUMENTS_FILE" "$COPIED_ARGUMENTS"
+chmod a+r "$COPIED_ARGUMENTS"
+
 REPOSITORY="$DIRECTORY/$SITE"
 
 REPOSITORY_URL=git://github.com/mysociety/$SITE.git
@@ -385,15 +420,29 @@ install_website_packages() {
 }
 
 overwrite_rc_local() {
-    cat > /etc/rc.local <<EOF
+    EC2_REWRITE="$REPOSITORY/bin/ec2-rewrite-conf"
+    # Some scripts have an ec2-rewrite-conf script that can be used to
+    # update the hostnme on reboot - if that's present, use it,
+    # otherwise the alternative is to re-run the install script:
+    if [ -f "$EC2_REWRITE" ]
+    then
+        cat > /etc/rc.local <<EOF
 #!/bin/sh -e
 
-su -l -c $REPOSITORY/bin/ec2-rewrite-conf $UNIX_USER
+su -l -c '$EC2_REWRITE' $UNIX_USER
 /etc/init.d/$SITE restart
 
 exit 0
 
 EOF
+    else
+        cat > /etc/rc.local <<EOF
+#!/bin/sh -e
+
+xargs -0 -a '$COPIED_ARGUMENTS' '$COPIED_SCRIPT'
+
+EOF
+    fi
     chmod a+rx /etc/rc.local
 }
 
