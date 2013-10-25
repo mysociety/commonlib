@@ -322,6 +322,11 @@ install_postfix() {
     # Set the things so that we can do this non-interactively
     echo postfix postfix/main_mailer_type select 'Internet Site' | debconf-set-selections
     echo postfix postfix/mail_name string "$HOST" | debconf-set-selections
+    # FIXME: for some reason this doesn't work - it's left here for
+    # reference, and will be fixed up by rewriting
+    # /etc/postfix/main.cf in site-specific-install.sh
+    echo postfix postfix/destinations string \
+        "$HOST, $(hostname --fqdn), localhost.localdomain, localhost" | debconf-set-selections
     DEBIAN_FRONTEND=noninteractive apt-get -qq -y install postfix >/dev/null
     echo $DONE_MSG
 }
