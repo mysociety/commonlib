@@ -144,6 +144,10 @@ COPIED_ARGUMENTS="$DIRECTORY/install-arguments"
 mv "$ARGUMENTS_FILE" "$COPIED_ARGUMENTS"
 chmod a+r "$COPIED_ARGUMENTS"
 
+# Save the host that's used for this installation:
+OLD_HOST_FILE="$DIRECTORY/last-host"
+echo "$HOST" > "$OLD_HOST_FILE"
+
 REPOSITORY="$DIRECTORY/$SITE"
 
 REPOSITORY_URL=git://github.com/mysociety/$SITE.git
@@ -442,7 +446,6 @@ su -l -c '$EC2_REWRITE' $UNIX_USER
 /etc/init.d/$SITE restart
 
 exit 0
-
 EOF
     else
         cat > /etc/rc.local <<EOF
@@ -450,6 +453,15 @@ EOF
 
 xargs -0 -a '$COPIED_ARGUMENTS' '$COPIED_SCRIPT'
 
+GENERAL_FILE='$CONF_DIRECTORY/general.yml'
+OLD_HOST_FILE='$OLD_HOST_FILE'
+
+if [ -f "\$GENERAL_FILE" ] && [ -f "\$OLD_HOST_FILE" ]
+then
+    NEW_HOST="\$(curl -s http://169.254.169.254/latest/meta-data/public-hostname)"
+    OLD_HOST="\$(cat "\$OLD_HOST_FILE")"
+    sed -i "s/\$OLD_HOST/\$NEW_HOST/g" "\$GENERAL_FILE"
+fi
 EOF
     fi
     chmod a+rx /etc/rc.local
