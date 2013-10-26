@@ -315,6 +315,28 @@ clone_or_update_repository() {
     echo $DONE_MSG
 }
 
+ensure_line_present() {
+    MATCH_RE="$1"
+    REQUIRED_LINE="$2"
+    FILE="$3"
+    MODE="$4"
+    if [ -f "$FILE" ]
+    then
+        if egrep "$MATCH_RE" "$FILE" > /dev/null
+        then
+            sed -r -i -e "s#$MATCH_RE.*#$REQUIRED_LINE#" "$FILE"
+        else
+            TMP_FILE=$(mktemp)
+            echo "$REQUIRED_LINE" > $TMP_FILE
+            cat "$FILE" >> $TMP_FILE
+            mv $TMP_FILE "$FILE"
+        fi
+    else
+        echo "$REQUIRED_LINE" >> "$FILE"
+    fi
+    chmod "$MODE" "$FILE"
+}
+
 install_postfix() {
     echo -n "Installing postfix... "
     # Make sure debconf-set-selections is available
