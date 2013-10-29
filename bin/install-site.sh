@@ -131,7 +131,10 @@ fi
 # Make sure that that directory exists:
 mkdir -p "$DIRECTORY"
 
-# Preserve a copy of this script, as used when last run:
+# Preserve a copy of this script, as used when last run.  This is
+# useful so that the install script can be found in a predictable
+# location; for example, Alaveteli relies on this to rerun the install
+# script on rebooting an EC2 instance.
 COPIED_SCRIPT="$DIRECTORY/install-site.sh"
 
 # $0 might not refer to a file, most commonly in the situation where
