@@ -133,6 +133,18 @@ mkdir -p "$DIRECTORY"
 
 # Preserve a copy of this script, as used when last run:
 COPIED_SCRIPT="$DIRECTORY/install-site.sh"
+
+# $0 might not refer to a file, most commonly in the situation where
+# you're piping the script from curl directly to "sh -s".  Since
+# Alaveteli on EC2 requires a copy of the install script, we don't
+# support running this script by piping directly from curl any more.
+if [ ! -f "$0" ]
+then
+    error_msg "Couldn't find the location of this script:"
+    error_msg "Please run it as './install-site.sh ...' or 'sh install-site.sh ...'"
+    exit 1
+fi
+
 # If the files are the same, copying it over itself will fail:
 if [ "$(readlink -f "$0")" != "$(readlink -f "$COPIED_SCRIPT")" ]
 then
