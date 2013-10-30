@@ -475,7 +475,7 @@ install_website_packages() {
 }
 
 overwrite_rc_local() {
-    EC2_REWRITE="$REPOSITORY/bin/ec2-rewrite-conf"
+    EC2_REWRITE="$BIN_DIRECTORY/ec2-rewrite-conf"
     # Some scripts have an ec2-rewrite-conf script that can be used to
     # update the hostnme on reboot - if that's present, use it,
     # otherwise the alternative is to re-run the install script:
