@@ -29,6 +29,24 @@ notice_msg() { printf "\033[33m%s\033[0m " "$*"; }
 done_msg() { printf "\033[32m%s\033[0m\n" "$*"; }
 DONE_MSG=$(done_msg done)
 
+# Write out the script arguments separated by NUL, so that the script can
+# be re-invoked, exactly the same, with:
+#   xargs -0 -a arguments-file script-file
+
+ARGUMENTS_FILE="$(tempfile)"
+truncate --size=0 "$ARGUMENTS_FILE"
+FIRST=true
+for ARG in "$@"
+do
+    if [ $FIRST = true ]
+    then
+	FIRST=false
+    else
+	printf '\0' >> "$ARGUMENTS_FILE"
+    fi
+    echo -n "$ARG" >> "$ARGUMENTS_FILE"
+done
+
 DEVELOPMENT_INSTALL=false
 if [ x"$1" = x"--dev" -o x"$1" = x"--development" ]
 then
@@ -65,7 +83,7 @@ SITE="$1"
 UNIX_USER="$2"
 
 case "$SITE" in
-    fixmystreet | mapit | theyworkforyou | pombola)
+    fixmystreet | mapit | theyworkforyou | pombola | alaveteli)
         echo ==== Installing $SITE;;
     *)
         echo Installing $SITE with this script is not currently supported.
@@ -109,6 +127,42 @@ elif [ $DEFAULT_SERVER = true ]; then
 else
     DIRECTORY="/var/www/$HOST"
 fi
+
+# Make sure that that directory exists:
+mkdir -p "$DIRECTORY"
+
+# Preserve a copy of this script, as used when last run.  This is
+# useful so that the install script can be found in a predictable
+# location; for example, Alaveteli relies on this to rerun the install
+# script on rebooting an EC2 instance.
+COPIED_SCRIPT="$DIRECTORY/install-site.sh"
+
+# $0 might not refer to a file, most commonly in the situation where
+# you're piping the script from curl directly to "sh -s".  Since
+# Alaveteli on EC2 requires a copy of the install script, we don't
+# support running this script by piping directly from curl any more.
+if [ ! -f "$0" ]
+then
+    error_msg "Couldn't find the location of this script:"
+    error_msg "Please run it as './install-site.sh ...' or 'sh install-site.sh ...'"
+    exit 1
+fi
+
+# If the files are the same, copying it over itself will fail:
+if [ "$(readlink -f "$0")" != "$(readlink -f "$COPIED_SCRIPT")" ]
+then
+    cp "$0" "$COPIED_SCRIPT"
+fi
+chmod a+rx "$COPIED_SCRIPT"
+
+COPIED_ARGUMENTS="$DIRECTORY/install-arguments"
+mv "$ARGUMENTS_FILE" "$COPIED_ARGUMENTS"
+chmod a+r "$COPIED_ARGUMENTS"
+
+# Save the host that's used for this installation:
+OLD_HOST_FILE="$DIRECTORY/last-host"
+echo "$HOST" > "$OLD_HOST_FILE"
+
 REPOSITORY="$DIRECTORY/$SITE"
 
 REPOSITORY_URL=git://github.com/mysociety/$SITE.git
@@ -180,7 +234,8 @@ add_unix_user() {
 }
 
 add_postgresql_user() {
-    su -l -c "createuser --createdb --no-createrole --no-superuser '$UNIX_USER'" postgres || true
+    SUPERUSER=${1:---no-createrole --no-superuser}
+    su -l -c "createuser --createdb $SUPERUSER '$UNIX_USER'" postgres || true
 }
 
 update_apt_sources() {
@@ -229,6 +284,21 @@ EOF
     echo $DONE_MSG
 }
 
+update_mysociety_apt_sources() {
+    echo -n "Updating mySociety APT source... "
+    cat > /etc/apt/sources.list.d/mysociety-debian.list <<EOF
+deb http://debian.mysociety.org squeeze main
+EOF
+    cat > /etc/apt/preferences <<EOF
+Package: *
+Pin: origin debian.mysociety.org
+Pin-Priority: 50
+EOF
+    curl -s https://debian.mysociety.org/debian.mysociety.org.gpg.key | sudo apt-key add -
+    apt-get -qq update
+    echo $DONE_MSG
+}
+
 clone_or_update_repository() {
     echo -n "Cloning or updating repository... "
     # Clone the repository into place if the directory isn't already
@@ -260,6 +330,28 @@ clone_or_update_repository() {
     echo $DONE_MSG
 }
 
+ensure_line_present() {
+    MATCH_RE="$1"
+    REQUIRED_LINE="$2"
+    FILE="$3"
+    MODE="$4"
+    if [ -f "$FILE" ]
+    then
+        if egrep "$MATCH_RE" "$FILE" > /dev/null
+        then
+            sed -r -i -e "s#$MATCH_RE.*#$REQUIRED_LINE#" "$FILE"
+        else
+            TMP_FILE=$(mktemp)
+            echo "$REQUIRED_LINE" > $TMP_FILE
+            cat "$FILE" >> $TMP_FILE
+            mv $TMP_FILE "$FILE"
+        fi
+    else
+        echo "$REQUIRED_LINE" >> "$FILE"
+    fi
+    chmod "$MODE" "$FILE"
+}
+
 install_postfix() {
     echo -n "Installing postfix... "
     # Make sure debconf-set-selections is available
@@ -267,6 +359,11 @@ install_postfix() {
     # Set the things so that we can do this non-interactively
     echo postfix postfix/main_mailer_type select 'Internet Site' | debconf-set-selections
     echo postfix postfix/mail_name string "$HOST" | debconf-set-selections
+    # FIXME: for some reason this doesn't work - it's left here for
+    # reference, and will be fixed up by rewriting
+    # /etc/postfix/main.cf in site-specific-install.sh
+    echo postfix postfix/destinations string \
+        "$HOST, $(hostname --fqdn), localhost.localdomain, localhost" | debconf-set-selections
     DEBIAN_FRONTEND=noninteractive apt-get -qq -y install postfix >/dev/null
     echo $DONE_MSG
 }
@@ -308,6 +405,15 @@ make_log_directory() {
 
 add_website_to_nginx() {
     echo -n "Adding site to nginx... "
+    NGINX_VERSION="$(/usr/sbin/nginx -v 2>&1 | sed 's,^nginx version: nginx/,,')"
+    # The 'default_server' option is just 'default' in earlier
+    # versions of nginx:
+    if dpkg --compare-versions "$NGINX_VERSION" lt 0.8.21
+    then
+        DEFAULT_SERVER_OPTION=default
+    else
+        DEFAULT_SERVER_OPTION=default_server
+    fi
     NGINX_SITE="$HOST"
     if [ $DEFAULT_SERVER = true ]
     then
@@ -315,11 +421,11 @@ add_website_to_nginx() {
     fi
     NGINX_SITE_FILENAME=/etc/nginx/sites-available/"$NGINX_SITE"
     NGINX_SITE_LINK=/etc/nginx/sites-enabled/"$NGINX_SITE"
-    cp $REPOSITORY/conf/nginx.conf.example $NGINX_SITE_FILENAME
+    cp $CONF_DIRECTORY/nginx.conf.example $NGINX_SITE_FILENAME
     sed -i "s,/var/www/$SITE,$DIRECTORY," $NGINX_SITE_FILENAME
     if [ $DEFAULT_SERVER = true ]
     then
-        sed -i "s/^.*listen 80.*$/    listen 80 default_server;/" $NGINX_SITE_FILENAME
+        sed -i "s/^.*listen 80.*$/    listen 80 $DEFAULT_SERVER_OPTION;/" $NGINX_SITE_FILENAME
     else
         sed -i "/listen 80/a\
 \    server_name $HOST;
@@ -333,7 +439,7 @@ add_website_to_nginx() {
 
 install_sysvinit_script() {
     SYSVINIT_FILENAME=/etc/init.d/$SITE
-    cp $REPOSITORY/conf/sysvinit.example $SYSVINIT_FILENAME
+    cp $CONF_DIRECTORY/sysvinit.example $SYSVINIT_FILENAME
     sed -i "s,/var/www/$SITE,$DIRECTORY,g" $SYSVINIT_FILENAME
     sed -i "s/^ *USER=.*/USER=$UNIX_USER/" $SYSVINIT_FILENAME
     chmod a+rx $SYSVINIT_FILENAME
@@ -343,10 +449,10 @@ install_sysvinit_script() {
 
 install_website_packages() {
     echo "Installing packages from repository packages file... "
-    EXACT_PACKAGES="$REPOSITORY/conf/packages.$DISTRIBUTION-$DISTVERSION"
-    PRECISE_PACKAGES="$REPOSITORY/conf/packages.ubuntu-precise"
-    SQUEEZE_PACKAGES="$REPOSITORY/conf/packages.debian-squeeze"
-    GENERIC_PACKAGES="$REPOSITORY/conf/packages"
+    EXACT_PACKAGES="$CONF_DIRECTORY/packages.$DISTRIBUTION-$DISTVERSION"
+    PRECISE_PACKAGES="$CONF_DIRECTORY/packages.ubuntu-precise"
+    SQUEEZE_PACKAGES="$CONF_DIRECTORY/packages.debian-squeeze"
+    GENERIC_PACKAGES="$CONF_DIRECTORY/packages"
     # If there's an exact match for the distribution and release, use that:
     if [ -e "$EXACT_PACKAGES" ]
     then
@@ -369,15 +475,37 @@ install_website_packages() {
 }
 
 overwrite_rc_local() {
-    cat > /etc/rc.local <<EOF
+    EC2_REWRITE="$BIN_DIRECTORY/ec2-rewrite-conf"
+    # Some scripts have an ec2-rewrite-conf script that can be used to
+    # update the hostnme on reboot - if that's present, use it,
+    # otherwise the alternative is to re-run the install script:
+    if [ -f "$EC2_REWRITE" ]
+    then
+        cat > /etc/rc.local <<EOF
 #!/bin/sh -e
 
-su -l -c $REPOSITORY/bin/ec2-rewrite-conf $UNIX_USER
+su -l -c '$EC2_REWRITE' $UNIX_USER
 /etc/init.d/$SITE restart
 
 exit 0
-
 EOF
+    else
+        cat > /etc/rc.local <<EOF
+#!/bin/sh -e
+
+xargs -0 -a '$COPIED_ARGUMENTS' '$COPIED_SCRIPT'
+
+GENERAL_FILE='$CONF_DIRECTORY/general.yml'
+OLD_HOST_FILE='$OLD_HOST_FILE'
+
+if [ -f "\$GENERAL_FILE" ] && [ -f "\$OLD_HOST_FILE" ]
+then
+    NEW_HOST="\$(curl -s http://169.254.169.254/latest/meta-data/public-hostname)"
+    OLD_HOST="\$(cat "\$OLD_HOST_FILE")"
+    sed -i "s/\$OLD_HOST/\$NEW_HOST/g" "\$GENERAL_FILE"
+fi
+EOF
+    fi
     chmod a+rx /etc/rc.local
 }
 
@@ -395,4 +523,27 @@ clone_or_update_repository
 
 chown -R "$UNIX_USER"."$UNIX_USER" "$DIRECTORY"
 
-. $REPOSITORY/bin/site-specific-install.sh
+# Check that we have a conf or config directory:
+if [ -d "$REPOSITORY/conf" ]
+then
+    CONF_DIRECTORY="$REPOSITORY/conf"
+elif [ -d "$REPOSITORY/config" ]
+then
+    CONF_DIRECTORY="$REPOSITORY/config"
+else
+    error_msg "No conf or config directory was found in $REPOSITORY"
+    exit 1
+fi
+
+# Check that we can find the bin or script directory:
+if [ -d "$REPOSITORY/bin" ]
+then
+    BIN_DIRECTORY="$REPOSITORY/bin"
+elif [ -d "$REPOSITORY/script" ]
+then
+    BIN_DIRECTORY="$REPOSITORY/script"
+else
+    error_msg "No bin or script directory was found in $REPOSITORY"
+fi
+
+. "$BIN_DIRECTORY/site-specific-install.sh"
