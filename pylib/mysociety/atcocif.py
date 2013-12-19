@@ -555,13 +555,17 @@ class CIFRecord:
     Exception: CIF identifier 'QT' when expected 'QX'
     """
 
-    def __init__(self, line, record_identity):
-        assert len(record_identity) == 2
+    def __init__(self, line, record_identities):
+        assert isinstance(record_identities, (basestring, list, tuple))
+        if isinstance(record_identities, basestring):
+            record_identities = (record_identities, )
+        for i in record_identities:
+            assert len(i) == 2
         self.line = line
         assert len(line) >= 2
         self.record_identity = line[0:2]
-        if self.record_identity != record_identity:
-            raise Exception, "CIF identifier '" + self.record_identity + "' when expected '" + record_identity + "'"
+        if self.record_identity not in record_identities:
+            raise Exception, "CIF identifier '" + self.record_identity + "' when expected one of '" + ", ".join(record_identities) + "'"
 
     def __str__(self):
         ret = self.__class__.__name__ + "\n"
