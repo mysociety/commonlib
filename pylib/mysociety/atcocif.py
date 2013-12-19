@@ -257,7 +257,12 @@ class ATCO(object):
                 elif record_identity in [
                     'QP',  # Operator record
                     'QD',  # Route description record
-                    'QN'  # Journey note
+                    'QN',  # Journey note
+                    'QY',  # Journey association
+                    'QG',  # Bus interchange
+                    'QJ',  # Bus cluster interchange
+                    'QW',  # Cluster walk link
+                    'QC',  # Bus cluster
                 ]:
                     logging.debug("Ignoring record type '" + record_identity + "'")
                 else:
