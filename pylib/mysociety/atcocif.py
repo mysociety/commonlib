@@ -1142,13 +1142,14 @@ class Location(CIFRecord):
     def __init__(self, line):
         CIFRecord.__init__(self, line, "QL")
 
-        matches = re.match('^QL([NDR])(.{12})(.{48})(.)([BSPRID ])(.{8})$', line)
+        matches = re.match('^QL([NDR])(.{12})(.{48})(.)([BSPRID ])(.{8})$', line.decode("utf-8"), re.U)
         if not matches:
+            import pudb; pu.db
             raise Exception("Location line incorrectly formatted: " + line)
 
         self.transaction_type = matches.group(1)
         assert self.transaction_type == 'N' # code doesn't handle other types yet
-        self.location = canonicalise_location(matches.group(2))
+        self.location = str(canonicalise_location(matches.group(2))) # There'll be trouble if location is anything beyond ASCII...
         self.full_location = matches.group(3).strip()
         self.gazetteer_code = matches.group(4)
         self.point_type = matches.group(5)
