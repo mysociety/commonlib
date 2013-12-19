@@ -961,7 +961,7 @@ class JourneyOrigin(CIFRecord):
     def __init__(self, line):
         CIFRecord.__init__(self, line, "QO")
 
-        matches = re.match('^QO(.{12})(\d{4})(.{3})(T[01])(F0|F1|  ) ?$', line)
+        matches = re.match('^QO(.{12})(\d{4})(.{3})(T[01])(F0|F1|  )? ?$', line)
         if not matches:
             raise Exception("Journey origin line incorrectly formatted: " + line)
 
@@ -969,7 +969,7 @@ class JourneyOrigin(CIFRecord):
         self.published_departure_time = parse_time(matches.group(2))
         self.bay_number = matches.group(3).strip()
         self.timing_point_indicator = { 'T0' : False, 'T1' : True }[matches.group(4)]
-        self.fare_stage_indicator = { 'F0' : False, 'F1' : True, '  ' : None }[matches.group(5)]
+        self.fare_stage_indicator = { 'F0' : False, 'F1' : True, '  ' : None, None : None }[matches.group(5)]
 
     def is_set_down(self):
         return False
@@ -1009,7 +1009,7 @@ class JourneyIntermediate(CIFRecord):
 
         # BPSN are documented values for activity_flag in CIF file, other train ones are documented
         # in http://www.atoc.org/rsp/_downloads/RJIS/20040601.pdf
-        matches = re.match('^QI(.{12})(\d{4})(\d{4})([BPSNACDORTUKXL -])(.{3})(T[01])(F0|F1|  )$', line)
+        matches = re.match('^QI(.{12})(\d{4})(\d{4})([BPSNACDORTUKXL -])(.{3})(T[01])(F0|F1|  )?$', line)
         if not matches:
             raise Exception("Journey intermediate line incorrectly formatted: " + line)
 
@@ -1019,7 +1019,7 @@ class JourneyIntermediate(CIFRecord):
         self.activity_flag = matches.group(4)
         self.bay_number = matches.group(5).strip()
         self.timing_point_indicator = { 'T0' : False, 'T1' : True }[matches.group(6)]
-        self.fare_stage_indicator = { 'F0' : False, 'F1' : True, '  ' : None }[matches.group(7)]
+        self.fare_stage_indicator = { 'F0' : False, 'F1' : True, '  ' : None, None : None }[matches.group(7)]
 
         # We think O means no stop for trains, and all such entries have no time marked
         if self.activity_flag == 'O':
@@ -1091,7 +1091,7 @@ class JourneyDestination(CIFRecord):
     def __init__(self, line):
         CIFRecord.__init__(self, line, "QT")
 
-        matches = re.match('^QT(.{12})(\d{4})(.{3})(T[01])(F0|F1|  )$', line)
+        matches = re.match('^QT(.{12})(\d{4})(.{3})(T[01])(F0|F1|  | )?$', line)
         if not matches:
             raise Exception("Journey destination line incorrectly formatted: " + line)
 
@@ -1099,7 +1099,7 @@ class JourneyDestination(CIFRecord):
         self.published_arrival_time = parse_time(matches.group(2))
         self.bay_number = matches.group(3).strip()
         self.timing_point_indicator = { 'T0' : False, 'T1' : True }[matches.group(4)]
-        self.fare_stage_indicator = { 'F0' : False, 'F1' : True, '  ' : None }[matches.group(5)]
+        self.fare_stage_indicator = { 'F0' : False, 'F1' : True, '  ' : None, ' ' : None, None : None }[matches.group(5)]
 
     def is_set_down(self):
         return True
@@ -1207,7 +1207,7 @@ class LocationAdditional(CIFRecord):
     def __init__(self, line):
         CIFRecord.__init__(self, line, "QB")
 
-        matches = re.match('^QB([NDR])(.{12})(.{8})(.{8})(.{24})(.{24})$', line)
+        matches = re.match('^QB([NDR])(.{12})(.{8})(.{5,8})(.{24})?(.{1,24})?$', line)
         if not matches:
             raise Exception("Location additional line incorrectly formatted: " + line)
 
@@ -1217,8 +1217,8 @@ class LocationAdditional(CIFRecord):
         northing = matches.group(4).strip()
         self.grid_reference_easting = easting and int(easting) or -1
         self.grid_reference_northing = northing and int(northing) or -1
-        self.district_name = matches.group(5).strip()
-        self.town_name = matches.group(6).strip()
+        self.district_name = (matches.group(5) or "").strip()
+        self.town_name = (matches.group(6) or "").strip()
 
 ###########################################################
 # Vehicle type classes
