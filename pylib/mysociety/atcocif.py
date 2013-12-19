@@ -713,8 +713,10 @@ class JourneyHeader(CIFRecord):
         # things to work at - if so, throw it away.
         if restrict_date_range_start:
             assert restrict_date_range_start <= restrict_date_range_end
-            if restrict_date_range_end < exception.start_of_exceptional_period \
-                or exception.end_of_exceptional_period < restrict_date_range_start:
+            if restrict_date_range_end < exception.start_of_exceptional_period:
+                return
+            if exception.end_of_exceptional_period < restrict_date_range_start:
+                print "Exception before dates we care about, but perhaps this doesn't matter."
                 return
 
         # test consistency with existing date running exceptions
