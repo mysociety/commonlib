@@ -1250,7 +1250,14 @@ class VehicleType(CIFRecord):
               'Ferry/River Bus' : 'F', 
               'Metro' : 'M', 
               'Heavy Rail' : 'T', 
-              'Air' : 'A' }
+              'Air' : 'A',
+              'EABUS': 'B',
+              'BUS': 'B',
+              'COACH': 'C',
+              'BUS-WCA': 'B',
+              'FERRY': 'F',
+              'WHEELCHA': 'W',
+          }
 
     def __init__(self, line):
         CIFRecord.__init__(self, line, "QV")
