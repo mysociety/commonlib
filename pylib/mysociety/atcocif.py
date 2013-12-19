@@ -46,6 +46,7 @@ import StringIO
 import zipfile
 import math
 import progressbar
+from time import time
 
 ###########################################################
 # Main class
@@ -116,6 +117,7 @@ class ATCO(object):
     def read_files(self, files):
         '''Loads in multiple ATCO-CIF files.'''
         for file in files:
+            print file
             self.read(file)
 
     def read(self, f):
@@ -185,7 +187,7 @@ class ATCO(object):
 
         # Load in every record - each record is one line of the file
         current_item = None
-        for line in self.handle:
+        for lineno, line in enumerate(self.handle, start=2):
             if self.show_progress:
                 pbar.update(self.handle.tell())
 
@@ -263,7 +265,10 @@ class ATCO(object):
                     raise Exception("Unknown record type '" + record_identity + "'")
             except:
                 # Show what line we were on, and reraise exception
-                logging.error("Exception caught reading line: " + line)
+                if hasattr(self.handle, "name"):
+                    logging.error(u"Exception caught reading '{0}' line {1}: {2}".format(self.handle.name, lineno, ""))
+                else:
+                    logging.error(u"Exception caught reading line {0}: {1}".format(lineno, line))
                 raise
 
         if current_item != None:
