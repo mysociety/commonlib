@@ -602,11 +602,12 @@ class FileHeader(CIFRecord):
     """
 
     def __init__(self, line):
-        CIFRecord.__init__(self, line, "AT")
+        CIFRecord.__init__(self, line, ("AT", "CI"))
 
         matches = re.match('^ATCO-CIF(\d\d)(\d\d)(.{32})(.{16})(\d{8})(\d{4,6})$', line) 
         if not matches:
-            raise Exception("ATCO-CIF header line incorrectly formatted: " + line)
+            return
+            # raise Exception("ATCO-CIF header line incorrectly formatted: " + line)
         self.version_major = int(matches.group(1))
         self.version_minor = int(matches.group(2))
         self.file_originator = matches.group(3).strip()
