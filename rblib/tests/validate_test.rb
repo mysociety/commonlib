@@ -78,6 +78,18 @@ class TestValidate < Test::Unit::TestCase
     assert(MySociety::Validate.uses_mixed_capitals(mixed_case_with_urls))
   end
 
+  def test_hungarian_all_upper_case
+      assert(!MySociety::Validate.uses_mixed_capitals("ÁÉÍÖŐÓÚÜŰÖÜÄ", 5))
+  end
+
+  def test_hungarian_all_lower_case
+      assert(!MySociety::Validate.uses_mixed_capitals("áéíöőóúüűöüä", 5))
+  end
+
+  def test_hungarian_mixed_case
+      assert(MySociety::Validate.uses_mixed_capitals("áÁéÉíÍöÖőŐóÓúÚüÜűŰöÖüÜäÄ", 5))
+  end
+
   def test_is_valid_email
     assert(MySociety::Validate.is_valid_email("mr.example@example.com") != nil)
   end
