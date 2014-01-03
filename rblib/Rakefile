@@ -1,0 +1,4 @@
+require 'rspec/core/rake_task'
+
+load 'tests/test.rake'
+load 'tests/spec.rake'
