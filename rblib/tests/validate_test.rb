@@ -53,6 +53,11 @@ class TestValidate < Test::Unit::TestCase
     assert(MySociety::Validate.uses_mixed_capitals(mixed_case_text))
   end
 
+  def test_all_upper_case_but_short
+    uppercase_text = "SHOUTY SHORT"
+    assert(MySociety::Validate.uses_mixed_capitals(uppercase_text))
+  end
+
   def test_mixed_case_without_urls
     mixed_case_with_urls = "
     The public authority appears to have aggregated this request with the following requests on this site:
