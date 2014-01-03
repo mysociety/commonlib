@@ -35,19 +35,25 @@ class TestValidate < Test::Unit::TestCase
     assert(MySociety::Validate::is_valid_partial_postcode("ZZ9"))
   end
 
-  def test_uses_mixed_caps
+  def test_all_upper_case
     uppercase_text = "I LIKE TO SHOUT, IT IS FUN. I ESPECIALLY LIKE TO DO SO FOR QUITE A LONG TIME, AND WHEN I DISABLED MY CAPS LOCK KEY."
     assert(MySociety::Validate.uses_mixed_capitals(uppercase_text) == false)
+  end
 
+  def test_all_lower_case
     lowercase_text = "(i who have died am alive again today,
                       and this is the sun's birthday;this is the birth
                       day of life and love and wings:and of the gay
                       great happening illimitably earth)"
     assert(MySociety::Validate.uses_mixed_capitals(lowercase_text) == false)
+  end
 
+  def test_mixed_case
     mixed_case_text = "This is a normal sentence. It is followed by another, and overall it is quite a long chunk of text so it exceeds the minimum limit."
     assert(MySociety::Validate.uses_mixed_capitals(mixed_case_text) == true)
+  end
 
+  def test_mixed_case_without_urls
     mixed_case_with_urls = "
     The public authority appears to have aggregated this request with the following requests on this site:
 
@@ -65,7 +71,6 @@ class TestValidate < Test::Unit::TestCase
 
     http://www.whatdotheyknow.com/request/number_of_post_dismissal_compens_3"
     assert(MySociety::Validate.uses_mixed_capitals(mixed_case_with_urls) == true)
-
   end
 
   def test_is_valid_email
