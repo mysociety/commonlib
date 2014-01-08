@@ -8,8 +8,9 @@
 #   - Standard error is also captured.
 #
 # After the run() method has been called, the instance variables
-# out, err and status contain the contents of the process’s stdout,
-# the contents of its stderr, and the exit status.
+# out, err, status and exited contain the contents of the process’s
+# stdout, the contents of its stderr, and the exit status.  exited
+# is set depending on whether the process exited normally.
 #
 # Example usage:
 #   require 'external_command'
@@ -44,6 +45,7 @@ class ExternalCommand
     attr_accessor :out, :err, :binary_mode, :memory_limit
     attr_reader :status
     attr_reader :timed_out
+    attr_reader :exited
 
     def initialize(cmd, *args)
         if !args.empty? && args[-1].is_a?(Hash)
@@ -214,6 +216,7 @@ class ExternalCommand
                         end
                     end
                     @status = 1
+                    @exited = false
                     return true
                 end
             end
@@ -225,6 +228,7 @@ class ExternalCommand
 
         Process::waitpid(@pid)
         @status = @fin.to_i
+        @exited = $?.exited?
 
         # Transcode strings as if they were retrieved using default
         # internal and external encodings
