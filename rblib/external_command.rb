@@ -10,7 +10,8 @@
 # After the run() method has been called, the instance variables
 # out, err, status and exited contain the contents of the process’s
 # stdout, the contents of its stderr, and the exit status.  exited
-# is set depending on whether the process exited normally.
+# is true if the process exited normally, and false otherwise
+# (usually indicating a crash or timeout).
 #
 # Example usage:
 #   require 'external_command'
