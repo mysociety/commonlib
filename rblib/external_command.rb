@@ -8,8 +8,10 @@
 #   - Standard error is also captured.
 #
 # After the run() method has been called, the instance variables
-# out, err and status contain the contents of the process’s stdout,
-# the contents of its stderr, and the exit status.
+# out, err, status and exited contain the contents of the process’s
+# stdout, the contents of its stderr, and the exit status.  exited
+# is true if the process exited normally, and false otherwise
+# (usually indicating a crash or timeout).
 #
 # Example usage:
 #   require 'external_command'
@@ -44,6 +46,7 @@ class ExternalCommand
     attr_accessor :out, :err, :binary_mode, :memory_limit
     attr_reader :status
     attr_reader :timed_out
+    attr_reader :exited
 
     def initialize(cmd, *args)
         if !args.empty? && args[-1].is_a?(Hash)
@@ -143,8 +146,13 @@ class ExternalCommand
         # Spawn the grandchild, and wait for it to finish.
         Process::waitpid(fork { grandchild_process })
 
-        # Write the grandchild’s exit status to the 'fin' pipe.
-        @fin_write.puts($?.exitstatus.to_s)
+        # Write the grandchild’s exit status to the 'fin' pipe,
+        # or the special value 256 to indicate an abnormal exit.
+        if !$?.exited?
+            @fin_write.puts('256')
+        else
+            @fin_write.puts($?.exitstatus.to_s)
+        end
 
         exit! 0
     end
@@ -214,6 +222,7 @@ class ExternalCommand
                         end
                     end
                     @status = 1
+                    @exited = false
                     return true
                 end
             end
@@ -225,6 +234,7 @@ class ExternalCommand
 
         Process::waitpid(@pid)
         @status = @fin.to_i
+        @exited = !(@fin.to_i == 256)
 
         # Transcode strings as if they were retrieved using default
         # internal and external encodings
