@@ -145,8 +145,13 @@ class ExternalCommand
         # Spawn the grandchild, and wait for it to finish.
         Process::waitpid(fork { grandchild_process })
 
-        # Write the grandchild’s exit status to the 'fin' pipe.
-        @fin_write.puts($?.exitstatus.to_s)
+        # Write the grandchild’s exit status to the 'fin' pipe,
+        # or the special value 256 to indicate an abnormal exit.
+        if !$?.exited?
+            @fin_write.puts('256')
+        else
+            @fin_write.puts($?.exitstatus.to_s)
+        end
 
         exit! 0
     end
@@ -228,7 +233,7 @@ class ExternalCommand
 
         Process::waitpid(@pid)
         @status = @fin.to_i
-        @exited = $?.exited?
+        @exited = !(@fin.to_i == 256)
 
         # Transcode strings as if they were retrieved using default
         # internal and external encodings
