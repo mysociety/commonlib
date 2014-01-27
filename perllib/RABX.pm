@@ -5,8 +5,6 @@
 #
 # Copyright (c) 2004 UK Citizens Online Democracy. All rights reserved.
 # Email: matthew@mysociety.org; WWW: http://www.mysociety.org/
-#
-# $Id: RABX.pm,v 1.27 2009-05-06 16:07:27 francis Exp $
 
 # References:
 #   Netstrings are documented here: http://cr.yp.to/proto/netstrings.txt
@@ -449,8 +447,6 @@ use HTTP::Response;
 use Data::Dumper;
 use Regexp::Common qw(URI);
 
-my $rcsid = ''; $rcsid .= '$Id: RABX.pm,v 1.27 2009-05-06 16:07:27 francis Exp $';
-
 =back
 
 =head1 NAME
@@ -471,13 +467,19 @@ Create a new RABX HTTP client for calling remote methods.
 
 =cut
 sub new ($$) {
-    my ($class, $url) = @_;
+    my ($class, $url, $userpwd) = @_;
+    my $match = $url =~ m#^$RE{URI}{HTTP}{-scheme => 'https?'}{-keep}$#;
     throw RABX::Error(qq("$url" is not a valid URL), RABX::Error::INTERFACE)
-        unless ($url =~ m#^$RE{URI}{HTTP}{-scheme => 'https?'}$#);
+        unless $match;
+    my ($host, $port) = ($3, $4);
+    $port ||= ($2 eq 'https' ? 443 : 80);
+
     my $self = [new LWP::UserAgent(), 0, $url];
     $self->[0]->env_proxy();
     bless($self, $class);
-    $self->ua()->agent("RABX::HTTP, $rcsid");
+    $self->ua()->agent("RABX::HTTP");
+    $self->ua()->credentials("$host:$port", "WriteToThem queue service", split(/:/, $userpwd))
+        if $userpwd;
     return $self;
 }
 
