@@ -27,10 +27,13 @@ display them with.
 =cut
 %mySociety::Parties::canonical = (
     "Alliance" => "Alliance",
+    "Alliance Party" => "Alliance",
     "Alliance Party of Northern Ireland" => "Alliance",
 
     "Bp" => "Bishop", # House of Lords
     "Bishop" => "Bishop",
+
+    'British Democratic Party' => 'British Democratic Party',
 
     'BNP' => 'BNP',
     'British National Party' => 'BNP',
@@ -44,6 +47,8 @@ display them with.
 
     "XB" => "Crossbench", # House of Lords
     "Crossbench" => "Crossbench",
+    "Judge" => "Judge",
+    "Non-affiliated" => "Non-affiliated",
 
     "DUP" => "DUP",
     "DU" => "DUP",
@@ -71,6 +76,9 @@ display them with.
     "Liberal Democrat" => "Liberal Democrat",
     "Liberal Democrats" => "Liberal Democrat",
     "Scottish Liberal Democrats" => "Liberal Democrat",
+    "Ind LDem" => "Independent Liberal Democrat",
+
+    "NI21" => "NI21",
 
     "One London Group" => "One London Group",
 
@@ -86,6 +94,7 @@ display them with.
     "Respect" => "Respect",
 
     "SDLP" => "SDLP",
+    "Social Democratic and Labour Party" => "SDLP",
 
     "Scottish National Party" => "SNP",
     "SNP" => "SNP",
@@ -105,14 +114,15 @@ display them with.
     "Sinn Fein" => "Sinn Féin",
     "Sinn Féin" => "Sinn Féin",
     "Sinn F\x{e9}in" => "Sinn Féin",
+    "Sinn F\x{c9}in" => "Sinn Féin",
 
     "Solidarity Group" => "Solidarity Group", 
 
     "Traditional Unionist" => "Traditional Unionist Voice",
 
-    "UK Independence Party" => "UK Independence",
-    "UK Independence" => "UK Independence",
-    "UKIP" => "UK Independence",
+    "UK Independence Party" => "UKIP",
+    "UK Independence" => "UKIP",
+    "UKIP" => "UKIP",
 
     "UU" => "UUP",
     "UUP" => "UUP",
@@ -124,6 +134,8 @@ display them with.
 
     # Latest Robert Kilroy-Silk vehicle
     "Veritas" => "Veritas",
+
+    "We Demand a Referendum" => "We Demand a Referendum Party",
 
     # For Democratic Services etc.
     "NOT A PERSON" => "NOT A PERSON"
