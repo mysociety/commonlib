@@ -185,7 +185,7 @@ EOF
 
 Read configuration from FILE.
 
-If the filename ends in .yml, or FILE.yml exists, that file is parsed as
+If the filename contains .yml, or FILE.yml exists, that file is parsed as
 a YAML object which is returned. Otherwise FILE is parsed by PHP, and any defines
 are extracted as config values.
 
@@ -199,7 +199,7 @@ sub read_config ($;$) {
     my ($f, $defaults) = @_;
 
     my $config;
-    if ($f =~ /\.yml$/) {
+    if ($f =~ /\.yml/) {
         $config = read_config_from_yaml($f);
     } elsif (-f "$f.yml") {
         if (-e $f) {
