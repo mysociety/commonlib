@@ -613,7 +613,8 @@ sub _dispatch($%) {
     binmode(STDIN);
     binmode(STDOUT);
 
-    my $maxage = 0;
+    my $maxage;
+    my $status = "200 OK";
 
     try {
         my ($func, $args, @args);
@@ -662,17 +663,20 @@ sub _dispatch($%) {
         $ret = $x->(@args);
     } catch RABX::Error with {
         $ret = shift;
+        $status = "400 Bad Request";
     } otherwise {
         my $E = shift;
         $ret = new RABX::Error("$E", RABX::Error::UNKNOWN);
+        $status = "500 Internal Error";
     };
 
     my $retstr = $rest
         ? RABX::return_string_json($ret)
         : RABX::return_string($ret);
-    print "Content-Type: application/octet-stream\n",
+    print "Status: $status\n",
+          "Content-Type: application/octet-stream\n",
           "Content-Length: ",  length($retstr), "\n";
-    print "Cache-Control: max-age=$maxage\n" if ($maxage);
+    print "Cache-Control: max-age=$maxage\n" if $maxage && $status =~ /^200/;
     print "\n",
           "$retstr\n";
 }
