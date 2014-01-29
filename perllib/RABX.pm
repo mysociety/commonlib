@@ -605,8 +605,9 @@ the function to be called, or a reference to a list of the function ref and a
 maximum cache age in seconds.
 
 =cut
-sub dispatch (%) { # XXX should take stream + environment hash
-    my (%funcs) = @_;
+
+sub _dispatch($%) {
+    my ($rest, %funcs) = @_;
     my $ret;
 
     binmode(STDIN);
@@ -615,82 +616,39 @@ sub dispatch (%) { # XXX should take stream + environment hash
     my $maxage = 0;
 
     try {
+        my ($func, $args, @args);
         my $meth = $ENV{REQUEST_METHOD};
         throw RABX::Error(qq#No REQUEST_METHOD in environment; this script must be run in a CGI/FastCGI context#, RABX::Error::INTERFACE)
             if (!defined($meth));
-        throw RABX::Error(qq#Bad HTTP method "$meth"; should be "GET" or "POST"#, RABX::Error::TRANSPORT)
-            if ($meth !~ m#^(GET|POST)$#);
-        my $callstr;
-        if ($meth eq 'GET') {
-            $callstr = $ENV{QUERY_STRING};
-            $callstr =~ s#\+# #gs;
-            $callstr =~ s#%([0-9a-f][0-9a-f])#sprintf('%c', hex($1))#gesi;
+        if ($rest) {
+            throw RABX::Error(qq#Bad HTTP method "$meth"; should be "GET"#, RABX::Error::TRANSPORT)
+                if ($meth !~ m#^(GET)$#);
+            ($func, @args) = split /\//, $ENV{QUERY_STRING};
+            @args = map { s#\+# #gs; s#%([0-9a-f][0-9a-f])#sprintf('%c', hex($1))#gesi; $_; } @args;
         } else {
-            my $l = $ENV{CONTENT_LENGTH};
-            throw RABX::Error(q#Bad or missing Content-Length header in POST#, RABX::Error::TRANSPORT)
-                if (!defined($l) or $l =~ m#[^\d]#);
-            $callstr = '';
-            while (length($callstr) < $l) {
-                my $n = STDIN->read($callstr, $l - length($callstr), length($callstr));
-                throw RABX::Error(qq#$! reading POST data#, RABX::Error::TRANSPORT)
-                    if (!defined($n));
-                throw RABX::Error(qq#EOF reading POST data#, RABX::Error::TRANSPORT)
-                    if ($n == 0);
+            throw RABX::Error(qq#Bad HTTP method "$meth"; should be "GET" or "POST"#, RABX::Error::TRANSPORT)
+                if ($meth !~ m#^(GET|POST)$#);
+            my $callstr;
+            if ($meth eq 'GET') {
+                $callstr = $ENV{QUERY_STRING};
+                $callstr =~ s#\+# #gs;
+                $callstr =~ s#%([0-9a-f][0-9a-f])#sprintf('%c', hex($1))#gesi;
+            } else {
+                my $l = $ENV{CONTENT_LENGTH};
+                throw RABX::Error(q#Bad or missing Content-Length header in POST#, RABX::Error::TRANSPORT)
+                    if (!defined($l) or $l =~ m#[^\d]#);
+                $callstr = '';
+                while (length($callstr) < $l) {
+                    my $n = STDIN->read($callstr, $l - length($callstr), length($callstr));
+                    throw RABX::Error(qq#$! reading POST data#, RABX::Error::TRANSPORT)
+                        if (!defined($n));
+                    throw RABX::Error(qq#EOF reading POST data#, RABX::Error::TRANSPORT)
+                        if ($n == 0);
+                }
             }
+            ($func, $args) = RABX::call_string_parse($callstr);
+            @args = @$args;
         }
-
-        my ($func, $args) = RABX::call_string_parse($callstr);
-        throw RABX::Error(qq#no function "$func"#, RABX::Error::INTERFACE)
-            if (!exists($funcs{$func}));
-
-        # Now actually call the function.
-        my $x = $funcs{$func};
-        if (ref($x) eq 'ARRAY') {
-            $maxage = $x->[1];
-            $x = $x->[0];
-        }
-        $ret = $x->(@$args);
-    } catch RABX::Error with {
-        $ret = shift;
-    } otherwise {
-        my $E = shift;
-        $ret = new RABX::Error("$E", RABX::Error::UNKNOWN);
-    };
-
-    my $retstr = RABX::return_string($ret);
-    print "Content-Type: application/octet-stream\n",
-          "Content-Length: ",  length($retstr), "\n";
-    print "Cache-Control: max-age=$maxage\n" if ($maxage);
-    print "\n",
-          "$retstr\n";
-}
-
-=item dispatch_rest FUNCTION SPEC [...]
-
-Similar to dispatch, but uses a non-RABX format for parameters and return
-value. Instead parameters are taken in the query string, separated by '/'.
-The return value is a JSON object.
-
-=cut
-sub dispatch_rest (%) { # XXX should take stream + environment hash
-    my (%funcs) = @_;
-    my $ret;
-
-    binmode(STDIN);
-    binmode(STDOUT);
-
-    my $maxage = 0;
-
-    try {
-        my $meth = $ENV{REQUEST_METHOD};
-        throw RABX::Error(qq#No REQUEST_METHOD in environment; this script must be run in a CGI/FastCGI context#, RABX::Error::INTERFACE)
-            if (!defined($meth));
-        throw RABX::Error(qq#Bad HTTP method "$meth"; should be "GET"#, RABX::Error::TRANSPORT)
-            if ($meth !~ m#^(GET)$#);
-
-        my ($func, @args) = split /\//, $ENV{QUERY_STRING};
-
-        @args = map { s#\+# #gs; s#%([0-9a-f][0-9a-f])#sprintf('%c', hex($1))#gesi; $_; } @args;
 
         throw RABX::Error(qq#no function "$func"#, RABX::Error::INTERFACE)
             if (!exists($funcs{$func}));
@@ -709,7 +667,9 @@ sub dispatch_rest (%) { # XXX should take stream + environment hash
         $ret = new RABX::Error("$E", RABX::Error::UNKNOWN);
     };
 
-    my $retstr = RABX::return_string_json($ret);
+    my $retstr = $rest
+        ? RABX::return_string_json($ret)
+        : RABX::return_string($ret);
     print "Content-Type: application/octet-stream\n",
           "Content-Length: ",  length($retstr), "\n";
     print "Cache-Control: max-age=$maxage\n" if ($maxage);
@@ -717,5 +677,19 @@ sub dispatch_rest (%) { # XXX should take stream + environment hash
           "$retstr\n";
 }
 
+sub dispatch (%) { # XXX should take stream + environment hash
+    _dispatch(0, @_);
+}
+
+=item dispatch_rest FUNCTION SPEC [...]
+
+Similar to dispatch, but uses a non-RABX format for parameters and return
+value. Instead parameters are taken in the query string, separated by '/'.
+The return value is a JSON object.
+
+=cut
+sub dispatch_rest (%) { # XXX should take stream + environment hash
+    _dispatch(1, @_);
+}
 
 1;
