@@ -123,6 +123,7 @@ display them with.
     "UK Independence Party" => "UKIP",
     "UK Independence" => "UKIP",
     "UKIP" => "UKIP",
+    "An Independence Party" => "An Independence Party",
 
     "UU" => "UUP",
     "UUP" => "UUP",
