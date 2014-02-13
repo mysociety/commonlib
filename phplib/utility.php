@@ -155,7 +155,7 @@ function trim_characters ($text, $start, $length) {
 function trim_url($url) {
     $short_url = $url;
     $url_bits = parse_url($url);
-    if (array_key_exists('path', $url_bits) && array_key_exists('scheme', $url_bits) && array_key_exists('host', $url_bits))
+    if ($url_bits && array_key_exists('path', $url_bits) && array_key_exists('scheme', $url_bits) && array_key_exists('host', $url_bits))
         if ($url != "" && ($url_bits['path'] != '/' || array_key_exists('query', $url_bits)) )
             $short_url = $url_bits['scheme'] . "://" .  $url_bits['host'] . "/...";
     return "<a href=\"" .  htmlspecialchars($url) .  "\">" .  htmlspecialchars($short_url) . "</a>";
@@ -166,7 +166,7 @@ function trim_url($url) {
 function trim_url_to_domain($url) {
     $short_url = $url;
     $url_bits = parse_url($url);
-    if (array_key_exists('path', $url_bits) && array_key_exists('scheme', $url_bits) && array_key_exists('host', $url_bits))
+    if ($url_bits && array_key_exists('path', $url_bits) && array_key_exists('scheme', $url_bits) && array_key_exists('host', $url_bits))
         $short_url = $url_bits['host'];
     $short_url = str_replace("www.", "", $short_url);
     return "<a href=\"" .  htmlspecialchars($url) .  "\">" .  htmlspecialchars($short_url) . "</a>";
