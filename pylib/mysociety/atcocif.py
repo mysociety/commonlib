@@ -1254,9 +1254,12 @@ class VehicleType(CIFRecord):
               'EABUS': 'B',
               'BUS': 'B',
               'COACH': 'C',
+              'WCCOACH': 'C',
               'BUS-WCA': 'B',
+              'WCBUS': 'B',
               'FERRY': 'F',
               'WHEELCHA': 'W',
+              '1': 'B',
           }
 
     def __init__(self, line):
