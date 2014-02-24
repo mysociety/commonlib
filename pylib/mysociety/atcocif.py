@@ -183,6 +183,8 @@ class ATCO(object):
             pbar = progressbar.ProgressBar(widgets=widgets, maxval=file_len).start()
 
         line = self.handle.readline().strip("\n\r")
+        if line in self.line_patches:
+            line = self.line_patches[line]
         self.file_header = FileHeader(line)
 
         # Load in every record - each record is one line of the file
