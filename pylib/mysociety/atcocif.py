@@ -47,6 +47,7 @@ import zipfile
 import math
 import progressbar
 from time import time
+from hashlib import md5
 
 ###########################################################
 # Main class
@@ -688,7 +689,9 @@ class JourneyHeader(CIFRecord):
         self.registration_number = matches.group(12).strip()
         self.route_direction = matches.group(13)
 
-        # Operator code and journey identifier are unique together
+        # Operator code and journey identifier should be unique together,
+        # but they're often not. This id is temporary and is overwritten by
+        # self.recalculate_id() when the complete journey record has been loaded
         self.id = self.operator + "-" + self.unique_journey_identifier
 
         self.hops = []
@@ -871,6 +874,12 @@ class JourneyHeader(CIFRecord):
         different types of transport. '''
         vehicle_code = atco.vehicle_type_to_code[self.file_loading_number][self.vehicle_type]
         return vehicle_code 
+
+    def recalculate_id(self):
+        ''' Set self.id to a unique value based on the items that make up
+        this JourneyHeader. This is required because the current source of CIF data
+        often has non-unique journey ids. '''
+        self.id = md5("".join([self.line] + [hop.line for hop in self.hops])).hexdigest()
 
 
 class JourneyDateRunning(CIFRecord):
