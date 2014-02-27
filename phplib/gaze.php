@@ -30,6 +30,7 @@ function gaze_check_error($data) {
         err($error_message);
 }
 
+global $gaze_client;
 if (defined('OPTION_GAZE_URL'))
     $gaze_client = new RABX_Client(OPTION_GAZE_URL, 
         defined('OPTION_GAZE_USERPWD') ? OPTION_GAZE_USERPWD : null);
