@@ -537,13 +537,18 @@ fi
 
 # Check that we can find the bin or script directory:
 if [ -d "$REPOSITORY/bin" ]
-then
-    BIN_DIRECTORY="$REPOSITORY/bin"
-elif [ -d "$REPOSITORY/script" ]
-then
-    BIN_DIRECTORY="$REPOSITORY/script"
-else
-    error_msg "No bin or script directory was found in $REPOSITORY"
+    then
+      BIN_DIRECTORY="$REPOSITORY/bin"
 fi
 
-. "$BIN_DIRECTORY/site-specific-install.sh"
+if [ -d "$REPOSITORY/script" ]
+    then
+      BIN_DIRECTORY="$REPOSITORY/script"
+fi
+
+if [ -f "$BIN_DIRECTORY/site-specific-install.sh" ]
+    then
+        . "$BIN_DIRECTORY/site-specific-install.sh"
+    else
+        error_msg "No bin or script directory was found in $REPOSITORY"
+fi
