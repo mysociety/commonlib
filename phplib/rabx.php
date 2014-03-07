@@ -372,14 +372,8 @@ class RABX_Client {
         $C = curl_getinfo($this->ch, CURLINFO_HTTP_CODE);
         debug("RABXWIRE", "RABX raw result:", $r);
 
-        if ($C != 200)
-            return rabx_error(RABX_ERROR_TRANSPORT, "HTTP error $C calling $this->url");
-        else {
-            $result = rabx_return_string_parse($r);
-            debug("RABX", "RABX result:", $result);
-            return $result;
-        }
+        $result = rabx_return_string_parse($r);
+        debug("RABX", "RABX result:", $result);
+        return $result;
     }
 }
-
-?>
