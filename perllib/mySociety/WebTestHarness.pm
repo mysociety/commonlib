@@ -696,6 +696,8 @@ sub email_get_containing($$) {
         die "Too many emails found containing $qdesc" if ($got > 1);
         $c++;
         sleep 1;
+        # Do a commit to make MySQL >= 5.5 invalidate our query cache
+        dbh()->commit();
     }
 
     # Get content
