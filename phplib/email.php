@@ -16,7 +16,7 @@
 
 function verp_envelope_sender($recipient, $prefix, $domain){
     
-   list($recipient_mailbox, $recipient_domain) = split('@', $recipient);
+   list($recipient_mailbox, $recipient_domain) = explode('@', $recipient);
    return $prefix . '+' . $recipient_mailbox . '=' . $recipient_domain . '@' . $domain;
 }
  
