@@ -10,7 +10,7 @@ package mySociety::Tracking;
 
 use strict;
 
-use Digest::SHA1;
+use Digest::SHA qw/sha1_hex/;
 use utf8;
 
 use mySociety::Config;
@@ -46,7 +46,7 @@ sub code ($$) {
         $d .= "\0$extra";
         $img .= ";extra=" . urlencode($extra);
     }
-    $img .= ";sign=" . Digest::SHA1::sha1_hex($d);
+    $img .= ";sign=" . sha1_hex($d);
     return '<!-- This "web bug" image is used to collect data which we use to improve our services. More on this at https://secure.mysociety.org/track/ --><img alt="" src="' . $img . '">';
 }
 
