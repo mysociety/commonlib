@@ -536,12 +536,12 @@ else
 fi
 
 # Check that we can find the bin or script directory:
-if [ -d "$REPOSITORY/bin" ]
+if [ -d "$REPOSITORY/bin" ] && [ -f "$REPOSITORY/bin/site-specific-install.sh" ]
     then
       BIN_DIRECTORY="$REPOSITORY/bin"
 fi
 
-if [ -d "$REPOSITORY/script" ]
+if [ -d "$REPOSITORY/script" ] && [ -f "$REPOSITORY/script/site-specific-install.sh" ]
     then
       BIN_DIRECTORY="$REPOSITORY/script"
 fi
