@@ -148,7 +148,10 @@ sub new ($$) {
     my $self = {};
 
     $self->{tempdir} = File::Temp::tempdir( CLEANUP => 0 );
-    $self->{useragent} = new mySociety::WebTestHarness::Mechanize(autocheck => 1, onerror => undef);
+    $self->{useragent} = new mySociety::WebTestHarness::Mechanize(
+        autocheck => 1, onerror => undef,
+        ssl_opts => { verify_hostname => 0 },
+    );
 
     return bless($self, $class);
 }
