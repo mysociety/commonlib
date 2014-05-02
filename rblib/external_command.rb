@@ -43,7 +43,7 @@
 require 'fcntl'
 
 class ExternalCommand
-    attr_accessor :out, :err, :binary_mode, :memory_limit
+    attr_accessor :out, :err, :binary_mode, :memory_limit, :timeout
     attr_reader :status
     attr_reader :timed_out
     attr_reader :exited
@@ -58,7 +58,6 @@ class ExternalCommand
         @cmd = cmd
         @args = args
         @timeout = options[:timeout]
-
         # Strings to collect stdout and stderr from the child process
         # These may be replaced by the caller, to append to existing strings.
         @out = ""

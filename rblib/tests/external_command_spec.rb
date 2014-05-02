@@ -47,21 +47,21 @@ describe "when running ExternalCommand" do
         f.status.should == 0
         f.out.should == "Here we are\n"
     end
-    
+
     it "should pass on the existing environment" do
         ENV["FOO"] = "frumious"
         f = ExternalCommand.new(env_cmd).run("Here we are\nThis part will be ignored")
         f.status.should == 0
         f.out.should =~ /^FOO=frumious$/
     end
-    
+
     it "should be able to set environment variables" do
         env = { "FOO" => "barbie" }
         f = ExternalCommand.new(env_cmd).run("Here we are\nThis part will be ignored", env)
         f.status.should == 0
         f.out.should =~ /^FOO=barbie$/
     end
-    
+
     it "should be able to override environment variables" do
         ENV["FOO"] = "frumious"
         env = { "FOO" => "barbie" }
@@ -69,7 +69,7 @@ describe "when running ExternalCommand" do
         f.status.should == 0
         f.out.should =~ /^FOO=barbie$/
     end
-    
+
     it "should handle timeouts" do
         start_time = Time.now
         f = ExternalCommand.new(sleep_cmd, "30", :timeout => 2).run
@@ -77,6 +77,17 @@ describe "when running ExternalCommand" do
         f.timed_out.should == true
         f.status.should_not == 0
     end
+
+    it 'should allow a timeout to be set before running' do
+        start_time = Time.now
+        f = ExternalCommand.new(sleep_cmd, "30")
+        f.timeout = 2
+        f.run
+        (Time.now - start_time).should < 5
+        f.timed_out.should == true
+        f.status.should_not == 0
+    end
+
 
     it "should be able to run a script which allocates lots of memory" do
         f = ExternalCommand.new(malloc_script).run
@@ -92,6 +103,6 @@ describe "when running ExternalCommand" do
         f.out.should == ""
         f.err.should == "Out of memory!\n"
     end
-        
+
 end
 
