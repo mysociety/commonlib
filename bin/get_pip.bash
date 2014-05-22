@@ -18,7 +18,7 @@
 
 
 # Upgrade pip to a secure version
-curl -s https://raw.github.com/pypa/pip/master/contrib/get-pip.py | python
+curl -s -L https://raw.github.com/pypa/pip/master/contrib/get-pip.py | python
 
 # The latest pip requires a newer version of setuptools than we have
 pip install setuptools --no-use-wheel --upgrade
