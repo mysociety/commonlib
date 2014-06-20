@@ -286,14 +286,20 @@ EOF
 
 update_mysociety_apt_sources() {
     echo -n "Updating mySociety APT source... "
+
     cat > /etc/apt/sources.list.d/mysociety-debian.list <<EOF
 deb http://debian.mysociety.org squeeze main
 EOF
-    cat > /etc/apt/preferences <<EOF
+
+    if [ x"$DISTRIBUTION" = x"debian" ] && [ x"$DISTVERSION" = x"wheezy" ]
+      then
+        cat > /etc/apt/preferences <<EOF
 Package: *
 Pin: origin debian.mysociety.org
 Pin-Priority: 50
 EOF
+    fi
+
     curl -s https://debian.mysociety.org/debian.mysociety.org.gpg.key | sudo apt-key add -
     apt-get -qq update
     echo $DONE_MSG
