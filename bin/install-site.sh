@@ -300,6 +300,15 @@ Pin-Priority: 50
 EOF
     fi
 
+    if [ x"$DISTRIBUTION" = x"ubuntu" ] && [ x"$DISTVERSION" = x"precise" ]
+      then
+        cat > /etc/apt/preferences <<EOF
+Package: *
+Pin: origin debian.mysociety.org
+Pin-Priority: 50
+EOF
+    fi
+
     curl -s https://debian.mysociety.org/debian.mysociety.org.gpg.key | sudo apt-key add -
     apt-get -qq update
     echo $DONE_MSG
