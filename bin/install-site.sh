@@ -524,8 +524,10 @@ EOF
     chmod a+rx /etc/rc.local
 }
 
-generate_locales
-set_locale
+if [ $SITE = "fixmystreet" ]; then
+    generate_locales
+    set_locale
+fi
 
 add_unix_user
 
