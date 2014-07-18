@@ -206,19 +206,30 @@ add_locale() {
     echo $DONE_MSG
 }
 
-generate_locales() {
-    echo "Generating locales... "
-    # If language-pack-en is present, install that:
-    apt-get -qq install -y language-pack-en >/dev/null || true
-    add_locale en_GB
+setup_locale() {
+    echo "Setting up locale... "
+    default=$(LANG="" && source /etc/default/locale && echo $LANG)
+    if [ x"$(LC_ALL=$LANG locale -k LC_CTYPE | grep -c 'charmap="UTF-8"')" = x1 ]; then
+        # Current is UTF-8, make sure it's generated and use that
+        add_locale $LANG
+        if [ $default != $lang && -n "$default" ]; then
+            echo '' > /etc/default/locale
+        fi
+    elif [ x"$(LC_ALL=$default locale -k LC_CTYPE | grep -c 'charmap="UTF-8"')" = x1 ]; then
+        # current not UTF-8, but default is, let's use that as current
+        export LANG="$default"
+        export LC_ALL="$default"
+    else
+        # Fall back to installing and using en_GB.UTF-8
+        # If language-pack-en is present, install that:
+        apt-get -qq install -y language-pack-en >/dev/null || true
+        add_locale en_GB
+        echo 'LANG="en_GB.UTF-8"' > /etc/default/locale
+        echo 'LC_ALL="en_GB.UTF-8"' >> /etc/default/locale
+        export LANG="en_GB.UTF-8"
+        export LC_ALL="en_GB.UTF-8"
+    fi
     echo $DONE_MSG
-}
-
-set_locale() {
-    echo 'LANG="en_GB.UTF-8"' > /etc/default/locale
-    echo 'LC_ALL="en_GB.UTF-8"' >> /etc/default/locale
-    export LANG="en_GB.UTF-8"
-    export LC_ALL="en_GB.UTF-8"
 }
 
 add_unix_user() {
@@ -524,10 +535,7 @@ EOF
     chmod a+rx /etc/rc.local
 }
 
-if [ $SITE = "fixmystreet" ]; then
-    generate_locales
-    set_locale
-fi
+setup_locale
 
 add_unix_user
 
