@@ -392,7 +392,7 @@ install_nginx() {
 install_postgis() {
     echo -n "Installing PostGIS... "
     POSTGIS_SCRIPT='https://docs.djangoproject.com/en/dev/_downloads/create_template_postgis-debian.sh'
-    su -l -c "curl '$POSTGIS_SCRIPT' | bash -s" postgres
+    su -l -c "curl -s '$POSTGIS_SCRIPT' | bash -s >/dev/null" postgres
     # According to Matthew's installation instructions, these two SRID
     # may be missing the appropriate +datum from the proj4text column,
     # depending on what PostGIS version is being used.  Check whether
