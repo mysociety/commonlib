@@ -208,7 +208,7 @@ add_locale() {
 
 setup_locale() {
     echo "Setting up locale... "
-    default=$(LANG="" && source /etc/default/locale && echo $LANG)
+    default=$(LANG="" && . /etc/default/locale && echo $LANG)
     if [ x"$(LC_ALL=$LANG locale -k LC_CTYPE | grep -c 'charmap="UTF-8"')" = x1 ]; then
         # Current is UTF-8, make sure it's generated and use that
         add_locale $LANG
