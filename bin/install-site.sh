@@ -123,7 +123,7 @@ fi
 if [ $DEVELOPMENT_INSTALL = true ]; then
     DIRECTORY=$(cd "."; pwd)
 elif [ $DEFAULT_SERVER = true ]; then
-    DIRECTORY="/var/www/$SITE"
+    DIRECTORY="/var/www"
 else
     DIRECTORY="/var/www/$HOST"
 fi
