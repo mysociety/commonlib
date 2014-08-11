@@ -485,7 +485,8 @@ install_website_packages() {
     else
         PACKAGES_FILE="$GENERIC_PACKAGES"
     fi
-    xargs -a "$PACKAGES_FILE" apt-get -qq -y install >/dev/null
+    DEBIAN_FRONTEND=noninteractive \
+      xargs -a "$PACKAGES_FILE" apt-get -qq -y install >/dev/null
     echo "  $DONE_MSG"
 }
 
