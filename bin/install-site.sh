@@ -1,15 +1,15 @@
 #!/bin/sh
 
-# This script can be used to install mySociety sites on a clean
-# install of Debian squeeze/wheezy or Ubuntu precise. It contains common
-# code that is used in installing sites, and sources a site specific
-# script called bin/site-specific-install.sh in each.
+# This script will install mySociety sites on a clean install of Debian
+# squeeze/wheezy or Ubuntu precise/trusty. It contains common code that
+# starts the installation, defines functions for later use, and sources
+# a site-specific script, called either bin/site-specific-install.sh or
+# script/site-specific-install.sh.
 
-# WARNING: This script makes significant changes to your server’s
-# setup, including modifying your web server setup, creating a user
-# account, creating a database, installing new packages etc.
-# Typically you should only use this on a clean install, such as a new
-# EC2 instance.
+# WARNING: This script makes significant changes to the server’s setup,
+# including modifying the web server setup, creating a user account and
+# database, installing new packages, etc. Typically you should only use
+# this on a clean install, such as a new EC2 instance.
 
 # The usage is:
 #
@@ -95,7 +95,7 @@ echo -n "Updating package lists... "
 apt-get -qq update
 echo $DONE_MSG
 echo "Installing some core packages..."
-for package in git-core lockfile-progs rubygems curl dnsutils lsb-release; do
+for package in git lockfile-progs curl dnsutils lsb-release; do
     echo -n "  $package... "; apt-get -qq install -y $package >/dev/null; echo $DONE_MSG
 done
 
@@ -240,7 +240,10 @@ add_postgresql_user() {
 
 update_apt_sources() {
     echo -n "Updating APT sources... "
-    if [ x"$DISTRIBUTION" = x"ubuntu" ] && [ x"$DISTVERSION" = x"precise" ]
+    if [ x"$DISTRIBUTION" = x"ubuntu" ] && [ x"$DISTVERSION" = x"trusty" ]
+    then
+        : # Do nothing, let's see if we need multiverse
+    elif [ x"$DISTRIBUTION" = x"ubuntu" ] && [ x"$DISTVERSION" = x"precise" ]
     then
         cat > /etc/apt/sources.list.d/mysociety-extra.list <<EOF
 deb http://eu-west-1.ec2.archive.ubuntu.com/ubuntu/ precise multiverse
@@ -420,7 +423,7 @@ make_log_directory() {
 
 add_website_to_nginx() {
     echo -n "Adding site to nginx... "
-    NGINX_VERSION="$(/usr/sbin/nginx -v 2>&1 | sed 's,^nginx version: nginx/,,')"
+    NGINX_VERSION="$(/usr/sbin/nginx -v 2>&1 | sed 's,^nginx version: nginx/\([^ ]*\).*,\1,')"
     # The 'default_server' option is just 'default' in earlier
     # versions of nginx:
     if dpkg --compare-versions "$NGINX_VERSION" lt 0.8.21
