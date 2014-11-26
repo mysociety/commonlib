@@ -22,7 +22,7 @@ function person_cookie_domain() {
     $httphost = $_SERVER['HTTP_HOST'];
     # XXX there must be a better way of doing this. (Also, the .livesimply
     # entry is for Francis's local test domain pledge.livesimply)
-    if (preg_match("/[^.]+(\.com|\.cat|\.org|\.net|\.co\.uk|\.org\.uk|\.livesimply)$/", $httphost, $matches)) {
+    if (preg_match("/[^.]+(\.com|\.cat|\.org|\.net|\.co\.uk|\.gov\.uk|\.org\.uk|\.livesimply)$/", $httphost, $matches)) {
         return "." . $matches[0];
     } else {
         return '.' . OPTION_WEB_DOMAIN;
