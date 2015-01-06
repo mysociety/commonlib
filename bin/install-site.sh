@@ -393,26 +393,36 @@ install_nginx() {
 }
 
 install_postgis() {
-    echo -n "Installing PostGIS... "
-    POSTGIS_SCRIPT='https://docs.djangoproject.com/en/dev/_downloads/create_template_postgis-debian.sh'
-    su -l -c "curl '$POSTGIS_SCRIPT' | bash -s" postgres
-    # According to Matthew's installation instructions, these two SRID
-    # may be missing the appropriate +datum from the proj4text column,
-    # depending on what PostGIS version is being used.  Check whether
-    # they are missing, and if so, update the column.
-    for T in 27700:+datum=OSGB36 29902:+datum=ire65
-    do
-        SRID="${T%%:*}"
-        DATUM="${T##*:}"
-        EXISTING="$(echo "select proj4text from spatial_ref_sys where srid = '$SRID'" | su -l -c "psql -t -P 'format=unaligned' template_postgis" postgres)"
-        if ! echo "$EXISTING" | grep -- "$DATUM"
-        then
-            echo Adding $DATUM to the proj4text column of spatial_ref_sys for srid $SRID
-            NEW_VALUE="${EXISTING% } $DATUM "
-            echo "UPDATE spatial_ref_sys SET proj4text = '$NEW_VALUE' WHERE srid = '$SRID'" | su -l -c 'psql template_postgis' postgres
-        fi
-    done
-    echo $DONE_MSG
+    if [ x"$DISTRIBUTION" = x"ubuntu" ] && [ x"$DISTVERSION" = x"trusty" ]
+    then
+        # On trusty, we have Postgresql >= 9.1 (9.3) *and* PostGIS >= 2.0
+        # and so PostGIS support should be installed with "CREATE EXTENSION
+        # postgis; CREATE EXTENSION postgis_topology;" instead. (So this
+        # condition would arguably be better written as a condition on
+        # those two versions.)
+        echo "PostGIS support should already be available."
+    else
+        echo -n "Installing PostGIS... "
+        POSTGIS_SCRIPT='https://docs.djangoproject.com/en/dev/_downloads/create_template_postgis-debian.sh'
+        su -l -c "curl '$POSTGIS_SCRIPT' | bash -s" postgres
+        # According to Matthew's installation instructions, these two SRID
+        # may be missing the appropriate +datum from the proj4text column,
+        # depending on what PostGIS version is being used.  Check whether
+        # they are missing, and if so, update the column.
+        for T in 27700:+datum=OSGB36 29902:+datum=ire65
+        do
+            SRID="${T%%:*}"
+            DATUM="${T##*:}"
+            EXISTING="$(echo "select proj4text from spatial_ref_sys where srid = '$SRID'" | su -l -c "psql -t -P 'format=unaligned' template_postgis" postgres)"
+            if ! echo "$EXISTING" | grep -- "$DATUM"
+            then
+                echo Adding $DATUM to the proj4text column of spatial_ref_sys for srid $SRID
+                NEW_VALUE="${EXISTING% } $DATUM "
+                echo "UPDATE spatial_ref_sys SET proj4text = '$NEW_VALUE' WHERE srid = '$SRID'" | su -l -c 'psql template_postgis' postgres
+            fi
+        done
+        echo $DONE_MSG
+    fi
 }
 
 make_log_directory() {
