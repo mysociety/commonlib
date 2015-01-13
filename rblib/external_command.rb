@@ -1,17 +1,16 @@
 # encoding: utf-8
+# Run an external command, capturing its stdout and stderr streams into
+# variables, and returning some information about the way the process
+# exited.
 
-# Run an external command, capturing its stdout and stderr
-# streams into variables.
-#
-# So it’s rather like the `backtick` built-in, except that:
-#   - The command is run as-is, rather than being parsed by the shell;
-#   - Standard error is also captured.
 #
 # After the run() method has been called, the instance variables
-# out, err, status and exited contain the contents of the process’s
-# stdout, the contents of its stderr, and the exit status.  exited
-# is true if the process exited normally, and false otherwise
-# (usually indicating a crash or timeout).
+# out, err, and status contain the contents of the process<E2><80><99>s
+# stdout, the contents of its stderr, and the exit status.  The instance
+# variable exited is true if the process exited normally, and false
+# otherwise (usually indicating a crash or timeout). The instance
+# variable timed_out indicates that this code forced the process to
+# finish.
 #
 # Example usage:
 #   require 'external_command'
