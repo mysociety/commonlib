@@ -47,6 +47,9 @@ class ExternalCommand
     attr_reader :timed_out
     attr_reader :exited
 
+    # Final argument can be a hash of options.
+    # Valid options are:
+    # :timeout - maximum amount of time (in s) to allow the process to run for
     def initialize(cmd, *args)
         if !args.empty? && args[-1].is_a?(Hash)
             options = args.pop
