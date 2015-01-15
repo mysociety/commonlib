@@ -24,23 +24,7 @@
 # run(), then the subprocess output/error will be appended
 # to this string.
 
-# <rant author="robin">
-#   In any sane language, this would be implemented with a
-#   single child process. The parent process would block on
-#   select(), and when the child process terminated, the
-#   select call would be interrupted by a CHLD signal
-#   and return EINTR. Unfortunately Ruby goes out of its
-#   way to prevent this from working, automatically restarting
-#   the select call if EINTR is returned. Therefore we
-#   use a parent-child-grandchild arrangement, where the
-#   parent blocks on select() and the child blocks on
-#   waitpid(). When the child detects that the grandchild
-#   has finished, it writes to a pipe that’s included in
-#   the parent’s select() for this purpose.
-# </rant>
-
-require 'fcntl'
-
+require 'open4'
 class ExternalCommand
     attr_accessor :out, :err, :binary_mode, :memory_limit
     attr_reader :status
@@ -66,9 +50,6 @@ class ExternalCommand
         @out = ""
         @err = ""
 
-        # String to collect the grandchild’s exit status from the child.
-        @fin = ""
-
         # String to write to the stdin of the child process.
         # This may be set by passing an argument to the run method.
         @in = ""
@@ -82,83 +63,60 @@ class ExternalCommand
         # Maximum memory available to the child process (in bytes) before
         # it is killed by the kernel.  This value is used as both the soft
         # and hard limit.
-        @memory_limit = Process.getrlimit(Process::RLIMIT_AS)[0]
+
+        @memory_limit = options.fetch(:memory_limit) { Process.getrlimit(Process::RLIMIT_AS)[0] }
     end
 
     def run(stdin_string=nil, env={})
-        # Pipes for parent-child communication
-        @out_read, @out_write = IO::pipe
-        @err_read, @err_write = IO::pipe
-        @fin_read, @fin_write = IO::pipe
-        if !stdin_string.nil?
-            @in_read, @in_write = IO::pipe
-            @in = stdin_string.dup
-        else
-            @in_read, @in_write = nil, nil
-        end
-        @env = env
 
-        @pid = fork do
-            # Here we’re in the child process.
-            child_process
-        end
-
-        # Here we’re in the parent process.
-        @timed_out = parent_process
-
-        return self
-    end
-
-    private
-
-    def child_process()
-        # If you ever need to print debugging information,
-        # uncomment the following line, add original_out
-        # to the dont_close array below, then you can use
-        # original_out.puts to print messages to the original
-        # stdout.
-        # original_out = IO.new STDOUT.fcntl Fcntl::F_DUPFD
-
-        # Reopen stdout and stderr to point at the pipes
-        STDOUT.reopen(@out_write)
-        STDERR.reopen(@err_write)
-        STDIN.reopen(@in_read) if !@in_read.nil?
-
-        # Close all the filehandles other than the ones we intend to use.
-        dont_close = [STDOUT, STDERR, @fin_write]
-        dont_close.push(STDIN) if !@in_read.nil?
-
-        ObjectSpace.each_object(IO) do |fh|
-            begin
-                fh.close unless dont_close.include?(fh)
-            rescue => e
-                # Perhaps it is already closed, or closing it
-                # would raise an "unitialized stream" exception
-            end
+        if @memory_limit < Process.getrlimit(Process::RLIMIT_AS)[0]
+            Process.setrlimit(Process::RLIMIT_AS, @memory_limit)
         end
 
         # Override the environment as specified
         ENV.update @env
 
-        # Set resource limits (if we can)
-        if @memory_limit < Process.getrlimit(Process::RLIMIT_AS)[0]
-            Process.setrlimit(Process::RLIMIT_AS, @memory_limit)
+        status = Open4::popen4(@cmd, *@args) do |pid, stdin, stdout, stderr|
+
+            # IOStreams should handle ASCII-8BIT encoded strings when told to
+            # expect binary data
+            if RUBY_VERSION.to_f >= 1.9 && binary_mode
+                stdout.binmode
+                stdin.binmode
+            end
+
+
+            if @in
+                @instreams = { stdin => @in.dup }
+            else
+                @instreams = {}
+                stdin.close
+            end
+            @outstreams = { stdout => @out, stderr => @err }
+
+            if @timeout
+                read_and_write_with_terminate_on_timeout(pid)
+                return self if @timed_out
+            else
+                read_and_write while @outstreams.any?
+            end
+
         end
-
-        # Spawn the grandchild, and wait for it to finish.
-        Process::waitpid(fork { grandchild_process })
-
-        # Write the grandchild’s exit status to the 'fin' pipe,
-        # or the special value 256 to indicate an abnormal exit.
-        if !$?.exited?
-            @fin_write.puts('256')
-        else
-            @fin_write.puts($?.exitstatus.to_s)
+        # if we're not expecting binary output, convert the output streams to the
+        # default encoding now they are written to - not before, as there might be
+        # partial characters there
+        if RUBY_VERSION.to_f >= 1.9 && ! binary_mode
+            [ @out, @err ].each { |io| io.force_encoding(Encoding.default_external) }
         end
-
-        exit! 0
+        @exited = status.exited?
+        @status = status.exitstatus
+        self
     end
 
+    private
+
+    # Try to kill the process with pid
+    # Returns true on successful kill, false otherwise
     def try_to_kill(signal, pid)
         begin
             Process.kill(signal, pid)
@@ -166,7 +124,6 @@ class ExternalCommand
             # already dead
             return true
         end
-
         sleep 0.1
         begin
             exit_status = Process.waitpid(pid, Process::WNOHANG)
@@ -177,111 +134,74 @@ class ExternalCommand
         return !exit_status.nil?
     end
 
-    def grandchild_process()
-        exec(@cmd, *@args)
-
-        # This is only reached if the exec fails
-        @err_write.print("Failed to exec: #{[@cmd, *@args].join(' ')}")
-        exit! 99
-    end
-
-    def parent_process()
-        # Close the writing ends of the pipes
-        @out_write.close
-        @err_write.close
-        @fin_write.close
-        @in_read.close if !@in_read.nil?
-
-        @fhs_read = {@out_read => @out, @err_read => @err, @fin_read => @fin}
-        @fhs_write = {}
-        if !@in_write.nil?
-            @fhs_write[@in_write] = @in
-        end
-
-        if @timeout.nil?
-            while @fin.empty?
-               ok = read_and_write_data
-               if !ok
-                   raise "select() timed out even with a nil (infinite) timeout"
-                end
-            end
+    # Read a chunk of data from one of of the external process's output streams. Closes
+    # a stream and deletes it from the array of output streams when there is no more
+    # data to read.
+    def read_from_stream(io_stream)
+        if io_stream.eof?
+            io_stream.close
+            @outstreams.delete io_stream
         else
-            time_to_give_up = Time.now.to_f + @timeout
-            while @fin.empty?
-                remaining_time = time_to_give_up - Time.now.to_f
-                ok = remaining_time > 0 && read_and_write_data(remaining_time)
-                if !ok
-                    # Timed out
+            # 8kb - usually a reasonable buffer size
+            data = io_stream.readpartial(8192)
+            @outstreams[io_stream] << data
+        end
+    end
 
-                    # Try to kill the process gently
-                    if !try_to_kill("TERM", @pid)
-                        # If that fails, wait a second and try again
-                        sleep 1
-                        if !try_to_kill("TERM", @pid)
-                            # If THAT fails, terminate with extreme prejudice
-                            try_to_kill("KILL", @pid)
-                            # (If even that fails, we’re out of luck. Carry on.)
-                        end
+    # Write a chunk of data to the external process's input stream.  Closes
+    # a stream and deletes it from the array of input streams when there is no more
+    # data to write. Does the same on disconnection of the stream, indicated by
+    # EPIPE.
+    def write_to_stream(io_stream)
+        begin
+            input_string = @instreams[io_stream]
+            number_of_bytes_written = io_stream.syswrite(input_string)
+            input_string.slice!(0, number_of_bytes_written)
+            if input_string.empty?
+                io_stream.close
+                @instreams.delete io_stream
+            end
+        rescue Errno::EPIPE
+            io_stream.close
+            @instreams.delete io_stream
+        end
+    end
+
+    # reads and writes data to the process's streams. If a timeout is passed,
+    # returns false if nothing can be read or written within that timeout.
+    def read_and_write(timeout=nil)
+        ready = IO.select(@outstreams.keys, @instreams.keys, [], timeout)
+        return false if ready.nil?
+        ready[0].each{ |io_stream| read_from_stream(io_stream) }
+        ready[1].each{ |io_stream| write_to_stream(io_stream) }
+    end
+
+    def read_and_write_with_terminate_on_timeout(pid)
+        time_to_give_up = Time.now.to_f + @timeout
+        while @outstreams.any?
+            remaining_time = time_to_give_up - Time.now.to_f
+            # check that we still have time remaining and that the select
+            # call does not time out in that time
+            ok = remaining_time > 0 && read_and_write(remaining_time)
+
+            if !ok
+                # Try to kill the process gently
+                if !try_to_kill("TERM", pid)
+                    # If that fails, wait a second and try again
+                    sleep 1
+                    if !try_to_kill("TERM", pid)
+                        # If THAT fails, terminate with extreme prejudice
+                        try_to_kill("KILL", pid)
+                        # (If even that fails, we’re out of luck. Carry on.)
                     end
-                    @status = 1
-                    @exited = false
-                    return true
                 end
+                # Collect any final output already in the buffers
+                read_and_write(0)
+                @exited = false
+                @timed_out = true
+                return
             end
         end
-
-        while read_and_write_data(0)
-            # Pull out any data that’s left in the pipes
-        end
-
-        Process::waitpid(@pid)
-        @status = @fin.to_i
-        @exited = !(@fin.to_i == 256)
-
-        # Transcode strings as if they were retrieved using default
-        # internal and external encodings
-        if RUBY_VERSION.to_f >= 1.9 && ! binary_mode
-            outstreams = { @out_read => @out, @err_read => @err }
-            outstreams.keys.each do |io|
-                outstreams[io].force_encoding(io.external_encoding)
-                outstreams[io].encode(Encoding.default_internal)
-            end
-        end
-        @out_read.close
-        @err_read.close
-        @in_write.close if !@in_write.nil? && !@in_write.closed?
-        return false
     end
 
-    def read_and_write_data(timeout=nil)
-        #puts "select(#{@fhs_read.keys.inspect}, #{@fhs_write.keys.inspect})"
-        ready_array = IO.select(@fhs_read.keys, @fhs_write.keys, [], timeout)
-        return false if ready_array.nil?
-        ready_array[0].each do |fh|
-            begin
-                s = fh.readpartial(8192)
-                #puts "<<[#{fh}] #{s}"
-                @fhs_read[fh] << s
-            rescue EOFError
-                #puts "! EOF reading from #{fh}"
-                @fhs_read.delete fh
-            end
-        end
-        ready_array[1].each do |fh|
-            begin
-                s = @fhs_write[fh]
-                #puts ">>[#{fh}] #{s}"
-                n = fh.syswrite(s)
-                s.slice!(0, n)
-                if s.empty?
-                    fh.close
-                    @fhs_write.delete fh
-                end
-            rescue Errno::EPIPE
-                fh.close
-                @fhs_write.delete fh
-            end
-        end
-        return true
-    end
 end
