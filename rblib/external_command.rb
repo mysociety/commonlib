@@ -18,19 +18,20 @@
 #   puts "Ran ls -l with exit status #{xc.status}"
 #   puts "===STDOUT===\n#{xc.out}"
 #   puts "===STDERR===\n#{xc.err}"
-#
-# The out and err attributes are writeable. If you assign
-# a string, after calling the constructor and before calling
-# run(), then the subprocess output/error will be appended
-# to this string.
+
 
 require 'open4'
 class ExternalCommand
 
-    attr_accessor :out, :err, :binary_output, :binary_input, :memory_limit
-    attr_reader :status
-    attr_reader :timed_out
-    attr_reader :exited
+    attr_reader :status,
+                :timed_out,
+                :exited,
+                :binary_output,
+                :binary_input,
+                :memory_limit,
+                :err,
+                :out,
+                :env
 
     # Final argument can be a hash of options.
     # Valid options are:
@@ -43,41 +44,44 @@ class ExternalCommand
     #                   the default external encoding (only significant in ruby 1.9 and above)
     # :memory_limit - maximum amount of memory (in bytes) available to the process
     # :timeout - maximum amount of time (in s) to allow the process to run for
+    # :env - hash of environment variables to set for the process
     def initialize(cmd, *args)
         if !args.empty? && args[-1].is_a?(Hash)
             options = args.pop
         else
             options = {}
         end
-
         @cmd = cmd
         @args = args
-        @timeout = options[:timeout]
+        @timeout = options.fetch(:timeout, nil)
 
         # Strings to collect stdout and stderr from the child process
         # These may be replaced by the caller, to append to existing strings.
-        @out = ""
-        @err = ""
+        @out = options.fetch(:append_to, "")
+        @err = options.fetch(:append_errors_to, "")
 
-        # String to write to the stdin of the child process.
-        # This may be set by passing an argument to the run method.
-        @in = ""
+        # Stdin string to pass to the process
+        @in = options.fetch(:stdin_string, nil)
 
         # By default, the strings returned for stdout and sterr will
         # be treated as binary, so will have the encoding ASCII-8BIT.
         # Set binary_mode to false in order to have strings transcoded
         # in Ruby 1.9 using the default internal and external encodings.
-        @binary_output = true
-        @binary_input = true
+        @binary_output =  options.fetch(:binary_output, true)
+        @binary_input = options.fetch(:binary_input, true)
 
         # Maximum memory available to the child process (in bytes) before
         # it is killed by the kernel.  This value is used as both the soft
         # and hard limit.
 
         @memory_limit = options.fetch(:memory_limit) { Process.getrlimit(Process::RLIMIT_AS)[0] }
+
+        # Hash of environment variables to set for the process
+        @env = options.fetch(:env, {})
+
     end
 
-    def run(stdin_string=nil, env={})
+    def run
 
         if @memory_limit < Process.getrlimit(Process::RLIMIT_AS)[0]
             Process.setrlimit(Process::RLIMIT_AS, @memory_limit)
@@ -95,13 +99,13 @@ class ExternalCommand
                 stdin.binmode if binary_input
             end
 
-
             if @in
                 @instreams = { stdin => @in.dup }
             else
                 @instreams = {}
                 stdin.close
             end
+
             @outstreams = { stdout => @out, stderr => @err }
 
             if @timeout
@@ -112,6 +116,7 @@ class ExternalCommand
             end
 
         end
+
         # if we're not expecting binary output, convert the output streams to the
         # default encoding now they are written to - not before, as there might be
         # partial characters there
