@@ -26,7 +26,8 @@
 
 require 'open4'
 class ExternalCommand
-    attr_accessor :out, :err, :binary_mode, :memory_limit
+
+    attr_accessor :out, :err, :binary_output, :binary_input, :memory_limit
     attr_reader :status
     attr_reader :timed_out
     attr_reader :exited
@@ -58,7 +59,8 @@ class ExternalCommand
         # be treated as binary, so will have the encoding ASCII-8BIT.
         # Set binary_mode to false in order to have strings transcoded
         # in Ruby 1.9 using the default internal and external encodings.
-        @binary_mode = true
+        @binary_output = true
+        @binary_input = true
 
         # Maximum memory available to the child process (in bytes) before
         # it is killed by the kernel.  This value is used as both the soft
@@ -74,11 +76,9 @@ class ExternalCommand
 
         status = Open4::popen4(env, @cmd, *@args) do |pid, stdin, stdout, stderr|
 
-            # IOStreams should handle ASCII-8BIT encoded strings when told to
-            # expect binary data
-            if RUBY_VERSION.to_f >= 1.9 && binary_mode
-                stdout.binmode
-                stdin.binmode
+            if RUBY_VERSION.to_f >= 1.9
+                stdout.binmode if binary_output
+                stdin.binmode if binary_input
             end
 
             if stdin_string
@@ -98,10 +98,10 @@ class ExternalCommand
             end
 
         end
-        # if we're not expecting binary output, convert the output streams to the
-        # default encoding now they are written to - not before, as there might be
-        # partial characters there
-        if RUBY_VERSION.to_f >= 1.9 && ! binary_mode
+        # we convert here because we don't want to do it when the string is only
+        # partially read as we might have half a unicode character. readpartial always returns
+        # binary encoding
+        if RUBY_VERSION.to_f >= 1.9 && ! binary_output
             [ @out, @err ].each { |io| io.force_encoding(Encoding.default_external) }
         end
         @exited = status.exited?
