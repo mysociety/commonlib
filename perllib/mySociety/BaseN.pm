@@ -36,7 +36,7 @@ use strict;
 # 
 
 use Carp;
-use Math::BigInt lib => 'GMP';
+use Math::BigInt try => 'GMP';
 use POSIX qw(ceil);
 
 my $std_alpha = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
