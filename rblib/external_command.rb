@@ -46,7 +46,7 @@ class ExternalCommand
     # :timeout - maximum amount of time (in s) to allow the process to run for
     # :env - hash of environment variables to set for the process
     def initialize(cmd, *args)
-        if !args.empty? && args[-1].is_a?(Hash)
+        if !args.empty? && args.last.is_a?(Hash)
             options = args.pop
         else
             options = {}
