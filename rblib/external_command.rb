@@ -20,8 +20,12 @@
 #   puts "===STDERR===\n#{xc.err}"
 
 
+
 require 'open4'
 class ExternalCommand
+
+    class ChildUnterminated < StandardError
+    end
 
     attr_reader :status,
                 :timed_out,
@@ -191,14 +195,16 @@ class ExternalCommand
         ready[1].each{ |io_stream| write_to_stream(io_stream) }
     end
 
+
+
     def read_and_write_with_terminate_on_timeout(pid)
         time_to_give_up = Time.now.to_f + @timeout
+        unterminated = false
         while @outstreams.any?
             remaining_time = time_to_give_up - Time.now.to_f
             # check that we still have time remaining and that the select
             # call does not time out in that time
             ok = remaining_time > 0 && read_and_write(remaining_time)
-
             if !ok
                 # Try to kill the process gently
                 if !try_to_kill("TERM", pid)
@@ -206,14 +212,18 @@ class ExternalCommand
                     sleep 1
                     if !try_to_kill("TERM", pid)
                         # If THAT fails, terminate with extreme prejudice
-                        try_to_kill("KILL", pid)
-                        # (If even that fails, we’re out of luck. Carry on.)
+                        if !try_to_kill("KILL", pid)
+                            unterminated = true
+                        end
                     end
                 end
                 # Collect any final output already in the buffers
                 read_and_write(0)
                 @exited = false
                 @timed_out = true
+                if unterminated
+                    raise ChildUnterminated, %Q[External Command: Process #{pid} executing "#{@cmd}" timed out at #{@timeout}s but could not be terminated.]
+                end
                 return
             end
         end

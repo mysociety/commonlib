@@ -127,5 +127,15 @@ describe "when running ExternalCommand" do
         t.err.should == ""
     end
 
+    it 'should raise a ChildUnterminated exception if the process cannot be terminated' do
+        start_time = Time.now
+        external_command = ExternalCommand.new(sleep_cmd, "30", :timeout => 2)
+        external_command.stub!(:try_to_kill).and_return(false)
+        lambda { f = external_command.run }.should raise_error(ExternalCommand::ChildUnterminated)
+        (Time.now - start_time).should < 5
+        external_command.timed_out.should == true
+        external_command.status.should_not == 0
+    end
+
 end
 
