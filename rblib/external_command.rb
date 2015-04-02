@@ -74,11 +74,14 @@ class ExternalCommand
         @binary_output =  options.fetch(:binary_output, true)
         @binary_input = options.fetch(:binary_input, true)
 
+        # Memory limit available to this process. We will use this as the
+        # hard limit for the child process and then restore it once the 
+        # child process has run.
+        @default_memory_limit =  Process.getrlimit(Process::RLIMIT_AS)[0]
+ 
         # Maximum memory available to the child process (in bytes) before
-        # it is killed by the kernel.  This value is used as both the soft
-        # and hard limit.
-
-        @memory_limit = options.fetch(:memory_limit) { Process.getrlimit(Process::RLIMIT_AS)[0] }
+        # it is killed by the kernel. 
+        @memory_limit = options.fetch(:memory_limit) { @default_memory_limit }
 
         # Hash of environment variables to set for the process
         @env = options.fetch(:env, {})
@@ -88,37 +91,44 @@ class ExternalCommand
     def run
 
         if @memory_limit < Process.getrlimit(Process::RLIMIT_AS)[0]
-            Process.setrlimit(Process::RLIMIT_AS, @memory_limit)
+            Process.setrlimit(Process::RLIMIT_AS, @memory_limit, @default_memory_limit)
         end
 
         # Override the environment as specified
         ENV.update @env
 
-        status = Open4::popen4(@cmd, *@args) do |pid, stdin, stdout, stderr|
+        begin
+            status = Open4::popen4(@cmd, *@args) do |pid, stdin, stdout, stderr|
 
-            # IOStreams should handle ASCII-8BIT encoded strings when told to
-            # expect binary data
-            if RUBY_VERSION.to_f >= 1.9
-                stdout.binmode if binary_output
-                stdin.binmode if binary_input
+                # IOStreams should handle ASCII-8BIT encoded strings when told to
+                # expect binary data
+                if RUBY_VERSION.to_f >= 1.9
+                    stdout.binmode if binary_output
+                    stdin.binmode if binary_input
+                end
+
+                if @in
+                    @instreams = { stdin => @in.dup }
+                else
+                    @instreams = {}
+                    stdin.close
+                end
+
+                @outstreams = { stdout => @out, stderr => @err }
+
+                if @timeout
+                    read_and_write_with_terminate_on_timeout(pid)
+                    return self if @timed_out
+                else
+                    read_and_write while @outstreams.any?
+                end
+
             end
+            
+        ensure
 
-            if @in
-                @instreams = { stdin => @in.dup }
-            else
-                @instreams = {}
-                stdin.close
-            end
-
-            @outstreams = { stdout => @out, stderr => @err }
-
-            if @timeout
-                read_and_write_with_terminate_on_timeout(pid)
-                return self if @timed_out
-            else
-                read_and_write while @outstreams.any?
-            end
-
+            # Restore the original memory limit
+            Process.setrlimit(Process::RLIMIT_AS, @default_memory_limit)
         end
 
         # if we're not expecting binary output, convert the output streams to the
