@@ -97,6 +97,14 @@ describe "when running ExternalCommand" do
         f.err.should == "Out of memory!\n"
     end
 
+    it "should not limit the memory available to calling code" do
+        f = ExternalCommand.new(malloc_script, :memory_limit => 1048576 * 128)
+        allocated_memory = Process.getrlimit(Process::RLIMIT_AS)[0].to_i
+        f.run
+        current_memory = Process.getrlimit(Process::RLIMIT_AS)[0]
+        current_memory.should == allocated_memory
+     end
+
     it "should handle data as binary by default" do
         # The base64 string was generated with:
         # printf "hello\360\n" | base64
