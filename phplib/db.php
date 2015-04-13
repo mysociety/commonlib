@@ -1,4 +1,4 @@
-<?
+<?php
 // db.php:
 // Interface to (PostgreSQL) database 
 //

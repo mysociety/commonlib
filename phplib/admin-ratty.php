@@ -280,7 +280,7 @@ EOF;
             }
 ?>
 </table>
-<?
+<?php
             print "<p><a href=\"$self_link&amp;action=editrule\">New rule</a>";
 ?>
 <h2>Help &mdash; how do these rules work?</h2>
@@ -311,7 +311,7 @@ number of distinct..." rules, matches is a count of how many times just the
 simple filter conditions were met, not how many times the rule actually triggered.
 Note that if the time period is zero, you don't get very useful results.
 </p>
-<?
+<?php
         }
 
     }

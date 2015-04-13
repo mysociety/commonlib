@@ -1,4 +1,4 @@
-<?
+<?php
 /*
  * BaseN.php
  * A pseudo-base-N encoding (a generalisation of Adobe's ASCII85).

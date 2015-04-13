@@ -1,4 +1,4 @@
-<?
+<?php
 /*
  * languages.php:
  * File mapping language names to language codes.

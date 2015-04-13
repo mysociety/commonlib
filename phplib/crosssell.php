@@ -1,4 +1,4 @@
-<?
+<?php
 /*
  * crosssell.php:
  * Adverts from one site to another site.
@@ -163,7 +163,7 @@ function crosssell_display_hfymp_advert($email, $name, $postcode) {
 Meanwhile...<br>
 <input style="font-size:100%" type="submit" value="Start a long term relationship"><br> with your MP
 </h2>
-<?
+<?php
     return true;
 }
 
@@ -195,7 +195,7 @@ function crosssell_display_hfyc_cheltenham_advert($email, $name, $postcode) {
 <input type="hidden" name="sign" value="<?=htmlspecialchars($auth_signature)?>">
 
 <div id="advert_thin">
-<?
+<?php
 
     if ($rand == 0) {
         echo "<h2>Cool! You live in Cheltenham!</h2> <p>We've got an exciting new free
@@ -214,7 +214,7 @@ function crosssell_display_hfyc_cheltenham_advert($email, $name, $postcode) {
 </p>
 </div>
 </form>
-<?
+<?php
     return "cheltenhamhfyc$rand";
 }
 */
@@ -245,7 +245,7 @@ function crosssell_display_twfy_alerts_advert($this_site, $email, $postcode) {
 another <a href="http://www.mysociety.org">mySociety</a> site. We will treat
 your data with the same diligence as we do on all our sites, and obviously you
 can unsubscribe at any time.
-<?  
+<?php
     return true;
 }
 
@@ -253,7 +253,7 @@ function crosssell_display_pb_advert() {
 ?>
 <h2 style="padding: 1em; font-size: 200%" align="center">
 Have you ever wanted to <a href="http://www.pledgebank.com">change the world</a> but stopped short because no-one would help?</h2>
-<?
+<?php
 }
 
 function crosssell_display_fms_advert() {
@@ -261,7 +261,7 @@ function crosssell_display_fms_advert() {
 <div id="advert_thin" style="text-align:center; font-size:150%">
 <p>Got a local problem like potholes or flytipping in your street?<br><a href="http://www.fixmystreet.com/">Report it at FixMyStreet</a></p>
 </div>
-<?
+<?php
 }
 
 /* Checking functions for sites, to see if you're already signed up or whatever */

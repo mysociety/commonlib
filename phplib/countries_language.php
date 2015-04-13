@@ -1,4 +1,4 @@
-<?
+<?php
 
 $countries_code_to_languages = array(
 'AF' => array("ps", "Dari", "Pushtu"),

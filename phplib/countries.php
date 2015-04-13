@@ -1,4 +1,4 @@
-<?
+<?php
 /*
  * countries.php:
  * Data on countries and (in some cases) named divisions within them.

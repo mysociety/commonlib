@@ -84,7 +84,7 @@ function share_form($url, $title, $email_url, $name, $email) {
 <li id="share_tab2" onclick="share_tab('2');"><?=_('Email') ?></li>
 </ul>
 <div class="clear"></div>
-<?
+<?php
     share_form_social($url, $title);
     share_form_email($email_url, $name, $email);
 }
