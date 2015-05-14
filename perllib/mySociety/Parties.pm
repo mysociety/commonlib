@@ -68,6 +68,7 @@ display them with.
     "Labour Party" => "Labour",
     "Lab" => "Labour",
     "Lab/Co-op" => "Labour / Co-operative",
+    "Labour/Co-operative" => "Labour / Co-operative",
     "Scottish Labour" => "Labour",
     "Ind Lab" => "Independent Labour",
 
