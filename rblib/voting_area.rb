@@ -1,3 +1,4 @@
+# -*- encoding : utf-8 -*-
 # voting_area.rb - voting area definitions.
 #
 # Copyright (c) 2010 UK Citizens Online Democracy. All rights reserved.

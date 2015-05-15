@@ -1,3 +1,4 @@
+# -*- encoding : utf-8 -*-
 # This file contains wrappers for useful operations on git
 # repositories.
 

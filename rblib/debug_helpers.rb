@@ -1,3 +1,4 @@
+# -*- encoding : utf-8 -*-
 # debug_helpers.rb:
 # mySociety library of debugging functions.
 #

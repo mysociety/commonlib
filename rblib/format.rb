@@ -1,3 +1,4 @@
+# -*- encoding : utf-8 -*-
 # format.rb:
 # mySociety library of formatting functions.
 #

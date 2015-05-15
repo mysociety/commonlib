@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- encoding : utf-8 -*-
 # validate.rb:
 # mySociety library of validation functions, such as valid email address.
 #

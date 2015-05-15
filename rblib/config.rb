@@ -1,3 +1,4 @@
+# -*- encoding : utf-8 -*-
 # config.rb:
 # Very simple config parser. Our config files are sort of cod-PHP.
 #

@@ -1,3 +1,4 @@
+# -*- encoding : utf-8 -*-
 # util.rb:
 # mySociety library of general utility functions
 #

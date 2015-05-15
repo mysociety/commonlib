@@ -1,4 +1,4 @@
-# coding: utf-8
+# -*- encoding : utf-8 -*-
 # This is a test of the external_command library
 $:.push(File.join(File.dirname(__FILE__), '..'))
 

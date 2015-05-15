@@ -1,3 +1,4 @@
+# -*- encoding : utf-8 -*-
 # url_mapper.rb:
 #
 # Some functions for transforming relative URLs within an application

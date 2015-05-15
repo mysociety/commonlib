@@ -1,3 +1,4 @@
+# -*- encoding : utf-8 -*-
 # mapit.rb:
 # Client interface for MaPit
 #

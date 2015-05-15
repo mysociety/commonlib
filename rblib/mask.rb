@@ -1,3 +1,4 @@
+# -*- encoding : utf-8 -*-
 # mask.rb - text masking functions
 #
 # Copyright (c) 2010 UK Citizens Online Democracy. All rights reserved.
