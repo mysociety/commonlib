@@ -17,15 +17,15 @@ module MySociety
 
         # Word wrap the body of a text email.
         # ... either taking a blank line as a paragraph seperator.
-        def Format.wrap_email_body_by_paragraphs(body)
+        def self.wrap_email_body_by_paragraphs(body)
             return Format._wrap_email_internal(body, 67, "     ", "\n\n")
         end
         # ... or wrapping each line separately.
-        def Format.wrap_email_body_by_lines(body)
+        def self.wrap_email_body_by_lines(body)
             return Format._wrap_email_internal(body, 67, "     ", "\n")
         end
         # Internal function for above
-        def Format._wrap_email_internal(body, line_width, indent, paragraph_split)
+        def self._wrap_email_internal(body, line_width, indent, paragraph_split)
             body = body.gsub(/\r\n/, "\n") # forms post with \r\n by default
             paras = body.split(paragraph_split)
 
@@ -44,7 +44,7 @@ module MySociety
 
         # Returns text with obvious links made into HTML hrefs.
         # Taken originally from phplib/utility.php and from WordPress, tweaked somewhat.
-        def Format.make_clickable(text, params = {})
+        def self.make_clickable(text, params = {})
             nofollow = params[:nofollow]
             contract = params[:contract]
             ret = ' ' + text + ' '
@@ -78,7 +78,7 @@ module MySociety
         # Simplify bracketed URLs like: www.liverpool.gov.uk <http://www.liverpool.gov.uk>
         # (so that the URL appears only once, and so that the escaping of the < > doesn't
         # get &gt; contaminated into the linked URL)
-        def Format.simplify_angle_bracketed_urls(text)
+        def self.simplify_angle_bracketed_urls(text)
             ret = ' ' + text + ' '
             #ret = ret.gsub(/(www\.[^\s<>{}()])\s+\<(https?):\/\//i, "\\1")
             ret = ret.gsub(/(www\.[^\s<>{}()]+)\s+<http:\/\/\1>/i, "\\1")
@@ -88,7 +88,7 @@ module MySociety
 
         # Differs from the Rails view helper pluralize, by not including the
         # number in the case of the singular.
-        def Format.fancy_pluralize(num, singular, plural)
+        def self.fancy_pluralize(num, singular, plural)
             if num == 1
                 return singular
             else
@@ -97,7 +97,7 @@ module MySociety
         end
 
         # Simplified a name to something usable in a URL
-        def Format.simplify_url_part(text, default_name, max_len = nil)
+        def self.simplify_url_part(text, default_name, max_len = nil)
             text = text.downcase # this also clones the string, if we use downcase! we modify the original
             text = Unicode.normalize_KD(text)
             text = text.to_ascii.downcase
@@ -126,11 +126,11 @@ module MySociety
 
         # Really, why aren't these in Ruby? (and no, capitalize is no good, as it
         # lowercases the whole of the rest of the string, yeuch)
-        def Format.lcfirst(text)
+        def self.lcfirst(text)
             text[0,1].downcase + text[1,text.size]
         end
 
-        def Format.ucfirst(text)
+        def self.ucfirst(text)
             text[0,1].upcase + text[1,text.size]
         end
 

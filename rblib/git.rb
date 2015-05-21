@@ -10,7 +10,7 @@ module MySociety
     # otherwise returns false.  These are necessary for a git
     # repository, but of course this isn't sufficient to tell you that
     # it's actually a working git repository.
-    def Git.has_objects_and_refs?(directory)
+    def self.has_objects_and_refs?(directory)
       ['objects', 'refs'].all? do |subdirectory|
         File.directory? File.join(directory, subdirectory)
       end
@@ -20,7 +20,7 @@ module MySociety
     # structure of a non-bare git repository; i.e. that it has a .git
     # subdirectory, and that subdirectory contains 'objects' and
     # 'refs'.
-    def Git.non_bare_repository?(directory)
+    def self.non_bare_repository?(directory)
       git_directory = File.join directory, '.git'
       return false unless File.directory? git_directory
       has_objects_and_refs? git_directory
@@ -31,7 +31,7 @@ module MySociety
     # "clean", and returns false otherwise.  (This could alternatively
     # be implemented by checking if the output of `git status
     # --porcelain` is empty.)
-    def Git.status_clean(repository_directory)
+    def self.status_clean(repository_directory)
       FileUtils.cd repository_directory do
         return false unless system 'git', 'diff', '--exit-code'
         return false unless system 'git', 'diff', '--cached', '--exit-code'
@@ -45,7 +45,7 @@ module MySociety
 
     # Set the URL for a given remote, raising an exception on any
     # error.
-    def Git.remote_set_url(repository_directory, remote, url)
+    def self.remote_set_url(repository_directory, remote, url)
       FileUtils.cd repository_directory do
         unless system 'git', 'remote', 'set-url', remote, url
           message = "Failed to set the URL for remote #{remote} to #{url}"
@@ -57,7 +57,7 @@ module MySociety
 
     # Runs "git fetch <REMOTE>" for the given remote to update its
     # remote-tracking branches, raising an exception on any error.
-    def Git.fetch(repository_directory, remote)
+    def self.fetch(repository_directory, remote)
       FileUtils.cd repository_directory do
         unless system 'git', 'fetch', remote
           raise "'git fetch #{remote}' failed in #{repository_directory}"
@@ -69,7 +69,7 @@ module MySociety
     # the remote-tracking branches; this is a reasonable way to check
     # if the commit at HEAD has been pushed at some point.  An
     # exception is raised on any error.
-    def Git.is_HEAD_pushed?(repository_directory)
+    def self.is_HEAD_pushed?(repository_directory)
       FileUtils.cd repository_directory do
         # Find all remote-tracking branches that contain HEAD:
         command = 'git branch -r --contains HEAD'
@@ -83,7 +83,7 @@ module MySociety
 
     # Check whether a given committish (e.g. a tag, a branch, an
     # object name, etc.) can be found in the repository.
-    def Git.committish_exists?(repository_directory, committish)
+    def self.committish_exists?(repository_directory, committish)
       FileUtils.cd repository_directory do
         return system 'git', 'rev-parse', '--verify', '--quiet', committish
       end
@@ -92,7 +92,7 @@ module MySociety
     # Check out the commit given by committish; this may detach HEAD
     # if that's not a branch name, as with "git checkout".  An
     # exception is raised on any error.
-    def Git.checkout(repository_directory, committish)
+    def self.checkout(repository_directory, committish)
       FileUtils.cd repository_directory do
         unless system 'git', 'checkout', committish, '--'
           raise "Checking out #{committish} in #{repository_directory} failed"

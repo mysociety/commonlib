@@ -56,7 +56,7 @@ module MySociety
         end
 
         # This method should become part of ruby as of 1.8.7
-        def Validate.each_char(s)
+        def self.each_char(s)
             if block_given?
                 s.scan(/./mu) do |x|
                     yield x
@@ -66,16 +66,16 @@ module MySociety
             end
         end
 
-        def Validate.contains_uppercase(s)
+        def self.contains_uppercase(s)
             @@uppercase_re.match s
         end
 
-        def Validate.contains_lowercase(s)
+        def self.contains_lowercase(s)
             @@lowercase_re.match s
         end
 
         # Stop someone writing all in capitals, or all lower case letters.
-        def Validate.uses_mixed_capitals(s, allow_shorter_than = 20)
+        def self.uses_mixed_capitals(s, allow_shorter_than = 20)
             # strip any URLs, as they tend to be all lower case and shouldn't count towards penalty
             s = s.gsub(/(https?):\/\/([^\s<>{}()]+[^\s.,<>{}()])/i, "")
             s = s.gsub(/(\s)www\.([a-z0-9\-]+)((?:\.[a-z0-9\-\~]+)+)((?:\/[^ <>{}()\n\r]*[^., <>{}()\n\r])?)/i, "")
@@ -105,7 +105,7 @@ module MySociety
             return true
         end
 
-        def Validate.email_match_regexp
+        def self.email_match_regexp
 
             # This is derived from the grammar in RFC2822.
             # mailbox = local-part "@" domain
@@ -144,7 +144,7 @@ module MySociety
             return "#{local_part}@#{domain}"
         end
 
-        def Validate.is_valid_email(addr)
+        def self.is_valid_email(addr)
             is_valid_address_re = Regexp.new("^#{Validate.email_match_regexp}\$")
 
             return addr =~ is_valid_address_re
@@ -153,7 +153,7 @@ module MySociety
         # For finding email addresses in a body of text.
         # XXX Less exact than the one above, but I had problems in Ruby's
         # regexp engine with the one above crashing it.
-        def Validate.email_find_regexp
+        def self.email_find_regexp
             return Regexp.new("(\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}\\b)")
         end
 
@@ -161,14 +161,14 @@ module MySociety
         # is_valid_postcode POSTCODE
         # Return true if POSTCODE is in the proper format for a UK postcode. Does not
         # require spaces in the appropriate place.
-        def Validate.is_valid_postcode(postcode)
+        def self.is_valid_postcode(postcode)
             return Validate.postcode_match_internal(postcode, "^", "$")
         end
 
         # is_valid_partial_postcode POSTCODE
         # Returns true if POSTCODE is in the proper format for the first part of a UK
         # postcode. Expects a stripped string.
-        def Validate.is_valid_partial_postcode(postcode)
+        def self.is_valid_partial_postcode(postcode)
 
             # Our test postcode
             if (postcode.match(/^zz9$/i))
@@ -195,11 +195,11 @@ module MySociety
             end
         end
 
-        def Validate.contains_postcode?(postcode)
+        def self.contains_postcode?(postcode)
             return Validate.postcode_match_internal(postcode, "\\b", "\\b")
         end
 
-        def Validate.postcode_match_internal(postcode, pre, post)
+        def self.postcode_match_internal(postcode, pre, post)
             # Our test postcode
             if (postcode.match(/#{pre}zz9\s*9z[zy]#{post}/i))
                 return true
@@ -228,7 +228,7 @@ module MySociety
             end
         end
 
-        def Validate.is_valid_lon_lat(lon, lat)
+        def self.is_valid_lon_lat(lon, lat)
           return (lon.to_s.match(/^\s*-?\d+\.?\d*\s*$/) && lat.to_s.match(/^\s*-?\d+\.?\d*\s*$/))
         end
     end

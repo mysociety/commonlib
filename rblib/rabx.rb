@@ -34,7 +34,7 @@ module MySociety
       
     end
     
-    def RABX.call_rest_rabx(base_url, params_init)
+    def self.call_rest_rabx(base_url, params_init)
       params = []
       params_init.each do |param|
         if param == nil
