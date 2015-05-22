@@ -30,9 +30,9 @@ module MySociety
         #     opt = MySociety::Config.get('CONFIG_VARIABLE', DEFAULT_VALUE)
 
 
-        # find_php() -> php_binary
+        # find_php -> php_binary
         # Try to locate the PHP binary in various sensible places.
-        def Config.find_php()
+        def self.find_php
             path = ENV["PATH"] or '/bin:/usr/bin'
             paths = path.split(':')
             for dir in path.split(':') +
@@ -55,7 +55,7 @@ module MySociety
         # 
         # For PHP configuration files only, "OPTION_" is removed from any names
         # beginning with that.
-        def Config.read_config(f)
+        def self.read_config(f)
             if f =~ /\.yml$/
                 config = read_config_from_yaml(f)
             elsif File.exists?(f + ".yml")
@@ -73,7 +73,7 @@ module MySociety
 
         # read_config_from_yaml(FILE) ->
         # read a YAML-format configuration file
-        def Config.read_config_from_yaml(f)
+        def self.read_config_from_yaml(f)
             File.open(f, "r") do |fh|
                 config = YAML.load(fh)
                 if config.class != Hash
@@ -86,10 +86,10 @@ module MySociety
         # read_config_from_php(FILE) ->
         # read a PHP-format configuration file
         attr :php_path
-        def Config.read_config_from_php(f)
+        def self.read_config_from_php(f)
             # We need to find the PHP binary.
             if @php_path.nil?
-                @php_path = find_php()
+                @php_path = find_php
             end
 
             # Delete everything from the environment other than our special variable to
@@ -102,7 +102,7 @@ module MySociety
             for k,v in ENV
                 store_environ[k] = v
             end
-            ENV.clear()
+            ENV.clear
             ENV['MYSOCIETY_CONFIG_FILE_PATH'] = f
 
             buf = nil
@@ -119,12 +119,12 @@ module MySociety
                 print "\0";
             }
             ?>''')
-                child.close_write()
+                child.close_write
 
                 # skip any header material
                 line = true
                 while line
-                    line = child.readline()
+                    line = child.readline
                     if line == "start_of_options\n"
                         break
                     else
@@ -133,9 +133,9 @@ module MySociety
                 end
 
                 # read remainder
-                buf = child.read()
+                buf = child.read
             end
-            ENV.clear()
+            ENV.clear
             ENV.update(store_environ)
 
             # check that php exited successfully
@@ -162,7 +162,7 @@ module MySociety
         # but instead return default values.
         attr :main_config_filename
         attr :ignore_missing_file
-        def Config.set_file(filename, ignore_missing_file = false)
+        def self.set_file(filename, ignore_missing_file = false)
             @main_config_filename = filename
             @ignore_missing_file = ignore_missing_file
         end
@@ -171,7 +171,7 @@ module MySociety
         # Loads and caches default config file, as set with set_file.  This
         # function is implicitly called by get and get_all.
         attr :cached_configs
-        def Config.load_default()
+        def self.load_default
             filename = @main_config_filename
             if not filename
                 raise "Please call MySociety::Config.set_file to specify config file" 
@@ -198,8 +198,8 @@ module MySociety
         # in set_config_file. The file is automatically loaded and cached. An
         # exception is thrown if the value isn't present and no DEFAULT is
         # specified.
-        def Config.get (key, default = nil)
-            config = load_default()
+        def self.get (key, default = nil)
+            config = load_default
             
             if config.include?(key)
                 return config[key]
@@ -215,7 +215,7 @@ module MySociety
         # and casts it from 1 / 0 to true or false. This is needed as, unlike
         # PHP, Perl and Python for which the config format was initially used,
         # Ruby treats 0 as true.
-        def Config.getbool (key, default = nil)
+        def self.getbool (key, default = nil)
             if default == false
                 default = 0
             elsif default == true

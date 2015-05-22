@@ -17,13 +17,13 @@ module MySociety
   
   module MaPit
   
-    def MaPit.do_call_rest_rabx(*params)
+    def self.do_call_rest_rabx(*params)
       base_url = MySociety::Config.get("MAPIT_URL")
       return MySociety::RABX.call_rest_rabx(base_url, params)
     end
     
     # Call the new MaPit, parse returned JSON
-    def MaPit.call(function, params, options={})
+    def self.call(function, params, options={})
       begin
         response = self.do_call(function, params, options)
       rescue Timeout::Error
@@ -46,7 +46,7 @@ module MySociety
     POSTCODE_NOT_FOUND = 2002        #    The postcode was not found in the database. 
     AREA_NOT_FOUND = 2003        #    The area ID refers to a non-existent area. 
 
-    def MaPit.get_voting_areas(postcode, generation = nil)
+    def self.get_voting_areas(postcode, generation = nil)
 
       #* MaPit.get_voting_areas POSTCODE [GENERATION]
       #
@@ -57,7 +57,7 @@ module MySociety
       return result
     end
 
-    def MaPit.get_voting_area_info(area)
+    def self.get_voting_area_info(area)
 
       #* MaPit.get_voting_area_info AREA
       #
@@ -89,7 +89,7 @@ module MySociety
       return result
     end
 
-    def MaPit.get_voting_areas_info(ary)
+    def self.get_voting_areas_info(ary)
 
       #* MaPit.get_voting_areas_info ARY
       #
@@ -100,7 +100,7 @@ module MySociety
       return result
     end
 
-    def MaPit.get_voting_area_by_name(name, type = nil, min_generation = nil)
+    def self.get_voting_area_by_name(name, type = nil, min_generation = nil)
 
       #* MaPit.get_voting_area_by_name NAME [TYPE] [MIN_GENERATION]
       #
@@ -113,7 +113,7 @@ module MySociety
       return result
     end
 
-    def MaPit.get_voting_areas_by_location(coordinate, method, types = nil, generation = nil)
+    def self.get_voting_areas_by_location(coordinate, method, types = nil, generation = nil)
 
       #* MaPit.get_voting_areas_by_location COORDINATE METHOD [TYPE(S)] [GENERATION]
       #
@@ -136,7 +136,7 @@ module MySociety
       return result
     end
 
-    def MaPit.get_areas_by_type(type, min_generation = nil)
+    def self.get_areas_by_type(type, min_generation = nil)
 
       #* MaPit.get_areas_by_type TYPE [MIN_GENERATION]
       #
@@ -149,7 +149,7 @@ module MySociety
       return result
     end
 
-    def MaPit.get_example_postcode(id)
+    def self.get_example_postcode(id)
 
       #* MaPit.get_example_postcode ID
       #
@@ -159,7 +159,7 @@ module MySociety
       return result
     end
 
-    def MaPit.get_voting_area_children(id)
+    def self.get_voting_area_children(id)
 
       #* MaPit.get_voting_area_children ID
       #
@@ -171,7 +171,7 @@ module MySociety
       return result
     end
 
-    def MaPit.get_location(postcode, partial = nil)
+    def self.get_location(postcode, partial = nil)
 
       #* MaPit.get_location POSTCODE [PARTIAL]
       #
@@ -205,7 +205,7 @@ module MySociety
     
     private
 
-    def MaPit.do_call(url, params, options={})
+    def self.do_call(url, params, options={})
       max_url_length = 1024
       base_url = MySociety::Config.get("MAPIT_URL")
       # path should start with a slash

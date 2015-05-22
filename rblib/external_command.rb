@@ -4,7 +4,7 @@
 # exited.
 
 #
-# After the run() method has been called, the attributes
+# After the run method has been called, the attributes
 # out, err, and status contain the contents of the process's
 # stdout, the contents of its stderr, and the exit status.  The instance
 # variable exited is true if the process exited normally, and false
@@ -14,7 +14,7 @@
 #
 # Example usage:
 #   require 'external_command'
-#   xc = ExternalCommand("ls", "-l").run()
+#   xc = ExternalCommand("ls", "-l").run
 #   puts "Ran ls -l with exit status #{xc.status}"
 #   puts "===STDOUT===\n#{xc.out}"
 #   puts "===STDERR===\n#{xc.err}"
