@@ -1,3 +1,4 @@
+# -*- encoding : utf-8 -*-
 # survey.rb
 # Client interface for survey.mysociety.org
 

@@ -1,3 +1,4 @@
+# -*- encoding : utf-8 -*-
 # This is for rotating images to the right orientation based on the
 # EXIF orientation data.  It depends on the binary jhead from the
 # package jhead.

@@ -1,4 +1,4 @@
-# encoding: UTF-8
+# -*- encoding : utf-8 -*-
 $:.push(File.join(File.dirname(__FILE__), '..'))
 require 'format'
 require 'test/unit'

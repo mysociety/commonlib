@@ -1,4 +1,4 @@
-# encoding: utf-8
+# -*- encoding : utf-8 -*-
 # Run an external command, capturing its stdout and stderr streams into
 # variables, and returning some information about the way the process
 # exited.

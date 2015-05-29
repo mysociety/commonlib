@@ -1,3 +1,4 @@
+# -*- encoding : utf-8 -*-
 # rabx.rb:
 # Client side functions to call RABX services, but via REST/JSON, rather than
 # using netstrings as for older Perl/PHP clients.

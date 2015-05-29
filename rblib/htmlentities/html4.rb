@@ -1,3 +1,4 @@
+# -*- encoding : utf-8 -*-
 class HTMLEntities
   MAPPINGS = {} unless defined? MAPPINGS
   MAPPINGS['html4'] = {
