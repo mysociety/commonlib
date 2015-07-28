@@ -78,7 +78,7 @@ sub read_config_from_php($) {
     my ($f) = @_;
 
     if (! -r $f) {
-        throw Error::Simple "$f: read permissions not OK for config file";
+        throw Error::Simple "$f: permission denied trying to read config file (maybe you're not running as the correct user?)";
     }
 
     my $old_SIGCHLD = $SIG{CHLD};
