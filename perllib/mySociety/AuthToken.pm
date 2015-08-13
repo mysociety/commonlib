@@ -56,7 +56,7 @@ sub store ($$) {
     RABX::wire_wr($data, $h);
     dbh()->do('
             insert into token (scope, token, data, created)
-            values (?, ?, ?, ms_current_timestamp())', {},
+            values (?, ?, ?, current_timestamp)', {},
             $scope, $token, $ser);
     return $token;
 }
