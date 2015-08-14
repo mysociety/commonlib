@@ -425,6 +425,16 @@ install_postgis() {
     fi
 }
 
+# Create a postgres template called template_utf8 that uses UTF-8 encoding
+create_postgres_template_utf8() {
+    echo "Creating template_utf8 database template... "
+    sudo -u postgres createdb -T template0 -E UTF-8 template_utf8
+    sudo -u postgres psql <<EOF
+update pg_database set datistemplate=true, datallowconn=false where datname='template_utf8';
+EOF
+    echo $DONE_MSG
+}
+
 make_log_directory() {
     LOG_DIRECTORY="$DIRECTORY/logs"
     mkdir -p "$LOG_DIRECTORY"
