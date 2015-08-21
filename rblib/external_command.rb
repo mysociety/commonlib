@@ -43,9 +43,9 @@ class ExternalCommand
     # :append_errors_to - string to append the errors produced by the process to
     # :stdin_string - stdin string to pass to the process
     # :binary_output - boolean flag for treating the output as binary or text encoded with
-    #                   the default external encoding (only significant in ruby 1.9 and above)
+    #                   the default external encoding
     # :binary_input - boolean flag for treating the input as binary or as text encoded with
-    #                   the default external encoding (only significant in ruby 1.9 and above)
+    #                   the default external encoding
     # :memory_limit - maximum amount of memory (in bytes) available to the process
     # :timeout - maximum amount of time (in s) to allow the process to run for
     # :env - hash of environment variables to set for the process
@@ -70,7 +70,7 @@ class ExternalCommand
         # By default, the strings returned for stdout and sterr will
         # be treated as binary, so will have the encoding ASCII-8BIT.
         # Set binary_mode to false in order to have strings transcoded
-        # in Ruby 1.9 using the default internal and external encodings.
+        # using the default internal and external encodings.
         @binary_output =  options.fetch(:binary_output, true)
         @binary_input = options.fetch(:binary_input, true)
 
@@ -102,10 +102,8 @@ class ExternalCommand
 
                 # IOStreams should handle ASCII-8BIT encoded strings when told to
                 # expect binary data
-                if RUBY_VERSION.to_f >= 1.9
-                    stdout.binmode if binary_output
-                    stdin.binmode if binary_input
-                end
+                stdout.binmode if binary_output
+                stdin.binmode if binary_input
 
                 if @in
                     @instreams = { stdin => @in.dup }
@@ -134,7 +132,7 @@ class ExternalCommand
         # if we're not expecting binary output, convert the output streams to the
         # default encoding now they are written to - not before, as there might be
         # partial characters there
-        if RUBY_VERSION.to_f >= 1.9 && ! binary_output
+        unless binary_output
             [ @out, @err ].each { |io| io.force_encoding(Encoding.default_external) }
         end
         @exited = status.exited?
