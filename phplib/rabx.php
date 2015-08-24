@@ -34,7 +34,7 @@ define("RABX_ERROR_USER", 1024);
  * Simple class to represent an error in RABX. */
 class RABX_Error {
     var $code, $text, $extra;
-    function RABX_Error($code, $text, $extra = null) {
+    function __construct($code, $text, $extra = null) {
         $this->code = $code;
         $this->text = $text;
         $this->extra = $extra;
@@ -323,7 +323,7 @@ class RABX_Client {
      * Constructor; return a client that calls functions at the given URL. 
      * USERPWD is optional HTTP authentication information. It's a string
      * formatted as "username:password". */
-    function RABX_Client($url, $userpwd = null) {
+    function __construct($url, $userpwd = null) {
         $this->url = $url;
         $this->ch = curl_init();
         $this->userpwd = $userpwd;
