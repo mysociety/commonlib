@@ -278,6 +278,10 @@ deb-src http://the.earth.li/debian/ wheezy main contrib non-free
 # Security Updates:
 deb http://security.debian.org/ wheezy/updates main non-free
 deb-src http://security.debian.org/ wheezy/updates main non-free
+
+# Debian Backports
+deb http://http.debian.net/debian wheezy-backports main contrib non-free
+deb-src http://http.debian.net/debian wheezy-backports main contrib non-free
 EOF
     else
         error_msg "Unsupported distribution and version combination $DISTRIBUTION $DISTVERSION"
