@@ -22,11 +22,11 @@ module MySociety
         end
 
         def self.contains_uppercase(s)
-            /[[:lower:]]/.match s
+            /[[:upper:]]/.match s
         end
 
         def self.contains_lowercase(s)
-            /[[:upper:]]/.match s
+            /[[:lower:]]/.match s
         end
 
         # Stop someone writing all in capitals, or all lower case letters.
