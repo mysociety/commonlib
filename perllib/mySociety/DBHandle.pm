@@ -22,7 +22,7 @@ use strict;
 BEGIN {
     use Exporter ();
     our @ISA = qw(Exporter);
-    our @EXPORT_OK = qw(&dbh &new_dbh &select_all);
+    our @EXPORT_OK = qw(&dbh &new_dbh &select_all &dbh_test);
 }
 
 use Carp;
@@ -47,7 +47,7 @@ Common functionality for shared database handles.
 
 =item configure KEY VALUE ...
 
-Configure database access. Must be called before dbh() or newdbh(). Allowed
+Configure database access. Must be called before dbh() or new_dbh(). Allowed
 keys are,
 
 =over 4
@@ -148,29 +148,42 @@ sub new_dbh () {
     return $dbh;
 }
 
-=item dbh
+=item dbh_test
 
-Return a shared database handle.
+Check database handle is okay, and create a new one if not.
+Returns handle and process ID.
 
 =cut
-sub dbh () {
-    our $dbh;
-    our $dbh_process;
+
+sub dbh_test($;$) {
+    my ($handle, $pid) = @_;
 
     # If the connection to the database has gone away, try to detect the
-    # condition here. Also detect a fork which has occured since dbh() was last
-    # called. XXX this means we could restart a transaction half-way through. 
-    if (!defined($dbh) || $dbh_process != $$
-        || !eval { $dbh->ping() }) { # call through eval because that's what Apache::DBI does
-        $dbh->{InactiveDestroy} = 1 if (defined($dbh));
-        $dbh = new_dbh();
-        $dbh_process = $$;
+    # condition here. Also detect a fork which has occured since last called.
+    # XXX this means we could restart a transaction half-way through.
+    if (!defined($handle) || ($pid && $pid != $$)
+        || !eval { $handle->ping() }) { # call through eval because that's what Apache::DBI does
+        $handle->{InactiveDestroy} = 1 if (defined($handle));
+        $handle = new_dbh();
+        $pid = $$;
         if (exists($mySociety::DBHandle::conf{OnFirstUse})) {
             my $f = $mySociety::DBHandle::conf{OnFirstUse};
             delete $mySociety::DBHandle::conf{OnFirstUse};
             &$f();
         }
     }
+    return ($handle, $pid);
+}
+
+=item dbh
+
+Return a database handle shared by calls to this function.
+
+=cut
+sub dbh () {
+    our $dbh;
+    our $dbh_process;
+    ($dbh, $dbh_process) = dbh_test($dbh, $dbh_process);
     return $dbh;
 }
 
