@@ -24,4 +24,5 @@ curl -s -L https://raw.github.com/pypa/pip/master/contrib/get-pip.py | python
 # Since pip version 7.0.0 you can upgrade to the latest version of
 # setuptools by upgrading distribute; for details of this change see
 # https://pip.pypa.io/en/latest/news.html
-pip install distribute --no-use-wheel --upgrade
+pip install setuptools==18.5
+pip install distribute==0.7.3
