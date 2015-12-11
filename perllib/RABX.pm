@@ -90,7 +90,6 @@ use strict;
 
 use Error qw(:try);
 use IO::String;
-use JSON;
 use utf8;
 
 my $have_fast_serialisation = 0;
@@ -387,32 +386,6 @@ sub return_string_parse ($) {
     }
 }
 
-=item return_string_json VALUE
-
-=item return_string_json ERROR
-
-Similar to return_string, only returns JSON rather than netstrings.
-
-=cut
-sub return_string_json ($) {
-    my ($v) = @_;
-    my $val;
-    if (ref($v) and UNIVERSAL::isa($v, 'RABX::Error')) {
-        $val = { 
-            'error_value' => $v->value() | RABX::Error::SERVER,    # Indicate that error was detected on server side.
-            'error_text' => $v->text(),
-
-        };
-        if ($v->can('error_extradata')) {
-            $val->{'error_extradata'} = $v->extradata();
-        }
-    } else {
-        $val = $v;
-    }
-    return JSON::to_json($val, { allow_nonref => 1 });
-}
-
-
 =item serialise X
 
 Format X (reference or scalar) into a string, and return it.
@@ -606,8 +579,8 @@ maximum cache age in seconds.
 
 =cut
 
-sub _dispatch($%) {
-    my ($rest, %funcs) = @_;
+sub dispatch (%) {
+    my (%funcs) = @_;
     my $ret;
 
     binmode(STDIN);
@@ -621,35 +594,28 @@ sub _dispatch($%) {
         my $meth = $ENV{REQUEST_METHOD};
         throw RABX::Error(qq#No REQUEST_METHOD in environment; this script must be run in a CGI/FastCGI context#, RABX::Error::INTERFACE)
             if (!defined($meth));
-        if ($rest) {
-            throw RABX::Error(qq#Bad HTTP method "$meth"; should be "GET"#, RABX::Error::TRANSPORT)
-                if ($meth !~ m#^(GET)$#);
-            ($func, @args) = split /\//, $ENV{QUERY_STRING};
-            @args = map { s#\+# #gs; s#%([0-9a-f][0-9a-f])#sprintf('%c', hex($1))#gesi; $_; } @args;
+        throw RABX::Error(qq#Bad HTTP method "$meth"; should be "GET" or "POST"#, RABX::Error::TRANSPORT)
+            if ($meth !~ m#^(GET|POST)$#);
+        my $callstr;
+        if ($meth eq 'GET') {
+            $callstr = $ENV{QUERY_STRING};
+            $callstr =~ s#\+# #gs;
+            $callstr =~ s#%([0-9a-f][0-9a-f])#sprintf('%c', hex($1))#gesi;
         } else {
-            throw RABX::Error(qq#Bad HTTP method "$meth"; should be "GET" or "POST"#, RABX::Error::TRANSPORT)
-                if ($meth !~ m#^(GET|POST)$#);
-            my $callstr;
-            if ($meth eq 'GET') {
-                $callstr = $ENV{QUERY_STRING};
-                $callstr =~ s#\+# #gs;
-                $callstr =~ s#%([0-9a-f][0-9a-f])#sprintf('%c', hex($1))#gesi;
-            } else {
-                my $l = $ENV{CONTENT_LENGTH};
-                throw RABX::Error(q#Bad or missing Content-Length header in POST#, RABX::Error::TRANSPORT)
-                    if (!defined($l) or $l =~ m#[^\d]#);
-                $callstr = '';
-                while (length($callstr) < $l) {
-                    my $n = STDIN->read($callstr, $l - length($callstr), length($callstr));
-                    throw RABX::Error(qq#$! reading POST data#, RABX::Error::TRANSPORT)
-                        if (!defined($n));
-                    throw RABX::Error(qq#EOF reading POST data#, RABX::Error::TRANSPORT)
-                        if ($n == 0);
-                }
+            my $l = $ENV{CONTENT_LENGTH};
+            throw RABX::Error(q#Bad or missing Content-Length header in POST#, RABX::Error::TRANSPORT)
+                if (!defined($l) or $l =~ m#[^\d]#);
+            $callstr = '';
+            while (length($callstr) < $l) {
+                my $n = STDIN->read($callstr, $l - length($callstr), length($callstr));
+                throw RABX::Error(qq#$! reading POST data#, RABX::Error::TRANSPORT)
+                    if (!defined($n));
+                throw RABX::Error(qq#EOF reading POST data#, RABX::Error::TRANSPORT)
+                    if ($n == 0);
             }
-            ($func, $args) = RABX::call_string_parse($callstr);
-            @args = @$args;
         }
+        ($func, $args) = RABX::call_string_parse($callstr);
+        @args = @$args;
 
         throw RABX::Error(qq#no function "$func"#, RABX::Error::INTERFACE)
             if (!exists($funcs{$func}));
@@ -670,30 +636,13 @@ sub _dispatch($%) {
         $status = "500 Internal Error";
     };
 
-    my $retstr = $rest
-        ? RABX::return_string_json($ret)
-        : RABX::return_string($ret);
+    my $retstr = RABX::return_string($ret);
     print "Status: $status\n",
           "Content-Type: application/octet-stream\n",
           "Content-Length: ",  length($retstr), "\n";
     print "Cache-Control: max-age=$maxage\n" if $maxage && $status =~ /^200/;
     print "\n",
           "$retstr\n";
-}
-
-sub dispatch (%) { # XXX should take stream + environment hash
-    _dispatch(0, @_);
-}
-
-=item dispatch_rest FUNCTION SPEC [...]
-
-Similar to dispatch, but uses a non-RABX format for parameters and return
-value. Instead parameters are taken in the query string, separated by '/'.
-The return value is a JSON object.
-
-=cut
-sub dispatch_rest (%) { # XXX should take stream + environment hash
-    _dispatch(1, @_);
 }
 
 1;

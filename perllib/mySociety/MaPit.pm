@@ -12,7 +12,7 @@ package mySociety::MaPit;
 use strict;
 
 use Encode;
-use JSON;
+use JSON::MaybeXS;
 use LWP::UserAgent;
 use RABX;
 use mySociety::Config;
