@@ -126,8 +126,12 @@ sub all_vhosts_backup_dirs {
 
         my $vhost      = $self->vhost($vhost_name);
         my $vhost_base = "/data/vhost/$vhost_name";
+        my $site = $self->site($vhost->{site});
 
-        foreach my $dir ( @{ $vhost->{backup_dirs} || [] } ) {
+        next if $vhost->{staging}; # Don't backup staging sites
+
+        my @backup_dirs = @{ $vhost->{backup_dirs} || $site->{backup_dirs} || [] };
+        foreach my $dir (@backup_dirs) {
 
             # TODO - add '->resolve' below once the Path::Class
             # shipped by debian is less ancient
