@@ -594,6 +594,7 @@ sub get_problem_from_message($){
                             'no such address',
                             'no such recipient',
                             'no such user', 
+                            'not a known user',
                             'not a valid mailbox',
                             'not our customer',
                             'recipient address unknown',
@@ -722,6 +723,7 @@ sub get_problem_from_message($){
     my $verification_failed_pattern = join('|', @verification_failed_synonyms);
     
     my @message_refused_synonyms = ('unable to deliver to',
+                                    'Administrative prohibition',
                                     '^Rejected$');
     my $message_refused_pattern = join('|', @message_refused_synonyms);
     
