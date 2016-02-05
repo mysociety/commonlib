@@ -507,7 +507,7 @@ sub parse_yahoo_error($){
     my $message;
     my $message_pattern = '\s*\n(((.*\S+.*)\n)*)';
     
-    if ($text =~ /Message from\s+yahoo.(?:com|co\.uk).\s*\n\s*Unable to deliver message to the following address\(es\)\.\s*\n\s*\n\s*<(.*?@(.*?))>:$message_pattern/){
+    if ($text =~ /(?:Message from\s+yahoo.(?:com|co\.uk).\s*\n\s*U|Sorry, we were u)nable to deliver (?:your )?message to the following address(?:\(es\))?\.\s*\n\s*\n\s*<(.*?@(.*?))>:$message_pattern/){
         $email_address = $1;
         $domain = $2;
         $message = $3;
@@ -582,6 +582,7 @@ sub get_problem_from_message($){
                             'does not exist', 
                             'does not have their email address registered',
                             'email address for typos',
+                            'e-mail address is not handled by this system',
                             'invalid address',
                             'invalid mailbox',
                             'invalid recipient', 
@@ -724,7 +725,7 @@ sub get_problem_from_message($){
     
     my @message_refused_synonyms = ('unable to deliver to',
                                     'Administrative prohibition',
-                                    '^Rejected$');
+                                    '^Rejected\.?$');
     my $message_refused_pattern = join('|', @message_refused_synonyms);
     
     my @auth_required_synonyms = ('server requires authentication');
