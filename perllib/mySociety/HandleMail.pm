@@ -31,6 +31,7 @@ use constant ERR_AUTH_REQUIRED => 11;
 use constant ERR_BAD_SYNTAX => 12;
 use constant ERR_DELAY => 13;
 use constant ERR_OUT_OF_OFFICE => 14;
+use constant ERR_TRANSACTION_FAILED => 15;
 
 use constant ERR_TYPE_PERMANENT => 1;
 use constant ERR_TYPE_TRANSIENT => 2;
@@ -559,6 +560,7 @@ sub error_type($){
     return ERR_TYPE_UNKNOWN if ($problem == ERR_NO_RELAY);
     return ERR_TYPE_UNKNOWN if ($problem == ERR_UNROUTEABLE);
     return ERR_TYPE_UNKNOWN if ($problem == ERR_SPAM);
+    return ERR_TYPE_UNKNOWN if ($problem == ERR_TRANSACTION_FAILED);
     return ERR_TYPE_UNKNOWN if ($problem == ERR_VERIFICATION_FAILED);
     return ERR_TYPE_UNKNOWN if ($problem == ERR_AUTH_REQUIRED);
     return ERR_TYPE_UNKNOWN if ($problem == ERR_BAD_SYNTAX);  
@@ -720,6 +722,9 @@ sub get_problem_from_message($){
                          'your ip address is from a blacklisted country');
     my $spam_pattern = join('|', @spam_synonyms);
         
+    my @transaction_failed_synonyms = ('Transaction failed');
+    my $transaction_failed_pattern = join('|', @transaction_failed_synonyms);
+
     my @verification_failed_synonyms = ('sender verify failed');
     my $verification_failed_pattern = join('|', @verification_failed_synonyms);
     
@@ -755,6 +760,8 @@ sub get_problem_from_message($){
         $problem = ERR_SPAM;
     }elsif($message =~ /$verification_failed_pattern/i){
         $problem = ERR_VERIFICATION_FAILED;
+    } elsif ($message =~ /$transaction_failed_pattern/i) {
+        $problem = ERR_TRANSACTION_FAILED;
     }elsif($message =~ /$message_refused_pattern/i){
         $problem = ERR_MESSAGE_REFUSED;
     }elsif($message =~ /$auth_required_pattern/i){
