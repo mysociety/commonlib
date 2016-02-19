@@ -1,0 +1,25 @@
+From   Mon Feb 15 21:31:17 2016
+Return-path: <>
+From: Somewhere <hmm@example.org>
+To: fms-alert@example.org
+Subject: Mail delivery failed: returning message to sender
+Date: Mon, 15 Feb 2016 21:31:17 +0100
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+This message was created automatically by mail delivery software.
+
+A message that you sent could not be delivered to one or more of
+its recipients. This is a permanent error. The following address
+failed:
+
+<anon@example.org>
+
+Reason:
+delivery retry timeout exceeded
+
+
+--- The header of the original message is following. ---
+
+It goes here.

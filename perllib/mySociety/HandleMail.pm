@@ -255,15 +255,14 @@ sub parse_exim_error ($){
     my $message;
     my $email_address;
     my $problem;
-    my $main_para_pattern = '\s*\n?\s*                              
-                            The\ following\ address\(es\)\ failed:
-                            \n\s*\n\s*';
+    my $main_para_pattern = '\s*The\s+following\s+address(?:\(es\))?\s+failed:\n\s*\n\s*';
     
     my $message_pattern = '\s*\n
                           (\s*\(.*?generated.*?\)\s*\n)?    #option description of where the address was generated from
+                          (?:Reason:\s*\n)?
                           (.*?)\n';                         # error message
     
-    my $email_pattern = '(.*?@(\S+))';
+    my $email_pattern = '<?(.*?@([^\s>]+))>?';
     
     my $standard_text = 'This\ is\ a\ permanent\ error.'
                         . $main_para_pattern 

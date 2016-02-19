@@ -5,14 +5,11 @@
 #
 #  Copyright (c) 2009 UK Citizens Online Democracy. All rights reserved.
 # Email: louise@mysociety.org; WWW: http://www.mysociety.org/
-#
-# $Id: HandleMail.t,v 1.17 2009-05-18 11:56:10 louise Exp $
-#
 
 use strict;
 use warnings; 
 
-use Test::More tests => 311;
+use Test::More tests => 317;
 
 # Horrible boilerplate to set up appropriate library paths.
 use FindBin;
@@ -216,6 +213,14 @@ sub test_parse_bounce(){
                         message => 'I will be out of the office starting 09/08/2008 and will not return until 09/11/2008. I will respond to your message when I return.');
                         
     expect_bounce_values('out of office', 'out-of-office.txt', %expected_values);
+
+    %expected_values = (smtp_code => undef, 
+                        message => 'delivery retry timeout exceeded',
+                        dsn_code => undef,
+                        problem => mySociety::HandleMail::ERR_TIMEOUT,
+                        email_address => 'anon@example.org', 
+                        domain => 'example.org');
+    expect_bounce_values('exim long retry mail','kundenserver.txt', %expected_values);
 
     return 1;
 }
