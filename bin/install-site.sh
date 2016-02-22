@@ -325,7 +325,8 @@ clone_or_update_repository() {
     echo -n "Cloning or updating repository... "
     # Clone the repository into place if the directory isn't already
     # present:
-    if [ -d "$REPOSITORY/.git" ]
+    # (NB we use -e instead of -d as FMS might be cloned as a submodule)
+    if [ -e "$REPOSITORY/.git" ]
     then
         if [ $DEVELOPMENT_INSTALL = true ]; then
             notice_msg skipping as development install...
