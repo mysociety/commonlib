@@ -283,6 +283,22 @@ deb-src http://security.debian.org/ wheezy/updates main non-free
 deb http://http.debian.net/debian wheezy-backports main contrib non-free
 deb-src http://http.debian.net/debian wheezy-backports main contrib non-free
 EOF
+    elif [ x"$DISTRIBUTION" = x"debian" ] && [ x"$DISTVERSION" = x"jessie" ]
+    then
+        # Install the basic packages we require:
+        cat > /etc/apt/sources.list.d/mysociety-extra.list <<EOF
+    # Debian mirror to use, including contrib and non-free:
+    deb http://http.debian.net/debian jessie main contrib non-free
+    deb-src http://http.debian.net/debian jessie main contrib non-free
+
+    # Security Updates:
+    deb http://security.debian.org/ jessie/updates non-free
+    deb-src http://security.debian.org/ jessie/updates non-free
+
+    # Debian Backports
+    deb http://http.debian.net/debian jessie-backports main contrib non-free
+    deb-src http://http.debian.net/debian jessie-backports main contrib non-free
+EOF
     else
         error_msg "Unsupported distribution and version combination $DISTRIBUTION $DISTVERSION"
         exit 1
