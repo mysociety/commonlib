@@ -166,7 +166,7 @@ echo "$HOST" > "$OLD_HOST_FILE"
 REPOSITORY="$DIRECTORY/$SITE"
 
 REPOSITORY_URL=git://github.com/mysociety/$SITE.git
-BRANCH=master
+BRANCH=use-bundler-rebased
 
 DISTRIBUTION="$(lsb_release -i -s  | tr A-Z a-z)"
 DISTVERSION="$(lsb_release -c -s)"
