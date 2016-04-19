@@ -359,6 +359,7 @@ class RABX_Client {
         } else {
             curl_setopt($this->ch, CURLOPT_URL, $u);
             curl_setopt($this->ch, CURLOPT_HTTPGET, 1);
+            curl_setopt($this->ch, CURLOPT_FOLLOWLOCATION, 1);
             /* By default curl passes a "Pragma: no-cache" header. Turn it
              * off. */
             curl_setopt($this->ch, CURLOPT_HTTPHEADER, array("Pragma: "));
