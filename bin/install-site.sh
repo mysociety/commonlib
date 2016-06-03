@@ -498,6 +498,8 @@ install_sysvinit_script() {
 install_website_packages() {
     echo "Installing packages from repository packages file... "
     EXACT_PACKAGES="$CONF_DIRECTORY/packages.$DISTRIBUTION-$DISTVERSION"
+    DIST_PACKAGES="$CONF_DIRECTORY/packages.$DISTRIBUTION"
+    FALLBACK_PACKAGES="$CONF_DIRECTORY/packages.generic"
     PRECISE_PACKAGES="$CONF_DIRECTORY/packages.ubuntu-precise"
     SQUEEZE_PACKAGES="$CONF_DIRECTORY/packages.debian-squeeze"
     GENERIC_PACKAGES="$CONF_DIRECTORY/packages"
@@ -505,6 +507,14 @@ install_website_packages() {
     if [ -e "$EXACT_PACKAGES" ]
     then
         PACKAGES_FILE="$EXACT_PACKAGES"
+    # Otherwise, if there's a file for the distribution:
+    elif [ -e "$DIST_PACKAGES" ]
+    then
+        PACKAGES_FILE="$DIST_PACKAGES"
+    # Or, if there's a fallback generic file:
+    elif [ -e "$FALLBACK_PACKAGES" ]
+    then
+        PACKAGES_FILE="$FALLBACK_PACKAGES"
     # Otherwise, if this is Ubuntu, and there's a version specifically
     # for precise, use that:
     elif [ x"$DISTRIBUTION" = x"ubuntu" ] && [ -e "$PRECISE_PACKAGES" ]
