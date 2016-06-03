@@ -502,7 +502,6 @@ install_website_packages() {
     FALLBACK_PACKAGES="$CONF_DIRECTORY/packages.generic"
     PRECISE_PACKAGES="$CONF_DIRECTORY/packages.ubuntu-precise"
     SQUEEZE_PACKAGES="$CONF_DIRECTORY/packages.debian-squeeze"
-    GENERIC_PACKAGES="$CONF_DIRECTORY/packages"
     # If there's an exact match for the distribution and release, use that:
     if [ -e "$EXACT_PACKAGES" ]
     then
@@ -526,7 +525,8 @@ install_website_packages() {
     then
         PACKAGES_FILE="$SQUEEZE_PACKAGES"
     else
-        PACKAGES_FILE="$GENERIC_PACKAGES"
+        error_msg "Could not find a packages file to use - please contribute one."
+        exit 1
     fi
     DEBIAN_FRONTEND=noninteractive \
       xargs -a "$PACKAGES_FILE" apt-get -qq -y install >/dev/null
