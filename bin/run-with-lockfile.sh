@@ -8,7 +8,7 @@
 # run-with-lockfile.c [1] but it should be substitutable in many
 # circumstances, and in addition is NFS-safe.
 
-# [1] https://secure.mysociety.org/cvstrac/fileview?f=mysociety/run-with-lockfile/run-with-lockfile.c
+# [1] https://github.com/mysociety/misc-scripts/blob/master/run-with-lockfile/run-with-lockfile.c
 
 FAIL_IF_OTHER=false
 
