@@ -60,8 +60,8 @@ module MySociety
             # http://www.whatdotheyknow.com/request/advice_sought_from_information_c#incoming-24711
             ret = ret.gsub(/( LTCODE http[\S\r\n]*? GTCODE )/) { |m| m.gsub(/[\n\r]/, "") }
 
-            ret = ret.gsub(/(https?):\/\/([^\s<>{}()]+[^\s.,<>{}()])/i, "<a href='\\1://\\2'" + (nofollow ? " rel='nofollow'" : "") + ">\\1://\\2</a>")
-            ret = ret.gsub(/(\s)www\.([a-z0-9\-]+)((?:\.[a-z0-9\-\~]+)+)((?:\/[^ <>{}()\n\r]*[^., <>{}()\n\r])?)/i,
+            ret = ret.gsub(/(https?):\/\/([^\s<>]+[^\s.,<>])/i, "<a href='\\1://\\2'" + (nofollow ? " rel='nofollow'" : "") + ">\\1://\\2</a>")
+            ret = ret.gsub(/(\s)www\.([a-z0-9\-]+)((?:\.[a-z0-9\-\~]+)+)((?:\/[^ <>\n\r]*[^., <>\n\r])?)/i,
                         "\\1<a href='http://www.\\2\\3\\4'" + (nofollow ? " rel='nofollow'" : "") + ">www.\\2\\3\\4</a>")
             if contract
                 ret = ret.gsub(/(<a href='[^']*'(?: rel='nofollow')?>)([^<]{40})[^<]{3,}<\/a>/, '\\1\\2...</a>')
@@ -81,8 +81,8 @@ module MySociety
         # get &gt; contaminated into the linked URL)
         def self.simplify_angle_bracketed_urls(text)
             ret = ' ' + text + ' '
-            #ret = ret.gsub(/(www\.[^\s<>{}()])\s+\<(https?):\/\//i, "\\1")
-            ret = ret.gsub(/(www\.[^\s<>{}()]+)\s+<http:\/\/\1>/i, "\\1")
+            #ret = ret.gsub(/(www\.[^\s<>])\s+\<(https?):\/\//i, "\\1")
+            ret = ret.gsub(/(www\.[^\s<>]+)\s+<http:\/\/\1>/i, "\\1")
             ret = ret.strip
             return ret
         end
