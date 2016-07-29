@@ -17,6 +17,20 @@ class TestFormat < Test::Unit::TestCase
     expect_clickable(text, expected)
   end
 
+  def test_make_brackets_clickable
+    text = "Hello http://www.flourish.org/page(1) goodbye"
+    expected = "Hello <a href='http://www.flourish.org/page(1)'>" \
+               "http://www.flourish.org/page(1)</a> goodbye"
+    expect_clickable(text, expected)
+  end
+
+  def test_make_curly_brackets_clickable
+    text = "Hello http://www.flourish.org/page{1} goodbye"
+    expected = "Hello <a href='http://www.flourish.org/page{1}'>" \
+               "http://www.flourish.org/page{1}</a> goodbye"
+    expect_clickable(text, expected)
+  end
+
   def test_make_wrapped_urls_in_angle_brackets_clickable
     text = """<http://www.flou
 rish.org/bl
