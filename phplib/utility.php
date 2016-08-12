@@ -297,18 +297,18 @@ function merge_spaces($text) {
 
 /* ms_make_clickable TEXT NOFOLLOW
  * Returns TEXT with obvious links made into HTML hrefs.  Set
- * NOFOLLOW to true to add rel='nofollow' to the links. */
+ * NOFOLLOW to true to add rel="nofollow" to the links. */
 // Taken from WordPress, tweaked slightly to work with , and . at end of some URLs.
 function ms_make_clickable($ret, $params = array()) {
     $nofollow = array_key_exists('nofollow', $params) && $params['nofollow']==true;
     $contract = array_key_exists('contract', $params) && $params['contract']==true;
     $ret = ' ' . $ret . ' ';
-    $ret = preg_replace("#(https?)://([^\s<>{}()]+[^\s.,<>{}()])#i", "<a href='$1://$2'" . 
-                ($nofollow ? " rel='nofollow'" : ""). ">$1://$2</a>", $ret);
+    $ret = preg_replace("#(https?)://([^\s<>{}()]+[^\s.,<>{}()])#i", "<a href=\"$1://$2\"" .
+                ($nofollow ? ' rel="nofollow"' : ""). ">$1://$2</a>", $ret);
     $ret = preg_replace("#(\s)www\.([a-z0-9\-]+)((?:\.[a-z0-9\-\~]+)+)((?:/[^ <>{}()\n\r]*[^., <>{}()\n\r])?)#i", 
-                "$1<a href='http://www.$2$3$4'" . ($nofollow ? " rel='nofollow'" : "") . ">www.$2$3$4</a>", $ret);
+                "$1<a href=\"http://www.$2$3$4\"" . ($nofollow ? ' rel="nofollow"' : "") . ">www.$2$3$4</a>", $ret);
     if ($contract)
-        $ret = preg_replace("#(<a href='[^']*'(?: rel='nofollow')?>)([^<]{40})[^<]{3,}</a>#", '$1$2...</a>', $ret);
+        $ret = preg_replace("#(<a href=\"[^\"]*\"(?: rel=\"nofollow\")?>)([^<]{40})[^<]{3,}</a>#", '$1$2...</a>', $ret);
     $ret = preg_replace("#(\s)([a-z0-9\-_.]+)@([^,< \n\r]*[^.,< \n\r])#i", "$1<a href=\"mailto:$2@$3\">$2@$3</a>", $ret);
     $ret = trim($ret);
     return $ret;
