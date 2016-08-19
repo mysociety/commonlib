@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # This script will install mySociety sites on a clean install of Debian
-# squeeze/wheezy or Ubuntu precise/trusty. It contains common code that
+# wheezy/jessie or Ubuntu precise/trusty/xenial. It contains common code that
 # starts the installation, defines functions for later use, and sources
 # a site-specific script, called either bin/site-specific-install.sh or
 # script/site-specific-install.sh.
@@ -240,7 +240,10 @@ add_postgresql_user() {
 
 update_apt_sources() {
     echo -n "Updating APT sources... "
-    if [ x"$DISTRIBUTION" = x"ubuntu" ] && [ x"$DISTVERSION" = x"trusty" ]
+    if [ x"$DISTRIBUTION" = x"ubuntu" ] && [ x"$DISTVERSION" = x"xenial" ]
+    then
+        : # Do nothing, let's see if we need multiverse
+    elif [ x"$DISTRIBUTION" = x"ubuntu" ] && [ x"$DISTVERSION" = x"trusty" ]
     then
         : # Do nothing, let's see if we need multiverse
     elif [ x"$DISTRIBUTION" = x"ubuntu" ] && [ x"$DISTVERSION" = x"precise" ]
@@ -250,22 +253,6 @@ deb http://eu-west-1.ec2.archive.ubuntu.com/ubuntu/ precise multiverse
 deb-src http://eu-west-1.ec2.archive.ubuntu.com/ubuntu/ precise multiverse
 deb http://eu-west-1.ec2.archive.ubuntu.com/ubuntu/ precise-updates multiverse
 deb-src http://eu-west-1.ec2.archive.ubuntu.com/ubuntu/ precise-updates multiverse
-EOF
-    elif [ x"$DISTRIBUTION" = x"debian" ] && [ x"$DISTVERSION" = x"squeeze" ]
-    then
-        # Install the basic packages we require:
-        cat > /etc/apt/sources.list.d/mysociety-extra.list <<EOF
-# Debian mirror to use, including contrib and non-free:
-deb http://the.earth.li/debian/ squeeze main contrib non-free
-deb-src http://the.earth.li/debian/ squeeze main contrib non-free
-
-# Security Updates:
-deb http://security.debian.org/ squeeze/updates main non-free
-deb-src http://security.debian.org/ squeeze/updates main non-free
-
-# Debian Backports
-deb http://backports.debian.org/debian-backports squeeze-backports main contrib non-free
-deb-src http://backports.debian.org/debian-backports squeeze-backports main contrib non-free
 EOF
     elif [ x"$DISTRIBUTION" = x"debian" ] && [ x"$DISTVERSION" = x"wheezy" ]
     then
@@ -311,7 +298,7 @@ update_mysociety_apt_sources() {
     echo -n "Updating mySociety APT source... "
 
     cat > /etc/apt/sources.list.d/mysociety-debian.list <<EOF
-deb http://debian.mysociety.org squeeze main
+deb http://debian.mysociety.org wheezy main
 EOF
 
     if [ x"$DISTRIBUTION" = x"debian" ] && [ x"$DISTVERSION" = x"wheezy" ]
