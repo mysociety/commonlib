@@ -413,13 +413,19 @@ install_nginx() {
 }
 
 install_postgis() {
-    if [ x"$DISTRIBUTION" = x"ubuntu" ] && [ x"$DISTVERSION" = x"trusty" ]
+    VERSION_POSTGIS=$(dpkg-query -W -f '${Version}\n' postgresql-*-postgis*|sort -rV|head -1)
+    if [ 2.0 = "$(printf '2.0\n%s\n' "$VERSION_POSTGIS" | sort -V | head -1)" ]
+    then POSTGIS_TWO=Yes
+    else POSTGIS_TWO=No
+    fi
+
+    if [ $POSTGIS_TWO = Yes ]
     then
-        # On trusty, we have Postgresql >= 9.1 (9.3) *and* PostGIS >= 2.0
+        # On trusty+, jessie+, we have Postgresql >= 9.1 *and* PostGIS >= 2.0
         # and so PostGIS support should be installed with "CREATE EXTENSION
         # postgis; CREATE EXTENSION postgis_topology;" instead. (So this
-        # condition would arguably be better written as a condition on
-        # those two versions.)
+        # condition would arguably be better written as a condition on those
+        # two versions.)
         echo "PostGIS support should already be available."
     else
         echo -n "Installing PostGIS... "
