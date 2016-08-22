@@ -198,7 +198,7 @@ add_locale() {
                 notice_msg generating...
             else
                 notice_msg adding and generating...
-                echo "\n$1.UTF-8 UTF-8" >> /etc/locale.gen
+                printf "\n$1.UTF-8 UTF-8\n" >> /etc/locale.gen
             fi
             locale-gen
         fi
