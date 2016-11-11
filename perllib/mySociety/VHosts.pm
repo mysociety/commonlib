@@ -47,7 +47,7 @@ sub _load_entries_from_file {
       || croak "Could not read content from $vhost_file";
 
     # Eval the contents to set the variables
-    my ( $sites, $vhosts, $databases );
+    our ( $sites, $vhosts, $databases );
     eval $vhosts_content;
 
     # check for any errors
