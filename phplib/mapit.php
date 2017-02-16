@@ -68,6 +68,7 @@ function mapit_call($url, $params, $opts = array(), $errors = array()) {
         if ($qs) $urlp .= "?$qs";
         curl_setopt($mapit_ch, CURLOPT_URL, OPTION_MAPIT_URL . $urlp);
         curl_setopt($mapit_ch, CURLOPT_HTTPGET, 1);
+        curl_setopt($mapit_ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($mapit_ch, CURLOPT_HTTPHEADER, array("Pragma: "));
     }
 
