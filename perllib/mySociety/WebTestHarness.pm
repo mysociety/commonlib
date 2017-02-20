@@ -538,6 +538,7 @@ sub _browser_html_hook ($) {
 sub _browser_debug_content ($) {
     my ($self) = @_;
     my ($fh, $filename) = File::Temp::tempfile( DIR => $self->{tempdir}, SUFFIX => '.html');
+    binmode $fh, ':encoding(UTF-8)';
     print $fh $self->{useragent}->content();
     close $fh;
     return $filename;
