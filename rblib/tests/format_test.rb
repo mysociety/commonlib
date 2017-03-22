@@ -24,6 +24,23 @@ class TestFormat < Test::Unit::TestCase
     expect_clickable(text, expected)
   end
 
+  def test_make_brackets_in_brackets_clickable
+    text = "The documentation (http://www.flourish.org/page(1)) has the answer"
+    expected = 'The documentation (<a href="http://www.flourish.org/page(1)">' \
+               'http://www.flourish.org/page(1)</a>) has the answer'
+    expect_clickable(text, expected)
+
+    text = "The documentation (http://www.flourish.org/page(1))) has the answer"
+    expected = 'The documentation (<a href="http://www.flourish.org/page(1)">' \
+               'http://www.flourish.org/page(1)</a>)) has the answer'
+    expect_clickable(text, expected)
+
+    text = "The documentation ((http://www.flourish.org/page(1)) has the answer"
+    expected = 'The documentation ((<a href="http://www.flourish.org/page(1)">' \
+               'http://www.flourish.org/page(1)</a>) has the answer'
+    expect_clickable(text, expected)
+  end
+
   def test_make_curly_brackets_clickable
     text = "Hello http://www.flourish.org/page{1} goodbye"
     expected = 'Hello <a href="http://www.flourish.org/page{1}">' \
@@ -40,6 +57,9 @@ More stuff and then another angle bracket >"""
     expected = "&lt;<a href=\"http://www.flourish.org/blog\">http://www.flourish.org/blog</a>&gt;\n\nMore stuff and then another angle bracket &gt;"
     expect_clickable(text, expected)
 
+    # text with 2 embedded links, one with an https link and one plain http
+    # to force the test to check whether the protocol part of the link is being
+    # matched and reassembled properly by make_clickable
     text = """<https://web.nhs.net/owa/redir.aspx?C=25a8af7e66054d62a435313f7f3d4694&URL=h
 ttp%3a%2f%2fwww.ico.gov.uk%2fupload%2fdocuments%2flibrary%2ffreedom_of_infor
 mation%2fdetailed_specialist_guides%2fname_of_applicant_fop083_v1.pdf> Valid
@@ -49,7 +69,7 @@ If we can be of any further assistance please contact our Helpline on 08456
 30 60 60 or 01625 545745 if you would prefer to call a national rate number,
 quoting your case reference number. You may also find some useful
 information on our website at
-<https://web.nhs.net/owa/redir.aspx?C=25a8af7e66054d62a435313f7f3d4694&URL=h
+<http://web.nhs.net/owa/redir.aspx?C=25a8af7e66054d62a435313f7f3d4694&URL=h
 ttp%3a%2f%2fwww.ico.gov.uk%2f> www.ico.gov.uk."""
 
     expected = """&lt;<a href=\"https://web.nhs.net/owa/redir.aspx?C=25a8af7e66054d62a435313f7f3d4694&amp;URL=http%3a%2f%2fwww.ico.gov.uk%2fupload%2fdocuments%2flibrary%2ffreedom_of_information%2fdetailed_specialist_guides%2fname_of_applicant_fop083_v1.pdf\">https://web.nhs.net/owa/redir.aspx?C=25a8af7e66054d62a435313f7f3d4694&amp;URL=http%3a%2f%2fwww.ico.gov.uk%2fupload%2fdocuments%2flibrary%2ffreedom_of_information%2fdetailed_specialist_guides%2fname_of_applicant_fop083_v1.pdf</a>&gt; Valid
@@ -59,7 +79,7 @@ If we can be of any further assistance please contact our Helpline on 08456
 30 60 60 or 01625 545745 if you would prefer to call a national rate number,
 quoting your case reference number. You may also find some useful
 information on our website at
-&lt;<a href=\"https://web.nhs.net/owa/redir.aspx?C=25a8af7e66054d62a435313f7f3d4694&amp;URL=http%3a%2f%2fwww.ico.gov.uk%2f\">https://web.nhs.net/owa/redir.aspx?C=25a8af7e66054d62a435313f7f3d4694&amp;URL=http%3a%2f%2fwww.ico.gov.uk%2f</a>&gt; <a href=\"http://www.ico.gov.uk\">www.ico.gov.uk</a>."""
+&lt;<a href=\"http://web.nhs.net/owa/redir.aspx?C=25a8af7e66054d62a435313f7f3d4694&amp;URL=http%3a%2f%2fwww.ico.gov.uk%2f\">http://web.nhs.net/owa/redir.aspx?C=25a8af7e66054d62a435313f7f3d4694&amp;URL=http%3a%2f%2fwww.ico.gov.uk%2f</a>&gt; <a href=\"http://www.ico.gov.uk\">www.ico.gov.uk</a>."""
     expect_clickable(text, expected)
 
   end

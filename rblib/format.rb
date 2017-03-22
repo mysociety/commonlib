@@ -61,7 +61,31 @@ module MySociety
             # http://www.whatdotheyknow.com/request/advice_sought_from_information_c#incoming-24711
             ret = ret.gsub(/( LTCODE http[\S\r\n]*? GTCODE )/) { |m| m.gsub(/[\n\r]/, "") }
 
-            ret = ret.gsub(/(https?):\/\/([^\s<>]+[^\s.,<>])/i, '<a href="\\1://\\2"' + (nofollow ? ' rel="nofollow"' : "") + ">\\1://\\2</a>")
+            # Pull out the urls
+            matches = ret.scan(/(https?):\/\/([^\s<>]+[^\s.,<>])/i)
+            extras = []
+            urls = []
+
+            # In a perfect world, we'd be able to use lookbehind to work out
+            # whether the brackets match but Ruby only does immediate lookbehind
+            # so...
+            #
+            # drop the closing bracket off the end until we no longer have more
+            # closing than opening brackets or the last char is not a bracket
+            matches.each do |match|
+                url = match[1]
+                extra = ""
+                while url.count(')') > url.count('(') && url[-1] == ")"
+                    url = url[0..-2]
+                    extra = "#{extra})"
+                end
+                urls << url
+                extras << extra
+            end
+
+            ret = ret.gsub(/(https?):\/\/([^\s<>]+[^\s.,<>])/i).with_index do | m, i |
+               %Q|<a href="#{$1}://#{urls[i]}"| + (nofollow ? ' rel="nofollow"' : "") + ">#{$1}://#{urls[i]}</a>#{extras[i]}"
+            end
             ret = ret.gsub(/(\s)www\.([a-z0-9\-]+)((?:\.[a-z0-9\-\~]+)+)((?:\/[^ <>\n\r]*[^., <>\n\r])?)/i,
                         '\\1<a href="http://www.\\2\\3\\4"' + (nofollow ? ' rel="nofollow"' : "") + ">www.\\2\\3\\4</a>")
             if contract
