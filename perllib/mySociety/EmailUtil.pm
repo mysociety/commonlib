@@ -17,7 +17,7 @@ use mySociety::Config;
 BEGIN {
     use Exporter ();
     our @ISA = qw(Exporter);
-    our @EXPORT_OK = qw(&is_valid_email &send_email &set_smarthost);
+    our @EXPORT_OK = qw(&is_valid_email &is_valid_email_list &send_email &set_smarthost);
 }
 our @EXPORT_OK;
 
@@ -75,7 +75,7 @@ sub is_valid_email ($) {
 
         $is_valid_address_re = "^$local_part\\s*@\\s*$domain\$";
     }
-    
+
     if ($addr =~ m#$is_valid_address_re#) {
         return 1;
     } else {
@@ -83,6 +83,25 @@ sub is_valid_email ($) {
     }
 }
 
+
+=item is_valid_email_list ADDRESSES
+
+Takes a string containing one or more comma-separated email addresses and calls
+is_valid_email on each, returning success iff they're all valid.
+
+=cut
+
+sub is_valid_email_list ($) {
+    my $addresses = shift;
+
+    my @emails = split(/,/, $addresses);
+    for my $email ( @emails ) {
+        unless ( is_valid_email( $email ) ) {
+            return 0;
+        }
+    }
+    return 1;
+}
 
 use constant EMAIL_SUCCESS => 0;
 use constant EMAIL_SOFT_ERROR => 1;
