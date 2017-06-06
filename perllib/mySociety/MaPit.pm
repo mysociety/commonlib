@@ -37,6 +37,9 @@ sub _call ($$;$) {
     unless ($ua) {
         $ua = new LWP::UserAgent();
         $ua->agent("MaPit.pm web service client");
+        if (my $api_key = mySociety::Config::get('MAPIT_API_KEY')) {
+            $ua->default_header("X-Api-Key", $api_key);
+        }
     }
     configure() unless $base;
     $params = join(',', @$params) if ref $params;
