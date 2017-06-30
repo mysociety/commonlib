@@ -1,9 +1,9 @@
 #!/bin/sh
 
 # This script will install mySociety sites on a clean install of Debian
-# wheezy/jessie or Ubuntu precise/trusty/xenial. It contains common code that
-# starts the installation, defines functions for later use, and sources
-# a site-specific script, called either bin/site-specific-install.sh or
+# wheezy/jessie/stretch or Ubuntu precise/trusty/xenial. It contains common
+# code that starts the installation, defines functions for later use, and
+# sources a site-specific script, called either bin/site-specific-install.sh or
 # script/site-specific-install.sh.
 
 # WARNING: This script makes significant changes to the server’s setup,
@@ -240,13 +240,7 @@ add_postgresql_user() {
 
 update_apt_sources() {
     echo -n "Updating APT sources... "
-    if [ x"$DISTRIBUTION" = x"ubuntu" ] && [ x"$DISTVERSION" = x"xenial" ]
-    then
-        : # Do nothing, let's see if we need multiverse
-    elif [ x"$DISTRIBUTION" = x"ubuntu" ] && [ x"$DISTVERSION" = x"trusty" ]
-    then
-        : # Do nothing, let's see if we need multiverse
-    elif [ x"$DISTRIBUTION" = x"ubuntu" ] && [ x"$DISTVERSION" = x"precise" ]
+    if [ x"$DISTRIBUTION" = x"ubuntu" ] && [ x"$DISTVERSION" = x"precise" ]
     then
         cat > /etc/apt/sources.list.d/mysociety-extra.list <<EOF
 deb http://eu-west-1.ec2.archive.ubuntu.com/ubuntu/ precise multiverse
@@ -254,6 +248,12 @@ deb-src http://eu-west-1.ec2.archive.ubuntu.com/ubuntu/ precise multiverse
 deb http://eu-west-1.ec2.archive.ubuntu.com/ubuntu/ precise-updates multiverse
 deb-src http://eu-west-1.ec2.archive.ubuntu.com/ubuntu/ precise-updates multiverse
 EOF
+    elif [ x"$DISTRIBUTION" = x"ubuntu" ]
+    then
+        : # Do nothing on other Ubuntu versions, let's see if we need multiverse
+    elif [ x"$DISTRIBUTION" = x"debian" ] && [ x"$DISTVERSION" = x"stretch" ]
+    then
+        : # Do nothing, assume we don't need contrib/non-free first off
     elif [ x"$DISTRIBUTION" = x"debian" ] && [ x"$DISTVERSION" = x"wheezy" ]
     then
         # Install the basic packages we require:
