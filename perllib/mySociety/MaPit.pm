@@ -13,6 +13,7 @@ use strict;
 use Encode;
 use JSON::MaybeXS;
 use LWP::UserAgent;
+use Try::Tiny;
 use mySociety::Config;
 
 =item configure [URL]
@@ -33,7 +34,8 @@ sub configure (;$) {
 my $ua;
 
 # Calls MapIt, returns the decoded JSON.
-# I do it properly with HTTP status codes, then I just ignore them!
+# MapIt returns proper HTTP status codes, but this ignores them and passes the
+# result through, assuming error will also be provided in the JSON body.
 sub call ($$;%) {
     my ($url, $params, %opts) = @_;
 
@@ -45,7 +47,7 @@ sub call ($$;%) {
     }
     configure() unless $base;
 
-    $params = join(',', @$params) if ref $params;
+    $params = get_opts_str($params);
     my ($urlp, $after) = split '/', $url, 2;
     $urlp .= "/$params" if $params;
     $urlp .= "/$after" if $after;
@@ -53,13 +55,7 @@ sub call ($$;%) {
         $opts{URL} = $params;
     }
 
-    my $qs = '';
-    foreach my $k (keys %opts) {
-        my $v = $opts{$k};
-        $v = join(',', @$v) if ref $v;
-        $qs .= $qs ? ';' : '';
-        $qs .= "$k=$v";
-    }
+    my $qs = join ';', map { $_ . '=' . get_opts_str($opts{$_}) } keys %opts;
 
     my $r;
     $qs = encode_utf8($qs) if utf8::is_utf8($qs);
@@ -73,11 +69,29 @@ sub call ($$;%) {
         $r = $ua->get($base . $urlp);
     }
 
-    my $j = JSON->new->utf8->allow_nonref->decode($r->content);
+    my $j = JSON->new->utf8->allow_nonref;
+    try {
+        $j = $j->decode($r->content);
+    } catch {
+        # Assume an error decoding the content as JSON
+        my @caller = caller(2); # 0 is catch(), 1 is try()
+        my $e = "The call to $base$urlp at line $caller[2] of $caller[0] failed";
+        $e .= '; it returned HTML' if $r->content_type =~ /html/;
+        $e .= '; rate limit exceeded' if $r->code == 429;
+        die $e;
+    };
     if (ref($j) eq 'HASH') {
         delete $j->{debug_db_queries};
     }
     return $j;
+}
+
+# Given a string, returns it; given an arrayref, returns
+# a string of its elements joined with ','.
+sub get_opts_str {
+    my $o = shift;
+    return join(',', @$o) if ref $o;
+    return $o;
 }
 
 1;
