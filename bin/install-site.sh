@@ -253,7 +253,12 @@ EOF
         : # Do nothing on other Ubuntu versions, let's see if we need multiverse
     elif [ x"$DISTRIBUTION" = x"debian" ] && [ x"$DISTVERSION" = x"stretch" ]
     then
-        : # Do nothing, assume we don't need contrib/non-free first off
+        # Install the basic packages we require:
+        cat > /etc/apt/sources.list.d/mysociety-extra.list <<EOF
+# Debian mirror to use, including contrib and non-free:
+deb http://the.earth.li/debian/ stretch main contrib non-free
+deb-src http://the.earth.li/debian/ stretch main contrib non-free
+EOF
     elif [ x"$DISTRIBUTION" = x"debian" ] && [ x"$DISTVERSION" = x"wheezy" ]
     then
         # Install the basic packages we require:
