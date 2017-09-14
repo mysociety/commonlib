@@ -24,6 +24,7 @@
 # passed down to site specific scripts so they can e.g. not install nginx.
 
 set -e
+set -x
 error_msg() { printf "\033[31m%s\033[0m\n" "$*"; }
 notice_msg() { printf "\033[33m%s\033[0m " "$*"; }
 done_msg() { printf "\033[32m%s\033[0m\n" "$*"; }
