@@ -341,7 +341,7 @@ clone_or_update_repository() {
             notice_msg updating...
             cd $REPOSITORY
             git remote set-url origin "$REPOSITORY_URL"
-            git fetch origin
+            git fetch --tags origin
             # Check that there are no uncommitted changes before doing a
             # git reset --hard:
             git diff --quiet || { echo "There were changes in the working tree in $REPOSITORY; exiting."; exit 1; }
