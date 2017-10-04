@@ -60,15 +60,12 @@ sub find_php () {
 sub read_config_from_yaml($) {
     my ($f) = @_;
 
-    open my $fh, "<", $f or throw Error::Simple "$f: failed to open config file: $!";
-    my $file_contents = join("", <$fh>);
-    my $conf = YAML::Load($file_contents);
+    my $conf = YAML::LoadFile($f);
 
     if (ref($conf) ne "HASH") {
         throw Error::Simple "$f: The YAML file must represent an object (a.k.a. hash, dict, map)";
     }
 
-    close $fh;
     return $conf;
 }
 
