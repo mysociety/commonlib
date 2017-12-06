@@ -219,7 +219,7 @@ sub wire_wr ($$) {
         # Format is A . number of keys . key . value . key . value ...
         $h->print('A');
         netstring_wr(scalar(keys %$ref), $h);
-        foreach (keys %$ref) {
+        foreach (sort keys %$ref) {
             wire_wr($_, $h);
             wire_wr($ref->{$_}, $h);
         }
