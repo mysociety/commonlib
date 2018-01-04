@@ -12,8 +12,11 @@
 import os
 import subprocess
 import re
-import simplejson
 import urllib
+try:
+    import json
+except ImportError:
+    import simplejson as json
 
 class RABXException(Exception):
     def __init__(self, value, text, extradata):
@@ -38,7 +41,7 @@ def call_rest_rabx(base_url, params_init):
     params_joined = "/".join(params_quoted)
     url = base_url.replace(".cgi", "-rest.cgi") + "?" + params_joined
     content = urllib.urlopen(url).read()
-    result = simplejson.loads(content)
+    result = json.loads(content)
     if 'error_value' in result:
         raise RABXException(result['error_value'], result['error_text'], result.get('error_extradata'))
     return result
