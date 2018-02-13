@@ -177,7 +177,7 @@ IP_ADDRESS_FOR_HOST="$(dig +short $HOST)"
 if [ x = x"$IP_ADDRESS_FOR_HOST" ]
 then
     error_msg "The hostname $HOST didn't resolve to an IP address"
-    exit 1
+    # exit 1
 fi
 echo $DONE_MSG
 
