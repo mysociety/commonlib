@@ -578,6 +578,7 @@ sub get_problem_from_message($){
                             'does not exist', 
                             'does not have their email address registered',
                             'email address for typos',
+                            'email address could not be found',
                             'e-mail address is not handled by this system',
                             'invalid (recipient|address|user|mailbox)',
                             'mail to that recipient is not accepted',
@@ -603,6 +604,7 @@ sub get_problem_from_message($){
     my $no_user_pattern = join('|', @no_user_synonyms);
        
     my @no_relay_synonyms = ('as a relay', 
+                             'domain is not hosted here',
                              'no valid cert for gatewaying', 
                              'not configured to relay mail',
                              'relay access denied',
@@ -652,6 +654,8 @@ sub get_problem_from_message($){
                                         'recipient has left',
                                         'recipient undeliverable',
                                         'recipient domain invalid',
+                                        'recipient suspended',
+                                        'dd requested mail action aborted',
                                         'user account is unavailable',
                                         'user account not activated', 
                                         'user disabled',
@@ -661,6 +665,7 @@ sub get_problem_from_message($){
     my @unrouteable_synonyms = ('all relevant mx records point to non-existent hosts', 
                                 'an mx or srv record indicated no smtp service',
                                 "domain isn't in my list of allowed rcpthosts",
+                                'unable to find the recipient domain',
                                 'unrouteable', 
                                 'couldn\'t find any host',
                                 'unroutable address');
@@ -676,6 +681,7 @@ sub get_problem_from_message($){
                          'bounced by server content filter',
                          'delivery not authorized, message refused',
                          'client host rejected: access denied',
+                         'confirmed junk email',
                          'denied by policy',
                          'does not have a valid MX DNS record',
                          'does not have permissions to submit to this server',
@@ -694,6 +700,7 @@ sub get_problem_from_message($){
                          'not accepting mail from',
                          'penalty box error',
                          'policy violation',
+                         'quarantine',
                          'rejected as spam',
                          'rejected due to security policies', 
                          'rejected for policy reasons',
@@ -716,6 +723,7 @@ sub get_problem_from_message($){
     my $verification_failed_pattern = join('|', @verification_failed_synonyms);
     
     my @message_refused_synonyms = ('unable to deliver to',
+                                    'I cannot deliver mail for',
                                     'Administrative prohibition',
                                     '^Rejected\.?$');
     my $message_refused_pattern = join('|', @message_refused_synonyms);
