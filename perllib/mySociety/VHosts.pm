@@ -126,26 +126,42 @@ sub all_vhosts_backup_dirs {
 
         my $vhost      = $self->vhost($vhost_name);
         my $vhost_base = "/data/vhost/$vhost_name";
+        my $nfs_base   = "/export/vhost/$vhost_name";
         my $site = $self->site($vhost->{site});
 
         next if $vhost->{staging}; # Don't backup staging sites
 
         my @backup_dirs = @{ $vhost->{backup_dirs} || $site->{backup_dirs} || [] };
+        my @shared_dirs = @{ $vhost->{shared_dirs} || [] };
         foreach my $dir (@backup_dirs) {
+
+            # Let's assume this will be a local backup.
+            my $servers = $vhost->{servers};
+            my $base    = $vhost_base;
+
+            # Is our backup directory on NFS?
+            # If so, we should back-up from there and not the app server.
+            foreach my $shared_dir (@shared_dirs) {
+                my($server,$export) = split /:/, $shared_dir;
+                if ($dir eq $export) {
+                    $servers = [ "$server" ];
+                    $base    = $nfs_base;
+                }
+            }
 
             # TODO - add '->resolve' below once the Path::Class
             # shipped by debian is less ancient
 
             if ( $make_dirs_absolute && !dir($dir)->is_absolute ) {
-                $dir = dir($dir)             #
-                  ->absolute($vhost_base)    # absolute based on vhost dir
-                  ->stringify;               # make it a string
+                $dir = dir($dir)        #
+                  ->absolute($base)     # absolute based on vhost or export dir
+                  ->stringify;          # make it a string
             }
 
             push @entries,
               {
                 vhost   => $vhost_name,
-                servers => $vhost->{servers},
+                servers => $servers,
                 dir     => $dir,
               };
         }
