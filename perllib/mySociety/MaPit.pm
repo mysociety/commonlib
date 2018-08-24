@@ -28,6 +28,7 @@ my $base;
 sub configure (;$) {
     $base = shift;
     $base = mySociety::Config::get('MAPIT_URL') if !defined($base);
+    $base = encode_utf8($base) if utf8::is_utf8($base);
     $base .= '/' unless $base =~ m{/$};
 }
 
