@@ -165,8 +165,8 @@ echo "$HOST" > "$OLD_HOST_FILE"
 
 REPOSITORY="$DIRECTORY/$SITE"
 
-REPOSITORY_URL=git://github.com/mysociety/$SITE.git
-BRANCH=master
+REPOSITORY_URL=${REPOSITORY_URL_OVERRIDE:-git://github.com/mysociety/${SITE}.git}
+BRANCH=${BRANCH_OVERRIDE:-master}
 
 DISTRIBUTION="$(lsb_release -i -s  | tr A-Z a-z)"
 DISTVERSION="$(lsb_release -c -s)"
