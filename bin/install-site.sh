@@ -13,7 +13,7 @@
 
 # The usage is:
 #
-#   install-site.sh [--dev] [--default] SITE-NAME UNIX-USER [HOST]
+#   install-site.sh [--dev] [--default] [--docker] SITE-NAME UNIX-USER [HOST]
 #
 # ... where --default means to install as the default site for this
 # server, rather than a virtualhost for HOST.  HOST is only optional
@@ -22,6 +22,10 @@
 # --dev will work from a checkout of the repository in your current directory,
 # (it will check it out if not present, do nothing if it is), and will be
 # passed down to site specific scripts so they can e.g. not install nginx.
+#
+# --docker will set some further variables (including --default) to prevent
+# installing additional software into the image.
+#
 
 set -e
 error_msg() { printf "\033[31m%s\033[0m\n" "$*"; }
@@ -64,12 +68,26 @@ then
     shift
 fi
 
+DOCKER=false
+INSTALL_DB=true
+INSTALL_POSTFIX=true
+if [ x"$1" = x"--docker" ]
+then
+    DOCKER=true
+    INSTALL_DB=false
+    DEFAULT_SERVER=true
+    shift
+fi
+
 usage_and_exit() {
     cat >&2 <<EOUSAGE
-Usage: $0 [--default] <SITE-NAME> <UNIX-USER> [HOST]
+Usage: $0 [--dev] [--default] [--docker] <SITE-NAME> <UNIX-USER> [HOST]
 HOST is only optional if you are running this on an EC2 instance.
 --default means to install as the default site for this server,
 rather than a virtualhost for HOST.
+--dev sets things up for a local development environment.
+--docker is intended when running this script from a Dockerfile and
+sets a number of other local variables controlling behaviour.
 EOUSAGE
     exit 1
 }
@@ -84,7 +102,13 @@ UNIX_USER="$2"
 
 case "$SITE" in
     fixmystreet | mapit | theyworkforyou | pombola | alaveteli)
-        echo ==== Installing $SITE;;
+        if [ $DOCKER = true ] && [ "$SITE" != 'fixmystreet' ]; then
+            echo Installing $SITE using Docker is not currently supported.
+            exit 1
+        else
+            echo ==== Installing $SITE
+        fi
+        ;;
     *)
         echo Installing $SITE with this script is not currently supported.
         exit 1;;
