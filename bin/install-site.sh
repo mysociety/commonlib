@@ -513,19 +513,26 @@ install_sysvinit_script() {
     sed -i "s,/var/www/$SITE,$DIRECTORY,g" $SYSVINIT_FILENAME
     sed -i "s/^ *USER=.*/USER=$UNIX_USER/" $SYSVINIT_FILENAME
     chmod a+rx $SYSVINIT_FILENAME
-    update-rc.d $SITE start 20 2 3 4 5 . stop 20 0 1 6 .
-    /etc/init.d/$SITE restart
+    update-rc.d $SITE defaults
+    if [ ! "$DOCKER" = true ]; then
+        # We don't want to try and start services during the build.
+        /etc/init.d/$SITE restart
+    fi
 }
 
 install_website_packages() {
     echo "Installing packages from repository packages file... "
+    DOCKER_PACKAGES="$CONF_DIRECTORY/packages.docker"
     EXACT_PACKAGES="$CONF_DIRECTORY/packages.$DISTRIBUTION-$DISTVERSION"
     DIST_PACKAGES="$CONF_DIRECTORY/packages.$DISTRIBUTION"
     FALLBACK_PACKAGES="$CONF_DIRECTORY/packages.generic"
     PRECISE_PACKAGES="$CONF_DIRECTORY/packages.ubuntu-precise"
     SQUEEZE_PACKAGES="$CONF_DIRECTORY/packages.debian-squeeze"
-    # If there's an exact match for the distribution and release, use that:
-    if [ -e "$EXACT_PACKAGES" ]
+    # Docker override, global for now.
+    if [ $DOCKER = true ] && [ -e "$DOCKER_PACKAGES" ]; then
+        PACKAGES_FILE="$DOCKER_PACKAGES"
+    # Otherwise, if there's an exact match for the distribution and release, use that:
+    elif [ -e "$EXACT_PACKAGES" ]
     then
         PACKAGES_FILE="$EXACT_PACKAGES"
     # Otherwise, if there's a file for the distribution:
