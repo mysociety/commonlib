@@ -225,7 +225,7 @@ clone_or_update_repository() {
     # present:
     if [ -d "$REPOSITORY/.git" ]
     then
-        if [ $DEVELOPMENT_INSTALL = true ]; then
+        if [ "$DEVELOPMENT_INSTALL" = true ]; then
             notice_msg skipping as development install...
         else
             notice_msg updating...
@@ -351,7 +351,7 @@ add_website_to_nginx() {
         DEFAULT_SERVER_OPTION=default_server
     fi
     NGINX_SITE="$HOST"
-    if [ $DEFAULT_SERVER = true ]
+    if [ "$DEFAULT_SERVER" = true ]
     then
         NGINX_SITE=default
     fi
@@ -359,7 +359,7 @@ add_website_to_nginx() {
     NGINX_SITE_LINK=/etc/nginx/sites-enabled/"$NGINX_SITE"
     cp $CONF_DIRECTORY/nginx.conf.example $NGINX_SITE_FILENAME
     sed -i "s,/var/www/$SITE,$DIRECTORY," $NGINX_SITE_FILENAME
-    if [ $DEFAULT_SERVER = true ]
+    if [ "$DEFAULT_SERVER" = true ]
     then
         sed -i "s/^.*listen 80.*$/    listen 80 $DEFAULT_SERVER_OPTION;/" $NGINX_SITE_FILENAME
     else
@@ -375,7 +375,7 @@ add_website_to_nginx() {
 
 install_sysvinit_script() {
     SYSVINIT_FILENAME=/etc/init.d/$SITE
-    if [ $DOCKER = true ] && [ -e $CONF_DIRECTORY/sysvinit.docker.example ]; then
+    if [ "$DOCKER" = true ] && [ -e $CONF_DIRECTORY/sysvinit.docker.example ]; then
         cp $CONF_DIRECTORY/sysvinit.docker.example $SYSVINIT_FILENAME
     else
         cp $CONF_DIRECTORY/sysvinit.example $SYSVINIT_FILENAME
@@ -399,7 +399,7 @@ install_website_packages() {
     PRECISE_PACKAGES="$CONF_DIRECTORY/packages.ubuntu-precise"
     SQUEEZE_PACKAGES="$CONF_DIRECTORY/packages.debian-squeeze"
     # Docker override, global for now.
-    if [ $DOCKER = true ] && [ -e "$DOCKER_PACKAGES" ]; then
+    if [ "$DOCKER" = true ] && [ -e "$DOCKER_PACKAGES" ]; then
         PACKAGES_FILE="$DOCKER_PACKAGES"
     # Otherwise, if there's an exact match for the distribution and release, use that:
     elif [ -e "$EXACT_PACKAGES" ]
