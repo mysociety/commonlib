@@ -192,20 +192,25 @@ EOF
 update_mysociety_apt_sources() {
     echo -n "Updating mySociety APT source... "
 
+    # We build packages targetted at Debian releases.
+    # Try and select the most appropritate ones for Ubuntu.
+    case $DISTVERSION in
+      xenial|yakkety|zesty|artful|stretch)
+        REPODIST=stretch
+        ;;
+      jessie)
+        REPODIST=jessie
+        ;;
+      *)
+        REPODIST=wheezy
+        ;;
+    esac
+
     cat > /etc/apt/sources.list.d/mysociety-debian.list <<EOF
-deb http://debian.mysociety.org wheezy main
+deb http://debian.mysociety.org $REPODIST main
 EOF
 
-    if [ x"$DISTRIBUTION" = x"debian" ] && [ x"$DISTVERSION" = x"wheezy" ]
-      then
-        cat > /etc/apt/preferences <<EOF
-Package: *
-Pin: origin debian.mysociety.org
-Pin-Priority: 50
-EOF
-    fi
-
-    if [ x"$DISTRIBUTION" = x"ubuntu" ] && [ x"$DISTVERSION" = x"precise" ]
+    if [ x"$DISTVERSION" = x"wheezy" ] || [ x"$DISTVERSION" = x"precise" ]
       then
         cat > /etc/apt/preferences <<EOF
 Package: *
