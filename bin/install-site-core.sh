@@ -12,7 +12,7 @@
 
 # The usage is:
 #
-#   install-site.sh [--dev] [--default] [--docker] SITE-NAME UNIX-USER [HOST]
+#   install-site.sh [--dev] [--default] [--systemd] [--docker] SITE-NAME UNIX-USER [HOST]
 #
 # ... where --default means to install as the default site for this
 # server, rather than a virtualhost for HOST.  HOST is only optional
@@ -21,6 +21,9 @@
 # --dev will work from a checkout of the repository in your current directory,
 # (it will check it out if not present, do nothing if it is), and will be
 # passed down to site specific scripts so they can e.g. not install nginx.
+#
+# --systemd will check for and use a native systemd unit file if a suitable
+# template is provided in the source repository.
 #
 # --docker will set some further variables (including --default) to prevent
 # installing additional software into the image.
@@ -62,6 +65,13 @@ then
     shift
 fi
 
+SYSTEMD=false
+if [ x"$1" = x"--systemd" ]
+then
+    SYSTEMD=true
+    shift
+fi
+
 DOCKER=false
 INSTALL_DB=true
 INSTALL_POSTFIX=true
@@ -75,13 +85,14 @@ fi
 
 usage_and_exit() {
     cat >&2 <<EOUSAGE
-Usage: $0 [--dev] [--default] [--docker] <SITE-NAME> <UNIX-USER> [HOST]
+Usage: $0 [--dev] [--default] [--docker] [--systemd] <SITE-NAME> <UNIX-USER> [HOST]
 HOST is only optional if you are running this on an EC2 instance.
 --default means to install as the default site for this server,
 rather than a virtualhost for HOST.
 --dev sets things up for a local development environment.
 --docker is intended when running this script from a Dockerfile and
 sets a number of other local variables controlling behaviour.
+--systemd try and use a native systemd unit file rather than a sysvinit script.
 EOUSAGE
     exit 1
 }
