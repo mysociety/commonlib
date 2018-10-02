@@ -374,7 +374,7 @@ add_website_to_nginx() {
     fi
     ln -nsf "$NGINX_SITE_FILENAME" "$NGINX_SITE_LINK"
     make_log_directory
-    /etc/init.d/nginx restart >/dev/null
+    /usr/sbin/service nginx restart >/dev/null
     echo $DONE_MSG
 }
 
@@ -397,7 +397,7 @@ install_sysvinit_script() {
     fi
     if [ ! "$DOCKER" = true ]; then
         # We don't want to try and start services during the build.
-        /sbin/service $SITE restart
+        /usr/sbin/service $SITE restart
     fi
 }
 
@@ -454,7 +454,7 @@ overwrite_rc_local() {
 #!/bin/sh -e
 
 su -l -c '$EC2_REWRITE' $UNIX_USER
-/etc/init.d/$SITE restart
+/usr/sbin/service $SITE restart
 
 exit 0
 EOF
