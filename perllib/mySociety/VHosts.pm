@@ -99,10 +99,13 @@ sub _entry {
 
 =head2 all_vhosts_backup_dirs
 
-    $entry_list = $vhosts->all_vhosts_backup_dirs();
+    $entry_list = $vhosts->all_vhosts_backup_dirs({nfs_server => 'hostname'});
 
 Returns all the directories (with absolute paths) that need to be backed up
 as an arrayref of entries.
+
+Things listed in shared_dirs will be backed up from the location specified in
+the nfs_server arugment.
 
     $entry_list = [
         {
@@ -118,6 +121,9 @@ sub all_vhosts_backup_dirs {
     my $self    = shift;
     my $args    = shift || {};
     my @entries = ();
+
+    # Arguments
+    my $nfs_server = $args->{nfs_server} || 'nfs';
 
     # flags
     my $make_dirs_absolute = 1;
@@ -142,7 +148,13 @@ sub all_vhosts_backup_dirs {
             # Is our backup directory on NFS?
             # If so, we should back-up from there and not the app server.
             foreach my $shared_dir (@shared_dirs) {
-                my($server,$export) = split /:/, $shared_dir;
+                my($server, $export);
+                if ($shared_dir =~ /:/) {
+                    ($server,$export) = split /:/, $shared_dir;
+                } else {
+                    $server = $nfs_server;
+                    $export = $shared_dir;
+                }
                 if ($dir eq $export) {
                     $servers = [ "$server" ];
                     $base    = $nfs_base;
