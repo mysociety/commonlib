@@ -403,15 +403,14 @@ install_sysvinit_script() {
 
 install_website_packages() {
     echo "Installing packages from repository packages file... "
-    DOCKER_PACKAGES="$CONF_DIRECTORY/packages.docker"
     EXACT_PACKAGES="$CONF_DIRECTORY/packages.$DISTRIBUTION-$DISTVERSION"
     DIST_PACKAGES="$CONF_DIRECTORY/packages.$DISTRIBUTION"
     FALLBACK_PACKAGES="$CONF_DIRECTORY/packages.generic"
     PRECISE_PACKAGES="$CONF_DIRECTORY/packages.ubuntu-precise"
     SQUEEZE_PACKAGES="$CONF_DIRECTORY/packages.debian-squeeze"
-    # Docker override, global for now.
-    if [ "$DOCKER" = true ] && [ -e "$DOCKER_PACKAGES" ]; then
-        PACKAGES_FILE="$DOCKER_PACKAGES"
+    # Allow override by setting PACKAGE_SUFFIX
+    if [ -n "$PACKAGE_SUFFIX" ] && [ -e "$CONF_DIRECTORY/packages.$PACKAGE_SUFFIX" ]; then
+        PACKAGES_FILE="$CONF_DIRECTORY/packages.$PACKAGE_SUFFIX"
     # Otherwise, if there's an exact match for the distribution and release, use that:
     elif [ -e "$EXACT_PACKAGES" ]
     then
@@ -586,23 +585,36 @@ fi
 DOCKER=false
 INSTALL_DB=true
 INSTALL_POSTFIX=true
+PACKAGE_SUFFIX=
 if [ x"$1" = x"--docker" ]
 then
     DOCKER=true
     INSTALL_DB=false
     DEFAULT_SERVER=true
+    PACKAGE_SUFFIX=docker
+    shift
+fi
+
+if [ x"$1" = x"--slim" ]
+then
+    DOCKER=false
+    INSTALL_DB=false
+    DEFAULT_SERVER=true
+    PACKAGE_SUFFIX=docker
     shift
 fi
 
 usage_and_exit() {
     cat >&2 <<EOUSAGE
-Usage: $0 [--dev] [--default] [--docker] [--systemd] <SITE-NAME> <UNIX-USER> [HOST]
+Usage: $0 [--dev] [--default] [--systemd] [--docker] [--slim] <SITE-NAME> <UNIX-USER> [HOST]
 HOST is only optional if you are running this on an EC2 instance.
 --default means to install as the default site for this server,
 rather than a virtualhost for HOST.
 --dev sets things up for a local development environment.
 --docker is intended when running this script from a Dockerfile and
 sets a number of other local variables controlling behaviour.
+--slim similar to Docker, intended for builds without databases and other
+backend applications included.
 --systemd try and use a native systemd unit file rather than a sysvinit script.
 EOUSAGE
     exit 1

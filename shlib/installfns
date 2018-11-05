@@ -403,15 +403,14 @@ install_sysvinit_script() {
 
 install_website_packages() {
     echo "Installing packages from repository packages file... "
-    DOCKER_PACKAGES="$CONF_DIRECTORY/packages.docker"
     EXACT_PACKAGES="$CONF_DIRECTORY/packages.$DISTRIBUTION-$DISTVERSION"
     DIST_PACKAGES="$CONF_DIRECTORY/packages.$DISTRIBUTION"
     FALLBACK_PACKAGES="$CONF_DIRECTORY/packages.generic"
     PRECISE_PACKAGES="$CONF_DIRECTORY/packages.ubuntu-precise"
     SQUEEZE_PACKAGES="$CONF_DIRECTORY/packages.debian-squeeze"
-    # Docker override, global for now.
-    if [ "$DOCKER" = true ] && [ -e "$DOCKER_PACKAGES" ]; then
-        PACKAGES_FILE="$DOCKER_PACKAGES"
+    # Allow override by setting PACKAGE_SUFFIX
+    if [ -n "$PACKAGE_SUFFIX" ] && [ -e "$CONF_DIRECTORY/packages.$PACKAGE_SUFFIX" ]; then
+        PACKAGES_FILE="$CONF_DIRECTORY/packages.$PACKAGE_SUFFIX"
     # Otherwise, if there's an exact match for the distribution and release, use that:
     elif [ -e "$EXACT_PACKAGES" ]
     then
