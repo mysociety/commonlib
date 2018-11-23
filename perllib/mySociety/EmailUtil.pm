@@ -132,6 +132,8 @@ sub send_email_sendmail ($$@) {
         exit(255);
     }
 
+    # Make sure to have Unix line endings
+    $text = join("\n", split(/\r?\n/, $text));
     print SENDMAIL $text or die "write: $!\n";
     close SENDMAIL;
 
@@ -213,7 +215,7 @@ sub send_email_smtp ($$$@) {
         }
     }
 
-    my @ll = map { "$_\r\n" } split(/\n/, $text);
+    my @ll = map { "$_\r\n" } split(/\r?\n/, $text);
     return EMAIL_SOFT_ERROR
         unless ($smtp->data(\@ll));
 
@@ -238,13 +240,12 @@ sub set_smarthost ($) {
 =item send_email TEXT SENDER RECIPIENT ...
 
 Send an email. TEXT is the full, already-formatted, with-headers, on-the-wire
-form of the email (except that line-endings should be "\n" not "\r\n"). SENDER
-is the B<envelope> sender of the mail (B<not> the From: address, which you
-should specify yourself). RECIPIENTs are the B<envelope> recipients of the
-mail. Returns one of the constants EMAIL_SUCCESS, EMAIL_SOFT_FAILURE, or
-EMAIL_HARD_FAILURE depending on whether the email was successfully sent (or
-queued), a temporary ("soft") error occurred, or a permanent ("hard") error
-occurred.
+form of the email. SENDER is the B<envelope> sender of the mail (B<not> the
+From: address, which you should specify yourself). RECIPIENTs are the
+B<envelope> recipients of the mail. Returns one of the constants EMAIL_SUCCESS,
+EMAIL_SOFT_FAILURE, or EMAIL_HARD_FAILURE depending on whether the email was
+successfully sent (or queued), a temporary ("soft") error occurred, or a
+permanent ("hard") error occurred.
 
 =cut
 sub send_email ($$@) {
