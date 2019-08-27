@@ -663,10 +663,10 @@ sub email_run_eveld($) {
 =item email_get_containing STRING
 
 Returns the email containing the given STRING as an SQL expression.  i.e. Use %
-for wildcard.  STRING can also be an array of such strings, any of which need 
-to match. It is an error if no matching mails are found within a few seconds,
-or there is more than one match.  The email is returned with any quoted
-printable characters decoded.
+for wildcard.  STRING can also be an array of such strings, any of which need
+to match - or all if the first entry is "-and". It is an error if no matching
+mails are found within a few seconds, or there is more than one match.  The
+email is returned with any quoted printable characters decoded.
 
 =cut
 sub email_get_containing($$) {
@@ -675,6 +675,12 @@ sub email_get_containing($$) {
     die "STRING must be scalar or array" if (ref($check) ne 'ARRAY' && ref($check) ne '');
     $check = [ $check ] if (ref($check) eq '');
 
+    my $bool = ' or ';
+    if ($check->[0] eq '-and') {
+        $bool = ' and ';
+        shift @$check;
+    }
+
     # need search string in quoted-printable, as email in the database is
     # encoded like that
     my @params;
@@ -682,8 +688,8 @@ sub email_get_containing($$) {
         my $quoted_c = encode_qp($c, "");
         push @params, $quoted_c;
     }
-    $qfragment = join(' or ' , map { 'content like ?' } @params);
-    $qdesc = join(' or ' , map { "'$_'" } @params);
+    $qfragment = join($bool, map { 'content like ?' } @params);
+    $qdesc = join($bool, map { "'$_'" } @params);
 
     # Provoke any sending of mails
     $self->email_run_eveld();
