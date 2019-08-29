@@ -80,6 +80,7 @@ sub scratch ($) {
 sub AUTOLOAD {
     my $f = $mySociety::Web::AUTOLOAD;
     $f =~ s/^.*:://;
+    return if $f eq 'DESTROY'; # Don't care about this
     local $@ = undef;
     eval "sub $f { my \$q = shift; return \$q->{q}->$f(\@_); }";
     goto(&$mySociety::Web::AUTOLOAD);
