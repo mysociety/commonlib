@@ -10,9 +10,14 @@
  */
 
 class ADMIN_PAGE_PHPINFO {
-    function ADMIN_PAGE_PHPINFO () {
+
+    function __construct() {
         $this->id = "phpinfo";
         $this->navname = "PHP Environment";
+    }
+
+    function ADMIN_PAGE_PHPINFO () {
+      self::__construct();
     }
 
     function display($self_link) {

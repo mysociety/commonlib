@@ -154,10 +154,15 @@ class HTML_QuickForm_Renderer_Default extends HTML_QuickForm_Renderer
     *
     * @access public
     */
-    function HTML_QuickForm_Renderer_Default()
+    function __construct()
     {
         $this->HTML_QuickForm_Renderer();
     } // end constructor
+
+    function HTML_QuickForm_Renderer_Default()
+    {
+      self::__construct();
+    }
 
    /**
     * returns the HTML generated for the form

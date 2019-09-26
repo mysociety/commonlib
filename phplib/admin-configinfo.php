@@ -10,9 +10,14 @@
  */
 
 class ADMIN_PAGE_CONFIGINFO {
-    function ADMIN_PAGE_CONFIGINFO () {
+
+    function __construct() {
         $this->id = "confinfo";
         $this->navname = "Configuration Values";
+    }
+
+    function ADMIN_PAGE_CONFIGINFO () {
+      self::__construct();
     }
 
     function display($self_link) {
@@ -26,4 +31,3 @@ class ADMIN_PAGE_CONFIGINFO {
         print '</ul>';
      }
 }
-

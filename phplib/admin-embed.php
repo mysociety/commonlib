@@ -10,10 +10,15 @@
  */
 
 class ADMIN_PAGE_EMBED {
-    function ADMIN_PAGE_EMBED ($id, $navname, $url) {
+
+    function __construct($id, $navname, $url) {
         $this->id = $id;
         $this->navname = $navname;
         $this->url = $url;
+    }
+
+    function ADMIN_PAGE_EMBED ($id, $navname, $url) {
+      self::__construct($id, $navname, $url);
     }
 
     function display($self_link) {

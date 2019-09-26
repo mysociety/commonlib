@@ -10,9 +10,14 @@
  */
 
 class ADMIN_PAGE_SERVERINFO {
-    function ADMIN_PAGE_SERVERINFO () {
+
+    function __construct() {
         $this->id = "serverinfo";
         $this->navname = "Server Information";
+    }
+
+    function ADMIN_PAGE_SERVERINFO () {
+      self::__construct();
     }
 
     function run($command) {
@@ -36,4 +41,3 @@ class ADMIN_PAGE_SERVERINFO {
         print $this->run("/sbin/ifconfig");
     }
 }
-
