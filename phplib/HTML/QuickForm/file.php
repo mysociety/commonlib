@@ -319,10 +319,12 @@ class HTML_QuickForm_file extends HTML_QuickForm_input
     * Needs to be redefined here as $_FILES is populated differently from 
     * other arrays when element name is of the form foo[bar]
     * 
+    * @param bool $sc1   unused, for signature compatibility
+    *
     * @access    private
     * @return    mixed
     */
-    function _findValue()
+    function _findValue(&$sc1 = null)
     {
         if (empty($_FILES)) {
             return null;

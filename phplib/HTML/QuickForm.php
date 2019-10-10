@@ -31,6 +31,10 @@ require_once 'PEAR.php';
  * Base class for all HTML classes
  */
 require_once dirname(__FILE__) . '/Common.php';
+/**
+ * Static utility methods
+ */
+require_once dirname(__FILE__) . '/QuickForm/utils.php';
 
 /**
  * Element types known to HTML_QuickForm
@@ -848,15 +852,19 @@ class HTML_QuickForm extends HTML_Common
 
         } elseif (false !== ($pos = strpos($elementName, '['))) {
             $base = str_replace(
-                        array('\\', '\''), array('\\\\', '\\\''), 
+                        array('\\', '\''), array('\\\\', '\\\''),
                         substr($elementName, 0, $pos)
                     );
-            $idx  = "['" . str_replace(
-                        array('\\', '\'', ']', '['), array('\\\\', '\\\'', '', "']['"), 
-                        substr($elementName, $pos + 1, -1)
-                    ) . "']";
+
+            $keys = str_replace(
+                array('\\', '\'', ']', '['), array('\\\\', '\\\'', '', "']['"),
+                substr($elementName, $pos + 1, -1)
+                );
+            $idx  = "['" . $keys . "']";
+            $keyArray = explode("']['", $keys);
+
             if (isset($this->_submitValues[$base])) {
-                $value = eval("return (isset(\$this->_submitValues['{$base}']{$idx})) ? \$this->_submitValues['{$base}']{$idx} : null;");
+                $value = HTML_QuickForm_utils::recursiveValue($this->_submitValues[$base], $keyArray, NULL);
             }
 
             if ((is_array($value) || null === $value) && isset($this->_submitFiles[$base])) {
@@ -1261,7 +1269,7 @@ class HTML_QuickForm extends HTML_Common
                         $this->_submitValues[$elName] = $this->_recursiveFilter($filter, $value);
                     } else {
                         $idx  = "['" . str_replace(
-                                    array('\\', '\'', ']', '['), array('\\\\', '\\\'', '', "']['"), 
+                                    array('\\', '\'', ']', '['), array('\\\\', '\\\'', '', "']['"),
                                     $elName
                                 ) . "']";
                         eval("\$this->_submitValues{$idx} = \$this->_recursiveFilter(\$filter, \$value);");
@@ -1512,7 +1520,7 @@ class HTML_QuickForm extends HTML_Common
      */
     function validate()
     {
-        if (count($this->_rules) == 0 && count($this->_formRules) == 0 && 
+        if (count($this->_rules) == 0 && count($this->_formRules) == 0 &&
             $this->isSubmitted()) {
             return (0 == count($this->_errors));
         } elseif (!$this->isSubmitted()) {
@@ -1548,10 +1556,10 @@ class HTML_QuickForm extends HTML_Common
                         } else {
                             $base = str_replace(
                                         array('\\', '\''), array('\\\\', '\\\''),
-                                        substr($target, 0, $pos) 
-                                    ); 
+                                        substr($target, 0, $pos)
+                                    );
                             $idx  = "['" . str_replace(
-                                        array('\\', '\'', ']', '['), array('\\\\', '\\\'', '', "']['"), 
+                                        array('\\', '\'', ']', '['), array('\\\\', '\\\'', '', "']['"),
                                         substr($target, $pos + 1, -1)
                                     ) . "']";
                             eval("\$isUpload = isset(\$this->_submitFiles['{$base}']['name']{$idx});");
