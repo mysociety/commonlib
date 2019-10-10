@@ -114,17 +114,17 @@ class ADMIN_PAGE_RATTY {
             $form->addElement('header', '', $rule = "" ? 'New Rate-Limiting Rule' : 'Edit Rate-Limiting Rule');
 
             $titlegroup = array();
-            $titlegroup[] = &HTML_QuickForm::createElement('text', 'note', null, array('size' => 40));
-            $titlegroup[] = &HTML_QuickForm::createElement('static', null, null, "<b>Eval position:</b>");
-            $titlegroup[] = &HTML_QuickForm::createElement('text', 'sequence', "Rule evaluation position:", array('size' => 5, 'maxlength' => 10));
+            $titlegroup[] = $form->createElement('text', 'note', null, array('size' => 40));
+            $titlegroup[] = $form->createElement('static', null, null, "<b>Eval position:</b>");
+            $titlegroup[] = $form->createElement('text', 'sequence', "Rule evaluation position:", array('size' => 5, 'maxlength' => 10));
             $form->addRule('sequence', 'Rule position must be numeric', 'numeric', null, 'server');
             $form->addGroup($titlegroup, "titlegroup", "Title of rule:", null, false);
 
             $limitgroup = array();
-            $limitgroup[] = &HTML_QuickForm::createElement('text', 'requests', null, array('size' => 5, 'maxlength' => 10));
-            $limitgroup[] = &HTML_QuickForm::createElement('static', null, null, "<b> hits every </b>");
-            $limitgroup[] = &HTML_QuickForm::createElement('text', 'interval', null, array('size' => 5, 'maxlength' => 10));
-            $limitgroup[] = &HTML_QuickForm::createElement('static', null, null, "<b> seconds</b>. Leave blank/zero to block completely.");
+            $limitgroup[] = $form->createElement('text', 'requests', null, array('size' => 5, 'maxlength' => 10));
+            $limitgroup[] = $form->createElement('static', null, null, "<b> hits every </b>");
+            $limitgroup[] = $form->createElement('text', 'interval', null, array('size' => 5, 'maxlength' => 10));
+            $limitgroup[] = $form->createElement('static', null, null, "<b> seconds</b>. Leave blank/zero to block completely.");
             $form->addGroup($limitgroup, "limitgroup", "Limit rate to:", null, false);
 
             $form->addElement('textarea', 'message', "Action when rule fires:<br>(for help see below)", array('rows' => 3, 'cols' => 60));
@@ -159,16 +159,16 @@ class ADMIN_PAGE_RATTY {
             foreach ($conditiondata as $condition) {
                 $ix++;
                 $condgroup = array();
-                $condgroup[0] = &HTML_QuickForm::createElement('select', "field$ix", null, $fields);
+                $condgroup[0] = $form->createElement('select', "field$ix", null, $fields);
 
                 if ($condition['condition'] == 'S') {
-                    $condgroup[1] = &HTML_QuickForm::createElement('hidden', "condition$ix", 'S');
+                    $condgroup[1] = $form->createElement('hidden', "condition$ix", 'S');
                     $desc = 'Limit hits separately for each:';
                 } else if ($condition['condition'] == 'D') {
-                    $condgroup[1] = &HTML_QuickForm::createElement('hidden', "condition$ix", 'D');
+                    $condgroup[1] = $form->createElement('hidden', "condition$ix", 'D');
                     $desc = 'Limit number of distinct values of:';
                 } else {
-                    $condgroup[1] = &HTML_QuickForm::createElement('select', "condition$ix", null, 
+                    $condgroup[1] = $form->createElement('select', "condition$ix", null, 
                             array(
                                 '+E' => 'exactly equals',
                                 '-E' => 'does not equal',
@@ -185,24 +185,24 @@ class ADMIN_PAGE_RATTY {
                             )
                         );
                     $desc = 'Applies only when:';
-                    $condgroup[2] = &HTML_QuickForm::createElement('text', "value$ix", null, array('size' => 15));
+                    $condgroup[2] = $form->createElement('text', "value$ix", null, array('size' => 15));
                 }
-                array_push($condgroup, HTML_QuickForm::createElement('submit', "delete$ix", 'Del'));
+                array_push($condgroup, $form->createElement('submit', "delete$ix", 'Del'));
                 $form->addGroup($condgroup, "c$ix", $desc, null, false);
                 $form->addRule("c$ix", 'Please use a valid regular expression', 'callback', 'check_condition_regexp');
 
             }
 
-            $buttongroup[0] = &HTML_QuickForm::createElement('submit', 'newfilter', 'Apply only when...');
-            $buttongroup[1] = &HTML_QuickForm::createElement('submit', 'newsingle', 'Limit hits separately for each...');
-            $buttongroup[2] = &HTML_QuickForm::createElement('submit', 'newdistinct', 'Limit number of distinct values of...');
+            $buttongroup[0] = $form->createElement('submit', 'newfilter', 'Apply only when...');
+            $buttongroup[1] = $form->createElement('submit', 'newsingle', 'Limit hits separately for each...');
+            $buttongroup[2] = $form->createElement('submit', 'newdistinct', 'Limit number of distinct values of...');
             $form->addGroup($buttongroup, "buttongroup", "Add new rule condition:",' <br> ', false);
 
             $form->addElement('header', '', 'Submit Changes');
             $finalgroup = array();
-            $finalgroup[] = &HTML_QuickForm::createElement('submit', 'done', 'Done');
-            $finalgroup[] = &HTML_QuickForm::createElement('submit', 'cancel', 'Cancel');
-            $finalgroup[] = &HTML_QuickForm::createElement('submit', 'deleterule', 'Delete Rule');
+            $finalgroup[] = $form->createElement('submit', 'done', 'Done');
+            $finalgroup[] = $form->createElement('submit', 'cancel', 'Cancel');
+            $finalgroup[] = $form->createElement('submit', 'deleterule', 'Delete Rule');
             $form->addGroup($finalgroup, "finalgroup", "",' ', false);
 
             if (get_http_var('done') != "") {
