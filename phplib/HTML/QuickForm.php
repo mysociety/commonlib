@@ -30,7 +30,7 @@ require_once 'PEAR.php';
 /**
  * Base class for all HTML classes
  */
-require_once 'HTML/Common.php';
+require_once dirname(__FILE__) . '/Common.php';
 
 /**
  * Element types known to HTML_QuickForm
