@@ -113,7 +113,7 @@ sub setup {
     }
 
     my $wth = new mySociety::WebTestHarness();
-    $wth->database_connect($config->{dbname} . '_');
+    $wth->database_connect($config->{dbname} . '_', $config->{db_encoding});
     $wth->database_drop_reload('../db/schema.sql');
     foreach (@{$config->{sql_extra}}) {
         $wth->database_load_schema($_);
@@ -156,15 +156,15 @@ sub new ($$) {
     return bless($self, $class);
 }
 
-=item database_connect PREFIX
+=item database_connect PREFIX ENCODING
 
 Connects to a database, for later commands. PREFIX is the prefix of the
 mySociety configuration parameters for the database being used. e.g. PB_ for
-PB_DB_NAME.  
+PB_DB_NAME. ENCODING is database encoding to use, if any.
 
 =cut
-sub database_connect($$) {
-    my ($self, $db_option_prefix) = @_;
+sub database_connect($$$) {
+    my ($self, $db_option_prefix, $encoding) = @_;
 
     mySociety::DBHandle::disconnect();
 
@@ -174,6 +174,7 @@ sub database_connect($$) {
     $self->{dbuser} = mySociety::Config::get($db_option_prefix.'DB_USER');
     $self->{dbpass} = mySociety::Config::get($db_option_prefix.'DB_PASS');
     $self->{dbtype} = mySociety::Config::get($db_option_prefix.'DB_TYPE', undef);
+    $self->{encoding} = $encoding || '';
 
     mySociety::DBHandle::configure(Name => $self->{dbname}, 
             User => $self->{dbuser}, Password => $self->{dbpass},
@@ -195,7 +196,9 @@ sub _mysql_database_drop_reload ($$){
     my $db_remake_db = DBI->connect($connstr, $self->{dbuser}, $self->{dbpass}, {
                             RaiseError => 1, AutoCommit => 1, PrintError => 0, PrintWarn => 1, });
     $db_remake_db->do("drop database if exists `$self->{dbname}`");
-    $db_remake_db->do("create database `$self->{dbname}`");
+    my $createdb_sql = "create database `$self->{dbname}`";
+    $createdb_sql .= " character set `$self->{encoding}`" if $self->{encoding};
+    $db_remake_db->do($createdb_sql);
     $db_remake_db->disconnect();
     
 }
@@ -222,7 +225,10 @@ sub _psql_database_drop_reload ($$){
     if ($c > 0) {
         $db_remake_db->do("drop database \"$self->{dbname}\"");
     }
-    $db_remake_db->do("create database \"$self->{dbname}\"");
+    my $createdb_sql = "create database \"$self->{dbname}\"";
+    $createdb_sql .= " encoding \"$self->{encoding}\" template \"template0\"" if $self->{encoding};
+    $createdb_sql .= " lc_collate 'C' lc_ctype 'C'" if $self->{encoding} eq 'SQL_ASCII';
+    $db_remake_db->do($createdb_sql);
     $db_remake_db->disconnect();
 
 } 
