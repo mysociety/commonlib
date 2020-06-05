@@ -103,8 +103,8 @@ $va_precise_names = array(
         'SPE' => 'Scottish Parliament Party List Members',
         'SPC' => 'Scottish Parliament Constituency Members',
 
-        'WAE' => 'Welsh Assembly Party List Members',
-        'WAC' => 'Welsh Assembly Constituency Members',
+        'WAE' => 'Senedd Party List Members',
+        'WAC' => 'Senedd Constituency Members',
 
         'NIE' => 'Northern Ireland Assembly Members',
 
@@ -206,7 +206,7 @@ $va_type_name = array(
         'SPE' =>  "Electoral Region",
         'SPC' =>  "constituency",
 
-        'WAS' =>  "National Assembly for Wales",
+        'WAS' =>  "Senedd",
         'WAE' =>  "Electoral Region",
         'WAC' =>  "constituency",
 
@@ -240,8 +240,8 @@ $va_rep_name = array(
     'COP' => 'councillor',
     'SPE' => 'MSP',
     'SPC' => 'MSP',
-    'WAE' => 'AM',
-    'WAC' => 'AM',
+    'WAE' => 'MS',
+    'WAC' => 'MS',
     'NIE' => 'MLA',
     'WMC' => 'MP',
     'HOC' => 'Lord',
@@ -262,8 +262,8 @@ $va_rep_name_long = array(
     'COP' => 'councillor',
     'SPE' => 'Member of the Scottish Parliament',
     'SPC' => 'Member of the Scottish Parliament',
-    'WAE' => 'Assembly Member',
-    'WAC' => 'Assembly Member',
+    'WAE' => 'Member of the Senedd',
+    'WAC' => 'Member of the Senedd',
     'NIE' => 'Member of the Legislative Assembly',
     'WMC' => 'Member of Parliament',
     'HOC' => 'Member of Parliament',
@@ -284,8 +284,8 @@ $va_rep_name_plural = array(
     'COP' => 'councillors',
     'SPE' => 'MSPs',
     'SPC' => 'MSPs',
-    'WAE' => 'AMs',
-    'WAC' => 'AMs',
+    'WAE' => 'MSs',
+    'WAC' => 'MSs',
     'NIE' => 'MLAs',
     'WMC' => 'MPs',
     'HOC' => 'Lords',
@@ -306,8 +306,8 @@ $va_rep_name_long_plural = array(
     'COP' => 'councillors',
     'SPE' => 'Members of the Scottish Parliament',
     'SPC' => 'Members of the Scottish Parliament',
-    'WAE' => 'Assembly Members',
-    'WAC' => 'Assembly Members',
+    'WAE' => 'Members of the Senedd',
+    'WAC' => 'Members of the Senedd',
     'NIE' => 'Members of the Legislative Assembly',
     'WMC' => 'Members of Parliament',
     'HOC' => 'Members of Parliament',
@@ -319,8 +319,8 @@ $va_rep_suffix = array(
     'LAE' => 'AM',
     'SPE' => 'MSP',
     'SPC' => 'MSP',
-    'WAE' => 'AM',
-    'WAC' => 'AM',
+    'WAE' => 'MS',
+    'WAC' => 'MS',
     'NIE' => 'MLA',
     'WMC' => 'MP',
     'EUR' => 'MEP'
@@ -407,7 +407,7 @@ Parliament. Devolved matters include <strong>education</strong>,
 and <strong>prisons</strong>. It also has some tax-raising powers.
 ",
     'WAS' => "
-The National Assembly for Wales has a wide range of powers over areas including
+The Senedd has a wide range of powers over areas including
 <strong>economic development</strong>, <strong>transport</strong>,
 <strong>finance</strong>, <strong>local government</strong>,
 <strong>health</strong>, <strong>housing</strong> and <strong>the Welsh

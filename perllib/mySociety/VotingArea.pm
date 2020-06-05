@@ -61,7 +61,7 @@ use constant SPA_AREA_ID => 900003;
 
 =item WAS_AREA_ID
 
-Welsh Assembly
+Welsh Parliament (Senedd)
 
 =cut
 use constant WAS_AREA_ID => 900004;
@@ -116,7 +116,7 @@ Known 3-letter area types.
         'MTD', 'MTW',  # Metropolitan District, Ward
         'COI', 'COP',  # Council of the Isles (Scilly) and constituent Parish
         'SPA', 'SPE', 'SPC', # Scottish Parliament, Electoral Region, Constituency
-        'WAS', 'WAE', 'WAC', # Welsh Assembly, Electoral Region, Constituency
+        'WAS', 'WAE', 'WAC', # Senedd, Electoral Region, Constituency
         'NIA', 'NIE', # Northern Ireland Assembly, Electoral Region
         'WMP', 'WMC', # Westminster Parliament, Constituency
         'HOL', 'HOC', # House of Lords, Dummy constituency
@@ -170,7 +170,7 @@ for instance "Ward" or "Electoral Division". NB: Also update in phplib/votingare
         SPE =>  "Electoral Region",
         SPC =>  "Constituency",
 
-        WAS =>  "National Assembly for Wales",
+        WAS =>  "Senedd",
         WAE =>  "Electoral Region",
         WAC =>  "Constituency",
 
@@ -294,8 +294,8 @@ that area.  For example, "Councillor" or "MEP".
         SPE => 'MSP',
         SPC => 'MSP',
 
-        WAE => 'AM',
-        WAC => 'AM',
+        WAE => 'MS',
+        WAC => 'MS',
 
         NIE => 'MLA',
 
@@ -376,8 +376,8 @@ Plural short version of rep_name.
         SPE => 'MSPs',
         SPC => 'MSPs',
 
-        WAE => 'AMs',
-        WAC => 'AMs',
+        WAE => 'MSs',
+        WAC => 'MSs',
 
         NIE => 'MLAs',
 
@@ -459,8 +459,8 @@ that area.  For example, "AM" for Assembly Members.
         SPE => 'MSP',
         SPC => 'MSP',
 
-        WAE => 'AM',
-        WAC => 'AM',
+        WAE => 'MS',
+        WAC => 'MS',
 
         NIE => 'MLA',
 
