@@ -130,57 +130,48 @@ add_postgresql_user() {
 
 update_apt_sources() {
     echo -n "Updating APT sources... "
-    if [ x"$DISTRIBUTION" = x"ubuntu" ] && [ x"$DISTVERSION" = x"precise" ]
-    then
-        cat > /etc/apt/sources.list.d/mysociety-extra.list <<EOF
-deb http://eu-west-1.ec2.archive.ubuntu.com/ubuntu/ precise multiverse
-deb-src http://eu-west-1.ec2.archive.ubuntu.com/ubuntu/ precise multiverse
-deb http://eu-west-1.ec2.archive.ubuntu.com/ubuntu/ precise-updates multiverse
-deb-src http://eu-west-1.ec2.archive.ubuntu.com/ubuntu/ precise-updates multiverse
-EOF
-    elif [ x"$DISTRIBUTION" = x"ubuntu" ]
-    then
-        : # Do nothing on other Ubuntu versions, let's see if we need multiverse
-    elif [ x"$DISTRIBUTION" = x"debian" ] && [ x"$DISTVERSION" = x"stretch" ]
-    then
+    if [ x"$DISTRIBUTION" = x"ubuntu" ] ; then
+        case "$DISTVERSION" in
+            xenial|bionic|focal)
+                : # Do nothing, these should have everything.
+                ;;
+            *)
+                error_msg "Unsupported distribution and version combination $DISTRIBUTION $DISTVERSION"
+                exit 1
+                ;;
+        esac
+    elif [ x"$DISTRIBUTION" = x"debian" ] ; then
+        case "$DISTVERSION" in
+            stretch)
+                BACKPORTS=true
+                ;;
+            buster)
+                BACKPORTS=false
+                ;;
+            *)
+                error_msg "Unsupported distribution and version combination $DISTRIBUTION $DISTVERSION"
+                exit 1
+                ;;
+        esac
         # Install the basic packages we require:
         cat > /etc/apt/sources.list.d/mysociety-extra.list <<EOF
 # Debian mirror to use, including contrib and non-free:
-deb http://the.earth.li/debian/ stretch main contrib non-free
-deb-src http://the.earth.li/debian/ stretch main contrib non-free
-EOF
-    elif [ x"$DISTRIBUTION" = x"debian" ] && [ x"$DISTVERSION" = x"wheezy" ]
-    then
-        # Install the basic packages we require:
-        cat > /etc/apt/sources.list.d/mysociety-extra.list <<EOF
-# Debian mirror to use, including contrib and non-free:
-deb http://the.earth.li/debian/ wheezy main contrib non-free
-deb-src http://the.earth.li/debian/ wheezy main contrib non-free
+deb http://the.earth.li/debian/ ${DISTVERSION} main contrib non-free
+deb-src http://the.earth.li/debian/ ${DISTVERSION} main contrib non-free
 
 # Security Updates:
-deb http://security.debian.org/ wheezy/updates main non-free
-deb-src http://security.debian.org/ wheezy/updates main non-free
+deb http://security.debian.org/ ${DISTVERSION}/updates main contrib non-free
+deb-src http://security.debian.org/ ${DISTVERSION}/updates main contrib non-free
 
+EOF
+        if [ "$BACKPORTS" == "true" ]
+        then
+            cat >> /etc/apt/sources.list.d/mysociety-extra.list <<EOF
 # Debian Backports
-deb http://http.debian.net/debian wheezy-backports main contrib non-free
-deb-src http://http.debian.net/debian wheezy-backports main contrib non-free
+deb http://http.debian.net/debian ${DISTVERSION}-backports main contrib non-free
+deb-src http://http.debian.net/debian ${DISTVERSION}-backports main contrib non-free
 EOF
-    elif [ x"$DISTRIBUTION" = x"debian" ] && [ x"$DISTVERSION" = x"jessie" ]
-    then
-        # Install the basic packages we require:
-        cat > /etc/apt/sources.list.d/mysociety-extra.list <<EOF
-    # Debian mirror to use, including contrib and non-free:
-    deb http://http.debian.net/debian jessie main contrib non-free
-    deb-src http://http.debian.net/debian jessie main contrib non-free
-
-    # Security Updates:
-    deb http://security.debian.org/ jessie/updates non-free
-    deb-src http://security.debian.org/ jessie/updates non-free
-
-    # Debian Backports
-    deb http://http.debian.net/debian jessie-backports main contrib non-free
-    deb-src http://http.debian.net/debian jessie-backports main contrib non-free
-EOF
+        fi
     else
         error_msg "Unsupported distribution and version combination $DISTRIBUTION $DISTVERSION"
         exit 1
@@ -194,30 +185,22 @@ update_mysociety_apt_sources() {
 
     # We build packages targetted at Debian releases.
     # Try and select the most appropritate ones for Ubuntu.
-    case $DISTVERSION in
-      xenial|yakkety|zesty|artful|stretch)
-        REPODIST=stretch
-        ;;
-      jessie)
-        REPODIST=jessie
-        ;;
-      *)
-        REPODIST=wheezy
-        ;;
+    case "$DISTVERSION" in
+        bionic|focal|buster)
+            REPODIST=buster
+            ;;
+        xenial|stretch)
+            REPODIST=stretch
+            ;;
+        *)
+            error_msg "Unsupported distribution and version combination $DISTRIBUTION $DISTVERSION"
+            exit 1
+            ;;
     esac
 
     cat > /etc/apt/sources.list.d/mysociety-debian.list <<EOF
 deb http://debian.mysociety.org $REPODIST main
 EOF
-
-    if [ x"$DISTVERSION" = x"wheezy" ] || [ x"$DISTVERSION" = x"precise" ]
-      then
-        cat > /etc/apt/preferences <<EOF
-Package: *
-Pin: origin debian.mysociety.org
-Pin-Priority: 50
-EOF
-    fi
 
     curl -s https://debian.mysociety.org/debian.mysociety.org.gpg.key | sudo apt-key add -
     apt-get -qq update
