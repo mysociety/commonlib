@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python2
 
 """
 Read in a YAML-formatted file, either named on the command-line or supplied
