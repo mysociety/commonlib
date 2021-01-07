@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 """
 Read in a YAML-formatted file, either named on the command-line or supplied
@@ -6,42 +6,52 @@ on standard input, and write it to standard output as a series of variable
 assignments in Bourne-shell format.
 """
 
+from __future__ import print_function
+import codecs
 import optparse, sys, re, yaml
 
 def die(message):
-  print >>sys.stderr, "%s: %s" % (sys.argv[0], message)
+  print("%s: %s" % (sys.argv[0], message), file=sys.stderr)
   sys.exit(1)
 
 def is_valid_varname(s):
   return re.match(r"^\w+$", s) is not None
   
+PY3 = sys.version_info[0] == 3
+if PY3:
+  text_type = str
+else:
+  sys.stdout = codecs.getwriter('utf-8')(sys.stdout)
+  text_type = unicode
+
 def shell_quote(s):
   """Return a quoted string that will be interpreted by a Bourne-like shell
   as representing the string that was passed in.
   """
-  return "'" + re.sub(r"'", "'\\''", s) + "'"
+  return "'" + re.sub(r"'", "'\\''", text_type(s)) + "'"
 
 def process(fh=None, data=None, prefix=[], output_prefix=""):
   assert fh is not None or data is not None
   
   if data is None:
     try:
-      data = yaml.load(fh)
-    except ValueError, e:
+      data = yaml.safe_load(fh)
+    except ValueError as e:
       die("Failed to parse YAML: " + e.args[0])
   
   if not isinstance(data, dict):
     die("The YAML file must represent an object (a.k.a. hash, dict, map)")
-  for k, v in data.iteritems():
+
+  for k, v in data.items():
     if not is_valid_varname(k):
       die("The key '%s' is not a valid shell variable name" % (k,))
     
     if isinstance(v, dict):
       process(data = v, prefix = prefix + [str(k)], output_prefix = output_prefix)
     elif isinstance(v, list):
-      print "%s%s=(%s)" % (output_prefix, "__".join(prefix + [k]), " ".join([shell_quote(unicode(x).encode('utf-8')) for x in v]))
+      print("%s%s=(%s)" % (output_prefix, "__".join(prefix + [k]), " ".join([shell_quote(x) for x in v])))
     else:
-      print "%s%s=%s" % (output_prefix, "__".join(prefix + [k]), shell_quote(unicode(v).encode('utf-8')))
+      print("%s%s=%s" % (output_prefix, "__".join(prefix + [k]), shell_quote(v)))
 
 def main(clargs):
   parser = optparse.OptionParser(usage = "usage: %prog [file.json]")
