@@ -186,25 +186,20 @@ update_mysociety_apt_sources() {
     # We build packages targetted at Debian releases.
     # Try and select the most appropritate ones for Ubuntu.
     case "$DISTVERSION" in
-        bionic|focal|buster)
-            REPODIST=buster
-            ;;
-        xenial|stretch)
-            REPODIST=stretch
+        xenial|stretch|bionic|buster|focal)
+            cat > /etc/apt/sources.list.d/mysociety-debian.list <<EOF
+deb http://debian.mysociety.org $DISTVERSION main
+EOF
+
+            curl -s https://debian.mysociety.org/debian.mysociety.org.gpg.key | sudo apt-key add -
+            apt-get -qq update
+            echo $DONE_MSG
             ;;
         *)
             error_msg "Unsupported distribution and version combination $DISTRIBUTION $DISTVERSION"
             exit 1
             ;;
     esac
-
-    cat > /etc/apt/sources.list.d/mysociety-debian.list <<EOF
-deb http://debian.mysociety.org $REPODIST main
-EOF
-
-    curl -s https://debian.mysociety.org/debian.mysociety.org.gpg.key | sudo apt-key add -
-    apt-get -qq update
-    echo $DONE_MSG
 }
 
 clone_or_update_repository() {
