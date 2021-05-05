@@ -132,8 +132,8 @@ $va_display_order = array(
         array('WAC', 'WAE'),
         array('SPC', 'SPE'),
         'NIE',
-        /* Westminster Parliament and European Parliament */
-        'WMC', 'EUR'
+        /* Westminster Parliament */
+        'WMC',
     );
 
 /* va_salaried
