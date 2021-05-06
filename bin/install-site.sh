@@ -164,7 +164,7 @@ deb http://security.debian.org/ ${DISTVERSION}/updates main contrib non-free
 deb-src http://security.debian.org/ ${DISTVERSION}/updates main contrib non-free
 
 EOF
-        if [ "$BACKPORTS" == "true" ]
+        if [ x"$BACKPORTS" = x"true" ]
         then
             cat >> /etc/apt/sources.list.d/mysociety-extra.list <<EOF
 # Debian Backports
