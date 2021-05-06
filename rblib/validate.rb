@@ -74,7 +74,6 @@ module MySociety
             # domain = sub-domain ("." sub-domain)* | address-literal
             # sub-domain = [A-Za-z0-9][A-Za-z0-9-]*
             # XXX ignore address-literal because nobody uses those...
-            # XXX Update this for http://tools.ietf.org/html/rfc6530
             # N.B. intended for validating email addresses in their canonical form,
             # so does not allow folding whitespace
 
@@ -82,14 +81,14 @@ module MySociety
             controls = '\\000-\\037\\177'
             # To add MacRuby support, see https://github.com/nex3/sass/pull/432
             highbit = '\\u{80}-\\u{D7FF}\\u{E000}-\\u{FFFD}\\u{10000}-\\u{10FFFF}'
-            atext = "[^#{specials} #{controls}#{highbit}]"
+            atext = "[^#{specials} #{controls}]"
             atom = "#{atext}+"
             dot_string = "#{atom}(\\.#{atom})*"
             qtext = "[^\"\\\\\\r\\n#{highbit}]"
             quoted_pair = '\\.'
             quoted_string = "\"(#{qtext}|#{quoted_pair})*\""
             local_part = "(#{dot_string}|#{quoted_string})"
-            sub_domain = '[A-Za-z0-9][A-Za-z0-9-]*'
+            sub_domain = "#{atom}"
             domain = "#{sub_domain}(\\.#{sub_domain})*"
 
             return "#{local_part}@#{domain}"
