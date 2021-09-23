@@ -144,9 +144,15 @@ update_apt_sources() {
         case "$DISTVERSION" in
             stretch)
                 BACKPORTS=true
+                SECURITY="$DISTVERSION/updates"
                 ;;
             buster)
                 BACKPORTS=false
+                SECURITY="$DISTVERSION/updates"
+                ;;
+            bullseye)
+                BACKPORTS=false
+                SECURITY="$DISTVERSION-security"
                 ;;
             *)
                 error_msg "Unsupported distribution and version combination $DISTRIBUTION $DISTVERSION"
@@ -160,8 +166,8 @@ deb http://the.earth.li/debian/ ${DISTVERSION} main contrib non-free
 deb-src http://the.earth.li/debian/ ${DISTVERSION} main contrib non-free
 
 # Security Updates:
-deb http://security.debian.org/ ${DISTVERSION}/updates main contrib non-free
-deb-src http://security.debian.org/ ${DISTVERSION}/updates main contrib non-free
+deb http://security.debian.org/debian-security ${SECURITY} main contrib non-free
+deb-src http://security.debian.org/debian-security ${SECURITY} main contrib non-free
 
 EOF
         if [ x"$BACKPORTS" = x"true" ]
@@ -186,7 +192,7 @@ update_mysociety_apt_sources() {
     # We build packages targetted at Debian releases.
     # Try and select the most appropritate ones for Ubuntu.
     case "$DISTVERSION" in
-        xenial|stretch|bionic|buster|focal)
+        xenial|stretch|bionic|buster|focal|bullseye)
             cat > /etc/apt/sources.list.d/mysociety-debian.list <<EOF
 deb http://debian.mysociety.org $DISTVERSION main
 EOF
