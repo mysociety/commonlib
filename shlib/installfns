@@ -156,8 +156,8 @@ update_apt_sources() {
         # Install the basic packages we require:
         cat > /etc/apt/sources.list.d/mysociety-extra.list <<EOF
 # Debian mirror to use, including contrib and non-free:
-deb http://the.earth.li/debian/ ${DISTVERSION} main contrib non-free
-deb-src http://the.earth.li/debian/ ${DISTVERSION} main contrib non-free
+deb http://mirror.mythic-beasts.com/debian/ ${DISTVERSION} main contrib non-free
+deb-src http://mirror.mythic-beasts.com/debian/ ${DISTVERSION} main contrib non-free
 
 # Security Updates:
 deb http://security.debian.org/ ${DISTVERSION}/updates main contrib non-free
