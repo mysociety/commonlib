@@ -17,7 +17,7 @@ core_package_install() {
     apt-get -qq update
     echo $DONE_MSG
     echo "Installing some core packages..."
-    for package in apt-utils git locales lockfile-progs curl dnsutils lsb-release; do
+    for package in apt-utils git locales lockfile-progs curl dnsutils lsb-release gnupg; do
         echo -n "  $package... "; apt-get -qq install -y $package >/dev/null; echo $DONE_MSG
     done
 }
