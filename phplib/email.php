@@ -15,8 +15,8 @@
  * RECIPIENT. PREFIX at DOMAIN needs to be set up to handle the bounces. */
 
 function verp_envelope_sender($recipient, $prefix, $domain){
-    
    list($recipient_mailbox, $recipient_domain) = explode('@', $recipient);
-   return $prefix . '+' . $recipient_mailbox . '=' . $recipient_domain . '@' . $domain;
+   $local = $prefix . '+' . $recipient_mailbox . '=' . $recipient_domain;
+   $local = substr($local, 0, 64);
+   return $local . '@' . $domain;
 }
- 
