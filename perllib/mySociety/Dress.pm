@@ -12,7 +12,7 @@ use strict;
 use mySociety::Config;
 
 # Dress DB - need to make DBHandle DBHandles?
-my $connstr = 'dbi:Pg:dbname=' . mySociety::Config::get('DRESS_DB_NAME') .';sslmode=allow';
+my $connstr = 'dbi:Pg:dbname=' . mySociety::Config::get('DRESS_DB_NAME') .';sslmode=prefer';
 $connstr .= ";host=" . mySociety::Config::get('DRESS_DB_HOST')
     if (mySociety::Config::get('DRESS_DB_HOST'));
 $connstr .= ";port=" . mySociety::Config::get('DRESS_DB_PORT')

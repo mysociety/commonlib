@@ -80,7 +80,7 @@ function db_connect() {
         if (defined("OPTION_${prefix}_DB_$v"))
             $connstr .= " $k='" .  constant("OPTION_${prefix}_DB_$v") . "'";
     }
-    $connstr .= " connect_timeout=10 sslmode=allow";
+    $connstr .= " connect_timeout=10 sslmode=prefer";
 
     /*  set 'persistent' => true to get persistent DB connections. 
      *  TODO: ensure

@@ -118,7 +118,7 @@ sub new_dbh () {
         if (exists($mySociety::DBHandle::conf{Host}));
     $connstr .= ";port=$mySociety::DBHandle::conf{Port}"
         if (exists($mySociety::DBHandle::conf{Port}));
-    $connstr .= ";sslmode=allow";
+    $connstr .= ";sslmode=prefer";
     my $dbh = DBI->connect($connstr,
                         $mySociety::DBHandle::conf{User},
                         $mySociety::DBHandle::conf{Password}, {
