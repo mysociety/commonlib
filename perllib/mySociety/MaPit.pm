@@ -56,7 +56,8 @@ sub call ($$;%) {
         $opts{URL} = $params;
     }
 
-    my $qs = join ';', map { $_ . '=' . get_opts_str($opts{$_}) } keys %opts;
+    my $sep = mySociety::Config::get('MAPIT_API_SEPARATOR', ';');
+    my $qs = join $sep, map { $_ . '=' . get_opts_str($opts{$_}) } keys %opts;
 
     my $r;
     $qs = encode_utf8($qs) if utf8::is_utf8($qs);
