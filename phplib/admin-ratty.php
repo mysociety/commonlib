@@ -230,7 +230,7 @@ class ADMIN_PAGE_RATTY {
                     list($field_name, $field_description, $field_examples) = $row;
                     print "<b>$field_name:</b> $field_description. ";
                     print "e.g. " . implode(", ", array_map(
-                    create_function('$a', 'return "\'".trim_characters($a, 0, 50)."\'";'), $field_examples));
+                    function($a) { return "'".trim_characters($a, 0, 50)."'"; }, $field_examples));
                     print "<br>";
                 }
                 print "</p>";
