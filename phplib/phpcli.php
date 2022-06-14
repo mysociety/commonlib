@@ -18,7 +18,6 @@ if (php_sapi_name() == 'cgi' || php_sapi_name() == 'cgi-fcgi') {
     set_time_limit(0);
     ini_set('track_errors', TRUE);
     ini_set('html_errors', FALSE);
-    ini_set('magic_quotes_runtime', FALSE);
     define('STDIN', fopen('php://stdin', 'r'));
     define('STDOUT', fopen('php://stdout', 'w'));
     define('STDERR', fopen('php://stderr', 'w'));

@@ -26,22 +26,6 @@ function unfck($v) {
     return is_array($v) ? array_map('unfck', $v) : stripslashes($v);
 }
 
-/* unfck_gpc
- * Apply the unfck function to elements of the global POST, GET, REQUEST and
- * COOKIE arrays, in place. */
-function unfck_gpc() {
-    foreach (array('POST', 'GET', 'REQUEST', 'COOKIE') as $gpc)
-    $GLOBALS["_$gpc"] = array_map('unfck', $GLOBALS["_$gpc"]);
-}
-
-/* If magic_quotes_gpc is ON (in which case values in the global GET, POST and
- * COOKIE arrays will have been "escaped" by arbitrary insertion of
- * backslashes), try to undo this. */
-if (get_magic_quotes_gpc()) unfck_gpc();
-
-/* Make some vague effort to turn off the "magic quotes" nonsense. */
-ini_set('magic_quotes_runtime', 0);
-
 /*
  * Actually useful functions begin below here.
  */
