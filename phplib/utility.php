@@ -211,8 +211,8 @@ $eo_replace = array("\xc4\x88", "\xc4\x89",
                     "\xc4\xb4", "\xc4\xb5",
                     "\xc5\x9c", "\xc5\x9d",
                     "\xc5\xac", "\xc5\xad");
-$eo_replace2 = array_map(create_function('$a', 'return substr($a, 1, 1)."x";'), $eo_search);
-$eo_search2 = array_map(create_function('$a', 'return "/$a/";'), $eo_replace);
+$eo_replace2 = array_map(function($a) { return substr($a, 1, 1)."x"; }, $eo_search);
+$eo_search2 = array_map(function($a) { return "/$a/"; }, $eo_replace);
 function input_esperanto($text) {
     global $eo_search, $eo_replace, $eo_search2, $eo_replace2;
     $text = preg_replace($eo_search, $eo_replace, $text);
