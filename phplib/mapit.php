@@ -54,7 +54,7 @@ function mapit_call($url, $params, $opts = array(), $errors = array()) {
     foreach ($opts as $k => $v) {
         if (!$v) continue;
         if (is_array($v)) $v = join(',', $v);
-        $qs .= $qs ? ';' : '';
+        $qs .= $qs ? '&' : '';
         $qs .= rawurlencode($k) . '=' . rawurlencode($v);
     }
     if (strlen(OPTION_MAPIT_URL . $urlp) > 1024) {

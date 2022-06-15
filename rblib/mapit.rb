@@ -220,11 +220,11 @@ module MySociety
         url_path += "/#{params}" if params
         url_path += "/#{suffix}" if suffix
         
-        # assemble a ";" delimited query string
+        # assemble a "&" delimited query string
         query_string = options.map do |key, value|
           value = value.join(',') if value.is_a? Array
           "#{key}=#{value}"
-        end.join(";")
+        end.join("&")
         
         # Use POST if the GET url would be too long
         if "#{base_url}#{url_path}".size > max_url_length
