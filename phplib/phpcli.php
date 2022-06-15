@@ -21,10 +21,9 @@ if (php_sapi_name() == 'cgi' || php_sapi_name() == 'cgi-fcgi') {
     define('STDIN', fopen('php://stdin', 'r'));
     define('STDOUT', fopen('php://stdout', 'w'));
     define('STDERR', fopen('php://stderr', 'w'));
-    register_shutdown_function(
-        create_function('',
-        'fclose(STDIN); fclose(STDOUT); fclose(STDERR); return true;')
-        );
+    register_shutdown_function(function() {
+        fclose(STDIN); fclose(STDOUT); fclose(STDERR); return true;
+    });
 }
 
 require_once 'Console/Getopt.php';
