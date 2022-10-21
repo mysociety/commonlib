@@ -17,6 +17,6 @@
 function verp_envelope_sender($recipient, $prefix, $domain){
    list($recipient_mailbox, $recipient_domain) = explode('@', $recipient);
    $local = $prefix . '+' . $recipient_mailbox . '=' . $recipient_domain;
-   $local = substr($local, 0, 64);
+   $local = preg_replace('#\.$#', '', substr($local, 0, 64));
    return $local . '@' . $domain;
 }
