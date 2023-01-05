@@ -39,7 +39,7 @@ module MySociety
             for dir in path.split(':') +
                 ['/usr/local/bin', '/usr/bin', '/software/bin', '/opt/bin', '/opt/php/bin']
                 for name in ['php4', 'php', 'php4-cgi', 'php-cgi']
-                    if File.exists?(File.join(dir, name))
+                    if File.exist?(File.join(dir, name))
                         return File.join(dir, name)
                     end
                 end
@@ -59,8 +59,8 @@ module MySociety
         def self.read_config(f)
             if f =~ /\.yml$/
                 config = read_config_from_yaml(f)
-            elsif File.exists?(f + ".yml")
-                if File.exists?(f)
+            elsif File.exist?(f + ".yml")
+                if File.exist?(f)
                     raise "Configuration error: both #{f} and #{f}.yml exist (remove one)"
                 end
                 config = read_config_from_yaml(f + ".yml")
@@ -177,7 +177,7 @@ module MySociety
             if not filename
                 raise "Please call MySociety::Config.set_file to specify config file" 
             end
-            if ! File.exists?(filename) and ! File.exists?(filename + ".yml")
+            if ! File.exist?(filename) and ! File.exist?(filename + ".yml")
                 if @ignore_missing_file
                     return {"CONFIG_FILE_NAME" => filename + " (missing file)"}
                 else
