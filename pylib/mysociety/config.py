@@ -24,6 +24,7 @@ Example use:
     opt = mysociety.config.get('CONFIG_VARIABLE', DEFAULT_VALUE)
 """
 
+from __future__ import print_function
 import os
 import subprocess
 import yaml
@@ -59,7 +60,7 @@ def read_config_from_yaml(filename):
     try:
         try:
             config = yaml.load(fh)
-        except ValueError, e:
+        except ValueError as e:
             raise Exception("Failed to parse YAML: " + e.args[0])
         if not isinstance(config, dict):
             raise Exception("The YAML file must represent an object (a.k.a. hash, dict, map)")
@@ -81,7 +82,7 @@ def find_php():
                 name += '.exe'
             if os.path.isfile('%s/%s' % (dir, name)):
                 return '%s/%s' % (dir,name)
-    raise Exception, "unable to locate PHP binary, needed to read config file"
+    raise Exception("unable to locate PHP binary, needed to read config file")
 
 php_path = None
 debian_version = None
@@ -117,10 +118,10 @@ def read_config_from_php(f):
     child = subprocess.Popen(args,
                              stdin=subprocess.PIPE,
                              stdout=subprocess.PIPE) # don't capture stderr
-    for k,v in store_environ.iteritems():
+    for k,v in store_environ.items():
         os.environ[k] = v
 
-    print >>child.stdin, """
+    child.stdin.write(b"""
 <?php
 $b = get_defined_constants();
 require(getenv("MYSOCIETY_CONFIG_FILE_PATH"));
@@ -132,41 +133,41 @@ foreach ($a as $k => $v) {
     print $v;
     print "\0";
 }
-?>"""
+?>""")
     child.stdin.close()
 
     # skip any header material
     line = True
     while line:
         line = child.stdout.readline()
-        if line == "start_of_options\n":
+        if line == b"start_of_options\n":
             break
     else:
-        raise Exception, "%s: %s: failed to read options" % (php_path, f)
+        raise Exception("%s: %s: failed to read options" % (php_path, f))
 
     # read remainder
-    buf = ''.join(child.stdout.readlines())
+    buf = b''.join(child.stdout.readlines())
     child.stdout.close()
 
     # check that php exited successfully
     status = child.wait()
     if status < 0:
-        raise Exception, "%s: %s: killed by signal %d" % (php_path, f, -status)
+        raise Exception("%s: %s: killed by signal %d" % (php_path, f, -status))
     elif status > 0:
-        raise Exception, "%s: %s: exited with failure status %d" % (php_path, f, status)
+        raise Exception("%s: %s: exited with failure status %d" % (php_path, f, status))
     
     # parse out config values
-    vals = buf.split('\0'); # option values may be empty
+    vals = buf.split(b'\0'); # option values may be empty
     vals.pop()  # The buffer ends "\0" so there's always a trailing empty value
                 # at the end of the buffer. I love perl! Perl is my friend!
                 # (I assume this should now read "Python", but I'm not sure.)
 
     if len(vals) % 2:
-        raise Exception, "%s: %s: bad option output from subprocess" % (php_path, f)
+        raise Exception("%s: %s: bad option output from subprocess" % (php_path, f))
 
     config = {}
     for i in range(len(vals) // 2):
-        config[vals[i*2]] = vals[i*2+1]
+        config[vals[i*2].decode('utf-8')] = vals[i*2+1].decode('utf-8')
     return config
 
 main_config_filename = None
@@ -194,7 +195,7 @@ def load_default():
 
     filename = main_config_filename
     if not filename:
-        raise Exception, "Please call mysociety::config::set_file to specify config file" 
+        raise Exception("Please call mysociety::config::set_file to specify config file")
 
     if not filename in cached_configs:
         cached_configs[filename] = read_config(filename)
