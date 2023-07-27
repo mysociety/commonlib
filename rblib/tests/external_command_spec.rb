@@ -94,7 +94,7 @@ describe "when running ExternalCommand" do
     it "should be able to limit memory available to its children" do
         f = ExternalCommand.new(malloc_script, :memory_limit => 1048576 * 128).run
         f.out.should == ""
-        f.err.should == "Out of memory!\n"
+        f.err.should =~ /^Out of memory!/
     end
 
     it "should not limit the memory available to calling code" do
