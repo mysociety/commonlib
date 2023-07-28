@@ -76,6 +76,14 @@ describe "when running ExternalCommand" do
         f.out.should =~ /^FOO=barbie$/
     end
 
+    it "should restore original environment variable" do
+        ENV["FOO"] = "frumious"
+        args = [env_cmd, { :stdin_string => "Here we are\nThis part will be ignored",
+                           :env => { "FOO" => "barbie" } }]
+        ExternalCommand.new(*args).run
+        ENV["FOO"].should == "frumious"
+    end
+
     it "should handle timeouts" do
         start_time = Time.now
         f = ExternalCommand.new(sleep_cmd, "30", :timeout => 2).run

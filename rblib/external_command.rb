@@ -94,6 +94,9 @@ class ExternalCommand
             Process.setrlimit(Process::RLIMIT_AS, @memory_limit, @default_memory_limit)
         end
 
+        # Store current environment variables before being overridden
+        old_env_values = @env.keys.inject({}) { |m, k| m[k] = ENV[k]; m }
+
         # Override the environment as specified
         ENV.update @env
 
@@ -128,6 +131,9 @@ class ExternalCommand
             # Restore the original memory limit
             Process.setrlimit(Process::RLIMIT_AS, @default_memory_limit)
         end
+
+        # Reset overridden environment variables
+        ENV.update(old_env_values)
 
         # if we're not expecting binary output, convert the output streams to the
         # default encoding now they are written to - not before, as there might be
