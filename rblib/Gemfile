@@ -1,0 +1,11 @@
+source 'https://rubygems.org'
+
+gem 'rake'
+
+gem 'rspec'
+gem 'test-unit'
+
+gem 'mocha'
+gem 'open4'
+gem 'unidecoder'
+gem 'webmock'

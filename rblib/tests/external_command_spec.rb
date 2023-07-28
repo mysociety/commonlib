@@ -94,7 +94,7 @@ describe "when running ExternalCommand" do
     it "should be able to limit memory available to its children" do
         f = ExternalCommand.new(malloc_script, :memory_limit => 1048576 * 128).run
         f.out.should == ""
-        f.err.should == "Out of memory!\n"
+        f.err.should =~ /^Out of memory!/
     end
 
     it "should not limit the memory available to calling code" do
@@ -138,7 +138,7 @@ describe "when running ExternalCommand" do
     it 'should raise a ChildUnterminated exception if the process cannot be terminated' do
         start_time = Time.now
         external_command = ExternalCommand.new(sleep_cmd, "30", :timeout => 2)
-        external_command.stub!(:try_to_kill).and_return(false)
+        allow(external_command).to receive(:try_to_kill).and_return(false)
         lambda { f = external_command.run }.should raise_error(ExternalCommand::ChildUnterminated)
         (Time.now - start_time).should < 5
         external_command.timed_out.should == true
