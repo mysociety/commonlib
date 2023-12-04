@@ -157,23 +157,34 @@ update_apt_sources() {
                 notice_msg "Unsupported distribution and version combination $DISTRIBUTION $DISTVERSION"
                 ;;
         esac
-        # Install the basic packages we require:
-        cat > /etc/apt/sources.list.d/mysociety-extra.list <<EOF
+        # Install the basic packages we require, backing up any old sources.list
+        [ -f /etc/apt/sources.list ] && mv /etc/apt/sources.list /etc/apt/sources.list.dist
+        cat > /etc/apt/sources.list.d/debian.sources <<EOF
 # Debian mirror to use, including contrib and non-free:
-deb http://mirror.mythic-beasts.com/debian/ ${DISTVERSION} main contrib non-free
-deb-src http://mirror.mythic-beasts.com/debian/ ${DISTVERSION} main contrib non-free
+Types: deb deb-src
+URIs: http://deb.debian.org/debian
+Suites: ${DISTVERSION} ${DISTVERSION}-updates
+Components: main contrib non-free
+Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
 
 # Security Updates:
-deb http://security.debian.org/debian-security ${SECURITY} main contrib non-free
-deb-src http://security.debian.org/debian-security ${SECURITY} main contrib non-free
+Types: deb deb-src
+URIs: http://deb.debian.org/debian-security
+Suites: $SECURITY
+Components: main contrib non-free
+Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
 
 EOF
         if [ x"$BACKPORTS" = x"true" ]
         then
-            cat >> /etc/apt/sources.list.d/mysociety-extra.list <<EOF
+            cat >> /etc/apt/sources.list.d/debian.sources <<EOF
 # Debian Backports
-deb http://http.debian.net/debian ${DISTVERSION}-backports main contrib non-free
-deb-src http://http.debian.net/debian ${DISTVERSION}-backports main contrib non-free
+Types: deb deb-src
+URIs: http://deb.debian.org/debian
+Suites: ${DISTVERSION}-backports
+Components: main contrib non-free
+Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
+
 EOF
         fi
     else
@@ -190,11 +201,16 @@ update_mysociety_apt_sources() {
     # Try and select the most appropritate ones for Ubuntu.
     case "$DISTVERSION" in
         focal|jammy|buster|bullseye|bookworm)
-            cat > /etc/apt/sources.list.d/mysociety-debian.list <<EOF
-deb http://debian.mysociety.org $DISTVERSION main
-EOF
+            cat > /etc/apt/sources.list.d/mysociety.sources <<EOF
+Types: deb
+URIs: http://debian.mysociety.org
+Suites: $DISTVERSION
+Components: main
+Signed-By: /etc/apt/keyrings/mysociety.asc
 
-            curl -s https://debian.mysociety.org/debian.mysociety.org.gpg.key | sudo apt-key add -
+EOF
+            mkdir -p /etc/apt/keyrings
+            curl -s https://debian.mysociety.org/debian.mysociety.org.gpg.key -o /etc/apt/keyrings/mysociety.asc
             apt-get -qq update
             echo $DONE_MSG
             ;;
