@@ -136,8 +136,7 @@ update_apt_sources() {
                 : # Do nothing, these should have everything.
                 ;;
             *)
-                error_msg "Unsupported distribution and version combination $DISTRIBUTION $DISTVERSION"
-                exit 1
+                notice_msg "Unsupported distribution and version combination $DISTRIBUTION $DISTVERSION"
                 ;;
         esac
     elif [ x"$DISTRIBUTION" = x"debian" ] ; then
@@ -155,8 +154,7 @@ update_apt_sources() {
                 SECURITY="$DISTVERSION-security"
                 ;;
             *)
-                error_msg "Unsupported distribution and version combination $DISTRIBUTION $DISTVERSION"
-                exit 1
+                notice_msg "Unsupported distribution and version combination $DISTRIBUTION $DISTVERSION"
                 ;;
         esac
         # Install the basic packages we require:
@@ -179,8 +177,7 @@ deb-src http://http.debian.net/debian ${DISTVERSION}-backports main contrib non-
 EOF
         fi
     else
-        error_msg "Unsupported distribution and version combination $DISTRIBUTION $DISTVERSION"
-        exit 1
+        notice_msg "Unsupported distribution and version combination $DISTRIBUTION $DISTVERSION"
     fi
     apt-get -qq update
     echo $DONE_MSG
@@ -202,8 +199,7 @@ EOF
             echo $DONE_MSG
             ;;
         *)
-            error_msg "Unsupported distribution and version combination $DISTRIBUTION $DISTVERSION"
-            exit 1
+            notice_msg "Unsupported distribution and version combination $DISTRIBUTION $DISTVERSION, not adding mySociety repository."
             ;;
     esac
 }
