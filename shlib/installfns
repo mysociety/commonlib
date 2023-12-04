@@ -132,7 +132,7 @@ update_apt_sources() {
     echo -n "Updating APT sources... "
     if [ x"$DISTRIBUTION" = x"ubuntu" ] ; then
         case "$DISTVERSION" in
-            xenial|bionic|focal)
+            focal|jammy)
                 : # Do nothing, these should have everything.
                 ;;
             *)
@@ -141,15 +141,15 @@ update_apt_sources() {
         esac
     elif [ x"$DISTRIBUTION" = x"debian" ] ; then
         case "$DISTVERSION" in
-            stretch)
-                BACKPORTS=true
-                SECURITY="$DISTVERSION/updates"
-                ;;
             buster)
                 BACKPORTS=false
                 SECURITY="$DISTVERSION/updates"
                 ;;
             bullseye)
+                BACKPORTS=false
+                SECURITY="$DISTVERSION-security"
+                ;;
+            bookworm)
                 BACKPORTS=false
                 SECURITY="$DISTVERSION-security"
                 ;;
@@ -189,7 +189,7 @@ update_mysociety_apt_sources() {
     # We build packages targetted at Debian releases.
     # Try and select the most appropritate ones for Ubuntu.
     case "$DISTVERSION" in
-        xenial|stretch|bionic|buster|focal|bullseye)
+        focal|jammy|buster|bullseye|bookworm)
             cat > /etc/apt/sources.list.d/mysociety-debian.list <<EOF
 deb http://debian.mysociety.org $DISTVERSION main
 EOF
@@ -386,8 +386,6 @@ install_website_packages() {
     EXACT_PACKAGES="$CONF_DIRECTORY/packages.$DISTRIBUTION-$DISTVERSION"
     DIST_PACKAGES="$CONF_DIRECTORY/packages.$DISTRIBUTION"
     FALLBACK_PACKAGES="$CONF_DIRECTORY/packages.generic"
-    PRECISE_PACKAGES="$CONF_DIRECTORY/packages.ubuntu-precise"
-    SQUEEZE_PACKAGES="$CONF_DIRECTORY/packages.debian-squeeze"
     # Allow override by setting PACKAGE_SUFFIX
     if [ -n "$PACKAGE_SUFFIX" ] && [ -e "$CONF_DIRECTORY/packages.$PACKAGE_SUFFIX" ]; then
         PACKAGES_FILE="$CONF_DIRECTORY/packages.$PACKAGE_SUFFIX"
@@ -403,16 +401,6 @@ install_website_packages() {
     elif [ -e "$FALLBACK_PACKAGES" ]
     then
         PACKAGES_FILE="$FALLBACK_PACKAGES"
-    # Otherwise, if this is Ubuntu, and there's a version specifically
-    # for precise, use that:
-    elif [ x"$DISTRIBUTION" = x"ubuntu" ] && [ -e "$PRECISE_PACKAGES" ]
-    then
-        PACKAGES_FILE="$PRECISE_PACKAGES"
-    # Otherwise, if this is Debian, and there's a version specifically
-    # for squeeze, use that:
-    elif [ x"$DISTRIBUTION" = x"debian" ] && [ -e "$SQUEEZE_PACKAGES" ]
-    then
-        PACKAGES_FILE="$SQUEEZE_PACKAGES"
     else
         error_msg "Could not find a packages file to use - please contribute one."
         exit 1
