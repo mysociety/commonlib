@@ -337,7 +337,7 @@ install_postgis() {
 make_log_directory() {
     LOG_DIRECTORY="$DIRECTORY/logs"
     mkdir -p "$LOG_DIRECTORY"
-    chown -R "$UNIX_USER"."$UNIX_USER" "$LOG_DIRECTORY"
+    chown -R "$UNIX_USER":"$UNIX_USER" "$LOG_DIRECTORY"
 }
 
 add_website_to_nginx() {
@@ -669,5 +669,5 @@ update_apt_sources
 # Remove one crippling package, if it's installed:
 apt-get -qq remove -y --purge apt-xapian-index >/dev/null || true
 clone_or_update_repository
-chown -R "$UNIX_USER"."$UNIX_USER" "$DIRECTORY"
+chown -R "$UNIX_USER":"$UNIX_USER" "$DIRECTORY"
 run_site_specific_script

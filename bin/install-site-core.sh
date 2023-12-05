@@ -175,5 +175,5 @@ update_apt_sources
 # Remove one crippling package, if it's installed:
 apt-get -qq remove -y --purge apt-xapian-index >/dev/null || true
 clone_or_update_repository
-chown -R "$UNIX_USER"."$UNIX_USER" "$DIRECTORY"
+chown -R "$UNIX_USER":"$UNIX_USER" "$DIRECTORY"
 run_site_specific_script
