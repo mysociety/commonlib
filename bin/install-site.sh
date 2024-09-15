@@ -146,7 +146,7 @@ update_apt_sources() {
                 SECURITY="$DISTVERSION/updates"
                 ;;
             bullseye)
-                BACKPORTS=false
+                BACKPORTS=true
                 SECURITY="$DISTVERSION-security"
                 ;;
             bookworm)
