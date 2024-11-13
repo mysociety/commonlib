@@ -38,7 +38,7 @@ function mapit_call($url, $params, $opts = array(), $errors = array()) {
         curl_setopt($mapit_ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($mapit_ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
         curl_setopt($mapit_ch, CURLOPT_USERAGENT, 'PHP MaPit client');
-        if (defined('OPTION_MAPIT_API_KEY')) curl_setopt($mapit_ch, CURLOPT_HTTPHEADER, 'X-Api-Key: '. OPTION_MAPIT_API_KEY);
+        if (defined('OPTION_MAPIT_API_KEY')) curl_setopt($mapit_ch, CURLOPT_HTTPHEADER, ['X-Api-Key: '. OPTION_MAPIT_API_KEY]);
     }
     if (is_array($params)) $params = join(',', $params);
     if (strpos($url, '/'))
