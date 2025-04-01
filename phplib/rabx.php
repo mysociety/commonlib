@@ -316,7 +316,7 @@ function microtime_float()
  
 
 class RABX_Client {
-    var $ch, $url, $use_post = FALSE;
+    var $ch, $url, $use_post, $userpwd = FALSE;
     var $lastt;
 
     /* constructor URL [USERPWD]
