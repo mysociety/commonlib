@@ -155,14 +155,14 @@ class IsterSimpleXMLElement extends IsterXmlNode
       switch( $child->___t ) {
       case ISTER_XML_CDATA:
         if( preg_match('/^(<!\[CDATA\[|]]>)$/', $child->___n) )
-          continue;
+          break;
         $txt .= $child->___n;
         break;
       case ISTER_XML_ENTITY:
         $txt .= $child->___ns;
         break;
       default:
-        continue;
+        break;
       }
     }
     return $txt;
