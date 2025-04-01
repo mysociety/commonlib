@@ -173,10 +173,10 @@ ini_set('ignore_repeated_errors', 'Off');
 ini_set('html_errors', 'Off');
 
 /* Ask for reporting of *all* errors. */
-error_reporting(E_ALL & ~E_STRICT);
+error_reporting(E_ALL & ~E_DEPRECATED & ~E_STRICT);
 
 /* Finally, set our error handler to be the default. Most classes of errors
  * cannot be trapped by a user error-handler, of course. */
-set_error_handler('err_global_handler', E_ALL & ~E_STRICT);
+set_error_handler('err_global_handler', E_ALL & ~E_DEPRECATED & ~E_STRICT);
 
 ?>
