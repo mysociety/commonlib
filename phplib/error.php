@@ -58,20 +58,14 @@ function err($str, $num = E_USER_ERROR) {
         $i = 1;
     if (!array_key_exists('file', $a[$i])) $a[$i]['file'] = '(unknown file)';
     if (!array_key_exists('line', $a[$i])) $a[$i]['line'] = '(unknown line)';
-    err_global_handler($num, $str, $a[$i]['file'], $a[$i]['line'],
-                        /* XXX We can't obtain the calling context AFAIK. */
-                        null);
+    err_global_handler($num, $str, $a[$i]['file'], $a[$i]['line']);
     exit(1); /* NOTREACHED */
 }
 
-/* err_log_webserver NUMBER STRING FILE LINE CONTEXT
+/* err_log_webserver NUMBER STRING FILE LINE
  * Log the error with the given parameters, trying to arrange that it reach the
  * appropriate web server error log. */
-function err_log_webserver($num, $str, $file, $line, $context) {
-#print "<pre>";
-#print_r($context);
-#error_log(print_r($context, TRUE));
-#print "</pre>";
+function err_log_webserver($num, $str, $file, $line) {
 
     /* Apache (and perhaps other webservers) logs errors preceded by a tag
      * giving the time and "severity" of the error. The time is in the format
@@ -110,9 +104,9 @@ $err_handler_log = 'err_log_webserver';
 $err_handler_display = null;
 $err_handling_error = false; // true if currently handling an error
 
-/* err_global_handler NUMBER STRING FILE LINE CONTEXT
+/* err_global_handler NUMBER STRING FILE LINE
  * Handler for all categories of errors. */
-function err_global_handler($num, $str, $file, $line, $context) {
+function err_global_handler($num, $str, $file, $line) {
     global $err_handler_log;
     global $err_handler_display;
     global $err_handling_error;
@@ -120,11 +114,11 @@ function err_global_handler($num, $str, $file, $line, $context) {
     $err_handling_error = true;
 
     if (isset($err_handler_log) && $num != E_USER_NOTICE)
-        $err_handler_log($num, $str, $file, $line, $context);
+        $err_handler_log($num, $str, $file, $line);
     if (isset($err_handler_display))
-        $err_handler_display($num, $str, $file, $line, $context);
+        $err_handler_display($num, $str, $file, $line);
     else
-        $err_handler_log($num, "no error display handler set", $file, $line, $context);
+        $err_handler_log($num, "no error display handler set", $file, $line);
     exit(1);
 }
 
