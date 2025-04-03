@@ -28,7 +28,15 @@ class ADMIN_PAGE_RATTY {
      * message field in rate-limiting rules (e.g., "HTML fragment to be
      * displayed to user when rule fires."). The contents of MESSAGEBLURB will
      * be displayed inside a <div>. */
-    function ADMIN_PAGE_RATTY($scope, $what, $description, $messageblurb) {
+
+    public $id;
+    public $navname;
+    public $scope;
+    public $scope_title;
+    public $scope_description;
+    public $scope_messageblurb;
+
+    function __construct($scope, $what, $description, $messageblurb) {
         $this->id = "ratty-" . $scope;
         $this->navname = "$what Rules";
 
