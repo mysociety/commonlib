@@ -669,8 +669,8 @@ mails are found within a few seconds, or there is more than one match.  The
 email is returned with any quoted printable characters decoded.
 
 =cut
-sub email_get_containing($$) {
-    my ($self, $check) = @_;
+sub email_get_containing($$;$) {
+    my ($self, $check, $regex) = @_;
     
     die "STRING must be scalar or array" if (ref($check) ne 'ARRAY' && ref($check) ne '');
     $check = [ $check ] if (ref($check) eq '');
@@ -688,7 +688,8 @@ sub email_get_containing($$) {
         my $quoted_c = encode_qp($c, "");
         push @params, $quoted_c;
     }
-    $qfragment = join($bool, map { 'content like ?' } @params);
+    my $match_op = defined $regex ? 'content similar to ?' : 'content like ?';
+    $qfragment = join($bool, map { $match_op } @params);
     $qdesc = join($bool, map { "'$_'" } @params);
 
     # Provoke any sending of mails
