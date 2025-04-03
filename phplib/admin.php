@@ -13,7 +13,7 @@ require_once dirname(__FILE__) . "/utility.php";
 
 // Error display
 require_once dirname(__FILE__) . "/error.php";
-function admin_display_error($num, $message, $file, $line, $context) {
+function admin_display_error($num, $message, $file, $line) {
     print "<p><strong>$message</strong> in $file:$line</p>";
 }
 err_set_handler_display('admin_display_error');
