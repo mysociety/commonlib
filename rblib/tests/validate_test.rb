@@ -94,8 +94,12 @@ class TestValidate < Test::Unit::TestCase
     assert(MySociety::Validate.is_valid_email("mr.example@example.com") != nil)
   end
 
-  def test_unicode_localpart_is_not_valid_email
-    assert(MySociety::Validate.is_valid_email("Pelé@example.com") == nil)
+  def test_unicode_localpart_is_valid_email
+    assert(MySociety::Validate.is_valid_email("Pelé@example.com") != nil)
+  end
+
+  def test_unicode_domain_is_valid_email
+    assert(MySociety::Validate.is_valid_email("üñîçøðé@üñîçøðé.com") != nil)
   end
 
   def test_localpart_with_unquoted_space_is_not_valid_email
