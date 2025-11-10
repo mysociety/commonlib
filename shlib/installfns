@@ -230,17 +230,16 @@ clone_or_update_repository() {
             notice_msg skipping as development install...
         else
             notice_msg updating...
-            cd $REPOSITORY
-            git remote set-url origin "$REPOSITORY_URL"
-            git fetch --tags origin
+            su -l -c "cd $REPOSITORY && git remote set-url origin '$REPOSITORY_URL'" "$UNIX_USER"
+            su -l -c "cd $REPOSITORY && git fetch --tags origin" "$UNIX_USER"
             # Check that there are no uncommitted changes before doing a
             # git reset --hard:
-            git diff --quiet || { echo "There were changes in the working tree in $REPOSITORY; exiting."; exit 1; }
-            git diff --cached --quiet || { echo "There were staged but uncommitted changes in $REPOSITORY; exiting."; exit 1; }
+            su -l -c "cd $REPOSITORY && git diff --quiet" "$UNIX_USER" || { echo "There were changes in the working tree in $REPOSITORY; exiting."; exit 1; }
+            su -l -c "cd $REPOSITORY && git diff --cached --quiet" "$UNIX_USER" || { echo "There were staged but uncommitted changes in $REPOSITORY; exiting."; exit 1; }
             # If that was fine, carry on:
-            git reset --quiet --hard origin/"$BRANCH"
-            git submodule --quiet sync
-            git submodule --quiet update --recursive
+            su -l -c "cd $REPOSITORY && git reset --quiet --hard origin/'$BRANCH'" "$UNIX_USER"
+            su -l -c "cd $REPOSITORY && git submodule --quiet sync" "$UNIX_USER"
+            su -l -c "cd $REPOSITORY && git submodule --quiet update --recursive" "$UNIX_USER"
         fi
     else
         PARENT="$(dirname $REPOSITORY)"
