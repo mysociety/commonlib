@@ -147,11 +147,9 @@ update_apt_sources() {
                 ;;
             bullseye)
                 BACKPORTS=false
-                SECURITY="$DISTVERSION-security"
                 ;;
             bookworm)
                 BACKPORTS=false
-                SECURITY="$DISTVERSION-security"
                 ;;
             *)
                 notice_msg "Unsupported distribution and version combination $DISTRIBUTION $DISTVERSION"
@@ -170,7 +168,7 @@ Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
 # Security Updates:
 Types: deb deb-src
 URIs: http://deb.debian.org/debian-security
-Suites: $SECURITY
+Suites: ${SECURITY:-"$DISTVERSION-security"}
 Components: main contrib non-free
 Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
 
