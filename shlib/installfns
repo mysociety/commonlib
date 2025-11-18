@@ -141,14 +141,13 @@ update_apt_sources() {
         esac
     elif [ x"$DISTRIBUTION" = x"debian" ] ; then
         case "$DISTVERSION" in
-            buster)
-                BACKPORTS=false
-                SECURITY="$DISTVERSION/updates"
-                ;;
             bullseye)
                 BACKPORTS=false
                 ;;
             bookworm)
+                BACKPORTS=false
+                ;;
+            trixie)
                 BACKPORTS=false
                 ;;
             *)
@@ -168,7 +167,7 @@ Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
 # Security Updates:
 Types: deb deb-src
 URIs: http://deb.debian.org/debian-security
-Suites: ${SECURITY:-"$DISTVERSION-security"}
+Suites: $DISTVERSION-security
 Components: main contrib non-free
 Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
 
@@ -198,7 +197,7 @@ update_mysociety_apt_sources() {
     # We build packages targetted at Debian releases.
     # Try and select the most appropritate ones for Ubuntu.
     case "$DISTVERSION" in
-        focal|jammy|buster|bullseye|bookworm)
+        focal|jammy|bullseye|bookworm|trixie)
             cat > /etc/apt/sources.list.d/mysociety.sources <<EOF
 Types: deb
 URIs: http://debian.mysociety.org
