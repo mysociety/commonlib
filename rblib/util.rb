@@ -7,16 +7,13 @@
 #
 #
 require 'openssl'
+require 'securerandom'
 module MySociety
 
   module Util
     # Makes a random token, suitable for using in URLs e.g confirmation messages.
     def self.generate_token
-      bits = 12 * 8
-      # Make range from value to double value, so number of digits in base 36
-      # encoding is quite long always.
-      rand_num = rand(max = 2**(bits+1)) + 2**bits
-      rand_num.to_s(base=36)
+      SecureRandom.alphanumeric(19)
     end
 
     # breaks a list of items into a hash keyed by first letter of their descriptor block
