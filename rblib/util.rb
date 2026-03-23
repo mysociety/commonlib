@@ -13,7 +13,7 @@ module MySociety
   module Util
     # Makes a random token, suitable for using in URLs e.g confirmation messages.
     def self.generate_token
-      SecureRandom.alphanumeric(19)
+      SecureRandom.hex(14)
     end
 
     # breaks a list of items into a hash keyed by first letter of their descriptor block
