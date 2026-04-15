@@ -70,7 +70,11 @@ function mapit_call($url, $params, $opts = array(), $errors = array()) {
         curl_setopt($mapit_ch, CURLOPT_URL, OPTION_MAPIT_URL . $urlp);
         curl_setopt($mapit_ch, CURLOPT_HTTPGET, 1);
         curl_setopt($mapit_ch, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($mapit_ch, CURLOPT_HTTPHEADER, array("Pragma: "));
+        $headers = array("Pragma: ");
+        if (defined('OPTION_MAPIT_API_KEY') && OPTION_MAPIT_API_KEY) {
+            $headers[] = 'X-Api-Key: ' . OPTION_MAPIT_API_KEY;
+        }
+        curl_setopt($mapit_ch, CURLOPT_HTTPHEADER, $headers);
     }
 
     if (!($r = curl_exec($mapit_ch))) {
