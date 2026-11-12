@@ -417,7 +417,6 @@ package RABX::Client;
 use LWP::UserAgent;
 use HTTP::Request;
 use HTTP::Response;
-use Data::Dumper;
 use Regexp::Common qw(URI);
 
 =back
@@ -553,9 +552,7 @@ sub call ($$@) {
 
 package RABX::Server::CGI;
 
-use CGI;
 use Error qw(:try);
-use Data::Dumper;
 
 =back
 
