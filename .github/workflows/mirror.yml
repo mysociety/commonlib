@@ -21,5 +21,5 @@ jobs:
       with:
         git_ssh_key: ${{ secrets.PUBLICCVS_GIT_KEY }}
         ssh_known_hosts: ${{ secrets.GIT_KNOWN_HOSTS }}
-        tag: ${{ github.ref_name }} 
+        tag: ${{ github.ref_name }}
         remote: 'ssh://gh-public@git.mysociety.org/data/git/public/commonlib.git'
