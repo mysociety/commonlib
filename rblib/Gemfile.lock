@@ -3,6 +3,8 @@ GEM
   specs:
     addressable (2.8.4)
       public_suffix (>= 2.0.2, < 6.0)
+    base64 (0.3.0)
+    bigdecimal (4.1.3)
     crack (0.4.5)
       rexml
     diff-lcs (1.5.0)
@@ -43,6 +45,8 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
+  base64
+  bigdecimal
   mocha
   open4
   rake
