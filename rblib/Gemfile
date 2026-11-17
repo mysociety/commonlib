@@ -5,6 +5,8 @@ gem 'rake'
 gem 'rspec'
 gem 'test-unit'
 
+gem 'base64'
+gem 'bigdecimal'
 gem 'mocha'
 gem 'open4'
 gem 'unidecoder'

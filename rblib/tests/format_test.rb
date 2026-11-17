@@ -48,6 +48,14 @@ class TestFormat < Test::Unit::TestCase
     expect_clickable(text, expected)
   end
 
+  def test_make_tab_separated_urls_clickable
+    text = "Test www.example.com/a\tfoo@example.com\tstyle=color:red"
+    expected = 'Test <a href="http://www.example.com/a">www.example.com/a</a>' \
+               "\t" + '<a href="mailto:foo@example.com">foo@example.com</a>' \
+               "\tstyle=color:red"
+    expect_clickable(text, expected)
+  end
+
   def test_make_wrapped_urls_in_angle_brackets_clickable
     text = """<http://www.flou
 rish.org/bl

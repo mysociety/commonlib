@@ -85,12 +85,12 @@ module MySociety
             ret = ret.gsub(/(https?):\/\/([^\s<>]+[^\s.,<>])/i).with_index do | m, i |
                %Q|<a href="#{$1}://#{urls[i]}"| + (nofollow ? ' rel="nofollow"' : "") + ">#{$1}://#{urls[i]}</a>#{extras[i]}"
             end
-            ret = ret.gsub(/(\s)www\.([a-z0-9\-]+)((?:\.[a-z0-9\-\~]+)+)((?:\/[^ <>\n\r]*[^., <>\n\r])?)/i,
+            ret = ret.gsub(/(\s)www\.([a-z0-9\-]+)((?:\.[a-z0-9\-\~]+)+)((?:\/[^\s<>]*[^\s.,<>])?)/i,
                         '\\1<a href="http://www.\\2\\3\\4"' + (nofollow ? ' rel="nofollow"' : "") + ">www.\\2\\3\\4</a>")
             if contract
                 ret = ret.gsub(/(<a href="[^"]*"(?: rel="nofollow")?>)([^<]{40})[^<]{3,}<\/a>/, "\\1\\2...</a>")
             end
-            ret = ret.gsub(/(\s)([a-z0-9\-_.]+)@([^,< \n\r]*[^.,< \n\r])/i, "\\1<a href=\"mailto:\\2@\\3\">\\2@\\3</a>")
+            ret = ret.gsub(/(\s)([a-z0-9\-_.]+)@([^\s,<]*[^\s.,<])/i, "\\1<a href=\"mailto:\\2@\\3\">\\2@\\3</a>")
 
             # Put back the codes for < and >
             ret = ret.gsub(" LTCODE ", "&lt;")
